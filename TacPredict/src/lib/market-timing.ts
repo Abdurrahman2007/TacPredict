@@ -34,3 +34,27 @@ export function marketDurationText(market: Market) {
     ? `${n / 60} hour${n === 60 ? "" : "s"}`
     : `${n} minute${n === 1 ? "" : "s"}`;
 }
+
+export function marketLocalWindowLabel(market: Market, timeZone = "UTC") {
+  const start = new Date(market.startsAt ?? ""),
+    end = new Date(market.endsAt ?? "");
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start)
+    return null;
+  const date = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone });
+  const time = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone,
+  });
+  const a = time.format(start).replace(/\s/g, " "),
+    b = time.format(end).replace(/\s/g, " ");
+  const samePeriod = a.slice(-2) === b.slice(-2);
+  const shortStart =
+    samePeriod && date.format(start) === date.format(end) ? a.replace(/\s[AP]M$/, "") : a;
+  const zone =
+    new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "shortOffset" })
+      .formatToParts(start)
+      .find((p) => p.type === "timeZoneName")?.value ?? "UTC";
+  return `${date.format(start)}, ${shortStart}–${date.format(start) === date.format(end) ? "" : date.format(end) + ", "}${b} ${timeZone === "UTC" || /^GMT(?:[+-]0(?::00)?)?$/.test(zone) ? "UTC" : zone}`;
+}

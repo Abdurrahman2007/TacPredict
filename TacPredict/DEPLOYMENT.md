@@ -41,3 +41,5 @@ Home: large BTC spot-chart card with compact ETH/SOL outcome cards, source-provi
 Rolling crypto discovery is bounded to the provider crypto tag, excluding large unrelated auction batches that can hide current intervals. Prefer ongoing verified short intervals; upcoming records remain explicitly labelled IN rather than LIVE.
 
 Premium UI update: removed crypto spot-window 5m/15m/1h selectors; provider duration written in full beneath asset name (e.g. 5 minutes). Detail Description has a visible preview and Show more/less, source statistics/rules/related sections and tinted safe-area outcome choices. Portfolio Deposit/Withdraw use premium action tiles and matching preview dialogs; transaction capability remains disabled.
+
+Home header refinement: featured logo and LIVE countdown top row; exact “Bitcoin Up or Down - 5 min” source-duration title beneath, then 12-hour date/time range. Client renders the browser's timezone with an explicit GMT offset; server initial output is UTC to avoid hydration mismatch. Detail retains full-word duration subtitle and no spot-window selectors.

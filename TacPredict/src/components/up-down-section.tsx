@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { MarketSparkline } from "@/components/market-sparkline";
 import { MarketCountdown } from "@/components/market-countdown";
+import { MarketWindowLabel } from "@/components/market-window-label";
 import { OutcomeRow } from "@/components/outcome-row";
 import { useSpotTicker } from "@/lib/use-spot-ticker";
-import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
+import { durationMinutes, marketDurationLabel, marketWindowLabel } from "@/lib/market-timing";
 import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
 import type { PolymarketFeed } from "@/lib/polymarket.functions";
 export function UpDownSection({
@@ -46,7 +47,8 @@ export function UpDownSection({
       <div className="grid gap-3 sm:grid-cols-2">
         {assets.map((asset, index) => {
           const market = liveMarkets[asset.key]!,
-            duration = marketDurationText(market);
+            duration = marketDurationLabel(market),
+            title = `${asset.name} Up or Down${duration ? ` - ${duration}` : ""}`;
           const observations = [...histories[asset.key], ...(ticks[asset.key] ?? [])].sort(
               (a, b) => a.time - b.time,
             ),
@@ -71,26 +73,32 @@ export function UpDownSection({
                   alt={`${asset.name} logo`}
                   className={`${index === 0 ? "size-10" : "size-8"} shrink-0 rounded-full`}
                 />
-                <Link
-                  to="/markets/$marketId"
-                  params={{ marketId: market.id }}
-                  className="min-w-0 flex-1"
-                  title={market.title}
-                >
-                  <span className="block text-lg font-semibold">{asset.name}</span>
-                  {duration && (
-                    <span className="mt-0.5 block text-sm text-muted-foreground">{duration}</span>
-                  )}
-                </Link>
+                {index !== 0 && (
+                  <Link
+                    to="/markets/$marketId"
+                    params={{ marketId: market.id }}
+                    className="min-w-0 flex-1 text-base font-semibold leading-snug"
+                    title={market.title}
+                  >
+                    {title}
+                  </Link>
+                )}
                 <MarketCountdown market={market} snapshotTime={crypto.updatedAt} />
               </div>
               {index === 0 ? (
                 <>
-                  {marketWindowLabel(market) && (
-                    <p className="mt-4 text-sm text-muted-foreground">
-                      {marketWindowLabel(market)}
-                    </p>
-                  )}
+                  <Link
+                    to="/markets/$marketId"
+                    params={{ marketId: market.id }}
+                    className="mt-4 block text-lg font-semibold leading-snug"
+                    title={market.title}
+                  >
+                    {title}
+                  </Link>
+                  <MarketWindowLabel
+                    market={market}
+                    className="mt-1 text-sm text-muted-foreground"
+                  />
                   <div className="mt-5">
                     <MarketSparkline
                       points={points}
