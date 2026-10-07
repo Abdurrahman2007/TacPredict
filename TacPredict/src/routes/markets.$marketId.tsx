@@ -84,7 +84,7 @@ function MarketDetailPage() {
         <ArrowLeft className="size-4" />
         Markets
       </Link>
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
         <article className="min-w-0">
           <div className="mb-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
             <span>
@@ -215,7 +215,7 @@ function MarketDetailPage() {
           </section>
         </article>
         <aside
-          className="h-fit rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24"
+          className="min-w-0 h-fit rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24"
           aria-label="USDC trade integration status"
         >
           <div className="flex items-center justify-between">

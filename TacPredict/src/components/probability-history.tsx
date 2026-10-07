@@ -189,7 +189,7 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
           <span>{new Date(last).toISOString().slice(5, 16).replace("T", " ")} UTC</span>
         </div>
       )}
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs text-muted-foreground">{market.volume} source vol</span>
         <div className="flex gap-1">
           {(["1h", "1d", "1w", "1m"] as const).map((v) => (
