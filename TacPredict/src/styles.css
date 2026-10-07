@@ -1,0 +1,174 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-app);
+  --radius-sm: calc(var(--radius) - 3px);
+  --radius-md: calc(var(--radius) - 1px);
+  --radius-lg: var(--radius);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-streak: var(--streak);
+  --color-streak-soft: var(--streak-soft);
+  --color-category: var(--category);
+  --color-category-foreground: var(--category-foreground);
+  --color-featured: var(--featured);
+  --color-featured-foreground: var(--featured-foreground);
+  --color-featured-muted: var(--featured-muted);
+  --color-surface-glass: var(--surface-glass);
+  --color-chart: var(--chart);
+  --color-chart-label: var(--chart-label);
+  --color-chart-label-foreground: var(--chart-label-foreground);
+  --color-bitcoin: var(--bitcoin);
+  --color-ethereum: var(--ethereum);
+  --color-solana: var(--solana);
+  --color-sport: var(--sport);
+  --color-sport-foreground: var(--sport-foreground);
+  --color-tech: var(--tech);
+  --color-tech-foreground: var(--tech-foreground);
+  --color-news: var(--news);
+  --color-news-foreground: var(--news-foreground);
+  --color-business: var(--business);
+  --color-business-foreground: var(--business-foreground);
+  --shadow-brand: var(--shadow-brand);
+  --shadow-card: var(--shadow-card);
+  --shadow-featured: var(--shadow-featured);
+}
+
+:root {
+  --font-app: "DM Sans", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --radius: 0.5rem;
+  --background: oklch(0.18 0.014 246);
+  --foreground: oklch(0.974 0.004 250);
+  --card: oklch(0.245 0.014 240);
+  --card-foreground: oklch(0.974 0.004 250);
+  --popover: oklch(0.245 0.014 240);
+  --popover-foreground: oklch(0.974 0.004 250);
+  --primary: oklch(0.79 0.16 151);
+  --primary-foreground: oklch(0.17 0.025 155);
+  --secondary: oklch(0.29 0.014 240);
+  --secondary-foreground: oklch(0.91 0.008 245);
+  --muted: oklch(0.27 0.012 240);
+  --muted-foreground: oklch(0.69 0.014 244);
+  --accent: oklch(0.32 0.02 241);
+  --accent-foreground: oklch(0.974 0.004 250);
+  --destructive: oklch(0.67 0.21 22);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.337 0.017 240);
+  --input: oklch(0.337 0.017 240);
+  --ring: oklch(0.79 0.16 151);
+  --positive: oklch(0.79 0.16 151);
+  --positive-soft: oklch(0.79 0.16 151 / 0.12);
+  --streak: oklch(0.79 0.16 151);
+  --streak-soft: oklch(0.79 0.16 151 / 0.12);
+  --category: oklch(0.31 0.03 246);
+  --category-foreground: oklch(0.83 0.06 241);
+  --featured: oklch(0.245 0.014 240);
+  --featured-foreground: oklch(0.974 0.004 250);
+  --featured-muted: oklch(0.69 0.014 244);
+  --surface-glass: oklch(0.245 0.014 240 / 0.88);
+  --chart: oklch(0.63 0.2 260);
+  --chart-label: oklch(0.82 0.018 235);
+  --chart-label-foreground: oklch(0.22 0.02 245);
+  --bitcoin: oklch(0.72 0.18 57);
+  --ethereum: oklch(0.55 0.16 280);
+  --solana: oklch(0.65 0.18 165);
+  --sport: oklch(0.7 0.15 235 / 0.2);
+  --sport-foreground: oklch(0.81 0.12 235);
+  --tech: oklch(0.72 0.15 305 / 0.2);
+  --tech-foreground: oklch(0.84 0.12 305);
+  --news: oklch(0.76 0.14 85 / 0.2);
+  --news-foreground: oklch(0.86 0.12 85);
+  --business: oklch(0.7 0.08 200 / 0.2);
+  --business-foreground: oklch(0.84 0.08 200);
+  --featured-overlay: linear-gradient(90deg, oklch(0.16 0.015 246 / 0.96), oklch(0.18 0.015 246 / 0.7) 58%, transparent);
+  --shadow-brand: 0 8px 24px -12px oklch(0.79 0.16 151 / 0.55);
+  --shadow-card: 0 18px 44px -30px oklch(0.02 0.01 245 / 0.9);
+  --shadow-featured: 0 22px 55px -26px oklch(0.02 0.01 245 / 0.9);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html { background: var(--color-background); overscroll-behavior: none; }
+  body { min-width: 320px; background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-app); letter-spacing: 0; overscroll-behavior: none; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0; }
+  button, a, input { -webkit-tap-highlight-color: transparent; }
+  ::selection { background: var(--color-accent); color: var(--color-accent-foreground); }
+}
+
+@layer components {
+  .page-title { @apply mt-1 text-[2.15rem] font-bold leading-[1.08] sm:text-4xl; }
+  .section-title { @apply text-[1.35rem] font-extrabold leading-tight; }
+  .section-kicker { @apply text-xs font-extrabold uppercase text-primary; }
+  .filter-chip { @apply shrink-0 rounded-full border border-border bg-card px-4 py-2.5 text-[0.8rem] font-bold text-muted-foreground transition-colors duration-150 hover:text-foreground; }
+  .filter-chip-active { @apply shrink-0 rounded-full bg-foreground px-4 py-2.5 text-[0.8rem] font-bold text-background; }
+  .market-tab { @apply relative shrink-0 pb-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground; }
+  .market-tab-active { @apply relative shrink-0 pb-3 text-sm font-extrabold text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary; }
+  .featured-outcome-primary { @apply flex h-12 items-center justify-between rounded-md bg-primary px-4 text-sm font-extrabold text-primary-foreground transition-transform active:scale-[0.98]; }
+  .featured-outcome-secondary { @apply flex h-12 items-center justify-between rounded-md border border-featured-muted/25 bg-surface-glass px-4 text-sm font-extrabold text-featured-foreground backdrop-blur-md transition-transform active:scale-[0.98]; }
+  .bg-featured-overlay { background: var(--featured-overlay); }
+  .market-icon { @apply grid size-13 shrink-0 place-items-center rounded-full text-xl shadow-sm sm:size-14; }
+  .market-icon svg { @apply size-[1.35rem]; }
+  .outcome-progress { @apply block h-0.5 w-full overflow-hidden rounded-full border-0 bg-secondary; appearance: none; }
+  .outcome-progress::-webkit-progress-bar { background: var(--color-secondary); border-radius: 999px; }
+  .outcome-progress::-webkit-progress-value { background: var(--progress-color); border-radius: 999px; transition: width 180ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .outcome-progress::-moz-progress-bar { background: var(--progress-color); border-radius: 999px; }
+  .outcome-progress-positive { --progress-color: var(--color-positive); }
+  .outcome-progress-negative { --progress-color: var(--color-destructive); }
+  .outcome-progress-chart { --progress-color: var(--color-chart); }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-enter { animation: enter-up 180ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@supports (content-visibility: auto) {
+  .market-list-item { content-visibility: auto; contain-intrinsic-size: 0 228px; }
+}
+
+@utility ios-press {
+  transition-property: transform, opacity, background-color, border-color;
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  &:active { transform: scale(0.975); opacity: 0.86; }
+}
+
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) { animation: 90ms ease-out both fade-out; }
+  ::view-transition-new(root) { animation: 170ms cubic-bezier(0.22, 1, 0.36, 1) both enter-up; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
