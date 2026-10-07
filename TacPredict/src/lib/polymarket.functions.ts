@@ -10,6 +10,7 @@ type GammaMarket = {
   outcomes?: string | string[];
   outcomePrices?: string | string[];
   endDate?: string;
+  eventStartTime?: string;
   createdAt?: string;
   volume?: string | number;
   volume24hr?: string | number;
@@ -109,7 +110,15 @@ function mapMarket(item: GammaMarket): Market | null {
     closesAt: formatClose(item.endDate),
     ...(item.createdAt ? { createdAt: item.createdAt } : {}),
     ...(item.endDate ? { endsAt: item.endDate } : {}),
-    volume24h: Number(item.volume24hr ?? 0),
+    ...(item.eventStartTime && Number.isFinite(Date.parse(item.eventStartTime))
+      ? { startsAt: item.eventStartTime }
+      : {}),
+    ...(item.volume24hr != null && Number.isFinite(Number(item.volume24hr))
+      ? { volume24h: Number(item.volume24hr) }
+      : {}),
+    ...(item.liquidity != null && Number.isFinite(Number(item.liquidity))
+      ? { liquidity: Number(item.liquidity) }
+      : {}),
     volume: `$${compact(volume)}`,
     participants: 0, // This feed does not provide a verified predictor count.
     outcomes,

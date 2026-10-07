@@ -14,6 +14,8 @@ export type Market = {
   closesAt: string;
   createdAt?: string;
   endsAt?: string;
+  startsAt?: string;
+  liquidity?: number;
   volume24h?: number;
   volume: string;
   participants: number;

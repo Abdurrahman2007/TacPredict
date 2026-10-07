@@ -3,10 +3,18 @@ import { useState } from "react";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { useSpotTicker } from "@/lib/use-spot-ticker";
 import { MarketSparkline } from "@/components/market-sparkline";
-export function CryptoDetailChart({ asset }: { asset: "bitcoin" | "ethereum" | "solana" }) {
+export function CryptoDetailChart({
+  asset,
+  initialMinutes = 15,
+}: {
+  asset: "bitcoin" | "ethereum" | "solana";
+  initialMinutes?: number;
+}) {
   const { data } = useQuery(cryptoMarketQueryOptions);
   const { ticks } = useSpotTicker();
-  const [minutes, setMinutes] = useState(15);
+  const [minutes, setMinutes] = useState(
+    [5, 15, 60].includes(initialMinutes) ? initialMinutes : 15,
+  );
   const observations = [...(data?.histories[asset] ?? []), ...(ticks[asset] ?? [])].sort(
       (a, b) => a.time - b.time,
     ),

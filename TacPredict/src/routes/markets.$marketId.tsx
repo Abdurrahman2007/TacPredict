@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, Clock3 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/connect-wallet";
 import { CryptoDetailChart } from "@/components/crypto-detail-chart";
+import { ProbabilityHistoryChart } from "@/components/probability-history";
+import { MarketCountdown } from "@/components/market-countdown";
+import { marketDurationLabel, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
@@ -36,9 +39,6 @@ function MarketDetailPage() {
   useEffect(() => {
     setSelected(initial || "");
   }, [initial, marketId]);
-  const cryptoAsset = Object.entries(feed.cryptoUpDown).find(
-    ([, item]) => item?.id === marketId,
-  )?.[0] as "bitcoin" | "ethereum" | "solana" | undefined;
   const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
     (item) => item?.id === marketId,
   );
@@ -54,6 +54,26 @@ function MarketDetailPage() {
         </Button>
       </div>
     );
+  const cryptoAsset =
+    market.category === "Crypto" && /up or down/i.test(market.title)
+      ? /\b(bitcoin|btc)\b/i.test(market.title)
+        ? "bitcoin"
+        : /\b(ethereum|eth)\b/i.test(market.title)
+          ? "ethereum"
+          : /\b(solana|sol)\b/i.test(market.title)
+            ? "solana"
+            : undefined
+      : undefined;
+  const duration = cryptoAsset ? marketDurationLabel(market) : null;
+  const related = feed.markets
+    .filter((m) => m.id !== market.id && m.category === market.category)
+    .slice(0, 4);
+  const money = (n: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(n);
   const chosen = market.outcomes.find((item) => item.id === selected) ?? market.outcomes[0];
   return (
     <div className="animate-enter pb-20 lg:pb-0">
@@ -65,33 +85,51 @@ function MarketDetailPage() {
         Markets
       </Link>
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <article>
-          <div className="flex items-start gap-4">
-            <MarketIcon market={market} />
-            <div className="min-w-0">
-              <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
-                {market.title}
-              </h1>
-            </div>
-          </div>
-          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-4" />
-              {market.endsAt
-                ? `Closes ${new Date(market.endsAt).toISOString().slice(0, 10)}`
-                : `Ends ${market.closesAt}`}
+        <article className="min-w-0">
+          <div className="mb-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+            <span>
+              {market.category}
+              {duration ? ` · ${duration} market` : ""}
             </span>
-            <span>{market.volume} source volume</span>
+            {cryptoAsset ? (
+              <MarketCountdown market={market} snapshotTime={feed.updatedAt} />
+            ) : (
+              <span>{market.closesAt}</span>
+            )}
           </div>
-          {cryptoAsset && <CryptoDetailChart asset={cryptoAsset} />}
-          {cryptoAsset && (
-            <section className="mt-7" aria-label="Source statistics">
-              <h2 className="text-lg font-semibold">Statistics</h2>
-              <div className="mt-4 flex justify-between border-b border-border py-3 text-sm">
-                <span className="text-muted-foreground">Source volume</span>
-                <span>{market.volume}</span>
+          <div className="flex items-start gap-3">
+            <MarketIcon market={market} />
+            <h1 className="min-w-0 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+              {cryptoAsset && duration
+                ? `${cryptoAsset[0]!.toUpperCase()}${cryptoAsset.slice(1)} · ${duration}`
+                : market.title}
+            </h1>
+          </div>
+          {marketWindowLabel(market) && (
+            <p className="mt-3 text-sm text-muted-foreground">{marketWindowLabel(market)}</p>
+          )}
+          {cryptoAsset ? (
+            <CryptoDetailChart
+              asset={cryptoAsset}
+              initialMinutes={
+                duration ? Number.parseInt(duration) * (duration.includes("hour") ? 60 : 1) : 15
+              }
+            />
+          ) : (
+            <>
+              <div
+                className="mt-7 flex items-center justify-between gap-3 rounded-2xl bg-card/50 p-4"
+                aria-label="Current outcome probabilities"
+              >
+                {market.outcomes.slice(0, 2).map((o, i) => (
+                  <div key={o.id} className={`min-w-0 flex-1 ${i ? "text-right" : ""}`}>
+                    <p className="text-2xl font-semibold tabular-nums">{o.probability}%</p>
+                    <p className="mt-1 truncate text-sm text-muted-foreground">{o.label}</p>
+                  </div>
+                ))}
               </div>
-            </section>
+              <ProbabilityHistoryChart key={market.id} market={market} />
+            </>
           )}
           <section className="mt-6 space-y-3" aria-label="Market outcomes">
             {market.outcomes.map((item, index) => (
@@ -132,6 +170,49 @@ function MarketDetailPage() {
               <ArrowUpRight className="size-4" />
             </a>
           </details>
+          <section className="mt-7" aria-label="Source statistics">
+            <h2 className="text-xl font-semibold">Statistics</h2>
+            {[
+              { label: "Source volume", value: market.volume },
+              ...(market.volume24h === undefined
+                ? []
+                : [{ label: "24h source volume", value: money(market.volume24h) }]),
+              ...(market.liquidity === undefined
+                ? []
+                : [{ label: "Source liquidity", value: money(market.liquidity) }]),
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-baseline gap-3 py-3 text-sm">
+                <span className="text-muted-foreground">{stat.label}</span>
+                <span className="flex-1 border-b border-dashed border-border" />
+                <span className="tabular-nums">{stat.value}</span>
+              </div>
+            ))}
+          </section>
+          {related.length > 0 && (
+            <section className="mt-7" aria-label="Related markets">
+              <h2 className="text-xl font-semibold">Related markets</h2>
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                {related.map((m) => (
+                  <Link
+                    key={m.id}
+                    to="/markets/$marketId"
+                    params={{ marketId: m.id }}
+                    className="ios-press w-64 shrink-0 rounded-[24px] border border-border bg-card p-5"
+                  >
+                    <MarketIcon market={m} />
+                    <p className="mt-3 line-clamp-2 text-base font-semibold">{m.title}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      {m.closesAt} · {m.volume} Vol
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          <section className="mt-7" aria-label="Market activity">
+            <h2 className="text-xl font-semibold">Activity</h2>
+            <p className="mt-4 text-sm text-muted-foreground">Trade activity is not available.</p>
+          </section>
         </article>
         <aside
           className="h-fit rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24"
@@ -191,13 +272,13 @@ function MarketDetailPage() {
           </p>
         </aside>
       </div>
-      {cryptoAsset && (
+      {market.outcomes.length > 0 && (
         <div
           className="fixed inset-x-0 z-40 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden"
           aria-label="Quick outcome selection"
           style={{ bottom: "calc(68px + max(.6rem, env(safe-area-inset-bottom)))" }}
         >
-          {market.outcomes.slice(0, 2).map((item, i) => (
+          {market.outcomes.slice(0, 2).map((item) => (
             <button
               key={item.id}
               type="button"
@@ -205,7 +286,7 @@ function MarketDetailPage() {
               onClick={() => setSelected(item.id)}
               className={`min-h-12 flex-1 rounded-full text-base font-semibold ${chosen?.id === item.id ? "bg-foreground text-background" : "bg-secondary text-foreground"}`}
             >
-              {i === 0 ? "Up" : "Down"} {item.probability}%
+              {item.label} {item.probability}%
             </button>
           ))}
         </div>

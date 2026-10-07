@@ -10,11 +10,13 @@ export const MarketSparkline = memo(function MarketSparkline({
   assetLabel = "Crypto",
   sourceLabel = "Coinbase",
   compact = false,
+  size = "detail",
 }: {
   points?: PricePoint[];
   assetLabel?: string;
   sourceLabel?: string;
   compact?: boolean;
+  size?: "detail" | "card";
 }) {
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const id = useId().replace(/:/g, "");
@@ -31,7 +33,9 @@ export const MarketSparkline = memo(function MarketSparkline({
   );
   if (series.length < 2)
     return (
-      <div className="grid h-52 place-items-center text-sm text-muted-foreground">
+      <div
+        className={`grid ${size === "card" ? "h-36" : "h-52"} place-items-center text-sm text-muted-foreground`}
+      >
         Price unavailable
       </div>
     );
@@ -77,7 +81,7 @@ export const MarketSparkline = memo(function MarketSparkline({
   }
   return (
     <div>
-      <div className="mb-5 flex items-start gap-5 sm:gap-8">
+      <div className={`${size === "card" ? "mb-3" : "mb-5"} flex items-start gap-5 sm:gap-8`}>
         <div>
           <p className="text-sm text-muted-foreground">Start</p>
           <p className="mt-1 text-lg font-semibold tabular-nums sm:text-2xl">
@@ -134,7 +138,7 @@ export const MarketSparkline = memo(function MarketSparkline({
         }}
       >
         <svg
-          className={`w-full overflow-visible ${compact ? "h-40" : "h-56 sm:h-64"}`}
+          className={`w-full overflow-visible ${size === "card" ? "h-36 sm:h-48" : compact ? "h-40" : "h-56 sm:h-64"}`}
           viewBox="0 0 360 190"
           preserveAspectRatio="none"
           role="img"
