@@ -19,6 +19,8 @@ type GammaMarket = {
   slug?: string;
   resolutionSource?: string;
   sportsMarketType?: string;
+  image?: string;
+  icon?: string;
 };
 
 export type PolymarketFeed = {
@@ -100,10 +102,13 @@ function mapMarket(item: GammaMarket): Market | null {
   return {
     id: `poly-${id}`,
     title,
+    ...((item.image ?? item.icon)?.startsWith("https://")
+      ? { image: item.image ?? item.icon }
+      : {}),
     category: categoryFor(title, item.sportsMarketType),
     closesAt: formatClose(item.endDate),
-    createdAt: item.createdAt,
-    endsAt: item.endDate,
+    ...(item.createdAt ? { createdAt: item.createdAt } : {}),
+    ...(item.endDate ? { endsAt: item.endDate } : {}),
     volume24h: Number(item.volume24hr ?? 0),
     volume: `$${compact(volume)}`,
     participants: 0, // This feed does not provide a verified predictor count.

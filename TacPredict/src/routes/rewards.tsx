@@ -1,85 +1,158 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flame, Gift, Sparkles } from "lucide-react";
+import { Clock3, Flame, Gift, ShieldCheck, Sparkles, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { usePredictionWallet } from "@/lib/prediction-wallet";
+import { PredictionWalletProvider, usePredictionWallet } from "@/lib/prediction-wallet";
+import { RewardExtras } from "@/components/reward-extras";
+import { cooldownLabel } from "@/lib/reward-clock";
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
     meta: [
       { title: "Rewards — TacPredict" },
-      {
-        name: "description",
-        content: "Track TAC Points, check-in streaks, tasks, and prediction rewards.",
-      },
-      { property: "og:title", content: "Rewards — TacPredict" },
-      {
-        property: "og:description",
-        content: "Earn and track TAC Points through predictions and rewards.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "description", content: "TAC Points rewards, separate from your Base USDC wallet." },
     ],
   }),
-  component: RewardsPage,
+  component: RewardsRoute,
 });
-
-function RewardsPage() {
-  const { user, balance, streak, claimedDailyReward, claimDailyReward } = usePredictionWallet();
-  const [status, setStatus] = useState("");
+function RewardsRoute() {
   return (
-    <div className="animate-enter max-w-2xl">
-      <p className="section-kicker">Your progress</p>
+    <PredictionWalletProvider>
+      <RewardsPage />
+    </PredictionWalletProvider>
+  );
+}
+function RewardsPage() {
+  const {
+    user,
+    ready,
+    balance,
+    streak,
+    rewardBackendReady,
+    rewardSecondsRemaining,
+    rewardAmount,
+    claimDailyReward,
+  } = usePredictionWallet();
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+  const waiting = rewardSecondsRemaining > 0;
+  async function claim() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await claimDailyReward();
+      setStatus(result.message ?? "Claim complete.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="animate-enter mx-auto max-w-4xl">
+      <p className="section-kicker">A little consistency. A little extra.</p>
       <h1 className="page-title">Rewards</h1>
-      <section className="mt-5 rounded-lg border border-border bg-card p-5 shadow-card">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-bold text-muted-foreground">TAC POINTS</p>
-            <p className="mt-1 text-4xl font-black tabular-nums">{balance.toLocaleString()}</p>
+      <p className="mt-2 text-sm text-muted-foreground">TAC Points · daily drops</p>
+      <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_1fr]">
+        <section className="onchain-balance-card rounded-2xl border border-border p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground">
+              TAC POINTS BALANCE
+            </p>
+            <Gift className="size-6 text-primary" />
           </div>
-          <Gift className="size-7 text-primary" />
-        </div>
-        <p className="mt-6 text-sm font-medium text-muted-foreground">
-          Use points to make predictions and earn rewards.
-        </p>
-      </section>
-      <section className="mt-6">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title">Daily check-in</h2>
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-streak">
-            <Flame className="size-4" /> 4 days
+          <p className="mt-6 text-5xl font-semibold tracking-tight tabular-nums">
+            {user && ready ? balance.toLocaleString() : "—"}
+            <span className="ml-3 text-base text-muted-foreground">TAC</span>
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Separate from USDC.</p>
+          <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4 shrink-0" />
+            Virtual points · not USDC · no cash value
+          </div>
+        </section>
+        <section className="rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Flame className="size-5" />
+            </span>
+            <span className="text-sm text-muted-foreground">Claim streak</span>
+          </div>
+          <p className="mt-5 text-4xl font-semibold">
+            {user ? streak : "—"}
+            <span className="ml-2 text-base text-muted-foreground">days</span>
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            24h cooldown · 48h streak window
+          </p>
+        </section>
+      </div>
+      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="section-kicker">Daily drop</p>
+            <h2 className="mt-2 text-2xl font-semibold">{waiting ? "Next drop" : "Daily claim"}</h2>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
+            <Sparkles className="size-4" />
+            {user && rewardBackendReady ? `+${rewardAmount}` : "100–160"} TAC
           </span>
         </div>
-        <div className="mt-3 flex items-center justify-between rounded-lg border border-border bg-card p-4">
-          <div>
-            <p className="font-bold">Today’s reward</p>
-            <p className="text-sm text-muted-foreground">
-              +100 TAC · streak {streak} day{streak === 1 ? "" : "s"}
-            </p>
+        <RewardExtras />
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
+          <div className="flex items-center gap-3">
+            <Clock3 className="size-5 text-primary" />
+            <div>
+              <p className="font-semibold tabular-nums">
+                {waiting ? cooldownLabel(rewardSecondsRemaining) : "Rolling 24-hour cooldown"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {waiting ? "Time until your next claim" : "After your last claim"}
+              </p>
+            </div>
           </div>
-          <Button
-            disabled={claimedDailyReward}
-            onClick={async () => {
-              if (!user) {
-                setStatus("Sign in to claim rewards.");
-                return;
-              }
-              const r = await claimDailyReward();
-              setStatus(r.message ?? "");
-            }}
-          >
-            <Sparkles /> {claimedDailyReward ? "Claimed" : "Claim"}
-          </Button>
+          {!user ? (
+            <Button asChild className="h-12 rounded-xl">
+              <Link to="/auth" search={{ next: "/rewards" }}>
+                Sign in for rewards <ArrowUpRight />
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              className="h-12 rounded-xl"
+              disabled={!ready || !rewardBackendReady || waiting || busy}
+              onClick={() => void claim()}
+            >
+              {busy
+                ? "Claiming…"
+                : waiting
+                  ? "Reward cooling down"
+                  : !rewardBackendReady
+                    ? "Backend setup pending"
+                    : "Claim TAC Points"}
+            </Button>
+          )}
         </div>
+        {user && !rewardBackendReady && (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Claims stay disabled until the secure 24-hour rewards migration is deployed.
+          </p>
+        )}
         {status && (
-          <p role="status" className="mt-3 text-sm font-semibold text-positive">
+          <p role="status" className="mt-4 text-sm">
             {status}
           </p>
         )}
       </section>
-      <Button variant="outline" className="mt-6 h-12 w-full" asChild>
-        <Link to="/profile">View prediction activity</Link>
-      </Button>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border p-5">
+        <div>
+          <p className="font-semibold">USDC lives in your wallet.</p>
+          <p className="mt-1 text-sm text-muted-foreground">TAC is not USDC.</p>
+        </div>
+        <Button asChild variant="outline" className="h-11">
+          <Link to="/profile">
+            Open portfolio <ArrowUpRight />
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }

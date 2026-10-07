@@ -1,115 +1,102 @@
 import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
-
+export type PricePoint = { time: number; price: number };
 export type CryptoMarketSnapshot = {
-  bitcoin: {
-    price: number;
-    change24h: number;
-    high24h: number;
-    low24h: number;
-    marketCap: number;
-  };
+  bitcoin: { price: number; change24h: number; high24h: number; low24h: number; marketCap: number };
   ethereum: { price: number; change24h: number };
   solana: { price: number; change24h: number };
-  bitcoinHistory: number[];
+  histories: Record<"bitcoin" | "ethereum" | "solana", PricePoint[]>;
   updatedAt: string;
 };
-
-type CoinGeckoPrice = {
-  usd?: number;
-  usd_24h_change?: number;
-  usd_24h_high?: number;
-  usd_24h_low?: number;
-  usd_market_cap?: number;
-};
-
-type CoinGeckoPriceResponse = Record<string, CoinGeckoPrice>;
-type CoinGeckoChartResponse = { prices?: Array<[number, number]> };
-
 const CACHE_MS = 60_000;
-let cachedSnapshot: { value: CryptoMarketSnapshot; expiresAt: number } | undefined;
-let pendingRequest: Promise<CryptoMarketSnapshot> | undefined;
-
-function numeric(value: number | undefined, fallback = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-async function fetchCryptoMarketSnapshot(): Promise<CryptoMarketSnapshot> {
-  const apiKey = process.env["COINGECKO_API_KEY"];
-  const headers = apiKey
-    ? { accept: "application/json", "x-cg-demo-api-key": apiKey }
-    : { accept: "application/json" };
-  const request = (url: string) =>
-    fetch(url, { headers }).then(async (response) => {
-      if (response.ok || !apiKey) return response;
-      return fetch(url, { headers: { accept: "application/json" } });
+let cached: { value: CryptoMarketSnapshot; expiresAt: number } | undefined;
+let pending: Promise<CryptoMarketSnapshot> | undefined;
+const numeric = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+async function request(path: string) {
+  try {
+    const key = process.env["COINGECKO_API_KEY"];
+    const response = await fetch(`https://api.coingecko.com/api/v3/${path}`, {
+      headers: key
+        ? { accept: "application/json", "x-cg-demo-api-key": key }
+        : { accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
     });
-  const [priceResponse, chartResponse] = await Promise.all([
-    request(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_market_cap=true&include_24hr_change=true",
-    ),
-    request("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1"),
-  ]);
-
-  if (!priceResponse.ok) {
-    console.error(`CoinGecko price request unavailable [${priceResponse.status}]`);
-    return {
-      bitcoin: { price: 0, change24h: 0, high24h: 0, low24h: 0, marketCap: 0 },
-      ethereum: { price: 0, change24h: 0 },
-      solana: { price: 0, change24h: 0 },
-      bitcoinHistory: [],
-      updatedAt: new Date().toISOString(),
-    };
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
   }
-
-  const prices = (await priceResponse.json()) as CoinGeckoPriceResponse;
-  const chart = chartResponse.ok ? ((await chartResponse.json()) as CoinGeckoChartResponse) : {};
-  const history = (chart.prices ?? []).map((point) => point[1]).filter(Number.isFinite);
-  const btc = prices["bitcoin"] ?? {};
-
+}
+async function snapshot(): Promise<CryptoMarketSnapshot> {
+  const assets = ["bitcoin", "ethereum", "solana"] as const;
+  const [prices, ...charts] = await Promise.all([
+    request(
+      "simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_market_cap=true&include_24hr_change=true",
+    ),
+    ...assets.map((asset) => request(`coins/${asset}/market_chart?vs_currency=usd&days=1`)),
+  ]);
+  const histories = Object.fromEntries(
+    assets.map((asset, index) => {
+      const rows: unknown = charts[index]?.prices;
+      const valid: PricePoint[] = Array.isArray(rows)
+        ? rows
+            .filter(
+              (row): row is [number, number] =>
+                Array.isArray(row) &&
+                typeof row[0] === "number" &&
+                typeof row[1] === "number" &&
+                Number.isFinite(row[0]) &&
+                Number.isFinite(row[1]) &&
+                row[1] > 0,
+            )
+            .map(([time, price]) => ({ time, price }))
+        : [];
+      const unique = [...new Map(valid.map((point) => [point.time, point])).values()].sort(
+        (a, b) => a.time - b.time,
+      );
+      return [asset, unique.slice(-300)];
+    }),
+  ) as CryptoMarketSnapshot["histories"];
+  const btc = histories.bitcoin.map((p) => p.price);
   return {
     bitcoin: {
-      price: numeric(btc.usd),
-      change24h: numeric(btc.usd_24h_change),
-      high24h: history.length ? Math.max(...history) : numeric(btc.usd),
-      low24h: history.length ? Math.min(...history) : numeric(btc.usd),
-      marketCap: numeric(btc.usd_market_cap),
+      price: numeric(prices?.bitcoin?.usd),
+      change24h: numeric(prices?.bitcoin?.usd_24h_change),
+      marketCap: numeric(prices?.bitcoin?.usd_market_cap),
+      high24h: btc.length ? Math.max(...btc) : 0,
+      low24h: btc.length ? Math.min(...btc) : 0,
     },
     ethereum: {
-      price: numeric(prices["ethereum"]?.usd),
-      change24h: numeric(prices["ethereum"]?.usd_24h_change),
+      price: numeric(prices?.ethereum?.usd),
+      change24h: numeric(prices?.ethereum?.usd_24h_change),
     },
     solana: {
-      price: numeric(prices["solana"]?.usd),
-      change24h: numeric(prices["solana"]?.usd_24h_change),
+      price: numeric(prices?.solana?.usd),
+      change24h: numeric(prices?.solana?.usd_24h_change),
     },
-    bitcoinHistory: history.filter((_, index) => index % 3 === 0).slice(-96),
+    histories,
     updatedAt: new Date().toISOString(),
   };
 }
-
 export const getCryptoMarketSnapshot = createServerFn({ method: "GET" }).handler(async () => {
-  const now = Date.now();
-  if (cachedSnapshot && cachedSnapshot.expiresAt > now) return cachedSnapshot.value;
-  if (pendingRequest) return pendingRequest;
-
-  pendingRequest = fetchCryptoMarketSnapshot()
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
+  if (pending) return pending;
+  pending = snapshot()
     .then((value) => {
-      cachedSnapshot = { value, expiresAt: Date.now() + CACHE_MS };
+      cached = { value, expiresAt: Date.now() + CACHE_MS };
       return value;
     })
     .finally(() => {
-      pendingRequest = undefined;
+      pending = undefined;
     });
-
-  return pendingRequest;
+  return pending;
 });
-
 export const cryptoMarketQueryOptions = queryOptions({
   queryKey: ["crypto-market-snapshot"],
   queryFn: () => getCryptoMarketSnapshot(),
   staleTime: CACHE_MS,
   gcTime: 10 * CACHE_MS,
   retry: 0,
+  refetchInterval: CACHE_MS,
+  refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
 });

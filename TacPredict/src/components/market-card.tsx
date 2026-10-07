@@ -68,7 +68,7 @@ export const MarketCard = memo(function MarketCard({ market }: { market: Market 
               />
             </span>
             <span className="text-xs tabular-nums opacity-75">
-              {(100 / Math.max(1, outcome.probability)).toFixed(2)}x
+              {outcome.probability > 0 ? `${(100 / outcome.probability).toFixed(2)}x` : "—"}
             </span>
             <span className="rounded-full bg-background/35 px-2.5 py-1 tabular-nums">
               {outcome.probability}%

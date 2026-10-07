@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { usePredictionWallet } from "@/lib/prediction-wallet";
+import { PredictionWalletProvider, usePredictionWallet } from "@/lib/prediction-wallet";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/auth")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AuthPage,
+  component: LegacyRoute,
 });
 
 function AuthPage() {
@@ -109,5 +109,16 @@ function AuthPage() {
         {mode === "in" ? "No account? Sign up" : "Have an account? Sign in"}
       </button>
     </div>
+  );
+}
+
+function LegacyRoute() {
+  return (
+    <PredictionWalletProvider>
+      <p className="mb-5 rounded-xl border border-border p-4 text-sm text-muted-foreground">
+        Legacy account login — separate from Base USDC trading.
+      </p>
+      <AuthPage />
+    </PredictionWalletProvider>
   );
 }

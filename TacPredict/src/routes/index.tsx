@@ -1,12 +1,12 @@
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { CalendarDays, ChevronRight, Flame, Radio, Sparkles, TrendingUp } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
-import { MarketSparkline } from "@/components/market-sparkline";
+import { UpDownSection } from "@/components/up-down-section";
 import { Button } from "@/components/ui/button";
-import { categories, markets } from "@/domain/markets/demo-markets";
+import { categories } from "@/domain/markets/demo-markets";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
 
@@ -22,22 +22,18 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Discover prediction markets across crypto, sports, technology, news, and business. Predict with TAC Points.",
+          "Discover prediction markets across crypto, sports, technology, news, and business. Base and USDC prediction-market design preview.",
       },
       { property: "og:title", content: "TacPredict — Prediction Markets" },
       {
         property: "og:description",
-        content: "Discover markets, make predictions, and earn rewards with TAC Points.",
+        content: "Discover markets, make predictions, and explore outcomes with a Base wallet.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(cryptoMarketQueryOptions),
-      context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
-    ]),
+  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
   errorComponent: ({ error }) => (
     <div role="alert" className="py-16 text-center">
       <h1 className="page-title">Markets unavailable</h1>
@@ -50,17 +46,12 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const usd = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
 function HomePage() {
   const { feed = "Trending" } = Route.useSearch();
-  const { data: crypto } = useSuspenseQuery(cryptoMarketQueryOptions);
+  const { data: crypto } = useQuery(cryptoMarketQueryOptions);
   const { data: polymarket } = useSuspenseQuery(polymarketFeedQueryOptions);
   const feedMarkets = useMemo(() => {
-    const liveMarkets = polymarket.markets.length > 0 ? polymarket.markets : markets.slice(1);
+    const liveMarkets = polymarket.markets;
     const sorted = [...liveMarkets];
     if (feed === "New")
       sorted.sort(
@@ -77,6 +68,23 @@ function HomePage() {
 
   return (
     <div className="animate-enter">
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p className="section-kicker">BASE / USDC</p>
+          <h1 className="page-title">Make your call.</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Explore the odds. Find your edge.</p>
+        </div>
+        <img
+          src="/brand/tacpredict.svg"
+          alt=""
+          width={56}
+          height={56}
+          className="size-14 shrink-0 rounded-2xl"
+        />
+      </div>
+      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+        External market-data preview · Base trading contracts not connected
+      </p>
       <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 py-2.5 sm:mx-0 sm:px-0">
         {feeds.map((item) => (
           <Link
@@ -105,16 +113,18 @@ function HomePage() {
           className="mt-4 rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
         >
           {polymarket.error}
-          {polymarket.markets.length === 0 && " Demo market previews are shown below."}
+          {polymarket.markets.length === 0 && " Try refreshing in a moment."}
         </p>
       )}
       <SportsCarousel markets={feedMarkets} />
 
-      <UpDownSection
-        crypto={crypto}
-        bitcoinHistory={crypto.bitcoinHistory}
-        liveMarkets={polymarket.cryptoUpDown}
-      />
+      {crypto && (
+        <UpDownSection
+          crypto={crypto}
+          histories={crypto.histories}
+          liveMarkets={polymarket.cryptoUpDown}
+        />
+      )}
 
       <div className="scrollbar-none -mx-4 mt-7 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {categories.slice(0, 7).map((category, index) => (
@@ -138,30 +148,30 @@ function HomePage() {
         })}
       </p>
 
-      <section className="mt-6 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border bg-card p-4">
-        <div className="grid size-10 shrink-0 place-items-center rounded-md bg-streak-soft text-streak">
-          <Flame className="size-5" />
+      <section className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5">
+        <div>
+          <p className="text-base font-semibold">Built for Base. Designed for your wallet.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Native USDC balance reads are ready. Market contracts are not connected yet.
+          </p>
         </div>
-        <div className="min-w-0">
-          <p className="truncate font-extrabold">4-day check-in streak</p>
-          <p className="truncate text-sm text-muted-foreground">Claim 100 TAC Points today</p>
-        </div>
-        <Button size="sm" className="shrink-0" asChild>
-          <Link to="/rewards">Claim</Link>
+        <Button variant="outline" className="h-11 rounded-xl" asChild>
+          <Link to="/profile">Open portfolio</Link>
         </Button>
       </section>
     </div>
   );
 }
 
-const multiplier = (probability: number) => `${(100 / Math.max(1, probability)).toFixed(2)}x`;
+const multiplier = (probability: number) =>
+  probability > 0 ? `${(100 / probability).toFixed(2)}x` : "—";
 
 function SportsCarousel({
   markets: allMarkets,
 }: {
   markets: import("@/domain/markets/types").Market[];
 }) {
-  const cards = [...allMarkets, ...markets]
+  const cards = [...allMarkets]
     .filter(
       (market, index, list) =>
         market.category === "Sports" && list.findIndex((item) => item.id === market.id) === index,
@@ -237,187 +247,6 @@ function SportsCarousel({
             </div>
           </Link>
         ))}
-      </div>
-    </section>
-  );
-}
-
-function UpDownSection({
-  crypto,
-  bitcoinHistory,
-  liveMarkets,
-}: {
-  crypto: {
-    bitcoin: { price: number; change24h: number };
-    ethereum: { price: number; change24h: number };
-    solana: { price: number; change24h: number };
-  };
-  bitcoinHistory: number[];
-  liveMarkets: import("@/lib/polymarket.functions").PolymarketFeed["cryptoUpDown"];
-}) {
-  const assets = [
-    {
-      key: "bitcoin" as const,
-      name: "Bitcoin",
-      symbol: "BTC",
-      icon: "₿",
-      iconClass: "bg-bitcoin",
-      price: crypto.bitcoin.price,
-    },
-    {
-      key: "ethereum" as const,
-      name: "Ethereum",
-      symbol: "ETH",
-      icon: "Ξ",
-      iconClass: "bg-ethereum",
-      price: crypto.ethereum.price,
-    },
-    {
-      key: "solana" as const,
-      name: "Solana",
-      symbol: "SOL",
-      icon: "◎",
-      iconClass: "bg-solana",
-      price: crypto.solana.price,
-    },
-  ].filter((asset) => liveMarkets[asset.key]);
-  const bitcoin = assets[0];
-  if (!bitcoin) return null;
-  const bitcoinMarket = liveMarkets[bitcoin.key];
-  if (!bitcoinMarket) return null;
-  const bitcoinUp = bitcoinMarket.outcomes[0]?.probability ?? 0;
-  const bitcoinDown = bitcoinMarket.outcomes[1]?.probability ?? 0;
-  return (
-    <section className="mt-7">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <h2 className="section-title truncate">Trending Up &amp; Down</h2>
-        <Link
-          to="/markets"
-          search={{ category: "Crypto", sort: "Trending", q: "" }}
-          className="inline-flex shrink-0 items-center rounded-full border border-border px-3 py-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
-        >
-          View More <ChevronRight className="size-4" />
-        </Link>
-      </div>
-      <Link
-        to="/markets/$marketId"
-        params={{ marketId: bitcoinMarket.id }}
-        className="ios-press mt-3 block overflow-hidden rounded-lg border border-border bg-card p-5 shadow-card sm:p-6"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-bitcoin text-xl font-black text-foreground">
-              ₿
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-lg font-extrabold">Bitcoin Up or Down</span>
-              <span className="mt-0.5 block text-xs font-semibold text-muted-foreground">
-                Polymarket odds · {usd.format(crypto.bitcoin.price)}
-              </span>
-            </span>
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-positive">
-            <span className="size-1.5 rounded-full bg-positive" /> LIVE
-          </span>
-        </div>
-        <div className="mt-5 h-24">
-          <MarketSparkline values={bitcoinHistory} />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <span className="rounded-md border border-positive/20 bg-positive-soft p-3.5 text-positive">
-            <span className="flex items-center justify-between text-sm font-extrabold">
-              <span>Up</span>
-              <span>{bitcoinUp}%</span>
-            </span>
-            <span className="mt-2 block text-xs font-bold tabular-nums opacity-80">
-              {multiplier(bitcoinUp)} reward
-            </span>
-          </span>
-          <span className="rounded-md border border-destructive/20 bg-destructive/10 p-3.5 text-destructive">
-            <span className="flex items-center justify-between text-sm font-extrabold">
-              <span>Down</span>
-              <span>{bitcoinDown}%</span>
-            </span>
-            <span className="mt-2 block text-xs font-bold tabular-nums opacity-80">
-              {multiplier(bitcoinDown)} reward
-            </span>
-          </span>
-        </div>
-      </Link>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {assets
-          .filter((asset) => asset.key !== "bitcoin")
-          .map((asset) => {
-            const market = liveMarkets[asset.key];
-            if (!market) return null;
-            const upProb = market.outcomes[0]?.probability ?? 0;
-            const downProb = market.outcomes[1]?.probability ?? 0;
-            return (
-              <Link
-                key={asset.symbol}
-                to="/markets/$marketId"
-                params={{ marketId: market.id }}
-                className="ios-press block rounded-lg border border-border bg-card p-5 shadow-card"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className={`grid size-9 shrink-0 place-items-center rounded-full text-base font-black text-foreground ${asset.iconClass}`}
-                    >
-                      {asset.icon}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-[0.95rem] font-bold">
-                        {asset.name} Up or Down
-                      </span>
-                      <span className="mt-0.5 block text-xs font-semibold text-muted-foreground">
-                        {usd.format(asset.price)} · Polymarket odds
-                      </span>
-                    </span>
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-positive">
-                    <span className="size-1.5 rounded-full bg-positive" /> LIVE
-                  </span>
-                </div>
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">Up</span>
-                      <progress
-                        className="outcome-progress outcome-progress-positive mt-1"
-                        value={upProb}
-                        max={100}
-                        aria-label={`Up ${upProb}%`}
-                      />
-                    </span>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-muted-foreground">
-                      {multiplier(upProb)}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-positive-soft px-3 py-1.5 text-sm font-bold tabular-nums text-positive">
-                      {upProb}%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">Down</span>
-                      <progress
-                        className="outcome-progress outcome-progress-negative mt-1"
-                        value={downProb}
-                        max={100}
-                        aria-label={`Down ${downProb}%`}
-                      />
-                    </span>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-muted-foreground">
-                      {multiplier(downProb)}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-destructive/10 px-3 py-1.5 text-sm font-bold tabular-nums text-destructive">
-                      {downProb}%
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
       </div>
     </section>
   );

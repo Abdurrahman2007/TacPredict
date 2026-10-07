@@ -1,63 +1,118 @@
+import { memo, useMemo } from "react";
+import type { PricePoint } from "@/lib/market-data.functions";
 import { cn } from "@/lib/utils";
-import { memo, useId } from "react";
-
+const usd = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 2,
+});
 export const MarketSparkline = memo(function MarketSparkline({
+  points = [],
+  assetLabel = "Crypto",
   compact = false,
-  values,
 }: {
+  points?: PricePoint[] | undefined;
+  assetLabel?: string;
   compact?: boolean;
-  values?: number[] | undefined;
 }) {
-  const gradientId = useId().replaceAll(":", "");
-  const width = 320;
-  const height = 112;
-  const safeValues = values?.filter(Number.isFinite) ?? [];
-  const min = safeValues.length ? Math.min(...safeValues) : 0;
-  const max = safeValues.length ? Math.max(...safeValues) : 1;
-  const range = Math.max(max - min, 1);
-  const points =
-    safeValues.length > 1
-      ? safeValues
-          .map(
-            (value, index) =>
-              `${(index / (safeValues.length - 1)) * width},${10 + ((max - value) / range) * 88}`,
-          )
-          .join(" ")
-      : "0,37 42,22 88,28 132,20 174,34 218,50 260,72 320,58";
-  const lastPoint = points.split(" ").at(-1)?.split(",") ?? ["320", "58"];
-
+  const series = useMemo(
+    () =>
+      [
+        ...new Map(
+          points
+            .filter((p) => Number.isFinite(p.time) && Number.isFinite(p.price) && p.price > 0)
+            .map((p) => [p.time, p]),
+        ).values(),
+      ].sort((a, b) => a.time - b.time),
+    [points],
+  );
+  if (series.length < 2)
+    return (
+      <div
+        className={cn(
+          "grid place-items-center text-sm text-muted-foreground",
+          compact ? "h-24" : "h-40",
+        )}
+      >
+        Price history unavailable
+      </div>
+    );
+  const low = Math.min(...series.map((p) => p.price)),
+    high = Math.max(...series.map((p) => p.price));
+  const floor = low - (high - low) * 0.06,
+    range = Math.max(high - low, high * 0.00001) * 1.12;
+  const first = series[0]!,
+    last = series.at(-1)!;
+  const span = last.time - first.time;
+  const plotted = series.map((p) => ({
+    x: 8 + ((p.time - first.time) / span) * 304,
+    y: 8 + (1 - (p.price - floor) / range) * 94,
+  }));
+  const line = plotted.map((p) => `${p.x},${p.y}`).join(" ");
+  const summary = `${assetLabel} USD price from ${new Date(first.time).toISOString()} to ${new Date(last.time).toISOString()}. First ${usd.format(first.price)}, latest ${usd.format(last.price)}, low ${usd.format(low)}, high ${usd.format(high)}.`;
   return (
-    <div
-      className={cn("relative w-full", compact ? "h-16" : "h-28")}
-      role="img"
-      aria-label={
-        safeValues.length ? "Bitcoin price over the last 24 hours" : "Price trend unavailable"
-      }
-    >
+    <div className={cn("w-full", compact ? "h-24" : "h-40")}>
+      <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
+        <span>{usd.format(low)}</span>
+        <span>{usd.format(high)}</span>
+      </div>
       <svg
-        className="size-full overflow-visible text-chart"
+        className={cn("w-full text-primary", compact ? "h-16" : "h-28")}
         viewBox="0 0 320 112"
         preserveAspectRatio="none"
+        role="img"
+        aria-label={summary}
       >
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <line x1="0" y1="55" x2="320" y2="55" className="stroke-border" strokeDasharray="4 5" />
-        <polygon points={`0,112 ${points} 320,112`} fill={`url(#${gradientId})`} />
+        <title>{summary}</title>
         <polyline
-          points={points}
+          key={`${first.time}-${last.time}-${last.price}`}
+          className="price-chart-line"
+          points={line}
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
         />
-        <circle cx={lastPoint[0]} cy={lastPoint[1]} r="4" fill="currentColor" />
+        {plotted.map((point, index) => (
+          <circle
+            key={series[index]!.time}
+            cx={point.x}
+            cy={point.y}
+            r="1"
+            fill="currentColor"
+            opacity=".65"
+          />
+        ))}
+        <circle cx={plotted.at(-1)!.x} cy={plotted.at(-1)!.y} r="3" fill="currentColor" />
       </svg>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>
+          {new Date(first.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
+        <span>CoinGecko · USD</span>
+        <span>
+          {new Date(last.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
+      </div>
+      <table className="sr-only">
+        <caption>{assetLabel} USD price observations</caption>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>USD</th>
+          </tr>
+        </thead>
+        <tbody>
+          {series.map((p) => (
+            <tr key={p.time}>
+              <td>{new Date(p.time).toISOString()}</td>
+              <td>{usd.format(p.price)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 });

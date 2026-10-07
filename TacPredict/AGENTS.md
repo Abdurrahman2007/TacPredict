@@ -18,5 +18,6 @@
 - External market-price credentials and requests must stay behind server functions because provider keys cannot ship to browsers.
 - CoinGecko market snapshots use a shared server cache and request deduplication because live cards must not create duplicate provider calls.
 - Polymarket discovery and crypto Up/Down odds use one shared cached server feed because displayed probabilities must come from the provider rather than price-change estimates.
-- The visible product uses the compact World Graphite design system with Space Grotesk headings and DM Sans body text because mobile market scanning is the primary interaction.
-- Prediction wallet state is accessed through one shared provider because balance and positions must remain consistent across shell, market, rewards, and profile screens.
+- The current product direction is Base plus native USDC, with purple/graphite styling based on the supplied TacPredict mascot and wallet-first portfolio navigation.
+- Base wallet state uses BaseWalletProvider. The legacy TAC Points provider is isolated to old auth/rewards routes; it must never be represented as USDC or onchain settlement.
+- Real prediction transactions remain disabled until Base market contracts, ABIs, indexer and resolution/settlement paths have been supplied and validated.

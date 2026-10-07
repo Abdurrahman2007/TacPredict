@@ -1,8 +1,24 @@
 import { Bot, Clapperboard, Landmark, Newspaper, Shapes, Trophy } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function MarketIcon({ market, className }: { market: Market; className?: string }) {
+  const [failed, setFailed] = useState<string | null>(null);
+  if (market.image?.startsWith("https://") && failed !== market.image)
+    return (
+      <span className={cn("market-icon overflow-hidden bg-secondary", className)}>
+        <img
+          src={market.image}
+          alt={`${market.title} source logo`}
+          className="size-full object-contain"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(market.image ?? null)}
+        />
+      </span>
+    );
   const lowerTitle = market.title.toLowerCase();
 
   if (market.category === "Crypto") {

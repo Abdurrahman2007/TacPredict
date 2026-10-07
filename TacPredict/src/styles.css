@@ -58,28 +58,28 @@
 }
 
 :root {
-  --font-app: -apple-system, BlinkMacSystemFont, "SF Pro Text", "DM Sans", sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Space Grotesk", sans-serif;
+  --font-app: -apple-system, BlinkMacSystemFont, "SF Pro Text",  sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",  sans-serif;
   --radius: 0.875rem;
-  --background: oklch(0.18 0.014 246);
+  --background: #0d0b14;
   --foreground: oklch(0.974 0.004 250);
-  --card: oklch(0.245 0.014 240);
+  --card: #181420;
   --card-foreground: oklch(0.974 0.004 250);
-  --popover: oklch(0.245 0.014 240);
+  --popover: #181420;
   --popover-foreground: oklch(0.974 0.004 250);
-  --primary: oklch(0.79 0.16 151);
-  --primary-foreground: oklch(0.17 0.025 155);
-  --secondary: oklch(0.29 0.014 240);
+  --primary: #bea8ff;
+  --primary-foreground: #1c103d;
+  --secondary: #241e30;
   --secondary-foreground: oklch(0.91 0.008 245);
   --muted: oklch(0.27 0.012 240);
   --muted-foreground: oklch(0.69 0.014 244);
-  --accent: oklch(0.32 0.02 241);
+  --accent: #2b223b;
   --accent-foreground: oklch(0.974 0.004 250);
   --destructive: oklch(0.67 0.21 22);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.337 0.017 240);
-  --input: oklch(0.337 0.017 240);
-  --ring: oklch(0.79 0.16 151);
+  --border: #342c43;
+  --input: #342c43;
+  --ring: #bea8ff;
   --positive: oklch(0.79 0.16 151);
   --positive-soft: oklch(0.79 0.16 151 / 0.12);
   --streak: oklch(0.79 0.16 151);
@@ -89,7 +89,7 @@
   --featured: oklch(0.245 0.014 240);
   --featured-foreground: oklch(0.974 0.004 250);
   --featured-muted: oklch(0.69 0.014 244);
-  --surface-glass: oklch(0.245 0.014 240 / 0.88);
+  --surface-glass: rgb(24 20 32 / 0.92);
   --chart: oklch(0.63 0.2 260);
   --chart-label: oklch(0.82 0.018 235);
   --chart-label-foreground: oklch(0.22 0.02 245);
@@ -304,3 +304,42 @@
     transform: translateY(-2px);
   }
 }
+
+.onchain-balance-card {
+  background: radial-gradient(ellipse at 100% 0, rgb(116 67 219 / 0.18), transparent 65%), #181420;
+}
+.onchain-brand-card {
+  background: radial-gradient(ellipse at 0 100%, rgb(92 50 211 / 0.16), transparent 70%), #15121e;
+}
+.brand-intro {
+  background: #0d0b14;
+  animation: brand-intro-exit 800ms ease both;
+}
+.brand-intro-mark {
+  animation: brand-arrive 660ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes brand-arrive {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateY(-16deg) translateY(14px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(600px) rotateY(0) translateY(0) scale(1);
+  }
+}
+@keyframes brand-intro-exit {
+  0%,
+  64% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .price-chart-line { animation: chart-arrive 300ms ease-out; }
+}
+@keyframes chart-arrive { from { opacity: .3; } to { opacity: 1; } }
