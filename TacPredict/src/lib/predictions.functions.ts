@@ -17,7 +17,7 @@ export const placePrediction = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const market = data.marketId.startsWith("poly-")
       ? await loadOpenProviderMarket(data.marketId)
-      : demoMarkets.find((item) => item.id === data.marketId) ?? null;
+      : (demoMarkets.find((item) => item.id === data.marketId) ?? null);
     if (!market) return { ok: false as const, message: "This market is closed or unavailable." };
     const outcome = market.outcomes.find((item) => item.id === data.outcomeId);
     if (!outcome) return { ok: false as const, message: "That outcome is no longer available." };
@@ -38,5 +38,7 @@ export const placePrediction = createServerFn({ method: "POST" })
       return { ok: false as const, message: "Could not place prediction. Please try again." };
     }
     const r = result as { ok: boolean; message?: string; balance?: number };
-    return r.ok ? { ok: true as const, balance: r.balance ?? 0 } : { ok: false as const, message: r.message ?? "Prediction rejected." };
+    return r.ok
+      ? { ok: true as const, balance: r.balance ?? 0 }
+      : { ok: false as const, message: r.message ?? "Prediction rejected." };
   });

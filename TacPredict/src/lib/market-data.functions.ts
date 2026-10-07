@@ -36,13 +36,18 @@ function numeric(value: number | undefined, fallback = 0) {
 
 async function fetchCryptoMarketSnapshot(): Promise<CryptoMarketSnapshot> {
   const apiKey = process.env["COINGECKO_API_KEY"];
-  const headers = apiKey ? { accept: "application/json", "x-cg-demo-api-key": apiKey } : { accept: "application/json" };
-  const request = (url: string) => fetch(url, { headers }).then(async (response) => {
-    if (response.ok || !apiKey) return response;
-    return fetch(url, { headers: { accept: "application/json" } });
-  });
+  const headers = apiKey
+    ? { accept: "application/json", "x-cg-demo-api-key": apiKey }
+    : { accept: "application/json" };
+  const request = (url: string) =>
+    fetch(url, { headers }).then(async (response) => {
+      if (response.ok || !apiKey) return response;
+      return fetch(url, { headers: { accept: "application/json" } });
+    });
   const [priceResponse, chartResponse] = await Promise.all([
-    request("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_market_cap=true&include_24hr_change=true"),
+    request(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_market_cap=true&include_24hr_change=true",
+    ),
     request("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1"),
   ]);
 
@@ -58,7 +63,7 @@ async function fetchCryptoMarketSnapshot(): Promise<CryptoMarketSnapshot> {
   }
 
   const prices = (await priceResponse.json()) as CoinGeckoPriceResponse;
-  const chart = chartResponse.ok ? (await chartResponse.json()) as CoinGeckoChartResponse : {};
+  const chart = chartResponse.ok ? ((await chartResponse.json()) as CoinGeckoChartResponse) : {};
   const history = (chart.prices ?? []).map((point) => point[1]).filter(Number.isFinite);
   const btc = prices["bitcoin"] ?? {};
 

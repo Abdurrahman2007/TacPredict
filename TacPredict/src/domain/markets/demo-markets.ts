@@ -18,10 +18,12 @@ export const markets: Market[] = [
     image: featuredBitcoin,
     featured: true,
     trend: "up",
-    description: "This market tracks whether Bitcoin trades at or above $120,000 on a major USD spot exchange before the closing time.",
+    description:
+      "This market tracks whether Bitcoin trades at or above $120,000 on a major USD spot exchange before the closing time.",
     source: "CoinGecko",
     sourceUrl: "https://www.coingecko.com/en/coins/bitcoin",
-    resolutionCriteria: "Resolves Yes if the reported Bitcoin USD spot price reaches $120,000 before market close; otherwise No.",
+    resolutionCriteria:
+      "Resolves Yes if the reported Bitcoin USD spot price reaches $120,000 before market close; otherwise No.",
   },
   {
     id: "ai-product-2026",
@@ -36,10 +38,12 @@ export const markets: Market[] = [
     ],
     image: marketAi,
     trend: "up",
-    description: "A market on whether a major AI research company announces a consumer-ready humanoid robot during 2026.",
+    description:
+      "A market on whether a major AI research company announces a consumer-ready humanoid robot during 2026.",
     source: "Official company announcements",
     sourceUrl: "https://www.reuters.com/technology/",
-    resolutionCriteria: "Resolves Yes after a public product announcement from a recognized AI lab; prototypes alone do not qualify.",
+    resolutionCriteria:
+      "Resolves Yes after a public product announcement from a recognized AI lab; prototypes alone do not qualify.",
   },
   {
     id: "cricket-final",
@@ -54,10 +58,12 @@ export const markets: Market[] = [
     ],
     image: marketCricket,
     trend: "flat",
-    description: "Predict whether the match winner will be decided during the final five overs of the second innings.",
+    description:
+      "Predict whether the match winner will be decided during the final five overs of the second innings.",
     source: "Official match scorecard",
     sourceUrl: "https://www.espncricinfo.com/",
-    resolutionCriteria: "Resolves from the official completed match scorecard. Abandoned matches are cancelled.",
+    resolutionCriteria:
+      "Resolves from the official completed match scorecard. Abandoned matches are cancelled.",
   },
   {
     id: "eth-5k",
@@ -71,10 +77,12 @@ export const markets: Market[] = [
       { id: "no", label: "No", probability: 62 },
     ],
     trend: "down",
-    description: "Tracks whether Ethereum trades above $5,000 on a major USD spot exchange before year end.",
+    description:
+      "Tracks whether Ethereum trades above $5,000 on a major USD spot exchange before year end.",
     source: "CoinGecko",
     sourceUrl: "https://www.coingecko.com/en/coins/ethereum",
-    resolutionCriteria: "Resolves Yes if the reported Ethereum USD spot price exceeds $5,000 before market close.",
+    resolutionCriteria:
+      "Resolves Yes if the reported Ethereum USD spot price exceeds $5,000 before market close.",
   },
   {
     id: "rate-cut",
@@ -88,10 +96,12 @@ export const markets: Market[] = [
       { id: "no", label: "No", probability: 29 },
     ],
     trend: "up",
-    description: "Predict whether the next announced central bank policy decision includes a reduction in its benchmark interest rate.",
+    description:
+      "Predict whether the next announced central bank policy decision includes a reduction in its benchmark interest rate.",
     source: "Official central bank release",
     sourceUrl: "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
-    resolutionCriteria: "Resolves from the official policy statement published after the next scheduled decision.",
+    resolutionCriteria:
+      "Resolves from the official policy statement published after the next scheduled decision.",
   },
   {
     id: "global-tech-event",
@@ -106,10 +116,12 @@ export const markets: Market[] = [
       { id: "robotics", label: "Robotics", probability: 24 },
     ],
     trend: "flat",
-    description: "Predict which technology category receives the greatest share of major product announcements at the next global event.",
+    description:
+      "Predict which technology category receives the greatest share of major product announcements at the next global event.",
     source: "Official event announcements",
     sourceUrl: "https://www.reuters.com/technology/",
-    resolutionCriteria: "Resolves using the event organizer's official program and product announcement archive.",
+    resolutionCriteria:
+      "Resolves using the event organizer's official program and product announcement archive.",
   },
 ];
 

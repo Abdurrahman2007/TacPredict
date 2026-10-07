@@ -1,11 +1,5 @@
 export type MarketCategory =
-  | "Crypto"
-  | "Sports"
-  | "News"
-  | "Technology"
-  | "Business"
-  | "Culture"
-  | "Other";
+  "Crypto" | "Sports" | "News" | "Technology" | "Business" | "Culture" | "Other";
 
 export type MarketOutcome = {
   id: string;
@@ -18,6 +12,9 @@ export type Market = {
   title: string;
   category: MarketCategory;
   closesAt: string;
+  createdAt?: string;
+  endsAt?: string;
+  volume24h?: number;
   volume: string;
   participants: number;
   outcomes: MarketOutcome[];

@@ -15,7 +15,7 @@ const navItems = [
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="TacPredict home">
             <BrandMark className="size-10" />
@@ -35,18 +35,34 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="icon" aria-label="Search markets" title="Search markets" asChild>
-              <Link to="/markets"><Search /></Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Search markets"
+              title="Search markets"
+              asChild
+            >
+              <Link to="/markets">
+                <Search />
+              </Link>
             </Button>
             <BalancePill />
-            <Button variant="outline" size="icon" aria-label="Open profile" title="Open profile" asChild>
-              <Link to="/profile"><CircleUserRound /></Link>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Open profile"
+              title="Open profile"
+              asChild
+            >
+              <Link to="/profile">
+                <CircleUserRound />
+              </Link>
             </Button>
           </div>
         </div>
       </header>
 
-       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-6 md:pb-12 md:pt-7">
+      <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-6 md:pb-12 md:pt-7">
         {children}
       </main>
 
@@ -62,10 +78,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.to}
                 to={item.to}
                 className="group ios-press flex min-h-[3.75rem] flex-col items-center justify-center gap-1 text-[0.7rem] font-semibold text-muted-foreground"
-                activeProps={{ className: "text-foreground [&_.nav-icon]:text-primary" }}
+                activeProps={{
+                  className:
+                    "text-foreground [&_.nav-icon]:bg-positive-soft [&_.nav-icon]:text-primary",
+                }}
                 activeOptions={{ exact: item.to === "/" }}
               >
-                <span className="nav-icon transition-colors group-hover:text-foreground">
+                <span className="nav-icon grid size-9 place-items-center rounded-xl transition-colors group-hover:bg-secondary/60 group-hover:text-foreground">
                   <Icon className="size-[1.35rem]" strokeWidth={2.25} />
                 </span>
                 <span>{item.label}</span>
@@ -81,9 +100,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 function BalancePill() {
   const { balance } = usePredictionWallet();
   return (
-    <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 transition-colors hover:border-primary/40" aria-label={`${balance.toLocaleString()} TAC Points, open profile`}>
+    <Link
+      to="/profile"
+      className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 transition-colors hover:border-primary/40"
+      aria-label={`${balance.toLocaleString()} TAC Points, open profile`}
+    >
       <span className="size-1.5 rounded-full bg-primary motion-safe:animate-pulse" />
-      <p className="text-xs font-bold tabular-nums">{balance.toLocaleString()} <span className="text-muted-foreground">TAC</span></p>
+      <p className="text-xs font-bold tabular-nums">
+        {balance.toLocaleString()} <span className="text-muted-foreground">TAC</span>
+      </p>
     </Link>
   );
 }
