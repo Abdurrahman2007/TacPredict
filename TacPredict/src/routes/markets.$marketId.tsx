@@ -3,7 +3,15 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ConnectWallet } from "@/components/connect-wallet";
+import { PredictionAmountCard } from "@/components/prediction-amount-card";
+import { MobileOutcomeDock } from "@/components/mobile-outcome-dock";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { CryptoDetailChart } from "@/components/crypto-detail-chart";
 import { ProbabilityHistoryChart } from "@/components/probability-history";
 import { MarketCountdown } from "@/components/market-countdown";
@@ -11,8 +19,6 @@ import { MarketDescription } from "@/components/market-description";
 import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
-import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { BASE_NETWORK, formatUsdc } from "@/lib/onchain/base";
 
 export const Route = createFileRoute("/markets/$marketId")({
   validateSearch: (search: Record<string, unknown>): { outcome?: string } =>
@@ -34,11 +40,15 @@ function MarketDetailPage() {
   const { marketId } = Route.useParams();
   const { outcome: initial } = Route.useSearch();
   const { data: feed } = useSuspenseQuery(polymarketFeedQueryOptions);
-  const wallet = useBaseWallet();
   const [selected, setSelected] = useState(initial || "");
-  const [amount, setAmount] = useState("10");
+  const [amountOpen, setAmountOpen] = useState(false);
+  const selectOutcome = (id: string) => {
+    setSelected(id);
+    if (window.matchMedia("(max-width: 1023px)").matches) setAmountOpen(true);
+  };
   useEffect(() => {
     setSelected(initial || "");
+    setAmountOpen(false);
   }, [initial, marketId]);
   const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
     (item) => item?.id === marketId,
@@ -77,7 +87,7 @@ function MarketDetailPage() {
     }).format(n);
   const chosen = market.outcomes.find((item) => item.id === selected) ?? market.outcomes[0];
   return (
-    <div className="animate-enter pb-20 lg:pb-0">
+    <div className="animate-enter pb-28 lg:pb-0">
       <Link
         to="/markets"
         className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"
@@ -136,7 +146,7 @@ function MarketDetailPage() {
                 type="button"
                 key={item.id}
                 aria-pressed={chosen?.id === item.id}
-                onClick={() => setSelected(item.id)}
+                onClick={() => selectOutcome(item.id)}
                 className={`ios-press flex min-h-16 w-full items-center justify-between gap-4 rounded-xl border px-4 text-left ${chosen?.id === item.id ? "border-primary/50 bg-primary/10" : "border-border bg-card"}`}
               >
                 <span className="text-sm font-semibold">{item.label}</span>
@@ -208,93 +218,30 @@ function MarketDetailPage() {
             <p className="mt-4 text-sm text-muted-foreground">Trade activity is not available.</p>
           </section>
         </article>
-        <aside
-          className="min-w-0 h-fit rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24"
-          aria-label="USDC trade integration status"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Make a prediction</h2>
-            <span className="rounded-md bg-secondary px-2 py-1 text-xs text-primary">
-              BASE / USDC
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {chosen?.label ?? "Choose an outcome"} · {chosen?.probability ?? "—"}% source
-            probability
-          </p>
-          <label
-            htmlFor="usdc-amount"
-            className="mt-6 block text-xs font-semibold tracking-wide text-muted-foreground"
-          >
-            AMOUNT PREVIEW
-          </label>
-          <div className="mt-2 flex items-center gap-3 rounded-xl border border-border bg-background px-4">
-            <input
-              id="usdc-amount"
-              type="number"
-              min="0.01"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="h-14 min-w-0 flex-1 bg-transparent text-xl font-semibold outline-none"
-            />
-            <span className="text-sm text-muted-foreground">USDC</span>
-          </div>
-          <div className="mt-3 flex justify-between text-sm">
-            <span className="text-muted-foreground">Wallet balance</span>
-            <span className="font-medium">
-              {!wallet.address
-                ? "0"
-                : wallet.chainId !== BASE_NETWORK.id
-                  ? "Switch network"
-                  : wallet.usdc === null
-                    ? "Loading…"
-                    : formatUsdc(wallet.usdc)}{" "}
-              USDC
-            </span>
-          </div>
-          <Button disabled className="mt-5 h-12 w-full rounded-xl">
-            Trading not enabled
-          </Button>
-          {!wallet.address && (
-            <div className="mt-3">
-              <ConnectWallet className="h-12 w-full rounded-xl" />
-            </div>
-          )}
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Preview only · No funds move.
-          </p>
-        </aside>
-      </div>
-      {market.outcomes.length > 0 && (
-        <div
-          className="fixed inset-x-0 z-40 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden"
-          aria-label="Quick outcome selection"
-          style={{ bottom: "calc(68px + max(.6rem, env(safe-area-inset-bottom)))" }}
-        >
-          {market.outcomes.slice(0, 2).map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={chosen?.id === item.id}
-              onClick={() => setSelected(item.id)}
-              className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold transition-colors ${chosen?.id === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
-              style={{
-                background:
-                  market.category === "Sports"
-                    ? index === 0
-                      ? "#9a4558"
-                      : "#526680"
-                    : index === 0
-                      ? "#197c53"
-                      : "#a24353",
-              }}
-            >
-              {item.label} {item.probability}%
-            </button>
-          ))}
+        <div className="hidden min-w-0 lg:block">
+          <PredictionAmountCard
+            key={market.id}
+            market={market}
+            selected={chosen?.id}
+            onSelect={setSelected}
+          />
         </div>
-      )}
+      </div>
+      <MobileOutcomeDock market={market} selected={chosen?.id} onSelect={selectOutcome} />
+      <Dialog open={amountOpen} onOpenChange={setAmountOpen}>
+        <DialogContent className="bottom-0 top-auto w-full max-w-md translate-y-0 grid-cols-1 gap-0 overflow-y-auto rounded-t-[28px] rounded-b-none border-b-0 bg-card p-0 shadow-2xl max-h-[calc(100dvh-80px)] sm:rounded-t-[28px] sm:rounded-b-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Amount preview</DialogTitle>
+            <DialogDescription>
+              Select an outcome and amount. Trading is not enabled.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="min-w-0 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-muted-foreground/30" />
+            <PredictionAmountCard market={market} selected={chosen?.id} onSelect={setSelected} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
