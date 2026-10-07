@@ -46,10 +46,7 @@ function UpDownPage() {
               ? "Loading spot-price context…"
               : "No verified Up/Down data to show"}
           </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            We never substitute invented markets or prices. Source markets and price providers may
-            be temporarily unavailable.
-          </p>
+          <p className="mt-3 text-sm text-muted-foreground">Source temporarily unavailable.</p>
           <Link
             to="/markets"
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-primary"
@@ -59,8 +56,7 @@ function UpDownPage() {
         </section>
       )}
       <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-        Spot-price history is context, not a prediction probability chart. These are external source
-        markets, not deployed Base contracts. No order is submitted here.
+        Spot prices, not outcome probabilities. Trading pending.
       </p>
     </div>
   );

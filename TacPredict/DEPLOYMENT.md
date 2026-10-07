@@ -19,3 +19,5 @@ Do not represent external source volume as TacPredict volume. No fabricated pric
 Before enabling real funds, review contracts, oracle/resolution rules, fees, slippage, permissions, allowance handling, indexer consistency, security audits and applicable regulatory requirements.
 
 TAC promo codes: apply `202610070002_tac_promo_codes.sql` as an administrator. Admins create hashed, bounded, expiring campaigns; clients cannot list codes or grant balances. Redemption is atomic, per-account/campaign unique, with database-enforced rate limiting. USDC promo payouts and weekly/monthly activity distributions remain pending funding, verified eligibility/indexing and approved campaign rules. No campaigns or payouts have been created by this release.
+
+Direct MCP deployment helper: `node scripts/package-cloudflare.cjs` after the build emits ignored `.output/worker-modules.json` and `.output/worker-packed.b64`. It minifies Worker modules and packages gzip static responses with `encodeBody: manual`; standard Wrangler deployments can instead use native static assets. DNS website records must be backed up before attaching the custom domain; preserve mail records.

@@ -96,7 +96,6 @@ function RewardsPage() {
             {user && rewardBackendReady ? `+${rewardAmount}` : "100–160"} TAC
           </span>
         </div>
-        <RewardExtras />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
           <div className="flex items-center gap-3">
             <Clock3 className="size-5 text-primary" />
@@ -142,6 +141,7 @@ function RewardsPage() {
           </p>
         )}
       </section>
+      <RewardExtras />
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border p-5">
         <div>
           <p className="font-semibold">USDC lives in your wallet.</p>

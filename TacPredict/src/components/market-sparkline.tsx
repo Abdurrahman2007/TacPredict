@@ -53,8 +53,8 @@ export const MarketSparkline = memo(function MarketSparkline({
   return (
     <div className={cn("w-full", compact ? "h-24" : "h-40")}>
       <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-        <span>{usd.format(low)}</span>
-        <span>{usd.format(high)}</span>
+        <span>Low {usd.format(low)}</span>
+        <span>High {usd.format(high)}</span>
       </div>
       <svg
         className={cn("w-full text-primary", compact ? "h-16" : "h-28")}
@@ -91,28 +91,30 @@ export const MarketSparkline = memo(function MarketSparkline({
         <span>
           {new Date(first.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span>CoinGecko · USD</span>
+        <span>24h · CoinGecko</span>
         <span>
           {new Date(last.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </span>
       </div>
-      <table className="sr-only">
-        <caption>{assetLabel} USD price observations</caption>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>USD</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.map((p) => (
-            <tr key={p.time}>
-              <td>{new Date(p.time).toISOString()}</td>
-              <td>{usd.format(p.price)}</td>
+      <div className="sr-only">
+        <table>
+          <caption>{assetLabel} USD price observations</caption>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>USD</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {series.map((p) => (
+              <tr key={p.time}>
+                <td>{new Date(p.time).toISOString()}</td>
+                <td>{usd.format(p.price)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 });
