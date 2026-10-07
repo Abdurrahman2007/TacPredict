@@ -36,6 +36,11 @@ export function UpDownSection({
           <ChevronRight className="size-4" />
         </Link>
       </div>
+      {!assets.length && (
+        <p className="py-8 text-sm text-muted-foreground">
+          Crypto markets are temporarily unavailable.
+        </p>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         {assets.map((asset, index) => {
           const market = liveMarkets[asset.key]!,

@@ -144,7 +144,7 @@ async function fetchFeed(): Promise<PolymarketFeed> {
         { headers, signal: AbortSignal.timeout(5000) },
       ),
       fetch(
-        `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=100&end_date_min=${encodeURIComponent(now)}&order=endDate&ascending=true`,
+        `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=100&tag_id=21&end_date_min=${encodeURIComponent(now)}&order=endDate&ascending=true`,
         { headers, signal: AbortSignal.timeout(5000) },
       ),
       fetch(
@@ -166,6 +166,24 @@ async function fetchFeed(): Promise<PolymarketFeed> {
       .map(mapMarket)
       .filter((market): market is Market => market !== null);
     const cryptoUpDown: PolymarketFeed["cryptoUpDown"] = {};
+    const nowMs = Date.now();
+    const timingRank = (m: Market) => {
+      const start = Date.parse(m.startsAt ?? "");
+      return Number.isFinite(start) ? (start <= nowMs ? 0 : 1) : 2;
+    };
+    mappedCrypto.sort((a, b) => {
+      const rank = timingRank(a) - timingRank(b);
+      if (rank) return rank;
+      const aEnd = Date.parse(a.endsAt ?? ""),
+        bEnd = Date.parse(b.endsAt ?? "");
+      if (timingRank(a) === 0) {
+        const aDuration = aEnd - Date.parse(a.startsAt ?? ""),
+          bDuration = bEnd - Date.parse(b.startsAt ?? "");
+        if (Number.isFinite(aDuration) && Number.isFinite(bDuration) && aDuration !== bDuration)
+          return aDuration - bDuration;
+      }
+      return aEnd - bEnd;
+    });
     for (const market of mappedCrypto) {
       const title = market.title.toLowerCase();
       const asset = title.startsWith("bitcoin up or down")
