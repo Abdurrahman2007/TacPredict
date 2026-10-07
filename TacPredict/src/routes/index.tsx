@@ -142,10 +142,7 @@ function HomePage() {
       <MarketSection title={feed} markets={feedMarkets} />
       <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
         Market odds and volume supplied by {polymarket.source} · refreshed{" "}
-        {new Date(polymarket.updatedAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+        {new Date(polymarket.updatedAt).toISOString().slice(11, 16) + " UTC"}
       </p>
 
       <section className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5">

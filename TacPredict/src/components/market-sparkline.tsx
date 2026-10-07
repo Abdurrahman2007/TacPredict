@@ -9,10 +9,12 @@ const usd = new Intl.NumberFormat("en-US", {
 export const MarketSparkline = memo(function MarketSparkline({
   points = [],
   assetLabel = "Crypto",
+  sourceLabel = "Coinbase",
   compact = false,
 }: {
   points?: PricePoint[] | undefined;
   assetLabel?: string;
+  sourceLabel?: string;
   compact?: boolean;
 }) {
   const series = useMemo(
@@ -88,13 +90,9 @@ export const MarketSparkline = memo(function MarketSparkline({
         <circle cx={plotted.at(-1)!.x} cy={plotted.at(-1)!.y} r="3" fill="currentColor" />
       </svg>
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>
-          {new Date(first.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
-        <span>24h · CoinGecko</span>
-        <span>
-          {new Date(last.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
+        <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
+        <span>{sourceLabel} · 24h UTC</span>
+        <span>{new Date(last.time).toISOString().slice(11, 16)}</span>
       </div>
       <div className="sr-only">
         <table>

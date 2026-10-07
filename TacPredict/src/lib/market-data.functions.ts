@@ -6,19 +6,20 @@ export type CryptoMarketSnapshot = {
   ethereum: { price: number; change24h: number };
   solana: { price: number; change24h: number };
   histories: Record<"bitcoin" | "ethereum" | "solana", PricePoint[]>;
+  source: "Coinbase";
   updatedAt: string;
 };
 const CACHE_MS = 60_000;
 let cached: { value: CryptoMarketSnapshot; expiresAt: number } | undefined;
 let pending: Promise<CryptoMarketSnapshot> | undefined;
-const numeric = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-async function request(path: string) {
+const numeric = (value: unknown) => {
+  const parsed = typeof value === "string" ? Number(value) : value;
+  return typeof parsed === "number" && Number.isFinite(parsed) ? parsed : 0;
+};
+async function request(path: string): Promise<unknown> {
   try {
-    const key = process.env["COINGECKO_API_KEY"];
-    const response = await fetch(`https://api.coingecko.com/api/v3/${path}`, {
-      headers: key
-        ? { accept: "application/json", "x-cg-demo-api-key": key }
-        : { accept: "application/json" },
+    const response = await fetch(`https://api.exchange.coinbase.com/products/${path}`, {
+      headers: { accept: "application/json" },
       signal: AbortSignal.timeout(5000),
     });
     return response.ok ? await response.json() : null;
@@ -27,54 +28,51 @@ async function request(path: string) {
   }
 }
 async function snapshot(): Promise<CryptoMarketSnapshot> {
-  const assets = ["bitcoin", "ethereum", "solana"] as const;
-  const [prices, ...charts] = await Promise.all([
-    request(
-      "simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_market_cap=true&include_24hr_change=true",
-    ),
-    ...assets.map((asset) => request(`coins/${asset}/market_chart?vs_currency=usd&days=1`)),
-  ]);
-  const histories = Object.fromEntries(
-    assets.map((asset, index) => {
-      const rows: unknown = charts[index]?.prices;
-      const valid: PricePoint[] = Array.isArray(rows)
-        ? rows
-            .filter(
-              (row): row is [number, number] =>
-                Array.isArray(row) &&
-                typeof row[0] === "number" &&
-                typeof row[1] === "number" &&
-                Number.isFinite(row[0]) &&
-                Number.isFinite(row[1]) &&
-                row[1] > 0,
-            )
-            .map(([time, price]) => ({ time, price }))
-        : [];
-      const unique = [...new Map(valid.map((point) => [point.time, point])).values()].sort(
+  const products = [
+    { asset: "bitcoin", pair: "BTC-USD" },
+    { asset: "ethereum", pair: "ETH-USD" },
+    { asset: "solana", pair: "SOL-USD" },
+  ] as const;
+  const now = Date.now();
+  const rows = await Promise.all(
+    products.map(async (product) => {
+      const [rawTicker, candles] = await Promise.all([
+        request(`${product.pair}/ticker`),
+        request(`${product.pair}/candles?granularity=900`),
+      ]);
+      const ticker = rawTicker as { price?: unknown } | null;
+      const history: PricePoint[] = [];
+      if (Array.isArray(candles))
+        for (const row of candles) {
+          if (!Array.isArray(row)) continue;
+          // Closed 15-minute candles only, positioned at their close timestamp.
+          const time = (numeric(row[0]) + 900) * 1000,
+            price = numeric(row[4]);
+          if (time > now - 86400000 && time <= now && price > 0) history.push({ time, price });
+        }
+      const unique = [...new Map(history.map((p) => [p.time, p])).values()].sort(
         (a, b) => a.time - b.time,
       );
-      return [asset, unique.slice(-300)];
+      return { asset: product.asset, price: numeric(ticker?.price), history: unique };
     }),
-  ) as CryptoMarketSnapshot["histories"];
-  const btc = histories.bitcoin.map((p) => p.price);
+  );
+  const btc = rows[0]!,
+    eth = rows[1]!,
+    sol = rows[2]!;
+  const prices = btc.history.map((p) => p.price);
   return {
     bitcoin: {
-      price: numeric(prices?.bitcoin?.usd),
-      change24h: numeric(prices?.bitcoin?.usd_24h_change),
-      marketCap: numeric(prices?.bitcoin?.usd_market_cap),
-      high24h: btc.length ? Math.max(...btc) : 0,
-      low24h: btc.length ? Math.min(...btc) : 0,
+      price: btc.price,
+      change24h: 0,
+      marketCap: 0,
+      high24h: prices.length ? Math.max(...prices) : 0,
+      low24h: prices.length ? Math.min(...prices) : 0,
     },
-    ethereum: {
-      price: numeric(prices?.ethereum?.usd),
-      change24h: numeric(prices?.ethereum?.usd_24h_change),
-    },
-    solana: {
-      price: numeric(prices?.solana?.usd),
-      change24h: numeric(prices?.solana?.usd_24h_change),
-    },
-    histories,
-    updatedAt: new Date().toISOString(),
+    ethereum: { price: eth.price, change24h: 0 },
+    solana: { price: sol.price, change24h: 0 },
+    histories: { bitcoin: btc.history, ethereum: eth.history, solana: sol.history },
+    source: "Coinbase",
+    updatedAt: new Date(now).toISOString(),
   };
 }
 export const getCryptoMarketSnapshot = createServerFn({ method: "GET" }).handler(async () => {

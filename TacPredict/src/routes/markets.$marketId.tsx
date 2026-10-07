@@ -75,7 +75,7 @@ function MarketDetailPage() {
             <span className="inline-flex items-center gap-1.5">
               <Clock3 className="size-4" />
               {market.endsAt
-                ? `Closes ${new Date(market.endsAt).toLocaleDateString()}`
+                ? `Closes ${new Date(market.endsAt).toISOString().slice(0, 10)}`
                 : `Ends ${market.closesAt}`}
             </span>
             <span>{market.volume} source volume</span>

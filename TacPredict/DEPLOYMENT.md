@@ -21,3 +21,5 @@ Before enabling real funds, review contracts, oracle/resolution rules, fees, sli
 TAC promo codes: apply `202610070002_tac_promo_codes.sql` as an administrator. Admins create hashed, bounded, expiring campaigns; clients cannot list codes or grant balances. Redemption is atomic, per-account/campaign unique, with database-enforced rate limiting. USDC promo payouts and weekly/monthly activity distributions remain pending funding, verified eligibility/indexing and approved campaign rules. No campaigns or payouts have been created by this release.
 
 Direct MCP deployment helper: `node scripts/package-cloudflare.cjs` after the build emits ignored `.output/worker-modules.json` and `.output/worker-packed.b64`. It minifies Worker modules and packages gzip static responses with `encodeBody: manual`; standard Wrangler deployments can instead use native static assets. DNS website records must be backed up before attaching the custom domain; preserve mail records.
+
+Price charts use Coinbase Exchange public tickers and closed 15-minute BTC-USD / ETH-USD / SOL-USD candles over the last 24 hours. Unknown source data is shown as unavailable, not synthesized.

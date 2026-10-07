@@ -16,6 +16,7 @@ export function UpDownSection({
 }: {
   detailed?: boolean;
   crypto: {
+    source: string;
     bitcoin: { price: number; change24h: number };
     ethereum: { price: number; change24h: number };
     solana: { price: number; change24h: number };
@@ -97,7 +98,11 @@ export function UpDownSection({
           </span>
         </div>
         <div className="mt-5">
-          <MarketSparkline points={histories[bitcoin.key]} assetLabel={bitcoin.name} />
+          <MarketSparkline
+            points={histories[bitcoin.key]}
+            assetLabel={bitcoin.name}
+            sourceLabel={crypto.source}
+          />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <span className="rounded-md border border-positive/20 bg-positive-soft p-3.5 text-positive">
@@ -157,7 +162,12 @@ export function UpDownSection({
                   </span>
                 </div>
                 <div className="mt-4">
-                  <MarketSparkline points={histories[asset.key]} assetLabel={asset.name} compact />
+                  <MarketSparkline
+                    points={histories[asset.key]}
+                    assetLabel={asset.name}
+                    sourceLabel={crypto.source}
+                    compact
+                  />
                 </div>
                 <div className="mt-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
