@@ -1,4 +1,4 @@
-import { memo, useId, useMemo } from "react";
+import { memo, useId, useMemo, useState } from "react";
 import type { PricePoint } from "@/lib/market-data.functions";
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -16,6 +16,7 @@ export const MarketSparkline = memo(function MarketSparkline({
   sourceLabel?: string;
   compact?: boolean;
 }) {
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const id = useId().replace(/:/g, "");
   const series = useMemo(
     () =>
@@ -49,6 +50,31 @@ export const MarketSparkline = memo(function MarketSparkline({
   const line = plotted.map((p) => `${p.x},${p.y}`).join(" "),
     endpoint = plotted.at(-1)!;
   const delta = last.price - first.price;
+  const selectedIndex =
+    selectedTime === null
+      ? -1
+      : series.reduce(
+          (best, p, i) =>
+            Math.abs(p.time - selectedTime) < Math.abs(series[best]!.time - selectedTime)
+              ? i
+              : best,
+          0,
+        );
+  const selectedPoint = selectedIndex < 0 ? null : series[selectedIndex]!;
+  const selectedPlot = selectedIndex < 0 ? null : plotted[selectedIndex]!;
+  function inspect(clientX: number, bounds: DOMRect) {
+    const fraction = Math.max(
+      0,
+      Math.min(1, (((clientX - bounds.left) / bounds.width) * 360 - 8) / 272),
+    );
+    const target = first.time + fraction * (last.time - first.time);
+    setSelectedTime(
+      series.reduce(
+        (best, p) => (Math.abs(p.time - target) < Math.abs(best.time - target) ? p : best),
+        first,
+      ).time,
+    );
+  }
   return (
     <div>
       <div className="mb-5 flex items-start gap-5 sm:gap-8">
@@ -71,7 +97,42 @@ export const MarketSparkline = memo(function MarketSparkline({
           </p>
         </div>
       </div>
-      <div className="relative">
+      <div
+        className="relative outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        role="slider"
+        tabIndex={0}
+        aria-label={`${assetLabel} chart. Tap or use arrow keys to inspect prices.`}
+        aria-valuemin={0}
+        aria-valuemax={series.length - 1}
+        aria-valuenow={selectedIndex < 0 ? series.length - 1 : selectedIndex}
+        aria-valuetext={`${usd.format(selectedPoint?.price ?? last.price)} at ${new Date(selectedPoint?.time ?? last.time).toISOString().slice(11, 19)} UTC`}
+        onPointerDown={(e) => inspect(e.clientX, e.currentTarget.getBoundingClientRect())}
+        onPointerMove={(e) => {
+          if (e.pointerType === "mouse" || e.buttons === 1)
+            inspect(e.clientX, e.currentTarget.getBoundingClientRect());
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") setSelectedTime(null);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setSelectedTime(null);
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            e.preventDefault();
+            setSelectedTime(
+              series[
+                Math.max(
+                  0,
+                  Math.min(
+                    series.length - 1,
+                    (selectedIndex < 0 ? series.length - 1 : selectedIndex) +
+                      (e.key === "ArrowLeft" ? -1 : 1),
+                  ),
+                )
+              ]!.time,
+            );
+          }
+        }}
+      >
         <svg
           className={`w-full overflow-visible ${compact ? "h-40" : "h-56 sm:h-64"}`}
           viewBox="0 0 360 190"
@@ -119,6 +180,36 @@ export const MarketSparkline = memo(function MarketSparkline({
             vectorEffect="non-scaling-stroke"
           />
         </svg>
+        {selectedPoint && selectedPlot && (
+          <>
+            <span
+              className="pointer-events-none absolute inset-y-0 border-l border-dashed border-foreground/40"
+              style={{ left: `${(selectedPlot.x / 360) * 100}%` }}
+            />
+            <span
+              className="pointer-events-none absolute size-2 rounded-full bg-white ring-4 ring-white/10"
+              style={{
+                left: `${(selectedPlot.x / 360) * 100}%`,
+                top: `${(selectedPlot.y / 190) * 100}%`,
+                transform: "translate(-50%,-50%)",
+              }}
+            />
+            <span
+              role="status"
+              className="pointer-events-none absolute z-10 rounded-xl border border-border bg-popover px-3 py-2 text-center text-xs shadow-lg"
+              style={{
+                left: `${Math.max(20, Math.min(78, (selectedPlot.x / 360) * 100))}%`,
+                top: `${Math.max(5, (selectedPlot.y / 190) * 100 - 8)}%`,
+                transform: "translate(-50%,-100%)",
+              }}
+            >
+              <strong className="block tabular-nums">{usd.format(selectedPoint.price)}</strong>
+              <span className="mt-1 block text-muted-foreground">
+                {new Date(selectedPoint.time).toISOString().slice(11, 19)} UTC
+              </span>
+            </span>
+          </>
+        )}
         {[low, (low + high) / 2, high]
           .filter((price) => Math.abs(y(price) - endpoint.y) > 18)
           .map((price, i) => (

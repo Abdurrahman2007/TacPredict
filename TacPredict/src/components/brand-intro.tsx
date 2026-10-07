@@ -1,42 +1,53 @@
 import { useEffect, useState } from "react";
+const introKey = "tacpredict-brand-intro-video-v2";
 export function BrandIntro() {
   const [visible, setVisible] = useState(false);
+  function finish() {
+    setVisible(false);
+    try {
+      sessionStorage.setItem(introKey, "1");
+    } catch {
+      /* Optional intro. */
+    }
+  }
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     try {
-      if (sessionStorage.getItem("tacpredict-brand-intro")) return;
+      if (sessionStorage.getItem(introKey)) return;
     } catch {
       return;
     }
     setVisible(true);
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setVisible(false);
       try {
-        sessionStorage.setItem("tacpredict-brand-intro", "1");
+        sessionStorage.setItem(introKey, "1");
       } catch {
-        /* Intro remains optional. */
+        /* Optional intro. */
       }
-    }, 820);
-    return () => window.clearTimeout(timer);
+    }, 2400);
+    return () => clearTimeout(timer);
   }, []);
   return visible ? (
-    <div
-      className="brand-intro pointer-events-none fixed inset-0 z-[100] grid place-items-center"
-      aria-hidden="true"
-    >
-      <div className="text-center">
-        <img
-          src="/brand/tacpredict.svg"
-          alt=""
-          width={120}
-          height={120}
-          className="brand-intro-mark mx-auto rounded-3xl"
-        />
-        <p className="mt-5 text-2xl font-bold tracking-tight">TacPredict</p>
-        <p className="mt-2 text-xs font-medium tracking-[.25em] text-muted-foreground">
-          MAKE YOUR CALL
-        </p>
-      </div>
+    <div className="fixed inset-0 z-[100] bg-background" aria-label="TacPredict opening animation">
+      <video
+        src="/brand/tacpredict-intro.mp4"
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        onEnded={finish}
+        onError={finish}
+        className="h-full w-full object-contain"
+        aria-hidden="true"
+      />
+      <button
+        type="button"
+        onClick={finish}
+        className="absolute right-4 top-4 min-h-11 rounded-full bg-secondary/80 px-4 text-sm text-muted-foreground"
+      >
+        Skip
+      </button>
     </div>
   ) : null;
 }

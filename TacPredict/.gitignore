@@ -35,3 +35,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Generated from the source base64 video during prebuild
+/public/brand/tacpredict-intro.mp4

@@ -1,3 +1,4 @@
+import { OutcomeRow } from "@/components/outcome-row";
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
@@ -131,9 +132,6 @@ function HomePage() {
   );
 }
 
-const multiplier = (probability: number) =>
-  probability > 0 ? `${(100 / probability).toFixed(2)}x` : "—";
-
 function SportsCarousel({
   markets: allMarkets,
 }: {
@@ -164,7 +162,7 @@ function SportsCarousel({
             key={market.id}
             to="/markets/$marketId"
             params={{ marketId: market.id }}
-            className="ios-press w-[19rem] shrink-0 snap-start rounded-lg border border-border bg-card p-5 shadow-card"
+            className="ios-press w-[calc(100vw-3rem)] max-w-[24rem] shrink-0 snap-start rounded-[24px] border border-border bg-card p-5 sm:p-6"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 text-sm font-extrabold uppercase text-muted-foreground">
@@ -173,35 +171,11 @@ function SportsCarousel({
               </span>
               <span className="text-xs font-semibold text-muted-foreground">{market.closesAt}</span>
             </div>
-            <h3 className="mt-2 line-clamp-1 text-[0.95rem] font-bold">{market.title}</h3>
-            <div className="mt-3 space-y-2.5">
+            <h3 className="mt-3 line-clamp-2 text-lg font-semibold">{market.title}</h3>
+            <div className="mt-5 space-y-4">
               {market.outcomes.slice(0, 2).map((outcome, index) => (
                 <div key={outcome.id} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold">{outcome.label}</span>
-                    <progress
-                      className={
-                        index === 0
-                          ? "outcome-progress outcome-progress-positive mt-1"
-                          : "outcome-progress outcome-progress-negative mt-1"
-                      }
-                      value={outcome.probability}
-                      max={100}
-                      aria-label={`${outcome.label} ${outcome.probability}%`}
-                    />
-                  </span>
-                  <span className="shrink-0 text-sm font-bold tabular-nums text-muted-foreground">
-                    {multiplier(outcome.probability)}
-                  </span>
-                  <span
-                    className={
-                      index === 0
-                        ? "shrink-0 rounded-full bg-positive-soft px-3 py-1.5 text-sm font-bold tabular-nums text-positive"
-                        : "shrink-0 rounded-full bg-destructive/10 px-3 py-1.5 text-sm font-bold tabular-nums text-destructive"
-                    }
-                  >
-                    {outcome.probability}%
-                  </span>
+                  <OutcomeRow outcome={outcome} index={index} />
                 </div>
               ))}
             </div>
@@ -241,7 +215,7 @@ function MarketSection({
           See all <ChevronRight className="size-4" />
         </Link>
       </div>
-      <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sectionMarkets.map((market) => (
           <MarketCard key={market.id} market={market} />
         ))}

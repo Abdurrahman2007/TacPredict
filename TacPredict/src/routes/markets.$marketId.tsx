@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight, Clock3 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/connect-wallet";
+import { CryptoDetailChart } from "@/components/crypto-detail-chart";
 import { MarketIcon } from "@/components/market-icon";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
@@ -32,6 +33,12 @@ function MarketDetailPage() {
   const wallet = useBaseWallet();
   const [selected, setSelected] = useState(initial || "");
   const [amount, setAmount] = useState("10");
+  useEffect(() => {
+    setSelected(initial || "");
+  }, [initial, marketId]);
+  const cryptoAsset = Object.entries(feed.cryptoUpDown).find(
+    ([, item]) => item?.id === marketId,
+  )?.[0] as "bitcoin" | "ethereum" | "solana" | undefined;
   const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
     (item) => item?.id === marketId,
   );
@@ -49,7 +56,7 @@ function MarketDetailPage() {
     );
   const chosen = market.outcomes.find((item) => item.id === selected) ?? market.outcomes[0];
   return (
-    <div className="animate-enter">
+    <div className="animate-enter pb-20 lg:pb-0">
       <Link
         to="/markets"
         className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"
@@ -62,10 +69,6 @@ function MarketDetailPage() {
           <div className="flex items-start gap-4">
             <MarketIcon market={market} />
             <div className="min-w-0">
-              <p className="section-kicker">
-                {market.category} ·{" "}
-                {market.source === "Polymarket" ? "EXTERNAL MARKET DATA" : "SAMPLE DATA"}
-              </p>
               <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
                 {market.title}
               </h1>
@@ -80,6 +83,16 @@ function MarketDetailPage() {
             </span>
             <span>{market.volume} source volume</span>
           </div>
+          {cryptoAsset && <CryptoDetailChart asset={cryptoAsset} />}
+          {cryptoAsset && (
+            <section className="mt-7" aria-label="Source statistics">
+              <h2 className="text-lg font-semibold">Statistics</h2>
+              <div className="mt-4 flex justify-between border-b border-border py-3 text-sm">
+                <span className="text-muted-foreground">Source volume</span>
+                <span>{market.volume}</span>
+              </div>
+            </section>
+          )}
           <section className="mt-6 space-y-3" aria-label="Market outcomes">
             {market.outcomes.map((item, index) => (
               <button
@@ -178,6 +191,25 @@ function MarketDetailPage() {
           </p>
         </aside>
       </div>
+      {cryptoAsset && (
+        <div
+          className="fixed inset-x-0 z-40 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden"
+          aria-label="Quick outcome selection"
+          style={{ bottom: "calc(68px + max(.6rem, env(safe-area-inset-bottom)))" }}
+        >
+          {market.outcomes.slice(0, 2).map((item, i) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={chosen?.id === item.id}
+              onClick={() => setSelected(item.id)}
+              className={`min-h-12 flex-1 rounded-full text-base font-semibold ${chosen?.id === item.id ? "bg-foreground text-background" : "bg-secondary text-foreground"}`}
+            >
+              {i === 0 ? "Up" : "Down"} {item.probability}%
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

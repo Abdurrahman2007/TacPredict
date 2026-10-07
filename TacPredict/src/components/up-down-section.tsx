@@ -101,6 +101,7 @@ export function UpDownSection({
                 {market.outcomes.slice(0, 2).map((outcome, i) => (
                   <Link
                     key={i}
+                    search={{ outcome: outcome.id }}
                     to="/markets/$marketId"
                     params={{ marketId: market.id }}
                     className="ios-press flex min-h-12 items-center justify-center gap-2 rounded-full bg-secondary px-4 text-base font-semibold"

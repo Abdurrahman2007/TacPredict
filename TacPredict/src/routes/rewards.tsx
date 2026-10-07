@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Clock3, Flame, Gift, ShieldCheck, Sparkles, ArrowUpRight } from "lucide-react";
+import { Clock3, Flame, Gift, Sparkles, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PredictionWalletProvider, usePredictionWallet } from "@/lib/prediction-wallet";
@@ -49,41 +49,43 @@ function RewardsPage() {
   return (
     <div className="animate-enter mx-auto max-w-4xl">
       <h1 className="page-title">Rewards</h1>
-      <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_1fr]">
-        <section className="onchain-balance-card rounded-2xl border border-border p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold tracking-widest text-muted-foreground">
-              TAC POINTS BALANCE
-            </p>
-            <Gift className="size-6 text-primary" />
-          </div>
-          <p className="mt-6 text-5xl font-semibold tracking-tight tabular-nums">
-            {!user ? "0" : ready ? balance.toLocaleString() : "Loading…"}
-            <span className="ml-3 text-base text-muted-foreground">TAC</span>
-          </p>
-          <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
-            <ShieldCheck className="size-4 shrink-0" />
-            Virtual points · no cash value
-          </div>
-        </section>
-        <section className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
-              <Flame className="size-5" />
-            </span>
-            <span className="text-sm text-muted-foreground">Claim streak</span>
-          </div>
-          <p className="mt-5 text-4xl font-semibold">
-            {user && ready ? streak : 0}
-            <span className="ml-2 text-base text-muted-foreground">days</span>
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">48h streak window</p>
-        </section>
-      </div>
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <section className="onchain-balance-card mt-6 rounded-[24px] border border-border p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">TAC Points</p>
+          <Gift className="size-5 text-primary" />
+        </div>
+        <p className="mt-3 text-4xl font-semibold tabular-nums">
+          {!user ? "0" : ready ? balance.toLocaleString() : "Loading…"}
+          <span className="ml-2 text-base text-muted-foreground">TAC</span>
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Virtual points · no cash value</p>
+      </section>
+      <section
+        className="mt-4 rounded-[24px] border border-border bg-card p-6"
+        aria-label="Daily check-in and streak"
+      >
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Daily check-in</h2>
+          <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-2 text-sm text-primary">
+            <Flame className="size-4" />
+            {user && ready ? streak : 0} day streak
+          </span>
+        </div>
+        <div className="mb-5 grid grid-cols-7 gap-2" aria-label="Seven-day streak progress">
+          {Array.from({ length: 7 }, (_, i) => (
+            <div
+              key={i}
+              className={`grid h-11 place-items-center rounded-xl text-xs font-semibold ${user && ready && streak > i ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+            >
+              {i + 1}
+            </div>
+          ))}
+        </div>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="mt-2 text-2xl font-semibold">{waiting ? "Next drop" : "Daily claim"}</h2>
+            <h2 className="mt-2 text-2xl font-semibold">
+              {waiting ? "Next drop" : "Claim reward"}
+            </h2>
           </div>
           <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
             <Sparkles className="size-4" />

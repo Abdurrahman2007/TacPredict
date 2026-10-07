@@ -21,7 +21,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ConnectWallet } from "@/components/connect-wallet";
 import { BASE_NETWORK, formatUsdc, shortAddress } from "@/lib/onchain/base";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 
@@ -68,52 +67,52 @@ function PortfolioPage() {
         </div>
       </div>
 
-      <section
-        className="onchain-wallet-bar mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4"
-        aria-label="Wallet connection"
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-xl bg-secondary text-primary">
-            <Wallet className="size-5" />
+      {connected && (
+        <section
+          className="onchain-wallet-bar mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4"
+          aria-label="Wallet connection"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-xl bg-secondary text-primary">
+              <Wallet className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">
+                {wallet.address ? shortAddress(wallet.address) : "Wallet not connected"}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {connected
+                  ? onBase
+                    ? "Base mainnet · native USDC"
+                    : "Connected to another network"
+                  : "Connect to see your balance"}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold">
-              {wallet.address ? shortAddress(wallet.address) : "Wallet not connected"}
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {connected
-                ? onBase
-                  ? "Base mainnet · native USDC"
-                  : "Connected to another network"
-                : "Connect to see your balance"}
-            </p>
+          <div className="flex items-center gap-2">
+            {connected ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => void copy()}
+                  aria-label="Copy wallet address"
+                >
+                  {copied ? <Check /> : <Copy />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={wallet.disconnect}
+                  aria-label="Disconnect locally"
+                >
+                  <LogOut />
+                </Button>
+              </>
+            ) : null}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {connected ? (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => void copy()}
-                aria-label="Copy wallet address"
-              >
-                {copied ? <Check /> : <Copy />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={wallet.disconnect}
-                aria-label="Disconnect locally"
-              >
-                <LogOut />
-              </Button>
-            </>
-          ) : (
-            <ConnectWallet className="h-11 rounded-xl" />
-          )}
-        </div>
-      </section>
+        </section>
+      )}
 
       {connected && !onBase && (
         <div

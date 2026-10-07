@@ -227,7 +227,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -336,3 +336,5 @@
   .price-chart-line { animation: chart-arrive 300ms ease-out; }
 }
 @keyframes chart-arrive { from { opacity: .3; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) { .animate-enter { animation: none; } }

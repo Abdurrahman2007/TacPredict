@@ -151,7 +151,7 @@ function MarketsPage() {
         </p>
       )}
       {filtered.length > 0 ? (
-        <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
+        <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((market) => (
             <MarketCard key={market.id} market={market} />
           ))}
