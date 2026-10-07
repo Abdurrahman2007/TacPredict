@@ -1,24 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Bitcoin, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { MarketSparkline } from "@/components/market-sparkline";
 import { useSpotTicker } from "@/lib/use-spot-ticker";
 import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
 import type { PolymarketFeed } from "@/lib/polymarket.functions";
-function CoinIcon({ asset }: { asset: string }) {
-  if (asset === "bitcoin") return <Bitcoin className="size-6" />;
-  if (asset === "ethereum")
-    return (
-      <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
-        <path d="m12 2 7 10-7 4-7-4Zm0 16 7-4-7 8-7-8Z" fill="currentColor" />
-      </svg>
-    );
-  return (
-    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
-      <path d="m5 4 16 0-3 4H2Zm-3 6h16l3 4H5Zm3 6h16l-3 4H2Z" fill="currentColor" />
-    </svg>
-  );
-}
 export function UpDownSection({
   crypto,
   histories,
@@ -81,11 +67,13 @@ export function UpDownSection({
             >
               <header className="mb-5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span
-                    className={`grid size-11 place-items-center rounded-full text-white ${asset.color}`}
-                  >
-                    <CoinIcon asset={asset.key} />
-                  </span>
+                  <img
+                    src={`/brand/crypto/${asset.key === "bitcoin" ? "btc" : asset.key === "ethereum" ? "eth" : "sol"}.svg`}
+                    alt={`${asset.name} logo`}
+                    width={44}
+                    height={44}
+                    className="size-11 shrink-0 rounded-full"
+                  />
                   <Link
                     to="/markets/$marketId"
                     params={{ marketId: market.id }}

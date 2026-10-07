@@ -25,3 +25,7 @@ Direct MCP deployment helper: `node scripts/package-cloudflare.cjs` after the bu
 Price charts use Coinbase Exchange closed one-minute candles plus validated public WebSocket ticker observations for BTC-USD, ETH-USD and SOL-USD. 5m/15m/1h switches filter observed spot-price windows, not prediction market durations. Start is the first observed spot value, not an oracle settlement price. LIVE requires a fresh timestamped ticker; stale/disconnected views fall back to SPOT. Unknown source data is unavailable, never synthesized. Updates are batched at 250ms and the socket pauses in the background.
 
 Production target: https://tacpredict.fun and www via the tacpredict-app Cloudflare Worker. GitHub source branch is development/base-usdc (PR #1); main is not automatically merged. DNS website A/CNAME content is preserved behind the Worker routes; mail DNS is unchanged.
+
+Disconnected wallet/rewards balances display 0 as an empty state; connected RPC reads retain Loading/Unavailable until verified. Portfolio market/claim amounts show explicitly labelled preview zeros until contracts/indexing are configured.
+
+Bundled BTC/ETH/SOL logo SVGs: spothq/cryptocurrency-icons (CC0 license included under public/brand/crypto). Logo rendering does not depend on Unicode glyphs or external image requests.

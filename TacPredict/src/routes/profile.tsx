@@ -151,8 +151,16 @@ function PortfolioPage() {
             </Button>
           </div>
           <div className="mt-3 flex items-baseline gap-3">
-            <p className="min-w-0 break-all text-5xl font-semibold tracking-tight tabular-nums">
-              {connected && onBase ? formatUsdc(wallet.usdc) : "—"}
+            <p className="min-w-0 break-all text-4xl font-semibold tracking-tight tabular-nums">
+              {!connected
+                ? "0"
+                : !onBase
+                  ? "Switch network"
+                  : wallet.usdc === null
+                    ? wallet.error
+                      ? "Unavailable"
+                      : "Loading…"
+                    : formatUsdc(wallet.usdc)}
             </p>
             <span className="text-base font-medium text-muted-foreground">USDC</span>
           </div>
@@ -198,13 +206,13 @@ function PortfolioPage() {
       <div className="mt-4 grid grid-cols-2 gap-4">
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">USDC in markets</p>
-          <p className="mt-3 text-2xl font-semibold">—</p>
-          <p className="mt-2 text-xs text-muted-foreground">Pending</p>
+          <p className="mt-3 text-2xl font-semibold">0</p>
+          <p className="mt-2 text-xs text-muted-foreground">Preview · Not connected</p>
         </section>
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Claimable winnings</p>
-          <p className="mt-3 text-2xl font-semibold">—</p>
-          <p className="mt-2 text-xs text-muted-foreground">Pending</p>
+          <p className="mt-3 text-2xl font-semibold">0</p>
+          <p className="mt-2 text-xs text-muted-foreground">Preview · Not connected</p>
         </section>
       </div>
 

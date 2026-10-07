@@ -58,7 +58,7 @@ function RewardsPage() {
             <Gift className="size-6 text-primary" />
           </div>
           <p className="mt-6 text-5xl font-semibold tracking-tight tabular-nums">
-            {user && ready ? balance.toLocaleString() : "—"}
+            {!user ? "0" : ready ? balance.toLocaleString() : "Loading…"}
             <span className="ml-3 text-base text-muted-foreground">TAC</span>
           </p>
           <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
@@ -74,7 +74,7 @@ function RewardsPage() {
             <span className="text-sm text-muted-foreground">Claim streak</span>
           </div>
           <p className="mt-5 text-4xl font-semibold">
-            {user ? streak : "—"}
+            {user && ready ? streak : 0}
             <span className="ml-2 text-base text-muted-foreground">days</span>
           </p>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">48h streak window</p>

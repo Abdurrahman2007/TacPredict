@@ -5,6 +5,25 @@ import { cn } from "@/lib/utils";
 
 export function MarketIcon({ market, className }: { market: Market; className?: string }) {
   const [failed, setFailed] = useState<string | null>(null);
+  const cryptoAsset = /\b(bitcoin|btc)\b/i.test(market.title)
+    ? "btc"
+    : /\b(ethereum|eth)\b/i.test(market.title)
+      ? "eth"
+      : /\b(solana|sol)\b/i.test(market.title)
+        ? "sol"
+        : null;
+  if (market.category === "Crypto" && cryptoAsset)
+    return (
+      <span className={cn("market-icon overflow-hidden", className)}>
+        <img
+          src={`/brand/crypto/${cryptoAsset}.svg`}
+          alt={`${cryptoAsset.toUpperCase()} logo`}
+          className="size-full object-contain"
+          width={48}
+          height={48}
+        />
+      </span>
+    );
   if (market.image?.startsWith("https://") && failed !== market.image)
     return (
       <span className={cn("market-icon overflow-hidden bg-secondary", className)}>
@@ -19,23 +38,6 @@ export function MarketIcon({ market, className }: { market: Market; className?: 
         />
       </span>
     );
-  const lowerTitle = market.title.toLowerCase();
-
-  if (market.category === "Crypto") {
-    const symbol = lowerTitle.includes("ethereum") ? "Ξ" : lowerTitle.includes("sol") ? "S" : "₿";
-    return (
-      <span
-        className={cn(
-          "market-icon bg-bitcoin font-[var(--font-display)] font-black text-foreground",
-          className,
-        )}
-        aria-label={symbol === "₿" ? "Bitcoin" : symbol === "Ξ" ? "Ethereum" : "Solana"}
-      >
-        {symbol}
-      </span>
-    );
-  }
-
   if (market.category === "Sports")
     return (
       <span

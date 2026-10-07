@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, Clock3, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Clock3 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/connect-wallet";
@@ -105,10 +105,7 @@ function MarketDetailPage() {
             </p>
           </details>
           <details className="mt-3 rounded-2xl border border-border bg-card p-4">
-            <summary className="cursor-pointer text-sm font-semibold">
-              <ShieldCheck className="size-4 text-primary" />
-              Rules
-            </summary>
+            <summary className="cursor-pointer text-sm font-semibold">Rules</summary>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {market.resolutionCriteria}
             </p>
@@ -158,7 +155,13 @@ function MarketDetailPage() {
           <div className="mt-3 flex justify-between text-sm">
             <span className="text-muted-foreground">Wallet balance</span>
             <span className="font-medium">
-              {wallet.address && wallet.chainId === BASE_NETWORK.id ? formatUsdc(wallet.usdc) : "—"}{" "}
+              {!wallet.address
+                ? "0"
+                : wallet.chainId !== BASE_NETWORK.id
+                  ? "Switch network"
+                  : wallet.usdc === null
+                    ? "Loading…"
+                    : formatUsdc(wallet.usdc)}{" "}
               USDC
             </span>
           </div>
