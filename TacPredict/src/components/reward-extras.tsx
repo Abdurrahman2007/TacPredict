@@ -98,7 +98,7 @@ export function RewardExtras() {
               {busy
                 ? "Redeeming…"
                 : asset === "USDC"
-                  ? "USDC payout setup pending"
+                  ? "USDC unavailable"
                   : !ready
                     ? "Promo backend pending"
                     : "Redeem TAC"}
@@ -106,8 +106,7 @@ export function RewardExtras() {
           )}
         </form>
         <p role="status" className="mt-3 text-sm text-muted-foreground">
-          {notice ||
-            (asset === "USDC" ? "No USDC transfers enabled." : "One redemption per campaign.")}
+          {notice}
         </p>
       </section>
       <section className="rounded-2xl border border-border bg-card p-5">
@@ -132,7 +131,7 @@ export function RewardExtras() {
           <p className="font-semibold">{period} TAC giveaway</p>
           <p className="mt-2 text-sm text-muted-foreground">Verified trades & activity</p>
           <span className="mt-4 inline-flex rounded-md bg-primary/10 px-2 py-1 text-xs text-primary">
-            Campaign setup pending
+            Coming soon
           </span>
         </div>
       </section>

@@ -1,6 +1,5 @@
-import { memo, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 import type { PricePoint } from "@/lib/market-data.functions";
-import { cn } from "@/lib/utils";
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -12,11 +11,12 @@ export const MarketSparkline = memo(function MarketSparkline({
   sourceLabel = "Coinbase",
   compact = false,
 }: {
-  points?: PricePoint[] | undefined;
+  points?: PricePoint[];
   assetLabel?: string;
   sourceLabel?: string;
   compact?: boolean;
 }) {
+  const id = useId().replace(/:/g, "");
   const series = useMemo(
     () =>
       [
@@ -30,88 +30,125 @@ export const MarketSparkline = memo(function MarketSparkline({
   );
   if (series.length < 2)
     return (
-      <div
-        className={cn(
-          "grid place-items-center text-sm text-muted-foreground",
-          compact ? "h-24" : "h-40",
-        )}
-      >
-        Price history unavailable
+      <div className="grid h-52 place-items-center text-sm text-muted-foreground">
+        Price unavailable
       </div>
     );
-  const low = Math.min(...series.map((p) => p.price)),
-    high = Math.max(...series.map((p) => p.price));
-  const floor = low - (high - low) * 0.06,
-    range = Math.max(high - low, high * 0.00001) * 1.12;
   const first = series[0]!,
-    last = series.at(-1)!;
-  const span = last.time - first.time;
+    last = series.at(-1)!,
+    low = Math.min(...series.map((p) => p.price)),
+    high = Math.max(...series.map((p) => p.price));
+  const range = Math.max(high - low, high * 0.00002),
+    floor = low - range * 0.15,
+    ceiling = high + range * 0.2;
+  const y = (price: number) => 12 + (1 - (price - floor) / (ceiling - floor)) * 162;
   const plotted = series.map((p) => ({
-    x: 8 + ((p.time - first.time) / span) * 304,
-    y: 8 + (1 - (p.price - floor) / range) * 94,
+    x: 8 + ((p.time - first.time) / Math.max(1, last.time - first.time)) * 272,
+    y: y(p.price),
   }));
-  const line = plotted.map((p) => `${p.x},${p.y}`).join(" ");
-  const summary = `${assetLabel} USD price from ${new Date(first.time).toISOString()} to ${new Date(last.time).toISOString()}. First ${usd.format(first.price)}, latest ${usd.format(last.price)}, low ${usd.format(low)}, high ${usd.format(high)}.`;
+  const line = plotted.map((p) => `${p.x},${p.y}`).join(" "),
+    endpoint = plotted.at(-1)!;
+  const delta = last.price - first.price;
   return (
-    <div className={cn("w-full", compact ? "h-24" : "h-40")}>
-      <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-        <span>Low {usd.format(low)}</span>
-        <span>High {usd.format(high)}</span>
+    <div>
+      <div className="mb-5 flex items-start gap-5 sm:gap-8">
+        <div>
+          <p className="text-sm text-muted-foreground">Start</p>
+          <p className="mt-1 text-lg font-semibold tabular-nums sm:text-2xl">
+            {usd.format(first.price)}
+          </p>
+        </div>
+        <div className="border-l border-border pl-5 sm:pl-8">
+          <p className="text-sm text-[#57a6ff]">Now</p>
+          <p className="mt-1 text-lg font-semibold tabular-nums text-[#57a6ff] sm:text-2xl">
+            {usd.format(last.price)}
+          </p>
+          <p
+            className={`mt-1 text-xs tabular-nums ${delta >= 0 ? "text-positive" : "text-destructive"}`}
+          >
+            {delta >= 0 ? "+" : "−"}
+            {usd.format(Math.abs(delta))}
+          </p>
+        </div>
       </div>
-      <svg
-        className={cn("w-full text-primary", compact ? "h-16" : "h-28")}
-        viewBox="0 0 320 112"
-        preserveAspectRatio="none"
-        role="img"
-        aria-label={summary}
-      >
-        <title>{summary}</title>
-        <polyline
-          key={`${first.time}-${last.time}-${last.price}`}
-          className="price-chart-line"
-          points={line}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-        {plotted.map((point, index) => (
-          <circle
-            key={series[index]!.time}
-            cx={point.x}
-            cy={point.y}
-            r="1"
-            fill="currentColor"
-            opacity=".65"
+      <div className="relative">
+        <svg
+          className={`w-full overflow-visible ${compact ? "h-40" : "h-56 sm:h-64"}`}
+          viewBox="0 0 360 190"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label={`${assetLabel} USD spot price. Start ${usd.format(first.price)}, latest ${usd.format(last.price)}. ${sourceLabel}.`}
+        >
+          <defs>
+            <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#387dff" stopOpacity=".20" />
+              <stop offset="100%" stopColor="#387dff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {[low, (low + high) / 2, high].map((price, i) => (
+            <g key={i}>
+              <line
+                x1="8"
+                x2="350"
+                y1={y(price)}
+                y2={y(price)}
+                stroke="currentColor"
+                className="text-border"
+                strokeDasharray="2 5"
+              />
+            </g>
+          ))}
+          <polygon points={`8,184 ${line} ${endpoint.x},184`} fill={`url(#${id})`} />
+          <line
+            x1="8"
+            x2="280"
+            y1={y(first.price)}
+            y2={y(first.price)}
+            stroke="#9eacb4"
+            strokeOpacity=".45"
+            strokeDasharray="4 5"
           />
-        ))}
-        <circle cx={plotted.at(-1)!.x} cy={plotted.at(-1)!.y} r="3" fill="currentColor" />
-      </svg>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
-        <span>{sourceLabel} · 24h UTC</span>
-        <span>{new Date(last.time).toISOString().slice(11, 16)}</span>
+          <polyline
+            className="price-chart-line"
+            points={line}
+            fill="none"
+            stroke="#387dff"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+        {[low, (low + high) / 2, high]
+          .filter((price) => Math.abs(y(price) - endpoint.y) > 18)
+          .map((price, i) => (
+            <span
+              key={i}
+              className="pointer-events-none absolute right-0 text-[11px] tabular-nums text-muted-foreground"
+              style={{ top: `${(y(price) / 190) * 100}%`, transform: "translateY(-50%)" }}
+            >
+              {usd.format(price)}
+            </span>
+          ))}
+        <span
+          className="pointer-events-none absolute size-2 rounded-full bg-[#387dff] ring-[6px] ring-[#387dff]/15"
+          style={{
+            left: `${(endpoint.x / 360) * 100}%`,
+            top: `${(endpoint.y / 190) * 100}%`,
+            transform: "translate(-50%,-50%)",
+          }}
+        />
+        <span
+          className="pointer-events-none absolute right-0 rounded-full bg-[#2878ee] px-2 py-1 text-[11px] font-medium tabular-nums text-white"
+          style={{ top: `${(endpoint.y / 190) * 100}%`, transform: "translateY(-50%)" }}
+        >
+          {usd.format(last.price)}
+        </span>
       </div>
-      <div className="sr-only">
-        <table>
-          <caption>{assetLabel} USD price observations</caption>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>USD</th>
-            </tr>
-          </thead>
-          <tbody>
-            {series.map((p) => (
-              <tr key={p.time}>
-                <td>{new Date(p.time).toISOString()}</td>
-                <td>{usd.format(p.price)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-2 flex justify-between text-xs tabular-nums text-muted-foreground">
+        <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
+        <span>{sourceLabel} · UTC</span>
+        <span>{new Date(last.time).toISOString().slice(11, 16)}</span>
       </div>
     </div>
   );

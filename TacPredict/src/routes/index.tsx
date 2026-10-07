@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { CalendarDays, ChevronRight, Flame, Radio, Sparkles, TrendingUp } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
-import { Button } from "@/components/ui/button";
 import { categories } from "@/domain/markets/demo-markets";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
@@ -68,23 +67,6 @@ function HomePage() {
 
   return (
     <div className="animate-enter">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="section-kicker">BASE / USDC</p>
-          <h1 className="page-title">Make your call.</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Explore the odds. Find your edge.</p>
-        </div>
-        <img
-          src="/brand/tacpredict.svg"
-          alt=""
-          width={56}
-          height={56}
-          className="size-14 shrink-0 rounded-2xl"
-        />
-      </div>
-      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-        External market-data preview · Base trading contracts not connected
-      </p>
       <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 py-2.5 sm:mx-0 sm:px-0">
         {feeds.map((item) => (
           <Link
@@ -116,7 +98,6 @@ function HomePage() {
           {polymarket.markets.length === 0 && " Try refreshing in a moment."}
         </p>
       )}
-      <SportsCarousel markets={feedMarkets} />
 
       {crypto && (
         <UpDownSection
@@ -125,6 +106,8 @@ function HomePage() {
           liveMarkets={polymarket.cryptoUpDown}
         />
       )}
+
+      <SportsCarousel markets={feedMarkets} />
 
       <div className="scrollbar-none -mx-4 mt-7 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {categories.slice(0, 7).map((category, index) => (
@@ -144,18 +127,6 @@ function HomePage() {
         Market odds and volume supplied by {polymarket.source} · refreshed{" "}
         {new Date(polymarket.updatedAt).toISOString().slice(11, 16) + " UTC"}
       </p>
-
-      <section className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5">
-        <div>
-          <p className="text-base font-semibold">Built for Base. Designed for your wallet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Native USDC balance reads are ready. Market contracts are not connected yet.
-          </p>
-        </div>
-        <Button variant="outline" className="h-11 rounded-xl" asChild>
-          <Link to="/profile">Open portfolio</Link>
-        </Button>
-      </section>
     </div>
   );
 }

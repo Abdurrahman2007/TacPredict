@@ -1,213 +1,133 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { Bitcoin, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { MarketSparkline } from "@/components/market-sparkline";
-const usd = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-const multiplier = (p: number) => (p > 0 ? `${(100 / p).toFixed(2)}x` : "—");
-
+import { useSpotTicker } from "@/lib/use-spot-ticker";
+import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
+import type { PolymarketFeed } from "@/lib/polymarket.functions";
+function CoinIcon({ asset }: { asset: string }) {
+  if (asset === "bitcoin") return <Bitcoin className="size-6" />;
+  if (asset === "ethereum")
+    return (
+      <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+        <path d="m12 2 7 10-7 4-7-4Zm0 16 7-4-7 8-7-8Z" fill="currentColor" />
+      </svg>
+    );
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <path d="m5 4 16 0-3 4H2Zm-3 6h16l3 4H5Zm3 6h16l-3 4H2Z" fill="currentColor" />
+    </svg>
+  );
+}
 export function UpDownSection({
   crypto,
   histories,
   liveMarkets,
   detailed = false,
 }: {
+  crypto: CryptoMarketSnapshot;
+  histories: CryptoMarketSnapshot["histories"];
+  liveMarkets: PolymarketFeed["cryptoUpDown"];
   detailed?: boolean;
-  crypto: {
-    source: string;
-    bitcoin: { price: number; change24h: number };
-    ethereum: { price: number; change24h: number };
-    solana: { price: number; change24h: number };
-  };
-  histories: import("@/lib/market-data.functions").CryptoMarketSnapshot["histories"];
-  liveMarkets: import("@/lib/polymarket.functions").PolymarketFeed["cryptoUpDown"];
 }) {
+  const [windowMinutes, setWindowMinutes] = useState(15);
+  const { ticks, live } = useSpotTicker();
   const assets = [
-    {
-      key: "bitcoin" as const,
-      name: "Bitcoin",
-      symbol: "BTC",
-      icon: "₿",
-      iconClass: "bg-bitcoin",
-      price: crypto.bitcoin.price,
-    },
-    {
-      key: "ethereum" as const,
-      name: "Ethereum",
-      symbol: "ETH",
-      icon: "Ξ",
-      iconClass: "bg-ethereum",
-      price: crypto.ethereum.price,
-    },
-    {
-      key: "solana" as const,
-      name: "Solana",
-      symbol: "SOL",
-      icon: "◎",
-      iconClass: "bg-solana",
-      price: crypto.solana.price,
-    },
-  ].filter((asset) => liveMarkets[asset.key]);
-  const bitcoin = assets[0];
-  if (!bitcoin) return null;
-  const bitcoinMarket = liveMarkets[bitcoin.key];
-  if (!bitcoinMarket) return null;
-  const bitcoinUp = bitcoinMarket.outcomes[0]?.probability ?? 0;
-  const bitcoinDown = bitcoinMarket.outcomes[1]?.probability ?? 0;
+    { key: "bitcoin" as const, name: "Bitcoin", color: "bg-bitcoin" },
+    { key: "ethereum" as const, name: "Ethereum", color: "bg-ethereum" },
+    { key: "solana" as const, name: "Solana", color: "bg-solana" },
+  ].filter((a) => liveMarkets[a.key]);
   return (
-    <section className="mt-7">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <h2 className="section-title truncate">Trending Up &amp; Down</h2>
+    <section className={detailed ? "" : "mt-7"}>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="section-title">{detailed ? "Up / Down" : "Trending Up & Down"}</h2>
         {!detailed && (
           <Link
             to="/up-down"
-            className="inline-flex shrink-0 items-center rounded-full border border-border px-3 py-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
+            className="flex min-h-11 items-center gap-1 rounded-full border border-border px-4 text-sm text-muted-foreground"
           >
-            View More <ChevronRight className="size-4" />
+            More
+            <ChevronRight className="size-4" />
           </Link>
         )}
       </div>
-      <Link
-        to="/markets/$marketId"
-        params={{ marketId: bitcoinMarket.id }}
-        className="ios-press mt-3 block overflow-hidden rounded-lg border border-border bg-card p-5 shadow-card sm:p-6"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-3">
-            <span
-              className={`grid size-11 shrink-0 place-items-center rounded-full text-xl font-black text-foreground ${bitcoin.iconClass}`}
+      <div className="mb-4 flex items-center gap-2" aria-label="Spot chart window">
+        {[5, 15, 60].map((n) => (
+          <button
+            key={n}
+            type="button"
+            aria-pressed={windowMinutes === n}
+            onClick={() => setWindowMinutes(n)}
+            className={`min-h-11 rounded-full px-4 text-sm font-medium ${windowMinutes === n ? "bg-foreground text-background" : "border border-border text-muted-foreground"}`}
+          >
+            {n === 60 ? "1h" : `${n}m`}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-muted-foreground">Spot chart</span>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {assets.map((asset, index) => {
+          const market = liveMarkets[asset.key]!;
+          const points = [...histories[asset.key], ...(ticks[asset.key] ?? [])].sort(
+            (a, b) => a.time - b.time,
+          );
+          const anchor = points.at(-1)?.time ?? Date.parse(crypto.updatedAt);
+          const visible = points.filter((p) => p.time >= anchor - windowMinutes * 60000);
+          const fresh = live && anchor > Date.now() - 30000;
+          return (
+            <article
+              key={asset.key}
+              className={`overflow-hidden rounded-[24px] border border-border bg-card p-5 sm:p-6 ${index === 0 ? "sm:col-span-2" : ""}`}
             >
-              {bitcoin.icon}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-lg font-extrabold">
-                {bitcoin.name} Up or Down
-              </span>
-              <span className="mt-0.5 block text-xs font-semibold text-muted-foreground">
-                Source odds ·{" "}
-                {crypto[bitcoin.key].price > 0
-                  ? usd.format(crypto[bitcoin.key].price)
-                  : "Spot price unavailable"}
-              </span>
-            </span>
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-positive">
-            <span className="size-1.5 rounded-full bg-positive" /> LIVE
-          </span>
-        </div>
-        <div className="mt-5">
-          <MarketSparkline
-            points={histories[bitcoin.key]}
-            assetLabel={bitcoin.name}
-            sourceLabel={crypto.source}
-          />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <span className="rounded-md border border-positive/20 bg-positive-soft p-3.5 text-positive">
-            <span className="flex items-center justify-between text-sm font-extrabold">
-              <span>Up</span>
-              <span>{bitcoinUp}%</span>
-            </span>
-            <span className="mt-2 block text-xs font-bold tabular-nums opacity-80">
-              {multiplier(bitcoinUp)} implied odds
-            </span>
-          </span>
-          <span className="rounded-md border border-destructive/20 bg-destructive/10 p-3.5 text-destructive">
-            <span className="flex items-center justify-between text-sm font-extrabold">
-              <span>Down</span>
-              <span>{bitcoinDown}%</span>
-            </span>
-            <span className="mt-2 block text-xs font-bold tabular-nums opacity-80">
-              {multiplier(bitcoinDown)} implied odds
-            </span>
-          </span>
-        </div>
-      </Link>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {assets
-          .filter((asset) => asset.key !== "bitcoin")
-          .map((asset) => {
-            const market = liveMarkets[asset.key];
-            if (!market) return null;
-            const upProb = market.outcomes[0]?.probability ?? 0;
-            const downProb = market.outcomes[1]?.probability ?? 0;
-            return (
-              <Link
-                key={asset.symbol}
-                to="/markets/$marketId"
-                params={{ marketId: market.id }}
-                className="ios-press block rounded-lg border border-border bg-card p-5 shadow-card"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className={`grid size-9 shrink-0 place-items-center rounded-full text-base font-black text-foreground ${asset.iconClass}`}
-                    >
-                      {asset.icon}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-[0.95rem] font-bold">
-                        {asset.name} Up or Down
-                      </span>
-                      <span className="mt-0.5 block text-xs font-semibold text-muted-foreground">
-                        {asset.price > 0 ? usd.format(asset.price) : "Spot price unavailable"} ·
-                        Polymarket odds
-                      </span>
-                    </span>
+              <header className="mb-5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`grid size-11 place-items-center rounded-full text-white ${asset.color}`}
+                  >
+                    <CoinIcon asset={asset.key} />
                   </span>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-positive">
-                    <span className="size-1.5 rounded-full bg-positive" /> LIVE
-                  </span>
+                  <Link
+                    to="/markets/$marketId"
+                    params={{ marketId: market.id }}
+                    className="text-lg font-semibold"
+                  >
+                    {asset.name}
+                  </Link>
                 </div>
-                <div className="mt-4">
-                  <MarketSparkline
-                    points={histories[asset.key]}
-                    assetLabel={asset.name}
-                    sourceLabel={crypto.source}
-                    compact
+                <span
+                  className={`flex items-center gap-1.5 text-xs font-medium ${fresh ? "text-positive" : "text-muted-foreground"}`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${fresh ? "bg-positive" : "bg-muted-foreground"}`}
                   />
-                </div>
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">Up</span>
-                      <progress
-                        className="outcome-progress outcome-progress-positive mt-1"
-                        value={upProb}
-                        max={100}
-                        aria-label={`Up ${upProb}%`}
-                      />
-                    </span>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-muted-foreground">
-                      {multiplier(upProb)}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-positive-soft px-3 py-1.5 text-sm font-bold tabular-nums text-positive">
-                      {upProb}%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">Down</span>
-                      <progress
-                        className="outcome-progress outcome-progress-negative mt-1"
-                        value={downProb}
-                        max={100}
-                        aria-label={`Down ${downProb}%`}
-                      />
-                    </span>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-muted-foreground">
-                      {multiplier(downProb)}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-destructive/10 px-3 py-1.5 text-sm font-bold tabular-nums text-destructive">
-                      {downProb}%
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+                  {fresh ? "LIVE" : "SPOT"}
+                </span>
+              </header>
+              <MarketSparkline
+                points={visible}
+                assetLabel={asset.name}
+                sourceLabel={crypto.source}
+                compact={index !== 0}
+              />
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                {market.outcomes.slice(0, 2).map((outcome, i) => (
+                  <Link
+                    key={i}
+                    to="/markets/$marketId"
+                    params={{ marketId: market.id }}
+                    className="ios-press flex min-h-12 items-center justify-center gap-2 rounded-full bg-secondary px-4 text-base font-semibold"
+                  >
+                    {i === 0 ? "Up" : "Down"}
+                    <span className="text-muted-foreground">{outcome.probability}%</span>
+                  </Link>
+                ))}
+              </div>
+              <p className="mt-3 text-center text-[11px] text-muted-foreground">
+                Polymarket odds · Preview
+              </p>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

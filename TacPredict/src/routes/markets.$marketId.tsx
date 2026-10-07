@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, Clock3, LockKeyhole, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Clock3, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/connect-wallet";
@@ -98,17 +98,17 @@ function MarketDetailPage() {
               </button>
             ))}
           </section>
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold">About this market</h2>
+          <details className="mt-6 rounded-2xl border border-border p-4">
+            <summary className="cursor-pointer text-sm font-semibold">About</summary>
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
               {market.description}
             </p>
-          </section>
-          <section className="mt-7 rounded-2xl border border-border bg-card p-5">
-            <h2 className="flex items-center gap-2 text-base font-semibold">
+          </details>
+          <details className="mt-3 rounded-2xl border border-border bg-card p-4">
+            <summary className="cursor-pointer text-sm font-semibold">
               <ShieldCheck className="size-4 text-primary" />
-              Resolution rules
-            </h2>
+              Rules
+            </summary>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {market.resolutionCriteria}
             </p>
@@ -118,10 +118,10 @@ function MarketDetailPage() {
               rel="noopener noreferrer"
               className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary"
             >
-              View source rules
+              Source rules
               <ArrowUpRight className="size-4" />
             </a>
-          </section>
+          </details>
         </article>
         <aside
           className="h-fit rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24"
@@ -162,14 +162,6 @@ function MarketDetailPage() {
               USDC
             </span>
           </div>
-          <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
-            <LockKeyhole className="size-5 text-primary" />
-            <p className="mt-3 text-sm font-semibold">Trading contracts not connected</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              These are external market odds, not executable Base orders. Prediction contracts,
-              settlement and an indexer must be connected before trading.
-            </p>
-          </div>
           <Button disabled className="mt-5 h-12 w-full rounded-xl">
             Trading not enabled
           </Button>
@@ -179,7 +171,7 @@ function MarketDetailPage() {
             </div>
           )}
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            No USDC approval, transfer or transaction is sent. The amount field is a preview only.
+            Preview only · No funds move.
           </p>
         </aside>
       </div>

@@ -48,9 +48,7 @@ function RewardsPage() {
   }
   return (
     <div className="animate-enter mx-auto max-w-4xl">
-      <p className="section-kicker">A little consistency. A little extra.</p>
       <h1 className="page-title">Rewards</h1>
-      <p className="mt-2 text-sm text-muted-foreground">TAC Points · daily drops</p>
       <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <section className="onchain-balance-card rounded-2xl border border-border p-6">
           <div className="flex items-center justify-between">
@@ -63,10 +61,9 @@ function RewardsPage() {
             {user && ready ? balance.toLocaleString() : "—"}
             <span className="ml-3 text-base text-muted-foreground">TAC</span>
           </p>
-          <p className="mt-4 text-sm text-muted-foreground">Separate from USDC.</p>
           <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
             <ShieldCheck className="size-4 shrink-0" />
-            Virtual points · not USDC · no cash value
+            Virtual points · no cash value
           </div>
         </section>
         <section className="rounded-2xl border border-border bg-card p-6">
@@ -80,15 +77,12 @@ function RewardsPage() {
             {user ? streak : "—"}
             <span className="ml-2 text-base text-muted-foreground">days</span>
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            24h cooldown · 48h streak window
-          </p>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">48h streak window</p>
         </section>
       </div>
       <section className="mt-6 rounded-2xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="section-kicker">Daily drop</p>
             <h2 className="mt-2 text-2xl font-semibold">{waiting ? "Next drop" : "Daily claim"}</h2>
           </div>
           <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
@@ -96,22 +90,15 @@ function RewardsPage() {
             {user && rewardBackendReady ? `+${rewardAmount}` : "100–160"} TAC
           </span>
         </div>
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
-          <div className="flex items-center gap-3">
-            <Clock3 className="size-5 text-primary" />
-            <div>
-              <p className="font-semibold tabular-nums">
-                {waiting ? cooldownLabel(rewardSecondsRemaining) : "Rolling 24-hour cooldown"}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {waiting ? "Time until your next claim" : "After your last claim"}
-              </p>
-            </div>
-          </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock3 className="size-4" />
+            {waiting ? cooldownLabel(rewardSecondsRemaining) : "Every 24 hours"}
+          </p>
           {!user ? (
             <Button asChild className="h-12 rounded-xl">
               <Link to="/auth" search={{ next: "/rewards" }}>
-                Sign in for rewards <ArrowUpRight />
+                Sign in <ArrowUpRight />
               </Link>
             </Button>
           ) : (
@@ -131,9 +118,7 @@ function RewardsPage() {
           )}
         </div>
         {user && !rewardBackendReady && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Claims stay disabled until the secure 24-hour rewards migration is deployed.
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Rewards setup pending.</p>
         )}
         {status && (
           <p role="status" className="mt-4 text-sm">
@@ -142,17 +127,6 @@ function RewardsPage() {
         )}
       </section>
       <RewardExtras />
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border p-5">
-        <div>
-          <p className="font-semibold">USDC lives in your wallet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">TAC is not USDC.</p>
-        </div>
-        <Button asChild variant="outline" className="h-11">
-          <Link to="/profile">
-            Open portfolio <ArrowUpRight />
-          </Link>
-        </Button>
-      </div>
     </div>
   );
 }

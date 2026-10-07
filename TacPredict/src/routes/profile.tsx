@@ -60,9 +60,7 @@ function PortfolioPage() {
     <div className="animate-enter mx-auto max-w-5xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="section-kicker">YOUR ONCHAIN ACCOUNT</p>
           <h1 className="page-title">Portfolio</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Base wallet. USDC portfolio.</p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm">
           <span className="size-2 rounded-full bg-[#527dff]" />
@@ -133,7 +131,7 @@ function PortfolioPage() {
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="mt-4 grid gap-4 ">
         <section
           className="onchain-balance-card rounded-2xl border border-border p-5 sm:p-6"
           aria-label="USDC wallet balance"
@@ -158,15 +156,6 @@ function PortfolioPage() {
             </p>
             <span className="text-base font-medium text-muted-foreground">USDC</span>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            {connected
-              ? onBase
-                ? wallet.usdc === null
-                  ? "Waiting for your wallet’s RPC response"
-                  : "Read directly from native USDC on Base"
-                : "Balance hidden until you switch to Base"
-              : "Connect to view balance."}
-          </p>
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Button
               variant="outline"
@@ -185,13 +174,11 @@ function PortfolioPage() {
               Withdraw
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Preview controls · transfers not enabled
-          </p>
+          <p className="mt-2 text-xs text-muted-foreground">Transfers unavailable</p>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="size-3.5" />
-              Self-custody · read-only connection
+              Self-custody · read-only
             </span>
             {wallet.address && (
               <a
@@ -206,36 +193,18 @@ function PortfolioPage() {
             )}
           </div>
         </section>
-        <section className="onchain-brand-card relative flex items-center gap-5 overflow-hidden rounded-2xl border border-border p-6">
-          <img
-            src="/brand/tacpredict.svg"
-            alt="TacPredict mascot"
-            width={112}
-            height={112}
-            className="size-24 shrink-0 rounded-2xl sm:size-28"
-          />
-          <div>
-            <p className="text-lg font-semibold">Make your call.</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Base. USDC. Your call.
-            </p>
-            <span className="mt-4 inline-flex rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-              Trading setup pending
-            </span>
-          </div>
-        </section>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4">
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">USDC in markets</p>
           <p className="mt-3 text-2xl font-semibold">—</p>
-          <p className="mt-2 text-xs text-muted-foreground">Awaiting position indexer</p>
+          <p className="mt-2 text-xs text-muted-foreground">Pending</p>
         </section>
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Claimable winnings</p>
           <p className="mt-3 text-2xl font-semibold">—</p>
-          <p className="mt-2 text-xs text-muted-foreground">Awaiting settlement contracts</p>
+          <p className="mt-2 text-xs text-muted-foreground">Pending</p>
         </section>
       </div>
 
@@ -246,7 +215,7 @@ function PortfolioPage() {
         <span className="flex items-center gap-3">
           <Gift className="size-5 text-primary" />
           <span>
-            <span className="block font-semibold">TAC Points & daily rewards</span>
+            <span className="block font-semibold">Rewards</span>
             <span className="mt-1 block text-sm text-muted-foreground">
               Virtual points · 24h rewards
             </span>
@@ -301,9 +270,7 @@ function PortfolioPage() {
             <Layers3 className="size-5" />
           </div>
           <h2 className="mt-4 text-base font-semibold">
-            {tab === "Activity"
-              ? "Onchain activity, once connected"
-              : "Your market positions belong here"}
+            {tab === "Activity" ? "No activity yet" : "No positions yet"}
           </h2>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
             {connected
@@ -333,9 +300,6 @@ function PortfolioPage() {
       )}
       <p role="status" aria-live="polite" className="mt-3 min-h-5 text-sm text-muted-foreground">
         {notice}
-      </p>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Read-only connection. No signatures or transfers.
       </p>
     </div>
   );

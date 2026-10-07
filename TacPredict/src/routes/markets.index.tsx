@@ -83,7 +83,6 @@ function MarketsPage() {
     <div className="animate-enter">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
-          <p className="section-kicker">Discover</p>
           <h1 className="page-title truncate">Markets</h1>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-positive">

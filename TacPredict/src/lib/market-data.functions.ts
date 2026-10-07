@@ -38,18 +38,21 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
     products.map(async (product) => {
       const [rawTicker, candles] = await Promise.all([
         request(`${product.pair}/ticker`),
-        request(`${product.pair}/candles?granularity=900`),
+        request(`${product.pair}/candles?granularity=60`),
       ]);
-      const ticker = rawTicker as { price?: unknown } | null;
+      const ticker = rawTicker as { price?: unknown; time?: string } | null;
       const history: PricePoint[] = [];
       if (Array.isArray(candles))
         for (const row of candles) {
           if (!Array.isArray(row)) continue;
-          // Closed 15-minute candles only, positioned at their close timestamp.
-          const time = (numeric(row[0]) + 900) * 1000,
+          // Real closed one-minute candles, timestamped at close.
+          const time = (numeric(row[0]) + 60) * 1000,
             price = numeric(row[4]);
-          if (time > now - 86400000 && time <= now && price > 0) history.push({ time, price });
+          if (time > now - 18000000 && time <= now && price > 0) history.push({ time, price });
         }
+      const tickerTime = Date.parse(ticker?.time ?? "");
+      if (Number.isFinite(tickerTime) && tickerTime <= Date.now() && numeric(ticker?.price) > 0)
+        history.push({ time: tickerTime, price: numeric(ticker?.price) });
       const unique = [...new Map(history.map((p) => [p.time, p])).values()].sort(
         (a, b) => a.time - b.time,
       );

@@ -22,4 +22,6 @@ TAC promo codes: apply `202610070002_tac_promo_codes.sql` as an administrator. A
 
 Direct MCP deployment helper: `node scripts/package-cloudflare.cjs` after the build emits ignored `.output/worker-modules.json` and `.output/worker-packed.b64`. It minifies Worker modules and packages gzip static responses with `encodeBody: manual`; standard Wrangler deployments can instead use native static assets. DNS website records must be backed up before attaching the custom domain; preserve mail records.
 
-Price charts use Coinbase Exchange public tickers and closed 15-minute BTC-USD / ETH-USD / SOL-USD candles over the last 24 hours. Unknown source data is shown as unavailable, not synthesized.
+Price charts use Coinbase Exchange closed one-minute candles plus validated public WebSocket ticker observations for BTC-USD, ETH-USD and SOL-USD. 5m/15m/1h switches filter observed spot-price windows, not prediction market durations. Start is the first observed spot value, not an oracle settlement price. LIVE requires a fresh timestamped ticker; stale/disconnected views fall back to SPOT. Unknown source data is unavailable, never synthesized. Updates are batched at 250ms and the socket pauses in the background.
+
+Production target: https://tacpredict.fun and www via the tacpredict-app Cloudflare Worker. GitHub source branch is development/base-usdc (PR #1); main is not automatically merged. DNS website A/CNAME content is preserved behind the Worker routes; mail DNS is unchanged.
