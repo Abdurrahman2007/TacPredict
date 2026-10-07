@@ -26,3 +26,11 @@ export function marketWindowLabel(market: Market) {
   }).format(start);
   return `${date} · ${start.toISOString().slice(11, 16)}–${end.toISOString().slice(11, 16)} UTC`;
 }
+
+export function marketDurationText(market: Market) {
+  const n = durationMinutes(market);
+  if (n === null) return null;
+  return n >= 60 && n % 60 === 0
+    ? `${n / 60} hour${n === 60 ? "" : "s"}`
+    : `${n} minute${n === 1 ? "" : "s"}`;
+}

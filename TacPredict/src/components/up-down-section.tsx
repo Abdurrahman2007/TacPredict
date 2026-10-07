@@ -4,7 +4,7 @@ import { MarketSparkline } from "@/components/market-sparkline";
 import { MarketCountdown } from "@/components/market-countdown";
 import { OutcomeRow } from "@/components/outcome-row";
 import { useSpotTicker } from "@/lib/use-spot-ticker";
-import { durationMinutes, marketDurationLabel, marketWindowLabel } from "@/lib/market-timing";
+import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
 import type { PolymarketFeed } from "@/lib/polymarket.functions";
 export function UpDownSection({
@@ -46,8 +46,7 @@ export function UpDownSection({
       <div className="grid gap-3 sm:grid-cols-2">
         {assets.map((asset, index) => {
           const market = liveMarkets[asset.key]!,
-            duration = marketDurationLabel(market),
-            title = `${asset.name} Up or Down${duration ? ` · ${duration}` : ""}`;
+            duration = marketDurationText(market);
           const observations = [...histories[asset.key], ...(ticks[asset.key] ?? [])].sort(
               (a, b) => a.time - b.time,
             ),
@@ -72,28 +71,23 @@ export function UpDownSection({
                   alt={`${asset.name} logo`}
                   className={`${index === 0 ? "size-10" : "size-8"} shrink-0 rounded-full`}
                 />
-                {index !== 0 && (
-                  <Link
-                    to="/markets/$marketId"
-                    params={{ marketId: market.id }}
-                    className="min-w-0 flex-1 text-base font-semibold"
-                  >
-                    {title}
-                  </Link>
-                )}
+                <Link
+                  to="/markets/$marketId"
+                  params={{ marketId: market.id }}
+                  className="min-w-0 flex-1"
+                  title={market.title}
+                >
+                  <span className="block text-lg font-semibold">{asset.name}</span>
+                  {duration && (
+                    <span className="mt-0.5 block text-sm text-muted-foreground">{duration}</span>
+                  )}
+                </Link>
                 <MarketCountdown market={market} snapshotTime={crypto.updatedAt} />
               </div>
               {index === 0 ? (
                 <>
-                  <Link
-                    to="/markets/$marketId"
-                    params={{ marketId: market.id }}
-                    className="mt-4 block text-lg font-semibold"
-                  >
-                    {title}
-                  </Link>
                   {marketWindowLabel(market) && (
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-4 text-sm text-muted-foreground">
                       {marketWindowLabel(market)}
                     </p>
                   )}

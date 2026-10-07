@@ -7,7 +7,8 @@ import { ConnectWallet } from "@/components/connect-wallet";
 import { CryptoDetailChart } from "@/components/crypto-detail-chart";
 import { ProbabilityHistoryChart } from "@/components/probability-history";
 import { MarketCountdown } from "@/components/market-countdown";
-import { marketDurationLabel, marketWindowLabel } from "@/lib/market-timing";
+import { MarketDescription } from "@/components/market-description";
+import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
@@ -64,7 +65,7 @@ function MarketDetailPage() {
             ? "solana"
             : undefined
       : undefined;
-  const duration = cryptoAsset ? marketDurationLabel(market) : null;
+  const duration = cryptoAsset ? marketDurationText(market) : null;
   const related = feed.markets
     .filter((m) => m.id !== market.id && m.category === market.category)
     .slice(0, 4);
@@ -87,10 +88,7 @@ function MarketDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
         <article className="min-w-0">
           <div className="mb-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
-            <span>
-              {market.category}
-              {duration ? ` · ${duration} market` : ""}
-            </span>
+            <span>{market.category}</span>
             {cryptoAsset ? (
               <MarketCountdown market={market} snapshotTime={feed.updatedAt} />
             ) : (
@@ -99,22 +97,20 @@ function MarketDetailPage() {
           </div>
           <div className="flex items-start gap-3">
             <MarketIcon market={market} />
-            <h1 className="min-w-0 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
-              {cryptoAsset && duration
-                ? `${cryptoAsset[0]!.toUpperCase()}${cryptoAsset.slice(1)} · ${duration}`
-                : market.title}
-            </h1>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                {cryptoAsset
+                  ? `${cryptoAsset[0]!.toUpperCase()}${cryptoAsset.slice(1)}`
+                  : market.title}
+              </h1>
+              {duration && <p className="mt-1 text-base text-muted-foreground">{duration}</p>}
+            </div>
           </div>
           {marketWindowLabel(market) && (
             <p className="mt-3 text-sm text-muted-foreground">{marketWindowLabel(market)}</p>
           )}
           {cryptoAsset ? (
-            <CryptoDetailChart
-              asset={cryptoAsset}
-              initialMinutes={
-                duration ? Number.parseInt(duration) * (duration.includes("hour") ? 60 : 1) : 15
-              }
-            />
+            <CryptoDetailChart asset={cryptoAsset} initialMinutes={durationMinutes(market) ?? 15} />
           ) : (
             <>
               <div
@@ -131,7 +127,10 @@ function MarketDetailPage() {
               <ProbabilityHistoryChart key={market.id} market={market} />
             </>
           )}
-          <section className="mt-6 space-y-3" aria-label="Market outcomes">
+          <section
+            className={`mt-6 space-y-3 ${market.outcomes.length <= 2 ? "hidden lg:block" : ""}`}
+            aria-label="Market outcomes"
+          >
             {market.outcomes.map((item, index) => (
               <button
                 type="button"
@@ -149,13 +148,8 @@ function MarketDetailPage() {
               </button>
             ))}
           </section>
-          <details className="mt-6 rounded-2xl border border-border p-4">
-            <summary className="cursor-pointer text-sm font-semibold">About</summary>
-            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-              {market.description}
-            </p>
-          </details>
-          <details className="mt-3 rounded-2xl border border-border bg-card p-4">
+          <MarketDescription key={market.id} text={market.description} />
+          <details className="mt-4 rounded-2xl border border-border/60 bg-card/40 p-4">
             <summary className="cursor-pointer text-sm font-semibold">Rules</summary>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {market.resolutionCriteria}
@@ -278,13 +272,23 @@ function MarketDetailPage() {
           aria-label="Quick outcome selection"
           style={{ bottom: "calc(68px + max(.6rem, env(safe-area-inset-bottom)))" }}
         >
-          {market.outcomes.slice(0, 2).map((item) => (
+          {market.outcomes.slice(0, 2).map((item, index) => (
             <button
               key={item.id}
               type="button"
               aria-pressed={chosen?.id === item.id}
               onClick={() => setSelected(item.id)}
-              className={`min-h-12 flex-1 rounded-full text-base font-semibold ${chosen?.id === item.id ? "bg-foreground text-background" : "bg-secondary text-foreground"}`}
+              className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold transition-colors ${chosen?.id === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
+              style={{
+                background:
+                  market.category === "Sports"
+                    ? index === 0
+                      ? "#9a4558"
+                      : "#526680"
+                    : index === 0
+                      ? "#197c53"
+                      : "#a24353",
+              }}
             >
               {item.label} {item.probability}%
             </button>

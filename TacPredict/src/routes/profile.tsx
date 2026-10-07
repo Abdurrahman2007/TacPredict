@@ -132,7 +132,7 @@ function PortfolioPage() {
 
       <div className="mt-4 grid gap-4 ">
         <section
-          className="onchain-balance-card rounded-2xl border border-border p-5 sm:p-6"
+          className="onchain-balance-card relative overflow-hidden rounded-[28px] border border-white/10 p-5 shadow-[0_20px_60px_-30px_rgba(0,0,0,.6)] sm:p-7"
           aria-label="USDC wallet balance"
         >
           <div className="flex items-center justify-between gap-3">
@@ -163,25 +163,35 @@ function PortfolioPage() {
             </p>
             <span className="text-base font-medium text-muted-foreground">USDC</span>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="h-12 rounded-xl"
+          <div className="mt-6 grid grid-cols-2 gap-3" aria-label="Transfer previews">
+            <button
+              type="button"
               onClick={() => setTransfer("Deposit")}
+              className="ios-press group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[22px] border border-white/20 bg-gradient-to-br from-[#c2afff] to-[#9275e5] p-4 text-[#201637] shadow-[0_12px_30px_-14px_rgba(174,143,255,.7)] transition-shadow hover:shadow-[0_12px_35px_-10px_rgba(174,143,255,.65)]"
             >
-              <ArrowDownLeft />
-              Deposit
-            </Button>
-            <Button
-              variant="outline"
-              className="h-12 rounded-xl"
+              <span className="grid size-9 place-items-center rounded-full bg-white/25">
+                <ArrowDownLeft className="size-5" />
+              </span>
+              <span className="flex w-full items-center justify-between gap-2 text-sm font-semibold">
+                Deposit
+                <ArrowUpRight className="size-3.5 opacity-60" />
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={() => setTransfer("Withdraw")}
+              className="ios-press group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/[.025] p-4 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,.06)] transition-colors hover:border-primary/40"
             >
-              <ArrowUpRight />
-              Withdraw
-            </Button>
+              <span className="grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
+                <ArrowUpRight className="size-5" />
+              </span>
+              <span className="flex w-full items-center justify-between gap-2 text-sm font-semibold">
+                Withdraw
+                <ArrowUpRight className="size-3.5 opacity-60" />
+              </span>
+            </button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Transfers unavailable</p>
+          <p className="mt-3 text-xs text-muted-foreground">Preview · Transfers unavailable</p>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="size-3.5" />
@@ -206,12 +216,16 @@ function PortfolioPage() {
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">USDC in markets</p>
           <p className="mt-3 text-2xl font-semibold">0</p>
-          <p className="mt-2 text-xs text-muted-foreground">Preview · Not connected</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {connected ? "Preview · Indexer pending" : "Preview · Not connected"}
+          </p>
         </section>
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Claimable winnings</p>
           <p className="mt-3 text-2xl font-semibold">0</p>
-          <p className="mt-2 text-xs text-muted-foreground">Preview · Not connected</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {connected ? "Preview · Indexer pending" : "Preview · Not connected"}
+          </p>
         </section>
       </div>
 
@@ -236,12 +250,19 @@ function PortfolioPage() {
           if (!open) setTransfer(null);
         }}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-[28px] border-white/10 bg-card p-6 shadow-2xl sm:rounded-[28px]">
           <DialogHeader>
-            <DialogTitle>{transfer} USDC</DialogTitle>
+            <div className="mb-3 grid size-14 place-items-center self-center rounded-[20px] bg-primary/15 text-primary sm:self-start">
+              {transfer === "Deposit" ? (
+                <ArrowDownLeft className="size-7" />
+              ) : (
+                <ArrowUpRight className="size-7" />
+              )}
+            </div>
+            <DialogTitle className="text-2xl">{transfer} USDC</DialogTitle>
             <DialogDescription>Base mainnet · native USDC · preview only</DialogDescription>
           </DialogHeader>
-          <div className="rounded-xl border border-border bg-primary/5 p-4">
+          <div className="rounded-[20px] border border-white/10 bg-background/40 p-5">
             <ShieldCheck className="mb-3 size-6 text-primary" />
             <p className="font-semibold">No funds move from this screen.</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -253,8 +274,8 @@ function PortfolioPage() {
             Your connected wallet remains self-custodial. This app does not sign, approve, or
             transfer tokens.
           </p>
-          <Button className="h-12" disabled>
-            {transfer} unavailable — contracts pending
+          <Button className="h-12 rounded-full" disabled>
+            {transfer} unavailable
           </Button>
         </DialogContent>
       </Dialog>

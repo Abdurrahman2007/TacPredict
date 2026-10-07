@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { useSpotTicker } from "@/lib/use-spot-ticker";
 import { MarketSparkline } from "@/components/market-sparkline";
@@ -12,9 +11,7 @@ export function CryptoDetailChart({
 }) {
   const { data } = useQuery(cryptoMarketQueryOptions);
   const { ticks } = useSpotTicker();
-  const [minutes, setMinutes] = useState(
-    [5, 15, 60].includes(initialMinutes) ? initialMinutes : 15,
-  );
+  const minutes = Math.min(Math.max(initialMinutes, 1), 60);
   const observations = [...(data?.histories[asset] ?? []), ...(ticks[asset] ?? [])].sort(
       (a, b) => a.time - b.time,
     ),
@@ -26,20 +23,6 @@ export function CryptoDetailChart({
         assetLabel={asset}
         sourceLabel="Coinbase"
       />
-      <div className="mt-5 flex gap-2">
-        {[5, 15, 60].map((n) => (
-          <button
-            key={n}
-            type="button"
-            onClick={() => setMinutes(n)}
-            aria-pressed={minutes === n}
-            className={`min-h-11 rounded-full px-4 text-sm ${minutes === n ? "bg-foreground text-background" : "border border-border text-muted-foreground"}`}
-          >
-            {n === 60 ? "1h" : `${n}m`}
-          </button>
-        ))}
-        <span className="ml-auto self-center text-xs text-muted-foreground">Spot price</span>
-      </div>
     </section>
   );
 }
