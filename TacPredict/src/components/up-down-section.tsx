@@ -27,10 +27,12 @@ export function UpDownSection({
   return (
     <section className={detailed ? "" : "mt-5"}>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="section-title">Trending Up &amp; Down</h2>
+        <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
+          Trending Up &amp; Down
+        </h2>
         <Link
           to="/search"
-          className="flex min-h-11 items-center gap-1 rounded-full border border-border px-4 text-sm text-muted-foreground"
+          className="flex min-h-11 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-border px-3 text-xs text-muted-foreground sm:px-4 sm:text-sm"
         >
           View more
           <ChevronRight className="size-4" />
