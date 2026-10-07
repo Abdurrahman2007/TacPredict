@@ -33,3 +33,5 @@ Bundled BTC/ETH/SOL logo SVGs: spothq/cryptocurrency-icons (CC0 license included
 Opening: 1.8-second muted H.264 logo animation, generated from the supplied mascot with a 2.5D perspective entrance. Binary is decoded by prebuild from the committed base64 source. Intro is session-once, skippable, reduced-motion-aware, and has a 2.4-second safety timeout. No separate duplicate Connect wallet button in the disconnected portfolio.
 
 Chart pointer/touch and keyboard inspection selects the nearest actual observation, not an interpolated quote. Up/Down opens the actual source market detail with a spot chart, source statistics, collapsible rules and quick outcome selection. Activity/OI/settlement data are not fabricated when unavailable. Streak and daily check-in share one card.
+
+Navigation: Home / Search / Markets / Rewards / Portfolio. Search uses the current verified discovery feed plus crypto source markets, with real featured/suggested records, local query filtering and BTC/ETH/SOL aliases. Home retains crypto charts; the /up-down route remains available for existing links but is not a navigation item.

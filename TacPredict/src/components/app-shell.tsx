@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { House, LineChart, Wallet, Gift, ArrowUpDown } from "lucide-react";
+import { House, LineChart, Wallet, Gift, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { BrandIntro } from "./brand-intro";
 import { ConnectWallet } from "./connect-wallet";
 const navItems = [
   { to: "/" as const, label: "Home", icon: House },
+  { to: "/search" as const, label: "Search", icon: Search },
   { to: "/markets" as const, label: "Markets", icon: LineChart },
-  { to: "/up-down" as const, label: "Up/Down", icon: ArrowUpDown },
   { to: "/rewards" as const, label: "Rewards", icon: Gift },
   { to: "/profile" as const, label: "Portfolio", icon: Wallet },
 ];

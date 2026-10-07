@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as UpDownRouteImport } from './routes/up-down'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
@@ -43,6 +44,11 @@ const RewardsRoute = RewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UpDownRoute = UpDownRouteImport.update({
   id: '/up-down',
   path: '/up-down',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets': typeof MarketsIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/profile'
     | '/rewards'
+    | '/search'
     | '/up-down'
     | '/markets/$marketId'
     | '/markets/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/profile'
     | '/rewards'
+    | '/search'
     | '/up-down'
     | '/markets/$marketId'
     | '/markets'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/profile'
     | '/rewards'
+    | '/search'
     | '/up-down'
     | '/markets/$marketId'
     | '/markets/'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
+  SearchRoute: typeof SearchRoute
   UpDownRoute: typeof UpDownRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/up-down': {
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
+  SearchRoute: SearchRoute,
   UpDownRoute: UpDownRoute,
 }
 export const routeTree = rootRouteImport
