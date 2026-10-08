@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRewardTasks } from "@/lib/use-reward-tasks";
 import { supabase } from "@/integrations/supabase/client";
-import { authFeatures } from "@/lib/auth-config";
+import { useAuthFeatures } from "@/lib/use-auth-features";
 export const Route = createFileRoute("/rewards")({
   head: () => ({
     meta: [
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/rewards")({
   component: RewardsPage,
 });
 function RewardsPage() {
+  const authFeatures = useAuthFeatures();
   const showLogin = useLoginDialog();
   const { user, ready, data, isError, isFetching, refetch } = useRewardTasks();
   const [busy, setBusy] = useState(false),

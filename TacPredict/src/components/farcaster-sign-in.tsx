@@ -160,14 +160,16 @@ export function FarcasterSignIn({
         aria-label="Continue with Farcaster"
         className={
           compact
-            ? "h-14 w-full rounded-full border-white/35 bg-transparent text-base hover:bg-white/5"
+            ? "h-14 w-full rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
             : "h-12 w-full rounded-full"
         }
         disabled={disabled || busy}
         onClick={() => void start()}
       >
-        <span aria-hidden="true" className="text-2xl font-bold text-primary">
-          ▥
+        <span aria-hidden="true" className="text-2xl font-bold text-white">
+          <svg viewBox="0 0 24 24" className="size-6" fill="currentColor">
+            <path d="M4 2h16v3h2v3h-2v12h2v2h-7v-2h2v-8a5 5 0 0 0-10 0v8h2v2H2v-2h2V8H2V5h2V2Z" />
+          </svg>
         </span>
         {compact ? (
           <span className="sr-only">Farcaster</span>

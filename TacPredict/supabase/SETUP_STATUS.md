@@ -16,11 +16,11 @@ Project: `lmqaiqvwcytmgwgwyfwx`; app: `https://tacpredict.fun` (and www).
 ## Awaiting dashboard access / credentials
 - `202610080003_locked_usdc_rewards.sql` is prepared; application must verify successful execution before claiming task backend ready.
 - Enable Supabase manual identity linking for the user's explicit Connect X feature.
-- Google OAuth: native Supabase client ready; dashboard requires user's Google client ID/secret.
-- X OAuth 2.0: native Supabase client/linkIdentity ready; dashboard requires user's X client ID/secret.
-- Custom SMTP required by dashboard for editing OTP email templates and sending to public users. Template must include `{{ .Token }}`. Send and verify a real six-digit code before setting `VITE_EMAIL_OTP_ENABLED=true`.
+- Google OAuth: public Supabase settings now report enabled; the app reads availability dynamically. User-account end-to-end sign-in remains to be validated.
+- X OAuth 2.0: native Supabase client/linkIdentity ready, but public settings still report `twitter: false`. The app will automatically enable the button when Supabase reports it enabled.
+- Email provider is enabled and the app email-code form is active. Custom SMTP/template delivery is not confirmed through public settings. The template must include `{{ .Token }}`; real six-digit code delivery/verification still needs a user-approved test.
 - Google/X OAuth callback at their provider console: `https://lmqaiqvwcytmgwgwyfwx.supabase.co/auth/v1/callback`.
-- Enable readiness flags only after real provider configuration and end-to-end validation.
+- Provider buttons now read the public `/auth/v1/settings` endpoint. Environment readiness flags are only an offline fallback; enabled status does not prove full OAuth or email delivery.
 
 ## Rewards and funds
 - Welcome campaign advertises a **15 USDC locked reward offer**. An offer is not a wallet deposit or already-earned balance.
