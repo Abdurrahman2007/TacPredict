@@ -24,6 +24,7 @@ export function AuthPanel({
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState("");
+  const [useExistingCode, setUseExistingCode] = useState(false);
   const [expiresAt, setExpiresAt] = useState(0);
   const [resendAt, setResendAt] = useState(0);
   const [clock, setClock] = useState(0);
@@ -96,6 +97,7 @@ export function AuthPanel({
       });
       if (error) throw error;
       const now = Date.now();
+      setUseExistingCode(false);
       setSentTo(target);
       setCode("");
       setClock(now);
@@ -106,8 +108,11 @@ export function AuthPanel({
   const verifyCode = () =>
     attempt(async () => {
       if (!/^\d{6}$/.test(code)) throw new Error("Enter the six-digit code from your email.");
+      const target = sentTo || email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target))
+        throw new Error("Enter the email that received this code.");
       const { error } = await supabase.auth.verifyOtp({
-        email: sentTo,
+        email: target,
         token: code,
         type: "email",
       });
@@ -121,15 +126,34 @@ export function AuthPanel({
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        void (sentTo ? verifyCode() : sendCode());
+        void (sentTo || useExistingCode ? verifyCode() : sendCode());
       }}
       className="space-y-3"
     >
-      {sentTo ? (
+      {sentTo || useExistingCode ? (
         <>
-          <p className="break-all text-sm text-muted-foreground">
-            Code sent to <span className="text-foreground">{sentTo}</span>
-          </p>
+          {sentTo ? (
+            <p className="break-all text-sm text-muted-foreground">
+              Code sent to <span className="text-foreground">{sentTo}</span>
+            </p>
+          ) : (
+            <>
+              <label htmlFor="auth-email" className="text-xs text-muted-foreground">
+                Email address
+              </label>
+              <input
+                id="auth-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="Email that received the code"
+                className="h-12 w-full min-w-0 rounded-xl border border-input bg-background/60 px-4 outline-none focus:border-primary"
+              />
+            </>
+          )}
           <label className="sr-only" htmlFor="auth-code">
             Six-digit code
           </label>
@@ -149,7 +173,9 @@ export function AuthPanel({
           <p className="text-center text-xs text-muted-foreground">
             {seconds
               ? `Expires in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
-              : "Request a new code if yours has expired."}
+              : useExistingCode
+                ? "Codes expire 10 minutes after the original request."
+                : "Request a new code if yours has expired."}
           </p>
           <Button
             type="submit"
@@ -164,6 +190,7 @@ export function AuthPanel({
               className="text-primary"
               disabled={locked}
               onClick={() => {
+                setUseExistingCode(false);
                 setSentTo("");
                 setCode("");
                 setMessage("");
@@ -171,14 +198,16 @@ export function AuthPanel({
             >
               Change email
             </button>
-            <button
-              type="button"
-              className="text-primary disabled:text-muted-foreground"
-              disabled={locked || resendSeconds > 0}
-              onClick={() => void sendCode()}
-            >
-              {resendSeconds ? `Resend in ${resendSeconds}s` : "Resend code"}
-            </button>
+            {sentTo && (
+              <button
+                type="button"
+                className="text-primary disabled:text-muted-foreground"
+                disabled={locked || resendSeconds > 0}
+                onClick={() => void sendCode()}
+              >
+                {resendSeconds ? `Resend in ${resendSeconds}s` : "Resend code"}
+              </button>
+            )}
           </div>
         </>
       ) : (
@@ -214,6 +243,18 @@ export function AuthPanel({
           <p className="text-center text-xs text-muted-foreground">
             No password. Codes expire after 10 minutes.
           </p>
+          <button
+            type="button"
+            disabled={locked}
+            onClick={() => {
+              setUseExistingCode(true);
+              setCode("");
+              setMessage("");
+            }}
+            className="block w-full text-center text-xs text-primary"
+          >
+            Already have a code?
+          </button>
         </>
       )}
     </form>
