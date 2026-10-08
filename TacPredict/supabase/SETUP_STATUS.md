@@ -20,7 +20,9 @@ Project: `lmqaiqvwcytmgwgwyfwx`; app: `https://tacpredict.fun` (and www).
 - Enable Supabase manual identity linking for the user's explicit Connect X feature.
 - Google OAuth: public Supabase settings now report enabled; the app reads availability dynamically. User-account end-to-end sign-in remains to be validated.
 - X OAuth 2.0 is enabled: `provider=x` authorize route returns a real redirect to x.com. The legacy public settings `twitter:false` does not describe the new `x` provider. Login, explicit identity linking, and reward verification now use/recognize the modern provider.
-- Email provider is enabled and the app email-code form is active. Custom SMTP/template delivery is not confirmed through public settings. The template must include `{{ .Token }}`; real six-digit code delivery/verification still needs a user-approved test.
+- Resend sender domain tacpredict.fun verified; sending-only domain-scoped key connected to hosted custom SMTP (smtp.resend.com:465, username resend). Sender TacPredict <support@tacpredict.fun>. Existing Cloudflare MX/routing/SPF preserved; only the Resend DKIM TXT and DNS-only return-path CNAMEs were added.
+- Both Magic link/OTP and Confirm signup hosted templates are branded and code-only (`{{ .Token }}`, no ConfirmationURL). Six digits / 600-second expiry verified in dashboard. Real recipient delivery and complete OTP sign-in still require a user-approved test.
+- Resend Free sending limits are 100/day and 3,000/month. Setup/testing only, not a guarantee of production capacity for 75,000 users. No paid plans were activated.
 - Google/X OAuth callback at their provider console: `https://lmqaiqvwcytmgwgwyfwx.supabase.co/auth/v1/callback`.
 - Provider availability uses cached public settings plus a non-followed modern-X authorize probe. Enabled status does not prove full OAuth or email delivery.
 
