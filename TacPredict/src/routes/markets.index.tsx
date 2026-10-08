@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
-import { categories, markets } from "@/domain/markets/demo-markets";
+import { categories } from "@/domain/markets/demo-markets";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
 import { useMemo } from "react";
@@ -30,7 +30,8 @@ export const Route = createFileRoute("/markets/")({
       { property: "og:title", content: "Markets — TacPredict" },
       {
         property: "og:description",
-        content: "Explore active prediction markets and make your call with TAC Points.",
+        content:
+          "Explore active prediction markets and explore outcomes in the Base USDC interface.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -57,7 +58,7 @@ function MarketsPage() {
   const query = search.q ?? "";
   const { data: liveFeed } = useSuspenseQuery(polymarketFeedQueryOptions);
   const filtered = useMemo(() => {
-    const allMarkets = liveFeed.markets.length > 0 ? liveFeed.markets : markets;
+    const allMarkets = liveFeed.markets;
     return allMarkets
       .filter((market) => {
         const categoryMatches = category === "All" || market.category === category;
@@ -82,7 +83,6 @@ function MarketsPage() {
     <div className="animate-enter">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
-          <p className="section-kicker">Discover</p>
           <h1 className="page-title truncate">Markets</h1>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-positive">
@@ -147,11 +147,11 @@ function MarketsPage() {
           className="mt-4 rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
         >
           {liveFeed.error}
-          {liveFeed.markets.length === 0 && " Showing demo previews."}
+          {liveFeed.markets.length === 0 && " Try refreshing in a moment."}
         </p>
       )}
       {filtered.length > 0 ? (
-        <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
+        <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((market) => (
             <MarketCard key={market.id} market={market} />
           ))}
@@ -163,7 +163,7 @@ function MarketsPage() {
         </div>
       )}
       <p className="mt-5 text-center text-[0.65rem] font-semibold text-muted-foreground">
-        Live odds and volume from Polymarket · TAC Points only on TacPredict
+        Odds and volume from Polymarket · Base execution contracts not connected
       </p>
     </div>
   );

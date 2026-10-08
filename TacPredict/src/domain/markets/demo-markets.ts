@@ -1,6 +1,3 @@
-import featuredBitcoin from "@/assets/featured-bitcoin.jpg";
-import marketAi from "@/assets/market-ai.jpg";
-import marketCricket from "@/assets/market-cricket.jpg";
 import type { Market } from "./types";
 
 export const markets: Market[] = [
@@ -15,7 +12,6 @@ export const markets: Market[] = [
       { id: "yes", label: "Yes", probability: 64 },
       { id: "no", label: "No", probability: 36 },
     ],
-    image: featuredBitcoin,
     featured: true,
     trend: "up",
     description:
@@ -36,7 +32,6 @@ export const markets: Market[] = [
       { id: "yes", label: "Yes", probability: 42 },
       { id: "no", label: "No", probability: 58 },
     ],
-    image: marketAi,
     trend: "up",
     description:
       "A market on whether a major AI research company announces a consumer-ready humanoid robot during 2026.",
@@ -56,7 +51,6 @@ export const markets: Market[] = [
       { id: "yes", label: "Yes", probability: 55 },
       { id: "no", label: "No", probability: 45 },
     ],
-    image: marketCricket,
     trend: "flat",
     description:
       "Predict whether the match winner will be decided during the final five overs of the second innings.",

@@ -10,6 +10,7 @@ type GammaMarket = {
   outcomes?: string | string[];
   outcomePrices?: string | string[];
   endDate?: string;
+  eventStartTime?: string;
   createdAt?: string;
   volume?: string | number;
   volume24hr?: string | number;
@@ -19,6 +20,8 @@ type GammaMarket = {
   slug?: string;
   resolutionSource?: string;
   sportsMarketType?: string;
+  image?: string;
+  icon?: string;
 };
 
 export type PolymarketFeed = {
@@ -100,11 +103,22 @@ function mapMarket(item: GammaMarket): Market | null {
   return {
     id: `poly-${id}`,
     title,
+    ...((item.image ?? item.icon)?.startsWith("https://")
+      ? { image: item.image ?? item.icon }
+      : {}),
     category: categoryFor(title, item.sportsMarketType),
     closesAt: formatClose(item.endDate),
-    createdAt: item.createdAt,
-    endsAt: item.endDate,
-    volume24h: Number(item.volume24hr ?? 0),
+    ...(item.createdAt ? { createdAt: item.createdAt } : {}),
+    ...(item.endDate ? { endsAt: item.endDate } : {}),
+    ...(item.eventStartTime && Number.isFinite(Date.parse(item.eventStartTime))
+      ? { startsAt: item.eventStartTime }
+      : {}),
+    ...(item.volume24hr != null && Number.isFinite(Number(item.volume24hr))
+      ? { volume24h: Number(item.volume24hr) }
+      : {}),
+    ...(item.liquidity != null && Number.isFinite(Number(item.liquidity))
+      ? { liquidity: Number(item.liquidity) }
+      : {}),
     volume: `$${compact(volume)}`,
     participants: 0, // This feed does not provide a verified predictor count.
     outcomes,
@@ -130,7 +144,7 @@ async function fetchFeed(): Promise<PolymarketFeed> {
         { headers, signal: AbortSignal.timeout(5000) },
       ),
       fetch(
-        `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=100&end_date_min=${encodeURIComponent(now)}&order=endDate&ascending=true`,
+        `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=100&tag_id=21&end_date_min=${encodeURIComponent(now)}&order=endDate&ascending=true`,
         { headers, signal: AbortSignal.timeout(5000) },
       ),
       fetch(
@@ -152,6 +166,24 @@ async function fetchFeed(): Promise<PolymarketFeed> {
       .map(mapMarket)
       .filter((market): market is Market => market !== null);
     const cryptoUpDown: PolymarketFeed["cryptoUpDown"] = {};
+    const nowMs = Date.now();
+    const timingRank = (m: Market) => {
+      const start = Date.parse(m.startsAt ?? "");
+      return Number.isFinite(start) ? (start <= nowMs ? 0 : 1) : 2;
+    };
+    mappedCrypto.sort((a, b) => {
+      const rank = timingRank(a) - timingRank(b);
+      if (rank) return rank;
+      const aEnd = Date.parse(a.endsAt ?? ""),
+        bEnd = Date.parse(b.endsAt ?? "");
+      if (timingRank(a) === 0) {
+        const aDuration = aEnd - Date.parse(a.startsAt ?? ""),
+          bDuration = bEnd - Date.parse(b.startsAt ?? "");
+        if (Number.isFinite(aDuration) && Number.isFinite(bDuration) && aDuration !== bDuration)
+          return aDuration - bDuration;
+      }
+      return aEnd - bEnd;
+    });
     for (const market of mappedCrypto) {
       const title = market.title.toLowerCase();
       const asset = title.startsWith("bitcoin up or down")

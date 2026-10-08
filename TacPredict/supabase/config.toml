@@ -1,1 +1,28 @@
-project_id = "bwlpjvoogmczjsguwgyn"
+project_id = "lmqaiqvwcytmgwgwyfwx"
+
+[auth]
+site_url = "https://tacpredict.fun"
+additional_redirect_urls = ["https://tacpredict.fun/auth/callback", "https://www.tacpredict.fun/auth/callback", "https://tacpredict.fun/auth", "https://www.tacpredict.fun/auth", "https://tacpredict.fun/", "https://www.tacpredict.fun/"]
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+otp_length = 6
+otp_expiry = 600
+max_frequency = "60s"
+
+[auth.web3.ethereum]
+enabled = true
+
+# Google OAuth and SMTP credentials belong in the dashboard, not in this file.
+
+# Code-only branded templates. These local settings must also be applied to hosted Auth.
+[auth.email.template.magic_link]
+subject = "Your TacPredict verification code"
+content_path = "./supabase/templates/verification.html"
+
+[auth.email.template.confirmation]
+subject = "Verify your email — TacPredict"
+content_path = "./supabase/templates/verification.html"

@@ -1,27 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Activity,
-  ArrowLeft,
-  Check,
-  Clock3,
-  ExternalLink,
-  Info,
-  ShieldCheck,
-  TrendingDown,
-  TrendingUp,
-  UsersRound,
-  WalletCards,
-} from "lucide-react";
-import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MarketSparkline } from "@/components/market-sparkline";
-import { markets } from "@/domain/markets/demo-markets";
-import { cn } from "@/lib/utils";
+import { PredictionAmountCard } from "@/components/prediction-amount-card";
+import { MobileOutcomeDock } from "@/components/mobile-outcome-dock";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { CryptoDetailChart } from "@/components/crypto-detail-chart";
+import { ProbabilityHistoryChart } from "@/components/probability-history";
+import { MarketCountdown } from "@/components/market-countdown";
+import { MarketDescription } from "@/components/market-description";
+import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
-import { usePredictionWallet } from "@/lib/prediction-wallet";
 import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
-import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 
 export const Route = createFileRoute("/markets/$marketId")({
   validateSearch: (search: Record<string, unknown>): { outcome?: string } =>
@@ -31,395 +28,220 @@ export const Route = createFileRoute("/markets/$marketId")({
       { title: "Market — TacPredict" },
       {
         name: "description",
-        content: "Review market odds and make a prediction using TAC Points.",
+        content:
+          "Explore market outcomes and resolution rules. Base USDC trading integration is pending.",
       },
-      { property: "og:title", content: "Prediction Market — TacPredict" },
-      {
-        property: "og:description",
-        content: "Review the market and make your prediction with TAC Points.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
-      context.queryClient.ensureQueryData(cryptoMarketQueryOptions),
-    ]),
-  errorComponent: ({ error }) => (
-    <div role="alert" className="py-16 text-center">
-      <h1 className="page-title">Market unavailable</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {error instanceof Error ? error.message : "Please try again."}
-      </p>
-    </div>
-  ),
-  notFoundComponent: () => <div className="py-16 text-center">Market not found.</div>,
+  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
   component: MarketDetailPage,
 });
-
 function MarketDetailPage() {
   const { marketId } = Route.useParams();
-  const { outcome: initialOutcome } = Route.useSearch();
-  const { data: liveFeed } = useSuspenseQuery(polymarketFeedQueryOptions);
-  const { data: crypto } = useSuspenseQuery(cryptoMarketQueryOptions);
-  const market = useMemo(
-    () =>
-      [...liveFeed.markets, ...Object.values(liveFeed.cryptoUpDown), ...markets].find(
-        (item) => item?.id === marketId,
-      ),
-    [liveFeed.markets, liveFeed.cryptoUpDown, marketId],
+  const { outcome: initial } = Route.useSearch();
+  const { data: feed } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const [selected, setSelected] = useState(initial || "");
+  const [amountOpen, setAmountOpen] = useState(false);
+  const selectOutcome = (id: string) => {
+    setSelected(id);
+    if (window.matchMedia("(max-width: 1023px)").matches) setAmountOpen(true);
+  };
+  useEffect(() => {
+    setSelected(initial || "");
+    setAmountOpen(false);
+  }, [initial, marketId]);
+  const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
+    (item) => item?.id === marketId,
   );
-  const [selectedOutcome, setSelectedOutcome] = useState(
-    initialOutcome || market?.outcomes[0]?.id || "",
-  );
-  const [amount, setAmount] = useState(100);
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const { user, balance, positions, enterMarket } = usePredictionWallet();
-
   if (!market)
     return (
       <div className="py-16 text-center">
         <h1 className="page-title">Market not found</h1>
-        <Button className="mt-5" asChild>
+        <p className="mt-3 text-sm text-muted-foreground">
+          This market is not in the current discovery feed.
+        </p>
+        <Button asChild className="mt-5">
           <Link to="/markets">Back to markets</Link>
         </Button>
       </div>
     );
-  const leadingOutcome = market.outcomes.reduce(
-    (best, outcome) => (outcome.probability > best.probability ? outcome : best),
-    market.outcomes[0]!,
-  );
-  const chosen = market.outcomes.find((outcome) => outcome.id === selectedOutcome);
-  const potential = chosen ? Math.round(amount * (100 / Math.max(1, chosen.probability))) : 0;
-  const isUpDown = market.category === "Crypto" && /up or down/i.test(market.title);
-  const assetKey = /ethereum/i.test(market.title)
-    ? "ethereum"
-    : /solana/i.test(market.title)
-      ? "solana"
-      : "bitcoin";
-  const currentPrice = crypto[assetKey].price;
-  const change = crypto[assetKey].change24h;
-  const userPositions = positions.filter((position) => position.marketId === market.id);
-  const formatPrice = (value: number) =>
-    value > 0
-      ? new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: value < 100 ? 2 : 0,
-        }).format(value)
-      : "Unavailable";
-
+  const cryptoAsset =
+    market.category === "Crypto" && /up or down/i.test(market.title)
+      ? /\b(bitcoin|btc)\b/i.test(market.title)
+        ? "bitcoin"
+        : /\b(ethereum|eth)\b/i.test(market.title)
+          ? "ethereum"
+          : /\b(solana|sol)\b/i.test(market.title)
+            ? "solana"
+            : undefined
+      : undefined;
+  const duration = cryptoAsset ? marketDurationText(market) : null;
+  const related = feed.markets
+    .filter((m) => m.id !== market.id && m.category === market.category)
+    .slice(0, 4);
+  const money = (n: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(n);
+  const chosen = market.outcomes.find((item) => item.id === selected) ?? market.outcomes[0];
   return (
-    <div className="animate-enter mx-auto max-w-3xl">
+    <div className="animate-enter pb-28 lg:pb-0">
       <Link
         to="/markets"
-        className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground"
+        className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"
       >
-        <ArrowLeft className="size-4" /> Markets
+        <ArrowLeft className="size-4" />
+        Markets
       </Link>
-      <article className="mt-2">
-        <div className="flex items-start gap-3">
-          <MarketIcon market={market} className="size-14" />
-          <div className="min-w-0 flex-1">
-            <p className="section-kicker">
-              {market.category} · {market.source}
-            </p>
-            <h1 className="mt-1 text-2xl font-black leading-tight sm:text-4xl">{market.title}</h1>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Clock3 className="size-4" /> Ends in {market.closesAt}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <UsersRound className="size-4" />{" "}
-            {market.source === "Polymarket"
-              ? "Polymarket market"
-              : `${market.participants.toLocaleString()} predictors`}
-          </span>
-          <span>{market.volume} volume</span>
-        </div>
-        {isUpDown && (
-          <div className="mt-6 grid grid-cols-2 gap-4 border-b border-border pb-5">
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">Current price</p>
-              <p className="mt-1 text-2xl font-black text-chart tabular-nums">
-                {formatPrice(currentPrice)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">24h movement</p>
-              <p
-                className={cn(
-                  "mt-1 inline-flex items-center gap-1 text-xl font-black tabular-nums",
-                  change >= 0 ? "text-positive" : "text-destructive",
-                )}
-              >
-                {change >= 0 ? <TrendingUp /> : <TrendingDown />}
-                {Math.abs(change).toFixed(2)}%
-              </p>
-            </div>
-          </div>
-        )}
-        <div className="mt-5 border-y border-border py-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">
-                Leading outcome
-              </p>
-              <p className="mt-1 text-lg font-bold">
-                {leadingOutcome.label} {leadingOutcome.probability}%
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[0.65rem] font-bold uppercase text-muted-foreground">
-                Market volume
-              </p>
-              <p className="mt-1 text-lg font-bold">{market.volume}</p>
-            </div>
-          </div>
-          {isUpDown && assetKey === "bitcoin" && crypto.bitcoinHistory.length > 1 && (
-            <div className="mt-4">
-              <p className="mb-2 text-sm text-muted-foreground">
-                Bitcoin spot price history · not market probability
-              </p>
-              <div className="h-40">
-                <MarketSparkline values={crypto.bitcoinHistory} />
-              </div>
-            </div>
-          )}
-        </div>
-      </article>
-
-      <section className="mt-7 border-y border-border py-6">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-          <h2 className="section-title min-w-0">Choose an outcome</h2>
-          <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-            Current probability
-          </span>
-        </div>
-        <div
-          className={cn(
-            "mt-3 grid gap-2",
-            market.outcomes.length > 2 ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2",
-          )}
-        >
-          {market.outcomes.map((outcome) => (
-            <Button
-              key={outcome.id}
-              variant={selectedOutcome === outcome.id ? "default" : "outline"}
-              className="h-14 justify-between text-base"
-              onClick={() => {
-                setSelectedOutcome(outcome.id);
-                setMessage("");
-              }}
-            >
-              <span>{outcome.label}</span>
-              <span className="text-lg tabular-nums">{outcome.probability}%</span>
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-6 rounded-lg border border-border bg-card p-4 shadow-card sm:p-5">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground">Your balance</p>
-            <p className="mt-1 text-xl font-black tabular-nums">{balance.toLocaleString()} TAC</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs font-semibold text-muted-foreground">Potential return</p>
-            <p className="mt-1 text-xl font-black tabular-nums">{potential.toLocaleString()} TAC</p>
-          </div>
-        </div>
-        <label
-          htmlFor="prediction-amount"
-          className="mt-5 block text-xs font-bold text-muted-foreground"
-        >
-          PREDICTION AMOUNT
-        </label>
-        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring/30">
-          <input
-            id="prediction-amount"
-            value={amount}
-            min={10}
-            max={balance}
-            step={10}
-            onChange={(event) => {
-              setAmount(Math.max(0, Number(event.target.value)));
-              setMessage("");
-            }}
-            type="number"
-            className="h-12 min-w-0 bg-transparent text-lg font-bold outline-none"
-          />
-          <span className="shrink-0 text-xs font-bold text-muted-foreground">TAC Points</span>
-        </div>
-        <div className="mt-3 grid grid-cols-4 gap-2">
-          {[100, 500, 1000].map((value) => (
-            <Button
-              key={value}
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                setAmount(Math.min(value, balance));
-                setMessage("");
-              }}
-            >
-              {value.toLocaleString()}
-            </Button>
-          ))}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setAmount(balance);
-              setMessage("");
-            }}
-          >
-            Max
-          </Button>
-        </div>
-        {!user ? (
-          <Button className="mt-5 h-13 w-full text-base" asChild>
-            <Link to="/auth">Sign in to predict</Link>
-          </Button>
-        ) : (
-          <Button
-            className="mt-5 h-13 w-full text-base"
-            disabled={!selectedOutcome || amount < 10 || amount > balance || submitting}
-            onClick={async () => {
-              if (!chosen || submitting) return;
-              setSubmitting(true);
-              const result = await enterMarket({
-                marketId: market.id,
-                outcomeId: chosen.id,
-                amount,
-              });
-              setMessage(
-                result.ok
-                  ? `${amount.toLocaleString()} TAC entered on ${chosen.label}.`
-                  : result.message,
-              );
-              setSubmitting(false);
-            }}
-          >
-            {submitting ? (
-              "Confirming…"
-            ) : message.includes("entered") ? (
-              <>
-                <Check /> Entry placed
-              </>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
+        <article className="min-w-0">
+          <div className="mb-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+            <span>{market.category}</span>
+            {cryptoAsset ? (
+              <MarketCountdown market={market} snapshotTime={feed.updatedAt} />
             ) : (
-              `Confirm ${chosen?.label ?? ""}`
+              <span>{market.closesAt}</span>
             )}
-          </Button>
-        )}
-        {message && (
-          <p
-            role="status"
-            className={cn(
-              "mt-3 text-center text-xs font-semibold",
-              message.includes("entered") ? "text-positive" : "text-destructive",
-            )}
-          >
-            {message}
-          </p>
-        )}
-        <p className="mt-3 flex items-center justify-center gap-1 text-[0.68rem] text-muted-foreground">
-          <ShieldCheck className="size-3.5" /> TAC is deducted immediately after confirmation
-        </p>
-      </section>
-
-      <section className="mt-7 rounded-lg border border-border bg-card p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title inline-flex items-center gap-2">
-            <WalletCards className="size-5" /> Your positions
-          </h2>
-          <span className="text-xs font-bold text-muted-foreground">
-            {userPositions.length} entries
-          </span>
-        </div>
-        {userPositions.length ? (
-          <div className="mt-4 divide-y divide-border">
-            {userPositions.slice(0, 4).map((position) => (
+          </div>
+          <div className="flex items-start gap-3">
+            <MarketIcon market={market} />
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                {cryptoAsset
+                  ? `${cryptoAsset[0]!.toUpperCase()}${cryptoAsset.slice(1)}`
+                  : market.title}
+              </h1>
+              {duration && <p className="mt-1 text-base text-muted-foreground">{duration}</p>}
+            </div>
+          </div>
+          {marketWindowLabel(market) && (
+            <p className="mt-3 text-sm text-muted-foreground">{marketWindowLabel(market)}</p>
+          )}
+          {cryptoAsset ? (
+            <CryptoDetailChart asset={cryptoAsset} initialMinutes={durationMinutes(market) ?? 15} />
+          ) : (
+            <>
               <div
-                key={position.id}
-                className="flex items-center justify-between gap-3 py-3 text-sm"
+                className="mt-7 flex items-center justify-between gap-3 rounded-2xl bg-card/50 p-4"
+                aria-label="Current outcome probabilities"
               >
-                <div>
-                  <p
-                    className={cn(
-                      "font-bold",
-                      /yes|up/i.test(position.outcomeLabel) ? "text-positive" : "text-destructive",
-                    )}
-                  >
-                    {position.outcomeLabel}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {position.amount.toLocaleString()} TAC entered
-                  </p>
-                </div>
-                <p className="font-bold tabular-nums">
-                  {position.potentialReturn.toLocaleString()} TAC
-                </p>
+                {market.outcomes.slice(0, 2).map((o, i) => (
+                  <div key={o.id} className={`min-w-0 flex-1 ${i ? "text-right" : ""}`}>
+                    <p className="text-2xl font-semibold tabular-nums">{o.probability}%</p>
+                    <p className="mt-1 truncate text-sm text-muted-foreground">{o.label}</p>
+                  </div>
+                ))}
+              </div>
+              <ProbabilityHistoryChart key={market.id} market={market} />
+            </>
+          )}
+          <section
+            className={`mt-6 space-y-3 ${market.outcomes.length <= 2 ? "hidden lg:block" : ""}`}
+            aria-label="Market outcomes"
+          >
+            {market.outcomes.map((item, index) => (
+              <button
+                type="button"
+                key={item.id}
+                aria-pressed={chosen?.id === item.id}
+                onClick={() => selectOutcome(item.id)}
+                className={`ios-press flex min-h-16 w-full items-center justify-between gap-4 rounded-xl border px-4 text-left ${chosen?.id === item.id ? "border-primary/50 bg-primary/10" : "border-border bg-card"}`}
+              >
+                <span className="text-sm font-semibold">{item.label}</span>
+                <span
+                  className={`text-xl font-semibold tabular-nums ${index === 0 ? "text-positive" : index === 1 ? "text-destructive" : "text-primary"}`}
+                >
+                  {item.probability}%
+                </span>
+              </button>
+            ))}
+          </section>
+          <MarketDescription key={market.id} text={market.description} />
+          <details className="mt-4 rounded-2xl border border-border/60 bg-card/40 p-4">
+            <summary className="cursor-pointer text-sm font-semibold">Rules</summary>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {market.resolutionCriteria}
+            </p>
+            <a
+              href={market.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary"
+            >
+              Source rules
+              <ArrowUpRight className="size-4" />
+            </a>
+          </details>
+          <section className="mt-7" aria-label="Source statistics">
+            <h2 className="text-xl font-semibold">Statistics</h2>
+            {[
+              { label: "Source volume", value: market.volume },
+              ...(market.volume24h === undefined
+                ? []
+                : [{ label: "24h source volume", value: money(market.volume24h) }]),
+              ...(market.liquidity === undefined
+                ? []
+                : [{ label: "Source liquidity", value: money(market.liquidity) }]),
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-baseline gap-3 py-3 text-sm">
+                <span className="text-muted-foreground">{stat.label}</span>
+                <span className="flex-1 border-b border-dashed border-border" />
+                <span className="tabular-nums">{stat.value}</span>
               </div>
             ))}
+          </section>
+          {related.length > 0 && (
+            <section className="mt-7" aria-label="Related markets">
+              <h2 className="text-xl font-semibold">Related markets</h2>
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                {related.map((m) => (
+                  <Link
+                    key={m.id}
+                    to="/markets/$marketId"
+                    params={{ marketId: m.id }}
+                    className="ios-press w-64 shrink-0 rounded-[24px] border border-border bg-card p-5"
+                  >
+                    <MarketIcon market={m} />
+                    <p className="mt-3 line-clamp-2 text-base font-semibold">{m.title}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      {m.closesAt} · {m.volume} Vol
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          <section className="mt-7" aria-label="Market activity">
+            <h2 className="text-xl font-semibold">Activity</h2>
+            <p className="mt-4 text-sm text-muted-foreground">Trade activity is not available.</p>
+          </section>
+        </article>
+        <div className="hidden min-w-0 lg:block">
+          <PredictionAmountCard
+            key={market.id}
+            market={market}
+            selected={chosen?.id}
+            onSelect={setSelected}
+          />
+        </div>
+      </div>
+      <MobileOutcomeDock market={market} selected={chosen?.id} onSelect={selectOutcome} />
+      <Dialog open={amountOpen} onOpenChange={setAmountOpen}>
+        <DialogContent className="bottom-0 top-auto w-full max-w-md translate-y-0 grid-cols-1 gap-0 overflow-y-auto rounded-t-[28px] rounded-b-none border-b-0 bg-card p-0 shadow-2xl max-h-[calc(100dvh-80px)] sm:rounded-t-[28px] sm:rounded-b-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Amount preview</DialogTitle>
+            <DialogDescription>
+              Select an outcome and amount. Trading is not enabled.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="min-w-0 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-muted-foreground/30" />
+            <PredictionAmountCard market={market} selected={chosen?.id} onSelect={setSelected} />
           </div>
-        ) : (
-          <p className="mt-5 text-sm text-muted-foreground">No position in this market yet.</p>
-        )}
-      </section>
-
-      <section className="mt-7">
-        <h2 className="section-title">Statistics</h2>
-        <dl className="mt-4 divide-y divide-border">
-          <div className="flex justify-between py-3 text-sm">
-            <dt className="text-muted-foreground">Predictors</dt>
-            <dd className="font-bold tabular-nums">
-              {market.source === "Polymarket"
-                ? "Not supplied by provider"
-                : market.participants.toLocaleString()}
-            </dd>
-          </div>
-          <div className="flex justify-between py-3 text-sm">
-            <dt className="text-muted-foreground">Total volume</dt>
-            <dd className="font-bold tabular-nums">{market.volume}</dd>
-          </div>
-          <div className="flex justify-between py-3 text-sm">
-            <dt className="text-muted-foreground">Settlement</dt>
-            <dd className="font-bold">TAC reward if correct</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="mt-7">
-        <h2 className="section-title inline-flex items-center gap-2">
-          <Info className="size-5" /> Rules summary
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">{market.resolutionCriteria}</p>
-        <a
-          href={market.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-primary"
-        >
-          View source on {market.source}
-          <ExternalLink className="size-3.5" />
-        </a>
-      </section>
-
-      <section className="mt-7 pb-8">
-        <h2 className="section-title inline-flex items-center gap-2">
-          <Activity className="size-5" /> Activity
-        </h2>
-        <p className="mt-4 rounded-lg border border-border bg-card p-5 text-sm text-muted-foreground">
-          Live public activity is not supplied by this market feed. Your confirmed TAC entries
-          appear above.
-        </p>
-      </section>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

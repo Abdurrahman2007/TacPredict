@@ -1,63 +1,259 @@
-import { cn } from "@/lib/utils";
-import { memo, useId } from "react";
-
+import { memo, useId, useMemo, useState } from "react";
+import type { PricePoint } from "@/lib/market-data.functions";
+const usd = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 2,
+});
 export const MarketSparkline = memo(function MarketSparkline({
+  points = [],
+  assetLabel = "Crypto",
+  sourceLabel = "CoinGecko",
   compact = false,
-  values,
+  size = "detail",
 }: {
+  points?: PricePoint[];
+  assetLabel?: string;
+  sourceLabel?: string;
   compact?: boolean;
-  values?: number[] | undefined;
+  size?: "detail" | "card";
 }) {
-  const gradientId = useId().replaceAll(":", "");
-  const width = 320;
-  const height = 112;
-  const safeValues = values?.filter(Number.isFinite) ?? [];
-  const min = safeValues.length ? Math.min(...safeValues) : 0;
-  const max = safeValues.length ? Math.max(...safeValues) : 1;
-  const range = Math.max(max - min, 1);
-  const points =
-    safeValues.length > 1
-      ? safeValues
-          .map(
-            (value, index) =>
-              `${(index / (safeValues.length - 1)) * width},${10 + ((max - value) / range) * 88}`,
-          )
-          .join(" ")
-      : "0,37 42,22 88,28 132,20 174,34 218,50 260,72 320,58";
-  const lastPoint = points.split(" ").at(-1)?.split(",") ?? ["320", "58"];
-
-  return (
-    <div
-      className={cn("relative w-full", compact ? "h-16" : "h-28")}
-      role="img"
-      aria-label={
-        safeValues.length ? "Bitcoin price over the last 24 hours" : "Price trend unavailable"
-      }
-    >
-      <svg
-        className="size-full overflow-visible text-chart"
-        viewBox="0 0 320 112"
-        preserveAspectRatio="none"
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
+  const id = useId().replace(/:/g, "");
+  const series = useMemo(
+    () =>
+      [
+        ...new Map(
+          points
+            .filter((p) => Number.isFinite(p.time) && Number.isFinite(p.price) && p.price > 0)
+            .map((p) => [p.time, p]),
+        ).values(),
+      ].sort((a, b) => a.time - b.time),
+    [points],
+  );
+  if (series.length < 1)
+    return (
+      <div
+        className={`grid ${size === "card" ? "h-36" : "h-52"} place-items-center text-sm text-muted-foreground`}
       >
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <line x1="0" y1="55" x2="320" y2="55" className="stroke-border" strokeDasharray="4 5" />
-        <polygon points={`0,112 ${points} 320,112`} fill={`url(#${gradientId})`} />
-        <polyline
-          points={points}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
+        Price unavailable
+      </div>
+    );
+  const first = series[0]!,
+    last = series.at(-1)!,
+    low = Math.min(...series.map((p) => p.price)),
+    high = Math.max(...series.map((p) => p.price));
+  const range = Math.max(high - low, high * 0.00002),
+    floor = low - range * 0.15,
+    ceiling = high + range * 0.2;
+  const y = (price: number) => 12 + (1 - (price - floor) / (ceiling - floor)) * 162;
+  const plotted = series.map((p) => ({
+    x: 8 + ((p.time - first.time) / Math.max(1, last.time - first.time)) * 272,
+    y: y(p.price),
+  }));
+  const line = plotted.map((p) => `${p.x},${p.y}`).join(" "),
+    endpoint = plotted.at(-1)!;
+  const delta = last.price - first.price;
+  const selectedIndex =
+    selectedTime === null
+      ? -1
+      : series.reduce(
+          (best, p, i) =>
+            Math.abs(p.time - selectedTime) < Math.abs(series[best]!.time - selectedTime)
+              ? i
+              : best,
+          0,
+        );
+  const selectedPoint = selectedIndex < 0 ? null : series[selectedIndex]!;
+  const selectedPlot = selectedIndex < 0 ? null : plotted[selectedIndex]!;
+  function inspect(clientX: number, bounds: DOMRect) {
+    const fraction = Math.max(
+      0,
+      Math.min(1, (((clientX - bounds.left) / bounds.width) * 360 - 8) / 272),
+    );
+    const target = first.time + fraction * (last.time - first.time);
+    setSelectedTime(
+      series.reduce(
+        (best, p) => (Math.abs(p.time - target) < Math.abs(best.time - target) ? p : best),
+        first,
+      ).time,
+    );
+  }
+  return (
+    <div>
+      <div className={`${size === "card" ? "mb-3" : "mb-5"} flex items-start gap-5 sm:gap-8`}>
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {series.length === 1
+              ? "First observed"
+              : sourceLabel === "CoinGecko"
+                ? "Reference"
+                : "Start"}
+          </p>
+          <p className="mt-1 text-lg font-semibold tabular-nums sm:text-2xl">
+            {usd.format(first.price)}
+          </p>
+        </div>
+        <div className="border-l border-border pl-5 sm:pl-8">
+          <p className="text-sm text-[#57a6ff]">Now</p>
+          <p className="mt-1 text-lg font-semibold tabular-nums text-[#57a6ff] sm:text-2xl">
+            {usd.format(last.price)}
+          </p>
+          <p
+            className={`mt-1 text-xs tabular-nums ${delta >= 0 ? "text-positive" : "text-destructive"}`}
+          >
+            {delta >= 0 ? "+" : "−"}
+            {usd.format(Math.abs(delta))}
+          </p>
+        </div>
+      </div>
+      <div
+        className="relative cursor-crosshair outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        style={{ touchAction: "pan-y" }}
+        role="slider"
+        tabIndex={0}
+        aria-label={`${assetLabel} chart. Tap or use arrow keys to inspect prices.`}
+        aria-valuemin={0}
+        aria-valuemax={series.length - 1}
+        aria-valuenow={selectedIndex < 0 ? series.length - 1 : selectedIndex}
+        aria-valuetext={`${usd.format(selectedPoint?.price ?? last.price)} at ${new Date(selectedPoint?.time ?? last.time).toISOString().slice(11, 19)} UTC`}
+        onPointerDown={(e) => inspect(e.clientX, e.currentTarget.getBoundingClientRect())}
+        onPointerMove={(e) => {
+          if (e.pointerType === "mouse" || e.buttons === 1)
+            inspect(e.clientX, e.currentTarget.getBoundingClientRect());
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setSelectedTime(null);
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            e.preventDefault();
+            setSelectedTime(
+              series[
+                Math.max(
+                  0,
+                  Math.min(
+                    series.length - 1,
+                    (selectedIndex < 0 ? series.length - 1 : selectedIndex) +
+                      (e.key === "ArrowLeft" ? -1 : 1),
+                  ),
+                )
+              ]!.time,
+            );
+          }
+        }}
+      >
+        <svg
+          className={`w-full overflow-visible ${size === "card" ? "h-36 sm:h-48" : compact ? "h-40" : "h-56 sm:h-64"}`}
+          viewBox="0 0 360 190"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label={`${assetLabel} USD spot price. Start ${usd.format(first.price)}, latest ${usd.format(last.price)}. ${sourceLabel}.`}
+        >
+          <defs>
+            <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#387dff" stopOpacity=".20" />
+              <stop offset="100%" stopColor="#387dff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {[low, (low + high) / 2, high].map((price, i) => (
+            <g key={i}>
+              <line
+                x1="8"
+                x2="350"
+                y1={y(price)}
+                y2={y(price)}
+                stroke="currentColor"
+                className="text-border"
+                strokeDasharray="2 5"
+              />
+            </g>
+          ))}
+          <polygon points={`8,184 ${line} ${endpoint.x},184`} fill={`url(#${id})`} />
+          <line
+            x1="8"
+            x2="280"
+            y1={y(first.price)}
+            y2={y(first.price)}
+            stroke="#9eacb4"
+            strokeOpacity=".45"
+            strokeDasharray="4 5"
+          />
+          <polyline
+            className="price-chart-line"
+            points={line}
+            fill="none"
+            stroke="#387dff"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+        {selectedPoint && selectedPlot && (
+          <>
+            <span
+              className="pointer-events-none absolute inset-y-0 border-l border-dashed border-foreground/40"
+              style={{ left: `${(selectedPlot.x / 360) * 100}%` }}
+            />
+            <span
+              className="pointer-events-none absolute size-2 rounded-full bg-white ring-4 ring-white/10"
+              style={{
+                left: `${(selectedPlot.x / 360) * 100}%`,
+                top: `${(selectedPlot.y / 190) * 100}%`,
+                transform: "translate(-50%,-50%)",
+              }}
+            />
+            <span
+              role="status"
+              className="pointer-events-none absolute z-10 rounded-xl border border-border bg-popover px-3 py-2 text-center text-xs shadow-lg"
+              style={{
+                left: `${Math.max(20, Math.min(78, (selectedPlot.x / 360) * 100))}%`,
+                top: `${Math.max(5, (selectedPlot.y / 190) * 100 - 8)}%`,
+                transform: "translate(-50%,-100%)",
+              }}
+            >
+              <strong className="block tabular-nums">{usd.format(selectedPoint.price)}</strong>
+              <span className="mt-1 block text-muted-foreground">
+                {new Date(selectedPoint.time).toISOString().slice(11, 19)} UTC
+              </span>
+            </span>
+          </>
+        )}
+        {[low, (low + high) / 2, high]
+          .filter((price) => Math.abs(y(price) - endpoint.y) > 18)
+          .map((price, i) => (
+            <span
+              key={i}
+              className="pointer-events-none absolute right-0 text-[11px] tabular-nums text-muted-foreground"
+              style={{ top: `${(y(price) / 190) * 100}%`, transform: "translateY(-50%)" }}
+            >
+              {usd.format(price)}
+            </span>
+          ))}
+        <span
+          className="pointer-events-none absolute size-2 rounded-full bg-[#387dff] ring-[6px] ring-[#387dff]/15"
+          style={{
+            left: `${(endpoint.x / 360) * 100}%`,
+            top: `${(endpoint.y / 190) * 100}%`,
+            transform: "translate(-50%,-50%)",
+          }}
         />
-        <circle cx={lastPoint[0]} cy={lastPoint[1]} r="4" fill="currentColor" />
-      </svg>
+        <span
+          className="pointer-events-none absolute right-0 rounded-full bg-[#2878ee] px-2 py-1 text-[11px] font-medium tabular-nums text-white"
+          style={{ top: `${(endpoint.y / 190) * 100}%`, transform: "translateY(-50%)" }}
+        >
+          {usd.format(last.price)}
+        </span>
+      </div>
+      {series.length === 1 && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          More history will appear as new source samples arrive.
+        </p>
+      )}
+      <div className="mt-2 flex justify-between text-xs tabular-nums text-muted-foreground">
+        <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
+        <span>{sourceLabel === "CoinGecko" ? "USD" : sourceLabel} · UTC</span>
+        <span>{new Date(last.time).toISOString().slice(11, 16)}</span>
+      </div>
     </div>
   );
 });

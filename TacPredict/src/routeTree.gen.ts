@@ -14,6 +14,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as UpDownRouteImport } from './routes/up-down'
+import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
 
@@ -42,6 +45,21 @@ const RewardsRoute = RewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpDownRoute = UpDownRouteImport.update({
+  id: '/up-down',
+  path: '/up-down',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth_/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketsIndexRoute = MarketsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -59,6 +77,9 @@ export interface FileRoutesByFullPath {
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/up-down': typeof UpDownRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
 }
@@ -67,6 +88,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/up-down': typeof UpDownRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets': typeof MarketsIndexRoute
 }
@@ -77,6 +101,9 @@ export interface FileRoutesById {
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/up-down': typeof UpDownRoute
+  '/auth_/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
 }
@@ -88,11 +115,22 @@ export interface FileRouteTypes {
     | '/markets'
     | '/profile'
     | '/rewards'
+    | '/search'
+    | '/up-down'
+    | '/auth/callback'
     | '/markets/$marketId'
     | '/markets/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/profile' | '/rewards' | '/markets/$marketId' | '/markets'
+    | '/'
+    | '/auth'
+    | '/profile'
+    | '/rewards'
+    | '/search'
+    | '/up-down'
+    | '/auth/callback'
+    | '/markets/$marketId'
+    | '/markets'
   id:
     | '__root__'
     | '/'
@@ -100,6 +138,9 @@ export interface FileRouteTypes {
     | '/markets'
     | '/profile'
     | '/rewards'
+    | '/search'
+    | '/up-down'
+    | '/auth_/callback'
     | '/markets/$marketId'
     | '/markets/'
   fileRoutesById: FileRoutesById
@@ -110,6 +151,9 @@ export interface RootRouteChildren {
   MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
+  SearchRoute: typeof SearchRoute
+  UpDownRoute: typeof UpDownRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -149,6 +193,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RewardsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/up-down': {
+      id: '/up-down'
+      path: '/up-down'
+      fullPath: '/up-down'
+      preLoaderRoute: typeof UpDownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth_/callback': {
+      id: '/auth_/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/markets/': {
       id: '/markets/'
       path: '/'
@@ -185,6 +250,9 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
+  SearchRoute: SearchRoute,
+  UpDownRoute: UpDownRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
