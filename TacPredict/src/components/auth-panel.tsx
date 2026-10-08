@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, LogOut, Mail, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, LogOut, Mail, Wallet } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,7 @@ export function AuthPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [chooseWallet, setChooseWallet] = useState(false);
-  const [showEmail, setShowEmail] = useState(false);
+  const verificationStep = !!sentTo || useExistingCode;
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [farcasterBusy, setFarcasterBusy] = useState(false);
   const locked = busy || farcasterBusy;
@@ -105,15 +105,15 @@ export function AuthPanel({
       setResendAt(now + 60_000);
       setMessage("Check your inbox for your six-digit code.");
     });
-  const verifyCode = () =>
+  const verifyCode = (token = code) =>
     attempt(async () => {
-      if (!/^\d{6}$/.test(code)) throw new Error("Enter the six-digit code from your email.");
+      if (!/^\d{6}$/.test(token)) throw new Error("Enter the six-digit code from your email.");
       const target = sentTo || email.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target))
         throw new Error("Enter the email that received this code.");
       const { error } = await supabase.auth.verifyOtp({
         email: target,
-        token: code,
+        token,
         type: "email",
       });
       if (error)
@@ -122,23 +122,85 @@ export function AuthPanel({
       await finish();
     });
 
+  const resetEmailStep = () => {
+    setUseExistingCode(false);
+    setSentTo("");
+    setCode("");
+    setMessage("");
+  };
   const emailForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        void (sentTo || useExistingCode ? verifyCode() : sendCode());
+        void sendCode();
       }}
-      className="space-y-3"
     >
-      {sentTo || useExistingCode ? (
-        <>
+      <label htmlFor="auth-email" className="sr-only">
+        Email address
+      </label>
+      <div className="auth-email-entry">
+        <input
+          id="auth-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          maxLength={254}
+          disabled={locked || !authFeatures.emailOtp}
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Enter your email"
+        />
+        <button
+          type="submit"
+          aria-label="Send verification code"
+          disabled={locked || !authFeatures.emailOtp || !email.trim()}
+          className="auth-email-arrow"
+        >
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+        </button>
+      </div>
+    </form>
+  );
+  if (!user && verificationStep)
+    return (
+      <div className="auth-panel auth-verification bg-[#0f1827] text-white">
+        <button
+          type="button"
+          aria-label="Back to sign in"
+          disabled={locked}
+          onClick={resetEmailStep}
+          className="auth-back"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+        <div className="auth-envelope" aria-hidden="true">
+          <Mail className="size-10" strokeWidth={1.4} />
+        </div>
+        <h1 className="text-center text-2xl font-semibold tracking-tight">Email verification</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-slate-400">
+          Enter the 6-digit verification code
           {sentTo ? (
-            <p className="break-all text-sm text-muted-foreground">
-              Code sent to <span className="text-foreground">{sentTo}</span>
-            </p>
-          ) : (
             <>
-              <label htmlFor="auth-email" className="text-xs text-muted-foreground">
+              {" "}
+              sent to
+              <br />
+              <span className="break-all text-slate-200">{sentTo}</span>
+            </>
+          ) : (
+            " from your email."
+          )}
+        </p>
+        <form
+          className="mt-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void verifyCode();
+          }}
+        >
+          {useExistingCode && (
+            <>
+              <label htmlFor="auth-email" className="sr-only">
                 Email address
               </label>
               <input
@@ -150,115 +212,83 @@ export function AuthPanel({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Email that received the code"
-                className="h-12 w-full min-w-0 rounded-xl border border-input bg-background/60 px-4 outline-none focus:border-primary"
+                className="mb-4 h-11 w-full rounded-full border border-white/30 bg-transparent px-4 text-sm outline-none focus:border-blue-400"
               />
             </>
           )}
-          <label className="sr-only" htmlFor="auth-code">
+          <label htmlFor="auth-code" className="sr-only">
             Six-digit code
           </label>
-          <input
-            id="auth-code"
-            name="code"
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-            value={code}
-            onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
-            placeholder="000000"
-            className="h-16 w-full min-w-0 rounded-2xl border border-input bg-background/60 px-4 text-center text-2xl font-semibold tracking-[.4em] outline-none focus:border-primary"
-          />
-          <p className="text-center text-xs text-muted-foreground">
-            {seconds
-              ? `Expires in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
-              : useExistingCode
-                ? "Codes expire 10 minutes after the original request."
-                : "Request a new code if yours has expired."}
-          </p>
-          <Button
-            type="submit"
-            disabled={locked || code.length !== 6}
-            className="h-12 w-full rounded-xl"
-          >
-            {busy ? "Verifying…" : "Verify & sign in"}
-          </Button>
-          <div className="flex justify-between gap-3 text-xs">
-            <button
-              type="button"
-              className="text-primary"
+          <div className="auth-code-control">
+            <input
+              id="auth-code"
+              name="code"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              required
               disabled={locked}
-              onClick={() => {
-                setUseExistingCode(false);
-                setSentTo("");
-                setCode("");
-                setMessage("");
+              value={code}
+              onChange={(event) => {
+                const token = event.target.value.replace(/\D/g, "").slice(0, 6);
+                setCode(token);
+                if (
+                  token.length === 6 &&
+                  (!useExistingCode || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+                )
+                  void verifyCode(token);
               }}
-            >
-              Change email
-            </button>
-            {sentTo && (
-              <button
-                type="button"
-                className="text-primary disabled:text-muted-foreground"
-                disabled={locked || resendSeconds > 0}
-                onClick={() => void sendCode()}
-              >
-                {resendSeconds ? `Resend in ${resendSeconds}s` : "Resend code"}
-              </button>
-            )}
+            />
+            <div className="auth-code-digits" aria-hidden="true">
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i} className={code.length === i ? "is-current" : ""}>
+                  {code[i] || ""}
+                </span>
+              ))}
+            </div>
           </div>
-        </>
-      ) : (
-        <>
-          <label htmlFor="auth-email" className="text-xs font-medium text-muted-foreground">
-            Email address
-          </label>
-          <input
-            id="auth-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            maxLength={254}
-            disabled={locked || !authFeatures.emailOtp}
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            className="h-12 w-full min-w-0 rounded-xl border border-input bg-background/60 px-4 outline-none focus:border-primary disabled:opacity-50"
-          />
-          <Button
-            type="submit"
-            disabled={locked || !authFeatures.emailOtp}
-            className="h-12 w-full rounded-xl"
-          >
-            <Mail className="size-4" />{" "}
-            {busy
-              ? "Sending…"
-              : authFeatures.emailOtp
-                ? "Send six-digit code"
-                : "Email codes · setup pending"}
-          </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            No password. Codes expire after 10 minutes.
-          </p>
+          {busy && (
+            <p role="status" className="mt-4 flex justify-center gap-2 text-sm text-slate-400">
+              <Loader2 className="size-4 animate-spin" />
+              Verifying…
+            </p>
+          )}
+          {!busy && code.length === 6 && (
+            <button type="submit" className="mt-4 w-full text-sm text-blue-400">
+              Verify & sign in
+            </button>
+          )}
+        </form>
+        {sentTo && (
           <button
             type="button"
-            disabled={locked}
-            onClick={() => {
-              setUseExistingCode(true);
-              setCode("");
-              setMessage("");
-            }}
-            className="block w-full text-center text-xs text-primary"
+            disabled={locked || resendSeconds > 0}
+            onClick={() => void sendCode()}
+            className="mt-5 block w-full text-center text-sm text-blue-400 disabled:text-slate-400"
           >
-            Already have a code?
+            {resendSeconds ? `Resend in ${resendSeconds} seconds` : "Resend code"}
           </button>
-        </>
-      )}
-    </form>
-  );
+        )}
+        <p className="mt-3 text-center text-[11px] text-slate-500">
+          {seconds
+            ? `Code expires in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
+            : "Codes expire 10 minutes after sending."}
+        </p>
+        {message && !message.startsWith("Check your inbox") && (
+          <p
+            role="status"
+            aria-live="polite"
+            className="mt-4 rounded-xl bg-white/5 p-3 text-sm text-slate-300"
+          >
+            {message}
+          </p>
+        )}
+        <div className="mt-7 text-center text-xs text-slate-500">
+          Powered by <span className="font-semibold text-slate-300">TacPredict</span>
+        </div>
+      </div>
+    );
   const signInWallet = (index: number) =>
     void attempt(async () => {
       const wallet = wallets[index];
@@ -268,9 +298,14 @@ export function AuthPanel({
       await finish();
     });
   return (
-    <div className="auth-panel min-w-0 bg-[#0f1827] px-7 pb-8 pt-14 text-white sm:px-11 sm:pt-16">
+    <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-6 pb-6 pt-9 text-white sm:px-8">
       <div className="text-center">
-        <h1 className="text-[36px] font-semibold tracking-[-.025em] sm:text-[40px]">
+        <img
+          src="/brand/tacpredict.svg"
+          alt="TacPredict"
+          className="mx-auto mb-3 size-11 rounded-xl"
+        />
+        <h1 className="text-[28px] font-semibold tracking-[-.025em]">
           {user ? "Your account" : mode === "signup" ? "Create account" : "Sign in"}
         </h1>
       </div>
@@ -300,7 +335,7 @@ export function AuthPanel({
         </div>
       ) : (
         <>
-          <div className="auth-social mt-9 grid grid-cols-4 gap-2">
+          <div className="auth-social mt-6 grid grid-cols-4 gap-2">
             <Button
               aria-label="Continue with Google"
               title={
@@ -370,25 +405,25 @@ export function AuthPanel({
               •••
             </Button>
           </div>
-          <Button
-            variant="outline"
-            className="mt-3 h-14 w-full rounded-full border-[#697180] bg-transparent text-base font-normal hover:bg-white/[.055]"
+          <div className="mt-3">{emailForm}</div>
+          <button
+            type="button"
             disabled={locked}
-            onClick={() => setShowEmail(!showEmail)}
+            onClick={() => {
+              setUseExistingCode(true);
+              setCode("");
+              setMessage("");
+            }}
+            className="mt-2 block w-full text-center text-[11px] text-slate-400 hover:text-white"
           >
-            Continue with Email
-          </Button>
-          {showEmail && (
-            <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4">
-              {emailForm}
-            </div>
-          )}
-          <div className="my-8 flex items-center gap-4 text-xs text-muted-foreground">
+            Already have a code?
+          </button>
+          <div className="my-5 flex items-center gap-4 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-white/25" />
             OR
             <span className="h-px flex-1 bg-white/25" />
           </div>
-          <div className="space-y-3" aria-label="Wallet sign-in methods">
+          <div className="space-y-2.5" aria-label="Wallet sign-in methods">
             <Button
               variant="outline"
               className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
@@ -486,7 +521,7 @@ export function AuthPanel({
           {message}
         </p>
       )}
-      <div className="mt-9 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500">
         Powered by
         <span className="text-sm font-semibold text-slate-300">TacPredict</span>
       </div>

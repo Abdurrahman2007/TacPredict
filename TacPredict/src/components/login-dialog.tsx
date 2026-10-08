@@ -23,7 +23,7 @@ export function LoginDialogProvider({ children }: { children: ReactNode }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           overlayClassName="z-[70] bg-black/70 backdrop-blur-sm"
-          className="login-popup fixed bottom-0 left-0 top-auto z-[80] block max-h-[92dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-t-[30px] border-[#36404e] bg-[#0f1827] p-0 pb-[env(safe-area-inset-bottom)] text-white shadow-2xl sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-[460px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[32px]"
+          className="login-popup fixed bottom-0 left-0 top-auto z-[80] block max-h-[92dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-t-[30px] border-[#36404e] bg-[#0f1827] p-0 pb-[env(safe-area-inset-bottom)] text-white shadow-2xl sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-[400px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[32px]"
         >
           <DialogTitle className="sr-only">TacPredict sign in</DialogTitle>
           <DialogDescription className="sr-only">

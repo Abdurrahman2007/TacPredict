@@ -20,7 +20,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { next } = Route.useSearch();
   return (
-    <section className="mx-auto max-w-[460px] py-4 sm:py-8">
+    <section className="mx-auto max-w-[400px] py-4 sm:py-8">
       <Link to="/" className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground">
         <ArrowLeft className="size-4" />
         Back home

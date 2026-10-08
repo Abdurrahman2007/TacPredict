@@ -618,3 +618,115 @@
     animation: none;
   }
 }
+
+/* Compact sign-in and a dedicated accessible six-digit verification step. */
+.auth-compact .auth-social button,
+.auth-compact [aria-label="Wallet sign-in methods"] > button {
+  height: 48px;
+  font-size: 14px;
+}
+.auth-email-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 49px;
+  padding: 5px 10px 5px 17px;
+  border: 1px solid #697180;
+  border-radius: 999px;
+  transition:
+    border-color 180ms,
+    box-shadow 180ms;
+}
+.auth-email-entry:focus-within {
+  border-color: #568bff;
+  box-shadow: 0 0 0 1px #568bff;
+}
+.auth-email-entry input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  color: white;
+  outline: none;
+  font-size: 14px;
+}
+.auth-email-entry input::placeholder {
+  color: #a6adba;
+}
+.auth-email-arrow {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #364253;
+  color: white;
+}
+.auth-verification {
+  position: relative;
+  padding: 52px 26px 28px;
+}
+.auth-back {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  padding: 5px;
+  color: #d5deeb;
+}
+.auth-envelope {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 64px;
+  margin: 0 auto 23px;
+  border-radius: 18px;
+  color: white;
+  background: linear-gradient(135deg, #48b6ff, #7863ff);
+  box-shadow: 0 10px 35px #476bff20;
+}
+.auth-code-control {
+  position: relative;
+  height: 48px;
+}
+.auth-code-control input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  outline: none;
+  border-radius: 24px;
+  cursor: text;
+}
+.auth-code-digits {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  pointer-events: none;
+}
+.auth-code-digits span {
+  display: grid;
+  place-items: center;
+  height: 48px;
+  min-width: 0;
+  border: 1px solid #697180;
+  border-radius: 999px;
+  background: #303b4c;
+  font-size: 22px;
+  font-weight: 500;
+}
+.auth-code-control:focus-within .is-current {
+  border-color: #729dff;
+  box-shadow: 0 0 0 2px #729dff30;
+}
+@media (max-width: 350px) {
+  .auth-code-digits {
+    gap: 5px;
+  }
+  .auth-verification {
+    padding-inline: 20px;
+  }
+}

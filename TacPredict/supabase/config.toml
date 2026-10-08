@@ -17,3 +17,12 @@ max_frequency = "60s"
 enabled = true
 
 # Google OAuth and SMTP credentials belong in the dashboard, not in this file.
+
+# Code-only branded templates. These local settings must also be applied to hosted Auth.
+[auth.email.template.magic_link]
+subject = "Your TacPredict verification code"
+content_path = "./supabase/templates/verification.html"
+
+[auth.email.template.confirmation]
+subject = "Verify your email — TacPredict"
+content_path = "./supabase/templates/verification.html"
