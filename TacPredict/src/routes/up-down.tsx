@@ -45,7 +45,7 @@ function UpDownPage() {
         </section>
       )}
       <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-        Coinbase spot · Polymarket odds · Trading unavailable
+        CoinGecko prices · Polymarket odds · Trading unavailable
       </p>
     </div>
   );

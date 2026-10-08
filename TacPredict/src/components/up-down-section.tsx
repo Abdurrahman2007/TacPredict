@@ -4,7 +4,7 @@ import { MarketSparkline } from "@/components/market-sparkline";
 import { MarketCountdown } from "@/components/market-countdown";
 import { MarketWindowLabel } from "@/components/market-window-label";
 import { OutcomeRow } from "@/components/outcome-row";
-import { useSpotTicker } from "@/lib/use-spot-ticker";
+import { sourcePriceWindow } from "@/lib/price-window";
 import { durationMinutes, marketDurationLabel, marketWindowLabel } from "@/lib/market-timing";
 import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
 import type { PolymarketFeed } from "@/lib/polymarket.functions";
@@ -19,7 +19,6 @@ export function UpDownSection({
   liveMarkets: PolymarketFeed["cryptoUpDown"];
   detailed?: boolean;
 }) {
-  const { ticks } = useSpotTicker();
   const assets = [
     { key: "bitcoin" as const, name: "Bitcoin", logo: "btc" },
     { key: "ethereum" as const, name: "Ethereum", logo: "eth" },
@@ -49,15 +48,12 @@ export function UpDownSection({
           const market = liveMarkets[asset.key]!,
             duration = marketDurationLabel(market),
             title = `${asset.name} Up or Down${duration ? ` - ${duration}` : ""}`;
-          const observations = [...histories[asset.key], ...(ticks[asset.key] ?? [])].sort(
-              (a, b) => a.time - b.time,
-            ),
+          const observations = [...histories[asset.key]].sort((a, b) => a.time - b.time),
             end = observations.at(-1)?.time ?? Date.parse(crypto.updatedAt),
             minutes = durationMinutes(market) ?? 15;
-          const points = observations.filter(
-            (p) =>
-              p.time >=
-              Math.max(end - Math.min(minutes, 60) * 60000, Date.parse(market.startsAt ?? "") || 0),
+          const points = sourcePriceWindow(
+            observations,
+            Math.max(end - Math.min(minutes, 60) * 60000, Date.parse(market.startsAt ?? "") || 0),
           );
           return (
             <article
@@ -107,6 +103,11 @@ export function UpDownSection({
                       size="card"
                     />
                   </div>
+                  <p className="mt-2 text-[10px] text-muted-foreground">
+                    {crypto.stale
+                      ? "Last available price · refresh delayed"
+                      : "CoinGecko reference price · updates about every minute"}
+                  </p>
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     {market.outcomes.slice(0, 2).map((o, i) => (
                       <Link

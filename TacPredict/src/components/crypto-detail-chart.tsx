@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
-import { useSpotTicker } from "@/lib/use-spot-ticker";
+import { sourcePriceWindow } from "@/lib/price-window";
 import { MarketSparkline } from "@/components/market-sparkline";
 export function CryptoDetailChart({
   asset,
@@ -10,19 +10,22 @@ export function CryptoDetailChart({
   initialMinutes?: number;
 }) {
   const { data } = useQuery(cryptoMarketQueryOptions);
-  const { ticks } = useSpotTicker();
   const minutes = Math.min(Math.max(initialMinutes, 1), 60);
-  const observations = [...(data?.histories[asset] ?? []), ...(ticks[asset] ?? [])].sort(
-      (a, b) => a.time - b.time,
-    ),
+  const observations = [...(data?.histories[asset] ?? [])].sort((a, b) => a.time - b.time),
     last = observations.at(-1)?.time ?? 0;
   return (
     <section className="mt-6" aria-label="Market spot chart">
       <MarketSparkline
-        points={observations.filter((p) => p.time >= last - minutes * 60000)}
+        points={sourcePriceWindow(observations, last - minutes * 60000)}
         assetLabel={asset}
-        sourceLabel="Coinbase"
+        sourceLabel="CoinGecko"
       />
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        CoinGecko reference prices · not a settlement oracle.{" "}
+        {data?.stale
+          ? "Refresh delayed; showing last available data."
+          : "Updates about every minute."}
+      </p>
     </section>
   );
 }

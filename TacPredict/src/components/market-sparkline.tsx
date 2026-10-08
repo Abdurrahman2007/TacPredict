@@ -8,7 +8,7 @@ const usd = new Intl.NumberFormat("en-US", {
 export const MarketSparkline = memo(function MarketSparkline({
   points = [],
   assetLabel = "Crypto",
-  sourceLabel = "Coinbase",
+  sourceLabel = "CoinGecko",
   compact = false,
   size = "detail",
 }: {
@@ -31,7 +31,7 @@ export const MarketSparkline = memo(function MarketSparkline({
       ].sort((a, b) => a.time - b.time),
     [points],
   );
-  if (series.length < 2)
+  if (series.length < 1)
     return (
       <div
         className={`grid ${size === "card" ? "h-36" : "h-52"} place-items-center text-sm text-muted-foreground`}
@@ -83,7 +83,13 @@ export const MarketSparkline = memo(function MarketSparkline({
     <div>
       <div className={`${size === "card" ? "mb-3" : "mb-5"} flex items-start gap-5 sm:gap-8`}>
         <div>
-          <p className="text-sm text-muted-foreground">Start</p>
+          <p className="text-sm text-muted-foreground">
+            {series.length === 1
+              ? "First observed"
+              : sourceLabel === "CoinGecko"
+                ? "Reference"
+                : "Start"}
+          </p>
           <p className="mt-1 text-lg font-semibold tabular-nums sm:text-2xl">
             {usd.format(first.price)}
           </p>
@@ -102,7 +108,8 @@ export const MarketSparkline = memo(function MarketSparkline({
         </div>
       </div>
       <div
-        className="relative outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="relative cursor-crosshair outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        style={{ touchAction: "pan-y" }}
         role="slider"
         tabIndex={0}
         aria-label={`${assetLabel} chart. Tap or use arrow keys to inspect prices.`}
@@ -114,9 +121,6 @@ export const MarketSparkline = memo(function MarketSparkline({
         onPointerMove={(e) => {
           if (e.pointerType === "mouse" || e.buttons === 1)
             inspect(e.clientX, e.currentTarget.getBoundingClientRect());
-        }}
-        onPointerLeave={(e) => {
-          if (e.pointerType === "mouse") setSelectedTime(null);
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") setSelectedTime(null);
@@ -240,6 +244,11 @@ export const MarketSparkline = memo(function MarketSparkline({
           {usd.format(last.price)}
         </span>
       </div>
+      {series.length === 1 && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          More history will appear as new source samples arrive.
+        </p>
+      )}
       <div className="mt-2 flex justify-between text-xs tabular-nums text-muted-foreground">
         <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
         <span>{sourceLabel} · UTC</span>

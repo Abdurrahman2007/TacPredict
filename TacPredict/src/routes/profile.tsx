@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowUpRight,
   Check,
@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Wallet,
   ArrowDownLeft,
-  Gift,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { BASE_NETWORK, formatUsdc, shortAddress } from "@/lib/onchain/base";
+import { LockedRewardCard } from "@/components/locked-reward-card";
+import { AccountCard } from "@/components/account-card";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 
 export const Route = createFileRoute("/profile")({
@@ -132,7 +133,7 @@ function PortfolioPage() {
 
       <div className="mt-4 grid gap-4 ">
         <section
-          className="onchain-balance-card relative overflow-hidden rounded-[28px] border border-white/10 p-5 shadow-[0_20px_60px_-30px_rgba(0,0,0,.6)] sm:p-7"
+          className="relative overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6"
           aria-label="USDC wallet balance"
         >
           <div className="flex items-center justify-between gap-3">
@@ -167,7 +168,7 @@ function PortfolioPage() {
             <button
               type="button"
               onClick={() => setTransfer("Deposit")}
-              className="ios-press group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[22px] border border-white/20 bg-gradient-to-br from-[#c2afff] to-[#9275e5] p-4 text-[#201637] shadow-[0_12px_30px_-14px_rgba(174,143,255,.7)] transition-shadow hover:shadow-[0_12px_35px_-10px_rgba(174,143,255,.65)]"
+              className="ios-press group flex min-h-24 flex-col items-start justify-between gap-3 rounded-[20px] border border-primary/25 bg-primary/10 p-4 text-primary transition-colors hover:bg-primary/15"
             >
               <span className="grid size-9 place-items-center rounded-full bg-white/25">
                 <ArrowDownLeft className="size-5" />
@@ -180,7 +181,7 @@ function PortfolioPage() {
             <button
               type="button"
               onClick={() => setTransfer("Withdraw")}
-              className="ios-press group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[22px] border border-white/15 bg-gradient-to-br from-white/10 to-white/[.025] p-4 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,.06)] transition-colors hover:border-primary/40"
+              className="ios-press group flex min-h-24 flex-col items-start justify-between gap-3 rounded-[20px] border border-border bg-secondary/60 p-4 text-foreground transition-colors hover:border-primary/40"
             >
               <span className="grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
                 <ArrowUpRight className="size-5" />
@@ -213,14 +214,14 @@ function PortfolioPage() {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <section className="rounded-2xl border border-border bg-card p-5">
+        <section className="rounded-[24px] border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">USDC in markets</p>
           <p className="mt-3 text-2xl font-semibold">0</p>
           <p className="mt-2 text-xs text-muted-foreground">
             {connected ? "Preview · Indexer pending" : "Preview · Not connected"}
           </p>
         </section>
-        <section className="rounded-2xl border border-border bg-card p-5">
+        <section className="rounded-[24px] border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Claimable winnings</p>
           <p className="mt-3 text-2xl font-semibold">0</p>
           <p className="mt-2 text-xs text-muted-foreground">
@@ -229,21 +230,7 @@ function PortfolioPage() {
         </section>
       </div>
 
-      <Link
-        to="/rewards"
-        className="ios-press mt-4 flex min-h-20 items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5"
-      >
-        <span className="flex items-center gap-3">
-          <Gift className="size-5 text-primary" />
-          <span>
-            <span className="block font-semibold">Rewards</span>
-            <span className="mt-1 block text-sm text-muted-foreground">
-              Virtual points · 24h rewards
-            </span>
-          </span>
-        </span>
-        <ArrowUpRight className="size-5 shrink-0" />
-      </Link>
+      <LockedRewardCard />
       <Dialog
         open={transfer !== null}
         onOpenChange={(open) => {
@@ -271,14 +258,15 @@ function PortfolioPage() {
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Your connected wallet remains self-custodial. This app does not sign, approve, or
-            transfer tokens.
+            Your connected wallet remains self-custodial. This screen does not request signatures,
+            approvals, or token transfers.
           </p>
           <Button className="h-12 rounded-full" disabled>
             {transfer} unavailable
           </Button>
         </DialogContent>
       </Dialog>
+      <AccountCard />
       <section className="mt-7">
         <div className="flex gap-6 border-b border-border" aria-label="Portfolio views">
           {["Positions", "Activity"].map((item) => (

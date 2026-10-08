@@ -142,6 +142,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_user_reward_tasks: { Args: never; Returns: Json };
       claim_daily_reward: { Args: never; Returns: Json };
       get_tac_promo_status: { Args: never; Returns: Json };
       redeem_tac_promo: { Args: { _code: string }; Returns: Json };

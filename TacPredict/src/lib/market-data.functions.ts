@@ -6,97 +6,22 @@ export type CryptoMarketSnapshot = {
   ethereum: { price: number; change24h: number };
   solana: { price: number; change24h: number };
   histories: Record<"bitcoin" | "ethereum" | "solana", PricePoint[]>;
-  source: "Coinbase";
+  source: "CoinGecko";
+  stale?: boolean;
   updatedAt: string;
 };
 const CACHE_MS = 60_000;
-let cached: { value: CryptoMarketSnapshot; expiresAt: number } | undefined;
-let pending: Promise<CryptoMarketSnapshot> | undefined;
-const numeric = (value: unknown) => {
-  const parsed = typeof value === "string" ? Number(value) : value;
-  return typeof parsed === "number" && Number.isFinite(parsed) ? parsed : 0;
-};
-async function request(path: string): Promise<unknown> {
-  try {
-    const response = await fetch(`https://api.exchange.coinbase.com/products/${path}`, {
-      headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(5000),
-    });
-    return response.ok ? await response.json() : null;
-  } catch {
-    return null;
-  }
-}
-async function snapshot(): Promise<CryptoMarketSnapshot> {
-  const products = [
-    { asset: "bitcoin", pair: "BTC-USD" },
-    { asset: "ethereum", pair: "ETH-USD" },
-    { asset: "solana", pair: "SOL-USD" },
-  ] as const;
-  const now = Date.now();
-  const rows = await Promise.all(
-    products.map(async (product) => {
-      const [rawTicker, candles] = await Promise.all([
-        request(`${product.pair}/ticker`),
-        request(`${product.pair}/candles?granularity=60`),
-      ]);
-      const ticker = rawTicker as { price?: unknown; time?: string } | null;
-      const history: PricePoint[] = [];
-      if (Array.isArray(candles))
-        for (const row of candles) {
-          if (!Array.isArray(row)) continue;
-          // Real closed one-minute candles, timestamped at close.
-          const time = (numeric(row[0]) + 60) * 1000,
-            price = numeric(row[4]);
-          if (time > now - 18000000 && time <= now && price > 0) history.push({ time, price });
-        }
-      const tickerTime = Date.parse(ticker?.time ?? "");
-      if (Number.isFinite(tickerTime) && tickerTime <= Date.now() && numeric(ticker?.price) > 0)
-        history.push({ time: tickerTime, price: numeric(ticker?.price) });
-      const unique = [...new Map(history.map((p) => [p.time, p])).values()].sort(
-        (a, b) => a.time - b.time,
-      );
-      return { asset: product.asset, price: numeric(ticker?.price), history: unique };
-    }),
-  );
-  const btc = rows[0]!,
-    eth = rows[1]!,
-    sol = rows[2]!;
-  const prices = btc.history.map((p) => p.price);
-  return {
-    bitcoin: {
-      price: btc.price,
-      change24h: 0,
-      marketCap: 0,
-      high24h: prices.length ? Math.max(...prices) : 0,
-      low24h: prices.length ? Math.min(...prices) : 0,
-    },
-    ethereum: { price: eth.price, change24h: 0 },
-    solana: { price: sol.price, change24h: 0 },
-    histories: { bitcoin: btc.history, ethereum: eth.history, solana: sol.history },
-    source: "Coinbase",
-    updatedAt: new Date(now).toISOString(),
-  };
-}
 export const getCryptoMarketSnapshot = createServerFn({ method: "GET" }).handler(async () => {
-  if (cached && cached.expiresAt > Date.now()) return cached.value;
-  if (pending) return pending;
-  pending = snapshot()
-    .then((value) => {
-      cached = { value, expiresAt: Date.now() + CACHE_MS };
-      return value;
-    })
-    .finally(() => {
-      pending = undefined;
-    });
-  return pending;
+  const { coingeckoSnapshot } = await import("./coingecko.server");
+  return coingeckoSnapshot();
 });
 export const cryptoMarketQueryOptions = queryOptions({
-  queryKey: ["crypto-market-snapshot"],
+  queryKey: ["crypto-market-snapshot", "coingecko-v1"],
   queryFn: () => getCryptoMarketSnapshot(),
   staleTime: CACHE_MS,
-  gcTime: 10 * CACHE_MS,
-  retry: 0,
+  gcTime: 60 * CACHE_MS,
+  retry: 1,
+  retryDelay: 5_000,
   refetchInterval: CACHE_MS,
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
