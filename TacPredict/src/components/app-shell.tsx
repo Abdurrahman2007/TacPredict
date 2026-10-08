@@ -3,7 +3,7 @@ import { House, LineChart, Wallet, Gift, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { BrandIntro } from "./brand-intro";
-import { ConnectWallet } from "./connect-wallet";
+import { LoginButton } from "./login-dialog";
 const navItems = [
   { to: "/" as const, label: "Home", icon: House },
   { to: "/search" as const, label: "Search", icon: Search },
@@ -39,12 +39,22 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="size-1.5 rounded-full bg-[#527dff]" />
               Base
             </span>
-            <ConnectWallet className="h-10 rounded-xl px-3 text-sm" />
+            <LoginButton />
           </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
         {children}
+        <footer className="mt-8 text-center text-xs text-muted-foreground">
+          <a
+            href="https://www.coingecko.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground"
+          >
+            Price data provided by CoinGecko
+          </a>
+        </footer>
       </main>
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"

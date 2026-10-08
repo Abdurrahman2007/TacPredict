@@ -183,7 +183,10 @@ export function FarcasterSignIn({
           if (!open) cancel();
         }}
       >
-        <DialogContent className="rounded-[28px] border-white/15 bg-[#111b29] text-center">
+        <DialogContent
+          overlayClassName="z-[90]"
+          className="z-[100] rounded-[28px] border-white/15 bg-[#111b29] text-center"
+        >
           <DialogTitle>Sign in with Farcaster</DialogTitle>
           <DialogDescription>
             Scan the QR code or open Farcaster to approve your sign-in.

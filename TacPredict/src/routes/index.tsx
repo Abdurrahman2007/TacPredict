@@ -100,13 +100,12 @@ function HomePage() {
         </p>
       )}
 
-      {crypto && (
-        <UpDownSection
-          crypto={crypto}
-          histories={crypto.histories}
-          liveMarkets={polymarket.cryptoUpDown}
-        />
-      )}
+      <UpDownSection
+        crypto={crypto}
+        histories={crypto?.histories}
+        liveMarkets={polymarket.cryptoUpDown}
+        snapshotTime={polymarket.updatedAt}
+      />
 
       <SportsCarousel markets={feedMarkets} />
 

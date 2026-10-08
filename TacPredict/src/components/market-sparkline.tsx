@@ -251,7 +251,7 @@ export const MarketSparkline = memo(function MarketSparkline({
       )}
       <div className="mt-2 flex justify-between text-xs tabular-nums text-muted-foreground">
         <span>{new Date(first.time).toISOString().slice(11, 16)}</span>
-        <span>{sourceLabel} · UTC</span>
+        <span>{sourceLabel === "CoinGecko" ? "USD" : sourceLabel} · UTC</span>
         <span>{new Date(last.time).toISOString().slice(11, 16)}</span>
       </div>
     </div>

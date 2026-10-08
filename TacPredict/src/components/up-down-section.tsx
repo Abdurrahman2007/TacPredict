@@ -13,11 +13,13 @@ export function UpDownSection({
   histories,
   liveMarkets,
   detailed = false,
+  snapshotTime,
 }: {
-  crypto: CryptoMarketSnapshot;
-  histories: CryptoMarketSnapshot["histories"];
+  crypto?: CryptoMarketSnapshot | undefined;
+  histories?: CryptoMarketSnapshot["histories"] | undefined;
   liveMarkets: PolymarketFeed["cryptoUpDown"];
   detailed?: boolean;
+  snapshotTime?: string;
 }) {
   const assets = [
     { key: "bitcoin" as const, name: "Bitcoin", logo: "btc" },
@@ -48,8 +50,10 @@ export function UpDownSection({
           const market = liveMarkets[asset.key]!,
             duration = marketDurationLabel(market),
             title = `${asset.name} Up or Down${duration ? ` - ${duration}` : ""}`;
-          const observations = [...histories[asset.key]].sort((a, b) => a.time - b.time),
-            end = observations.at(-1)?.time ?? Date.parse(crypto.updatedAt),
+          const observations = [...(histories?.[asset.key] ?? [])].sort((a, b) => a.time - b.time),
+            end =
+              observations.at(-1)?.time ??
+              Date.parse(crypto?.updatedAt ?? snapshotTime ?? "1970-01-01T00:00:00Z"),
             minutes = durationMinutes(market) ?? 15;
           const points = sourcePriceWindow(
             observations,
@@ -79,7 +83,12 @@ export function UpDownSection({
                     {title}
                   </Link>
                 )}
-                <MarketCountdown market={market} snapshotTime={crypto.updatedAt} />
+                <MarketCountdown
+                  market={market}
+                  snapshotTime={
+                    snapshotTime ?? crypto?.updatedAt ?? market.startsAt ?? "1970-01-01T00:00:00Z"
+                  }
+                />
               </div>
               {index === 0 ? (
                 <>
@@ -99,15 +108,13 @@ export function UpDownSection({
                     <MarketSparkline
                       points={points}
                       assetLabel={asset.name}
-                      sourceLabel={crypto.source}
+                      sourceLabel={crypto?.source ?? "CoinGecko"}
                       size="card"
                     />
                   </div>
-                  <p className="mt-2 text-[10px] text-muted-foreground">
-                    {crypto.stale
-                      ? "Last available price · refresh delayed"
-                      : "CoinGecko reference price · updates about every minute"}
-                  </p>
+                  {crypto?.stale && (
+                    <p className="mt-2 text-[10px] text-muted-foreground">Price refresh delayed</p>
+                  )}
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     {market.outcomes.slice(0, 2).map((o, i) => (
                       <Link
@@ -124,6 +131,17 @@ export function UpDownSection({
                 </>
               ) : (
                 <>
+                  <div className="mt-4 flex items-baseline justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">Spot price</span>
+                    <span className="text-base font-semibold tabular-nums text-[#4a9bff]">
+                      {crypto
+                        ? new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          }).format(crypto[asset.key].price)
+                        : "Price temporarily unavailable"}
+                    </span>
+                  </div>
                   <div className="mt-4 space-y-3">
                     {market.outcomes.slice(0, 2).map((o, i) => (
                       <Link

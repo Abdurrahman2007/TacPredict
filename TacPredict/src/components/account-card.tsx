@@ -1,10 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { useLoginDialog } from "@/components/login-dialog";
 import { useEffect, useState } from "react";
 import { LogOut, UserRound } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 export function AccountCard() {
+  const showLogin = useLoginDialog();
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -53,7 +54,7 @@ export function AccountCard() {
               : user?.email ||
                 (user
                   ? "Wallet account · separate from your USDC connection"
-                  : "Sign in for your TAC rewards. Your wallet stays separate.")}
+                  : "Sign in to track your rewards and predictions.")}
           </p>
         </div>
       </div>
@@ -74,13 +75,12 @@ export function AccountCard() {
             Sign out
           </Button>
         ) : (
-          <Link
-            to="/auth"
-            search={{ next: "/profile" }}
+          <button
+            onClick={() => showLogin("/profile")}
             className="mt-4 inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
           >
             Sign in
-          </Link>
+          </button>
         ))}
       {message && (
         <p role="status" className="mt-3 text-xs text-muted-foreground">

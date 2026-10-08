@@ -1,15 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  ArrowUpRight,
-  Check,
-  Gift,
-  LockKeyhole,
-  ShieldCheck,
-  UserRound,
-  Wallet,
-  LineChart,
-} from "lucide-react";
+import { ArrowUpRight, Check, Gift, LockKeyhole, UserRound, Wallet, LineChart } from "lucide-react";
+import { useLoginDialog } from "@/components/login-dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRewardTasks } from "@/lib/use-reward-tasks";
@@ -29,6 +21,7 @@ export const Route = createFileRoute("/rewards")({
   component: RewardsPage,
 });
 function RewardsPage() {
+  const showLogin = useLoginDialog();
   const { user, ready, data, isError, isFetching, refetch } = useRewardTasks();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -96,7 +89,7 @@ function RewardsPage() {
           Welcome tasks
         </span>
       </div>
-      <section className="mt-5 rounded-[26px] border border-border bg-card p-5 sm:p-7">
+      <section className="mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#222c37] via-card to-[#222332] p-6 sm:p-8">
         <div className="flex items-center justify-between">
           <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
             <Gift className="size-6" />
@@ -132,7 +125,7 @@ function RewardsPage() {
         </p>
       </section>
       <div className="mb-3 mt-7 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Your tasks</h2>
+        <h2 className="text-lg font-semibold">Your reward journey</h2>
         <button
           className="min-h-10 text-xs text-primary disabled:text-muted-foreground"
           disabled={!user || isFetching}
@@ -147,21 +140,33 @@ function RewardsPage() {
           Task progress is temporarily unavailable. No completion has been assumed.
         </p>
       )}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {tasks.map((task) => (
-          <section key={task.kind} className="rounded-[24px] border border-border bg-card p-5">
+      <div className="overflow-hidden rounded-[26px] border border-border bg-card px-5 sm:px-7">
+        {tasks.map((task, index) => (
+          <section
+            key={task.kind}
+            className="relative border-b border-border/60 py-6 last:border-b-0"
+          >
             <div className="flex items-start gap-3">
               <span
-                className={`grid size-10 shrink-0 place-items-center rounded-xl ${task.done ? "bg-emerald-400/10 text-emerald-400" : "bg-secondary text-muted-foreground"}`}
+                className={`grid size-10 shrink-0 place-items-center rounded-full ${task.done ? "bg-emerald-400/10 text-emerald-400" : "bg-secondary text-muted-foreground"}`}
               >
-                {task.done ? <Check className="size-5" /> : <task.icon className="size-5" />}
+                {task.done ? (
+                  <Check className="size-5" />
+                ) : (
+                  <span className="text-base font-semibold">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                )}
               </span>
               <div className="min-w-0">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-primary">
+                  Step {index + 1}
+                </p>
                 <h3 className="text-base font-semibold">{task.title}</h3>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{task.description}</p>
               </div>
             </div>
-            <div className="mt-4 flex min-h-10 flex-wrap items-center justify-between gap-2">
+            <div className="ml-[52px] mt-3 flex min-h-10 flex-wrap items-center justify-between gap-2">
               <span
                 className={`text-xs font-medium ${task.done ? "text-emerald-400" : "text-muted-foreground"}`}
               >
@@ -170,13 +175,12 @@ function RewardsPage() {
               {task.done ? (
                 <span className="text-xs text-emerald-400">Complete</span>
               ) : task.kind === "account" || !user ? (
-                <Link
-                  to="/auth"
-                  search={{ next: "/rewards" }}
+                <button
+                  onClick={() => showLogin("/rewards")}
                   className="text-xs font-semibold text-primary"
                 >
                   Sign in <ArrowUpRight className="inline size-3.5" />
-                </Link>
+                </button>
               ) : task.kind === "x" ? (
                 <Button
                   variant="outline"
@@ -200,15 +204,15 @@ function RewardsPage() {
           {message}
         </p>
       )}
-      <section className="mt-5 flex items-start gap-3 rounded-2xl border border-border p-4">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-        <p className="text-xs leading-6 text-muted-foreground">
-          Account and X tasks are verified against your Supabase identity. Deposit and prediction
-          tasks require the future contract/indexer integration; they will not be marked complete
-          from a click, wallet balance, or client claim. Reward credits cannot be withdrawn,
-          transferred or used for predictions. Future withdrawals require a separate funded release.
+      <details className="mt-5 rounded-2xl border border-border px-5 py-4 text-xs text-muted-foreground">
+        <summary className="cursor-pointer font-medium text-foreground">Reward details</summary>
+        <p className="mt-3 leading-6">
+          Complete all four verified steps to qualify for 15 USDC in locked promotional credit. This
+          credit is separate from your available balance and cannot currently be spent, transferred
+          or withdrawn. Deposits and predictions require the contract/indexer integration; clicks
+          alone never complete tasks. Any future withdrawals require a separately funded release.
         </p>
-      </section>
+      </details>
     </div>
   );
 }

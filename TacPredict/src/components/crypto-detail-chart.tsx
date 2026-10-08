@@ -20,12 +20,11 @@ export function CryptoDetailChart({
         assetLabel={asset}
         sourceLabel="CoinGecko"
       />
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        CoinGecko reference prices · not a settlement oracle.{" "}
-        {data?.stale
-          ? "Refresh delayed; showing last available data."
-          : "Updates about every minute."}
-      </p>
+      {data?.stale && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Price refresh delayed · showing last available data
+        </p>
+      )}
     </section>
   );
 }

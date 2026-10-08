@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { BASE_NETWORK, formatUsdc, shortAddress } from "@/lib/onchain/base";
 import { LockedRewardCard } from "@/components/locked-reward-card";
+import { ConnectWallet } from "@/components/connect-wallet";
 import { AccountCard } from "@/components/account-card";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 
@@ -68,6 +69,11 @@ function PortfolioPage() {
         </div>
       </div>
 
+      {!connected && (
+        <div className="mt-4">
+          <ConnectWallet className="h-10 rounded-full" />
+        </div>
+      )}
       {connected && (
         <section
           className="onchain-wallet-bar mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4"
