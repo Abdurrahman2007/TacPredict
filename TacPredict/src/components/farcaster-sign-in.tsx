@@ -8,12 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 export function FarcasterSignIn({
   disabled,
   compact = false,
+  walletRow = false,
   onBusyChange,
   onSuccess,
   onError,
 }: {
   disabled: boolean;
   compact?: boolean;
+  walletRow?: boolean;
   onBusyChange?: (busy: boolean) => void;
   onSuccess: () => Promise<void>;
   onError: (message: string) => void;
@@ -154,29 +156,40 @@ export function FarcasterSignIn({
     }
   };
   return (
-    <div className={compact ? "min-w-0" : "mt-3"}>
+    <div className={compact || walletRow ? "min-w-0" : "mt-3"}>
       <Button
         variant="outline"
         aria-label="Continue with Farcaster"
         className={
-          compact
-            ? "h-14 w-full rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
-            : "h-12 w-full rounded-full"
+          walletRow
+            ? "h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
+            : compact
+              ? "h-14 w-full rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
+              : "h-12 w-full rounded-full"
         }
         disabled={disabled || busy}
         onClick={() => void start()}
       >
-        <span aria-hidden="true" className="text-2xl font-bold text-white">
-          <svg viewBox="0 0 24 24" className="size-6" fill="currentColor">
-            <path d="M4 2h16v3h2v3h-2v12h2v2h-7v-2h2v-8a5 5 0 0 0-10 0v8h2v2H2v-2h2V8H2V5h2V2Z" />
-          </svg>
-        </span>
-        {compact ? (
-          <span className="sr-only">Farcaster</span>
-        ) : busy ? (
-          "Waiting…"
+        {walletRow ? (
+          <>
+            <span>Farcaster</span>
+            <img
+              src="/brand/providers/farcaster.svg"
+              className="size-7 rounded-lg bg-[#855DCD] p-1"
+              alt=""
+            />
+          </>
         ) : (
-          "Continue with Farcaster"
+          <>
+            <img src="/brand/providers/farcaster.svg" className="size-6" alt="" />
+            {compact ? (
+              <span className="sr-only">Farcaster</span>
+            ) : busy ? (
+              "Waiting…"
+            ) : (
+              "Continue with Farcaster"
+            )}
+          </>
         )}
       </Button>
       <Dialog

@@ -38,7 +38,7 @@ BEGIN
  IF _uid IS NULL THEN RETURN jsonb_build_object('ok',false,'message','Sign in first.'); END IF;
  SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id=_uid) INTO _account;
  -- Verified OAuth identity, never a client-supplied username or user_metadata flag.
- SELECT EXISTS(SELECT 1 FROM auth.identities WHERE user_id=_uid AND provider='twitter') INTO _x;
+ SELECT EXISTS(SELECT 1 FROM auth.identities WHERE user_id=_uid AND provider IN ('x','twitter')) INTO _x;
  SELECT coalesce(sum(amount_usdc) FILTER (WHERE event_kind='deposit'),0),count(*) FILTER (WHERE event_kind='prediction')
  INTO _deposits,_predictions FROM public.verified_usdc_events WHERE user_id=_uid;
  _qualified:=_account AND _x AND _deposits>=5 AND _predictions>=4;

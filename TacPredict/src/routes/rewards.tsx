@@ -72,7 +72,7 @@ function RewardsPage() {
     try {
       sessionStorage.setItem("tac-auth-next", "/rewards");
       const { error } = await supabase.auth.linkIdentity({
-        provider: "twitter",
+        provider: authFeatures.xProvider,
         options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) throw error;

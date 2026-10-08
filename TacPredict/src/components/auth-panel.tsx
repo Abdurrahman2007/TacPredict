@@ -19,7 +19,7 @@ export function AuthPanel({
 }) {
   const authFeatures = useAuthFeatures();
   const navigate = useNavigate();
-  const { wallets } = useBaseWallet();
+  const { wallets, connect } = useBaseWallet();
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -75,7 +75,7 @@ export function AuthPanel({
         /rate|too many|seconds/i.test(raw)
           ? "Too many requests. Please wait before trying again."
           : /email.*not.*authorized|smtp|sending.*email/i.test(raw)
-            ? "Email delivery is not ready yet. Please use wallet sign-in or try later."
+            ? "Email delivery failed. Check the project’s SMTP sender/template configuration, or try Google or wallet sign-in."
             : raw.slice(0, 240),
       );
     } finally {
@@ -92,7 +92,7 @@ export function AuthPanel({
         throw new Error("Enter a valid email address.");
       const { error } = await supabase.auth.signInWithOtp({
         email: target,
-        options: { shouldCreateUser: mode === "signup" },
+        options: { shouldCreateUser: true },
       });
       if (error) throw error;
       const now = Date.now();
@@ -223,6 +223,7 @@ export function AuthPanel({
       const wallet = wallets[index];
       if (!wallet) throw new Error("Choose an installed wallet.");
       await signInWithEthereumWallet(wallet.provider);
+      await connect(wallet);
       await finish();
     });
   return (
@@ -297,7 +298,7 @@ export function AuthPanel({
                 void attempt(async () => {
                   sessionStorage.setItem("tac-auth-next", safeAuthNext(next));
                   const { error } = await supabase.auth.signInWithOAuth({
-                    provider: "twitter",
+                    provider: authFeatures.xProvider,
                     options: { redirectTo: `${window.location.origin}/auth/callback` },
                   });
                   if (error) throw error;
@@ -347,38 +348,38 @@ export function AuthPanel({
             <span className="h-px flex-1 bg-white/25" />
           </div>
           <div className="space-y-3" aria-label="Wallet sign-in methods">
-            {[
-              { name: "MetaMask", key: "metamask" },
-              { name: "Trust Wallet", key: "trust" },
-              { name: "Argent", key: "argent" },
-            ].map((brand) => {
-              const index = wallets.findIndex((w) => w.name.toLowerCase().includes(brand.key));
-              return (
-                <Button
-                  key={brand.key}
-                  variant="outline"
-                  className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
-                  disabled={locked}
-                  onClick={() =>
-                    index >= 0
-                      ? signInWallet(index)
-                      : setMessage(
-                          `Open TacPredict in ${brand.name}’s browser or install its Ethereum wallet extension to sign in.`,
-                        )
-                  }
-                >
-                  <span>{brand.name}</span>
-                  <span className="flex items-center gap-2">
-                    {index >= 0 && (
-                      <span className="rounded-md border border-blue-400 px-2 py-1 text-[10px] text-blue-400">
-                        Installed
-                      </span>
-                    )}
-                    <img src={`/brand/wallets/${brand.key}.svg`} alt="" className="size-7" />
-                  </span>
-                </Button>
-              );
-            })}
+            <Button
+              variant="outline"
+              className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
+              disabled={locked}
+              onClick={() =>
+                void attempt(async () => {
+                  const installed = wallets.find((w) => /coinbase/i.test(w.name));
+                  const provider =
+                    installed?.provider ??
+                    (await import("@/lib/onchain/coinbase-auth").then((m) =>
+                      m.getCoinbaseAuthProvider(),
+                    ));
+                  if (!provider)
+                    throw new Error("Coinbase Wallet is unavailable. Please try again.");
+                  await signInWithEthereumWallet(provider);
+                  await connect(
+                    installed ?? { id: "coinbase-sdk", name: "Coinbase Wallet", provider },
+                  );
+                  await finish();
+                })
+              }
+            >
+              <span>Coinbase Wallet</span>
+              <img src="/brand/providers/coinbase.svg" className="size-7 rounded-lg" alt="" />
+            </Button>
+            <FarcasterSignIn
+              disabled={busy}
+              onBusyChange={setFarcasterBusy}
+              onSuccess={finish}
+              onError={setMessage}
+              walletRow
+            />
             {chooseWallet &&
               wallets.map((wallet, index) => (
                 <Button
@@ -392,29 +393,31 @@ export function AuthPanel({
                   <span className="text-xs text-blue-400">Installed</span>
                 </Button>
               ))}
-            <Button
-              variant="outline"
-              className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
-              disabled={locked}
-              onClick={() => {
-                setChooseWallet(!chooseWallet);
-                if (!wallets.length)
-                  setMessage(
-                    "Open TacPredict in MetaMask/Trust Wallet’s browser, or install a compatible Ethereum wallet. WalletConnect QR is not configured yet.",
-                  );
-              }}
-            >
-              <span>
-                {wallets.length
-                  ? chooseWallet
-                    ? "Show fewer wallets"
-                    : "All wallets"
-                  : "All wallets"}
-              </span>
-              <span className="rounded-full border border-primary/60 px-2 py-0.5 text-xs text-primary">
-                {wallets.length || <Wallet className="size-4" />}
-              </span>
-            </Button>
+            {wallets.length > 0 && (
+              <Button
+                variant="outline"
+                className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
+                disabled={locked}
+                onClick={() => {
+                  setChooseWallet(!chooseWallet);
+                  if (!wallets.length)
+                    setMessage(
+                      "Open TacPredict in MetaMask/Trust Wallet’s browser, or install a compatible Ethereum wallet. WalletConnect QR is not configured yet.",
+                    );
+                }}
+              >
+                <span>
+                  {wallets.length
+                    ? chooseWallet
+                      ? "Show fewer wallets"
+                      : "All wallets"
+                    : "All wallets"}
+                </span>
+                <span className="rounded-full border border-primary/60 px-2 py-0.5 text-xs text-primary">
+                  {wallets.length || <Wallet className="size-4" />}
+                </span>
+              </Button>
+            )}
           </div>
           <p className="mt-5 text-center text-xs text-slate-400">
             {mode === "signin" ? "New here? " : "Already have an account? "}

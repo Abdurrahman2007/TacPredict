@@ -1,0 +1,1 @@
+Farcaster symbol extracted from the official Farcaster documentation header: https://docs.farcaster.xyz/ . Coinbase Wallet SVG from the official @coinbase/wallet-sdk 4.4.0 wallet-logo export (https://github.com/coinbase/coinbase-wallet-sdk). Provider marks identify actual supported login services, not sponsorship.
