@@ -4,28 +4,33 @@ import { getWalletLinkChallenge, proveWalletLink } from "@/lib/protocol/wallet-l
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Layers, ShieldCheck, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
+import { useProtocolUser } from "@/lib/protocol/use-auth-user";
+import { useLoginDialog } from "@/components/login-dialog";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { atomicDecimal } from "@/lib/protocol/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { claimPosition } from "@/lib/protocol/execution";
 export function NativePortfolio({ tab }: { tab: string }) {
   const q = useNativePortfolio(),
+    auth = useProtocolUser(),
+    login = useLoginDialog(),
     wallet = useBaseWallet(),
     feed = useQuery(nativeMarketFeedQueryOptions);
   const [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
-  const positions = q.data?.positions ?? [];
-  const activity = positions.filter(
-    (p) => p.positionStatus !== "OPEN" || BigInt(p.sharesAtomic) > 0n,
-  );
+  const positions = (q.data?.positions ?? []).filter((p) => p.chainId === 8453);
   async function claim(p: (typeof positions)[number]) {
     const d = feed.data?.deployments.find((d) => d.chainId === p.chainId);
     if (!d) return;
     setBusy(true);
+    setNotice("");
     try {
       const hash = await claimPosition(wallet, d, p.onchainId, p.status === "VOID");
-      setNotice(`Claim confirmed: ${hash}. Finalized indexer will update your portfolio.`);
+      setNotice(
+        `Transaction confirmed: ${hash}. Your portfolio updates after indexer finalization.`,
+      );
       await wallet.refresh();
       await q.refetch();
     } catch (e) {
@@ -35,8 +40,9 @@ export function NativePortfolio({ tab }: { tab: string }) {
     }
   }
   async function linkWallet() {
-    if (!wallet.provider || !wallet.address) return;
+    if (!wallet.provider || !wallet.address || !auth.user) return;
     setBusy(true);
+    setNotice("");
     try {
       const c = await getWalletLinkChallenge({ data: { address: wallet.address } });
       const client = createWalletClient({
@@ -46,92 +52,189 @@ export function NativePortfolio({ tab }: { tab: string }) {
       });
       const signature = await client.signMessage({ message: c.message });
       await proveWalletLink({ data: { id: c.id, signature } });
-      setNotice("Wallet ownership verified. Portfolio linked to your account.");
+      setNotice("Wallet ownership verified. Positions are linked to your account.");
       await q.refetch();
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : "Linking failed.");
+      setNotice(e instanceof Error ? e.message : "Wallet verification failed.");
     } finally {
       setBusy(false);
     }
   }
+  const activity = q.data?.activity;
   return (
     <div className="mt-4 space-y-3">
-      {q.isError ? (
-        <p
-          role="alert"
-          className="rounded-2xl border border-border p-5 text-sm text-muted-foreground"
-        >
-          Native portfolio data unavailable. No estimated balance is substituted.
-        </p>
+      {!auth.ready || (auth.user && q.isPending) ? (
+        <div className="finance-card space-y-4" aria-label="Loading portfolio" aria-busy="true">
+          <div className="h-4 w-2/3 rounded bg-secondary" />
+          <div className="h-3 w-1/2 rounded bg-secondary" />
+          <div className="h-11 rounded bg-secondary" />
+        </div>
+      ) : q.isError ? (
+        <div role="alert" className="finance-card">
+          <h3 className="text-sm font-semibold">Positions unavailable</h3>
+          <p className="mt-2 text-xs leading-6 text-muted-foreground">
+            Finalized data could not be loaded. No estimate is substituted.
+          </p>
+          <button className="finance-pill mt-4" onClick={() => void q.refetch()}>
+            Retry
+            <RefreshCw size={14} />
+          </button>
+        </div>
       ) : !q.data?.walletLinked ? (
-        <p className="rounded-2xl border border-dashed border-border bg-card/40 p-5 text-sm text-muted-foreground">
-          Sign in with a verified wallet identity to link indexed on-chain positions. Google/X/email
-          accounts need a separate wallet-ownership proof; a connected address alone is not proof.
-        </p>
-      ) : !(tab === "Activity" ? activity : positions).length ? (
-        <p className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-          No indexed on-chain positions yet. Contracts and markets must launch before real trading.
-        </p>
-      ) : (
-        (tab === "Activity" ? activity : positions).map((p) => (
-          <article key={p.id} className="rounded-2xl border border-border bg-card p-4">
-            <Link
-              to="/markets/$marketId"
-              params={{ marketId: p.marketId }}
-              className="font-semibold"
+        <div className="finance-card text-center">
+          <span className="finance-icon mx-auto">
+            <ShieldCheck size={22} />
+          </span>
+          <h3 className="mt-4 font-semibold">Your positions, privately linked</h3>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
+            Sign in and prove wallet ownership to load your finalized positions. Connecting an
+            address alone does not authorize account access.
+          </p>
+          {!auth.user ? (
+            <button
+              className="finance-pill finance-pill-primary mt-5"
+              onClick={() => login("/profile")}
             >
-              {p.title}
-            </Link>
-            <p className="mt-2 text-sm">
-              {p.outcome} · {atomicDecimal(p.sharesAtomic)} shares
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {p.positionStatus} · Last-trade value{" "}
-              {p.valueAtomic === null ? "unavailable" : `${atomicDecimal(p.valueAtomic)} USDC`} ·
-              Claimable {atomicDecimal(p.claimableAtomic)} USDC
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              P&amp;L unavailable until verified cost basis is indexed.
+              Sign in to your account
+              <ArrowUpRight size={15} />
+            </button>
+          ) : wallet.address ? (
+            <button className="finance-pill mt-5" disabled={busy} onClick={() => void linkWallet()}>
+              {busy ? "Verifying…" : "Verify wallet ownership"}
+              <ShieldCheck size={15} />
+            </button>
+          ) : (
+            <p className="mt-4 text-xs text-primary">Connect your wallet above to continue.</p>
+          )}
+        </div>
+      ) : tab === "Activity" ? (
+        activity === null ? (
+          <div role="status" className="finance-inline-alert">
+            Finalized activity is unavailable. Try refreshing your portfolio.
+          </div>
+        ) : !activity?.length ? (
+          <EmptyState
+            title="No finalized activity yet"
+            description="Settled buys, sells and redemptions will appear here with their Base transaction."
+          />
+        ) : (
+          activity.map((a) => (
+            <article key={`${a.kind}-${a.id}`} className="finance-card !p-4">
+              <div className="flex flex-wrap justify-between items-start gap-2">
+                <div>
+                  <p className="text-sm font-semibold">{a.kind}</p>
+                  <Link
+                    to="/markets/$marketId"
+                    params={{ marketId: a.marketId }}
+                    className="mt-1 block text-xs text-muted-foreground"
+                  >
+                    {a.title}
+                  </Link>
+                </div>
+                <p className="text-sm tabular-nums">{atomicDecimal(a.amountAtomic)} USDC</p>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-muted-foreground">
+                  {new Date(a.timestamp).toLocaleDateString()} · Finalized
+                </span>
+                <a
+                  className="inline-flex min-h-11 items-center gap-1 text-xs text-primary"
+                  href={`https://basescan.org/tx/${a.txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Transaction
+                  <ArrowUpRight size={13} />
+                </a>
+              </div>
+            </article>
+          ))
+        )
+      ) : !positions.length ? (
+        <EmptyState
+          title="No positions yet"
+          description="Your native Base prediction positions will appear here after finalized activity is indexed."
+        />
+      ) : (
+        positions.map((p) => (
+          <article key={p.id} className="finance-card !p-4 sm:!p-5">
+            <div className="flex items-start justify-between gap-3">
+              <Link
+                to="/markets/$marketId"
+                params={{ marketId: p.marketId }}
+                className="text-sm font-semibold leading-6"
+              >
+                {p.title}
+              </Link>
+              <span className="finance-badge shrink-0">
+                {BigInt(p.claimableAtomic) > 0n ? "Claimable" : p.positionStatus}
+              </span>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-xs">
+              <div>
+                <p className="text-muted-foreground">Outcome · Shares</p>
+                <p className="mt-1">
+                  {p.outcome} · {atomicDecimal(p.sharesAtomic)}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Last-trade value</p>
+                <p className="mt-1 tabular-nums">
+                  {p.valueAtomic === null ? "—" : `${atomicDecimal(p.valueAtomic)} USDC`}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Claimable</p>
+                <p className="mt-1 tabular-nums">{atomicDecimal(p.claimableAtomic)} USDC</p>
+              </div>
+            </div>
+            <p className="mt-4 text-[11px] text-muted-foreground">
+              P&amp;L — · Cost basis not yet indexed
             </p>
             {BigInt(p.claimableAtomic) > 0n && (
-              <button
-                disabled={
-                  busy ||
-                  !feed.data?.deployments.some(
-                    (d) => d.chainId === p.chainId && d.tradingEnabled,
-                  ) ||
-                  wallet.address?.toLowerCase() !== p.wallet
-                }
-                onClick={() => void claim(p)}
-                className="mt-3 min-h-11 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-40"
-              >
-                {p.status === "VOID" ? "Redeem void shares" : "Claim USDC"}
-              </button>
+              <div className="mt-4">
+                <button
+                  className="finance-pill finance-pill-primary"
+                  disabled={
+                    busy ||
+                    !feed.data?.deployments.some((d) => d.chainId === p.chainId) ||
+                    wallet.address?.toLowerCase() !== p.wallet ||
+                    wallet.chainId !== p.chainId
+                  }
+                  onClick={() => void claim(p)}
+                >
+                  {busy ? "Processing…" : p.status === "VOID" ? "Redeem void shares" : "Claim USDC"}
+                </button>
+                {wallet.address?.toLowerCase() !== p.wallet && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Connect the position’s owner wallet to claim.
+                  </p>
+                )}
+              </div>
             )}
           </article>
         ))
       )}
-      {tab === "Activity" && q.data?.walletLinked && (
-        <p className="text-xs text-muted-foreground">
-          Position lifecycle above. Transaction activity is available on each market; a full account
-          timeline is not yet indexed.
-        </p>
-      )}
-      {!q.data?.walletLinked && wallet.address && (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void linkWallet()}
-          className="min-h-11 rounded-full border border-primary/40 px-5 text-sm text-primary disabled:opacity-40"
-        >
-          Verify connected wallet ownership
-        </button>
-      )}
       {notice && (
-        <p role="status" className="break-all text-sm text-muted-foreground">
+        <p role="status" className="finance-inline-alert break-all">
           {notice}
         </p>
       )}
+    </div>
+  );
+}
+function EmptyState({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="finance-card !bg-transparent text-center">
+      <span className="finance-icon mx-auto">
+        <Layers size={21} />
+      </span>
+      <h3 className="mt-4 text-sm font-semibold">{title}</h3>
+      <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">{description}</p>
+      <Link to="/markets" className="finance-pill mt-5">
+        Explore markets
+        <ArrowUpRight size={15} />
+      </Link>
     </div>
   );
 }

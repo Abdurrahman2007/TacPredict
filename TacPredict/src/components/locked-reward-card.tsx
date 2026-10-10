@@ -2,21 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { Gift, LockKeyhole, ChevronRight } from "lucide-react";
 import { useRewardTasks } from "@/lib/use-reward-tasks";
 export function LockedRewardCard() {
-  const { user, data } = useRewardTasks();
+  const { user, data, isError } = useRewardTasks();
+  const earned = !isError && data?.eligible && data.locked_credit === 15;
   return (
     <Link
       to="/rewards"
-      className="ios-press mt-4 flex items-center justify-between gap-4 rounded-[24px] border border-border bg-card p-5"
+      className="ios-press flex items-center justify-between gap-4 rounded-[24px] border border-border bg-card p-5"
     >
       <div className="flex min-w-0 items-center gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
           <Gift className="size-5" />
         </span>
         <div>
-          <p className="text-sm font-semibold">Locked reward · 15 USDC</p>
+          <p className="text-sm font-semibold">
+            {earned ? "Earned credit · 15 USDC" : "Welcome reward · 15 USDC"}
+          </p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {data?.eligible
-              ? "Qualified credit · Withdrawals unavailable"
+            {earned
+              ? "Locked promotional credit · Not withdrawable"
               : user
                 ? "Complete welcome tasks to qualify"
                 : "Sign in to start your welcome tasks"}

@@ -36,7 +36,7 @@ node protocol/scripts/indexer.mjs                       # requires verified depl
 node protocol/scripts/matcher.mjs                       # dry-run matching
 node protocol/scripts/matcher.mjs --execute              # explicit relayer execution
 ```
-Test compiler: pinned solc 0.8.30, optimizer 200, viaIR, Shanghai; OpenZeppelin 5.2.0. Ganache is test-only. Fourteen local scenarios cover collateral conservation, pause/merge, signatures/partial fills/cancel/nonces, wrong chain/self-trades, insufficient allowances/atomic rollback, close/evidence source/time, dispute authorization, double claims, timeout bonds, signed matching, secondary void payouts and one-atomic-unit full-set recovery. This is NOT exhaustive fuzzing, an independent audit, or a production security guarantee.
+Test compiler: pinned solc 0.8.30, optimizer 200, viaIR, Shanghai; OpenZeppelin 5.2.0. Ganache is test-only. Fourteen local scenarios cover collateral conservation, pause/merge, signatures/partial fills/cancel/nonces, wrong chain/self-trades, insufficient allowances/atomic rollback, close/evidence source/time, dispute authorization, double claims, timeout bonds, signed matching, secondary void payouts and one-atomic-unit full-set recovery. The UI atomic quote tests also cover amounts larger than JS safe integers, six-decimal enforcement, price bounds and budget ceilings. This is NOT exhaustive fuzzing, an independent audit, or a production security guarantee.
 
 ## Database/main project
 Main Supabase project: `lmqaiqvwcytmgwgwyfwx`. Migrations 0004–0012 are additive native `protocol_*` schema/read APIs; old accounts/data remain intact. Every native table has RLS. Anonymous/authenticated clients cannot write financial read models; only a privileged finalized-event indexer can. Own positions/claims/refunds are scoped to proven wallets. API numeric values are strings to preserve uint256 precision.
@@ -65,3 +65,6 @@ Tables include deployments, immutable metadata, markets/outcomes/sources/rules, 
 - Indexed liquidity is null until an executable depth calculation is implemented. Do not confuse volume with liquidity or open interest.
 - Notifications/audit/event persistence are schema foundations; notification delivery, robust order cancellation synchronization under missed RPC jobs, indexer SQL integration tests, backfills and operational monitoring still need production completion.
 - Testnet deployment script produces a manifest and multisig bootstrap calldata but does not register/activate a deployment in the database. No mainnet deployment/keys/real-money activation has occurred.
+
+### Portfolio / Rewards follow-up
+The frontend separates native wallet USDC, indexed positions/claimable proceeds and locked promotional credit. Migration `202610080013_native_reward_journey.sql` adds private native reward verification and finalized account activity. See `docs/PORTFOLIO_REWARDS_RELEASE.md` for explicit qualification semantics and launch limitations. These UI improvements do not activate deposits or trading and do not mint withdrawable rewards.

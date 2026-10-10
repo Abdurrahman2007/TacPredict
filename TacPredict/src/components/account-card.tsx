@@ -38,10 +38,7 @@ export function AccountCard() {
     };
   }, []);
   return (
-    <section
-      className="mt-4 rounded-2xl border border-border bg-card p-5"
-      aria-label="TacPredict account"
-    >
+    <section className="finance-card" aria-label="TacPredict account">
       <div className="flex items-center gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
           <UserRound className="size-5" />
@@ -77,7 +74,7 @@ export function AccountCard() {
         ) : (
           <button
             onClick={() => showLogin("/profile")}
-            className="mt-4 inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            className="mt-4 inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground"
           >
             Sign in
           </button>

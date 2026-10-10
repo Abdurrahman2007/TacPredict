@@ -1,10 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowUpRight, Check, Gift, LockKeyhole, UserRound, Wallet, LineChart } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Gift,
+  LockKeyhole,
+  RefreshCw,
+  ShieldCheck,
+  ChevronDown,
+} from "lucide-react";
 import { useLoginDialog } from "@/components/login-dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { useRewardTasks } from "@/lib/use-reward-tasks";
+import { rewardView } from "@/lib/reward-view";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthFeatures } from "@/lib/use-auth-features";
 export const Route = createFileRoute("/rewards")({
@@ -14,206 +21,355 @@ export const Route = createFileRoute("/rewards")({
       {
         name: "description",
         content:
-          "Complete verified account tasks to qualify for a locked 15 USDC promotional reward. Withdrawals are unavailable.",
+          "Your verified four-step welcome journey. 15 USDC promotional credit stays locked and separate from wallet funds.",
       },
     ],
   }),
   component: RewardsPage,
 });
 function RewardsPage() {
-  const authFeatures = useAuthFeatures();
-  const showLogin = useLoginDialog();
-  const { user, ready, data, isError, isFetching, refetch } = useRewardTasks();
+  const auth = useAuthFeatures(),
+    login = useLoginDialog();
+  const q = useRewardTasks();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
-  const account = Boolean(data?.account_created),
-    x = Boolean(data?.x_connected),
-    deposit = Math.max(0, Number(data?.deposit_usdc ?? 0)),
-    predictions = Math.max(0, Number(data?.predictions ?? 0));
-  const complete = [account, deposit >= 5, predictions >= 4, x].filter(Boolean).length;
+  const view = rewardView(q.data, Boolean(q.user), q.isError);
+  const checking = !q.ready || (Boolean(q.user) && q.isPending);
+  const live = view.verified && q.data?.launch_ready === true;
   const tasks = [
     {
+      id: "account",
       title: "Create your account",
       description: "Sign in and verify your TacPredict account.",
-      icon: UserRound,
-      done: account,
-      value: account ? "Verified" : "Not completed",
-      kind: "account",
+      detail: view.verified
+        ? view.done[0]
+          ? "Account verified"
+          : "Verification required"
+        : "Sign in to see verified progress",
     },
     {
-      title: "Deposit 5 USDC",
-      description: "Requires a verified deposit into the prediction contract.",
-      icon: Wallet,
-      done: deposit >= 5,
-      value: `${Math.min(deposit, 5).toFixed(2)} / 5 USDC`,
-      kind: "deposit",
+      id: "deposit",
+      title: "Fund 5 USDC",
+      description:
+        "Make one contribution of at least 5 native USDC to real Base prediction collateral.",
+      detail: view.verified
+        ? `${Math.min(q.data!.deposit_usdc, 5).toFixed(2)} / 5 USDC verified`
+        : "— / 5 USDC verified",
     },
     {
+      id: "prediction",
       title: "Make 4 predictions",
-      description: "Four verified, USDC-funded prediction entries.",
-      icon: LineChart,
-      done: predictions >= 4,
-      value: `${Math.min(predictions, 4)} / 4 predictions`,
-      kind: "prediction",
+      description: "Four distinct USDC-funded buy orders, verified after settlement.",
+      detail: view.verified
+        ? `${Math.min(q.data!.predictions, 4)} / 4 predictions verified`
+        : "— / 4 predictions verified",
     },
     {
+      id: "x",
       title: "Connect your X account",
-      description: "Link X securely to this same TacPredict account.",
-      icon: UserRound,
-      done: x,
-      value: x ? "Connected" : "Not connected",
-      kind: "x",
+      description: "Link X to this same account. You can do this before launch.",
+      detail: view.verified
+        ? view.done[3]
+          ? "X identity verified"
+          : "X not connected"
+        : "Identity verification required",
     },
   ];
   async function connectX() {
-    if (!user || busy || !authFeatures.x) return;
+    if (!q.user) {
+      login("/rewards");
+      return;
+    }
+    if (busy || !auth.x) return;
     setBusy(true);
     setMessage("");
     try {
       sessionStorage.setItem("tac-auth-next", "/rewards");
       const { error } = await supabase.auth.linkIdentity({
-        provider: authFeatures.xProvider,
+        provider: auth.xProvider,
         options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) throw error;
     } catch {
-      setMessage("Could not connect X. Please try again.");
+      setMessage("X could not be linked. Your progress has not changed. Please try again.");
     } finally {
       setBusy(false);
     }
   }
-  return (
-    <div className="animate-enter mx-auto max-w-4xl">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="page-title">Rewards</h1>
-        <span className="rounded-full border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          Welcome tasks
-        </span>
-      </div>
-      <section className="mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#222c37] via-card to-[#222332] p-6 sm:p-8">
-        <div className="flex items-center justify-between">
-          <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Gift className="size-6" />
-          </span>
-          <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
-            <LockKeyhole className="size-3.5" />
-            Locked
-          </span>
-        </div>
-        <p className="mt-5 text-sm text-muted-foreground">
-          {data?.eligible ? "Your locked promotional credit" : "Locked reward offer"}
-        </p>
-        <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
-          15<span className="ml-2 text-lg text-muted-foreground">USDC</span>
-        </p>
-        <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
-          Complete all four tasks to qualify. This is a locked promotional reward, not available
-          wallet funds. Withdrawals are not enabled.
-        </p>
-        <div className="mt-5 flex items-center justify-between text-xs">
-          <span>{complete} of 4 tasks completed</span>
-          <span className="text-muted-foreground">{Math.round((complete / 4) * 100)}%</span>
-        </div>
-        <Progress
-          className="mt-3 h-1.5 bg-secondary"
-          value={(complete / 4) * 100}
-          aria-label="Reward task completion"
-        />
-        <p className="mt-4 text-xs text-muted-foreground">
-          {data?.eligible
-            ? "Qualified · 15 USDC credit recorded and locked. Not withdrawable or spendable."
-            : "15 USDC is a reward offer; it is not credited to your available balance."}
-        </p>
-      </section>
-      <div className="mb-3 mt-7 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Your reward journey</h2>
-        <button
-          className="min-h-10 text-xs text-primary disabled:text-muted-foreground"
-          disabled={!user || isFetching}
-          onClick={() => void refetch()}
-        >
-          {isFetching ? "Checking…" : "Refresh progress"}
+  const nextTitle =
+    view.next === "account"
+      ? "Start with your account"
+      : view.next === "x"
+        ? "Connect X while you wait"
+        : view.next === "retry"
+          ? "Check your verified progress"
+          : view.next === "complete"
+            ? view.earned
+              ? "Your credit is recorded"
+              : "Credit confirmation pending"
+            : live
+              ? "Continue your onchain journey"
+              : "Your next step opens at launch";
+  function action(id: string) {
+    if (id === "account")
+      return (
+        <button className="finance-pill finance-pill-primary" onClick={() => login("/rewards")}>
+          Sign in <ArrowRight size={16} />
         </button>
-      </div>
-      {!ready && <p className="mb-3 text-sm text-muted-foreground">Checking your account…</p>}
-      {isError && (
-        <p role="status" className="mb-3 text-sm text-muted-foreground">
-          Task progress is temporarily unavailable. No completion has been assumed.
-        </p>
-      )}
-      <div className="overflow-hidden rounded-[26px] border border-border bg-card px-5 sm:px-7">
-        {tasks.map((task, index) => (
-          <section
-            key={task.kind}
-            className="relative border-b border-border/60 py-6 last:border-b-0"
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={`grid size-10 shrink-0 place-items-center rounded-full ${task.done ? "bg-emerald-400/10 text-emerald-400" : "bg-secondary text-muted-foreground"}`}
-              >
-                {task.done ? (
-                  <Check className="size-5" />
-                ) : (
-                  <span className="text-base font-semibold">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                )}
+      );
+    if (id === "retry")
+      return (
+        <button className="finance-pill" disabled={q.isFetching} onClick={() => void q.refetch()}>
+          Retry verification <RefreshCw size={15} />
+        </button>
+      );
+    if (id === "x")
+      return (
+        <button
+          className="finance-pill finance-pill-primary"
+          disabled={busy || (Boolean(q.user) && !auth.x)}
+          onClick={() => void connectX()}
+        >
+          {busy ? "Connecting…" : auth.x ? "Connect X" : "X unavailable"} <ArrowRight size={16} />
+        </button>
+      );
+    if ((id === "deposit" || id === "prediction") && live)
+      return (
+        <Link className="finance-pill finance-pill-primary" to="/markets">
+          View markets <ArrowRight size={16} />
+        </Link>
+      );
+    return (
+      <span className="finance-badge">
+        <LockKeyhole size={13} />
+        {id === "complete" ? "Non-withdrawable" : "Launch pending"}
+      </span>
+    );
+  }
+  return (
+    <div className="finance-page animate-enter" data-testid="rewards-page">
+      <header className="finance-page-header">
+        <div>
+          <p className="finance-eyebrow">YOUR WELCOME JOURNEY</p>
+          <h1 className="page-title">Rewards</h1>
+        </div>
+        <span className="finance-badge">
+          <Gift size={14} />
+          USDC only
+        </span>
+      </header>
+      <div className="finance-columns">
+        <div className="min-w-0 space-y-5">
+          <section className="finance-card finance-reward-hero" aria-label="Welcome reward">
+            <div className="flex items-start justify-between gap-3">
+              <span className="finance-icon">
+                <Gift size={23} />
               </span>
-              <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.15em] text-primary">
-                  Step {index + 1}
-                </p>
-                <h3 className="text-base font-semibold">{task.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{task.description}</p>
-              </div>
+              <span className="finance-badge text-primary">
+                <LockKeyhole size={13} />
+                {view.earned ? "Earned · locked" : "Locked offer"}
+              </span>
             </div>
-            <div className="ml-[52px] mt-3 flex min-h-10 flex-wrap items-center justify-between gap-2">
-              <span
-                className={`text-xs font-medium ${task.done ? "text-emerald-400" : "text-muted-foreground"}`}
-              >
-                {task.value}
-              </span>
-              {task.done ? (
-                <span className="text-xs text-emerald-400">Complete</span>
-              ) : task.kind === "account" || !user ? (
-                <button
-                  onClick={() => showLogin("/rewards")}
-                  className="text-xs font-semibold text-primary"
-                >
-                  Sign in <ArrowUpRight className="inline size-3.5" />
-                </button>
-              ) : task.kind === "x" ? (
-                <Button
-                  variant="outline"
-                  className="h-9 rounded-full text-xs"
-                  disabled={busy || !authFeatures.x}
-                  onClick={() => void connectX()}
-                >
-                  {busy ? "Connecting…" : authFeatures.x ? "Connect X" : "X setup pending"}
-                </Button>
-              ) : (
-                <span className="rounded-full bg-secondary px-2.5 py-1.5 text-[10px] text-muted-foreground">
-                  Onchain setup pending
+            <p className="mt-6 text-sm text-muted-foreground">
+              {view.earned ? "Your promotional credit" : "Welcome reward"}
+            </p>
+            <p className="finance-balance mt-2">
+              15 <span>USDC</span>
+            </p>
+            <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+              {view.earned
+                ? "All four requirements are verified. Your credit is recorded."
+                : "Four verified steps. One welcome reward."}{" "}
+              <strong className="font-medium text-foreground">
+                Not wallet funds. Not withdrawable.
+              </strong>
+            </p>
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <div className="flex justify-between gap-3 text-xs">
+                <span>
+                  {checking
+                    ? "Checking progress…"
+                    : view.verified
+                      ? `${view.complete} of 4 completed`
+                      : "4 steps to qualify"}
                 </span>
-              )}
+                <span className="text-muted-foreground">
+                  {view.verified ? `${view.complete * 25}%` : "Verified progress"}
+                </span>
+              </div>
+              <div
+                className="mt-3 grid grid-cols-4 gap-2"
+                role="progressbar"
+                aria-label="Verified welcome tasks"
+                aria-valuemin={0}
+                aria-valuemax={4}
+                aria-valuenow={view.verified ? view.complete : undefined}
+                aria-valuetext={
+                  view.verified ? `${view.complete} of 4 verified` : "Verification not available"
+                }
+              >
+                {view.done.map((done, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-colors motion-reduce:transition-none ${done ? "bg-primary" : "bg-white/10"}`}
+                  />
+                ))}
+              </div>
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                {view.earned
+                  ? "15 USDC earned credit · spending, transfers and withdrawals remain locked."
+                  : "The offer becomes account credit only after every requirement is verified."}
+              </p>
             </div>
           </section>
-        ))}
+          <section className="finance-card finance-next" aria-label="Next recommended step">
+            <div>
+              <p className="finance-eyebrow text-primary">NEXT FOR YOU</p>
+              <h2 className="mt-2 text-base font-semibold">{nextTitle}</h2>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {view.next === "x"
+                  ? "Account linking is available independently of funding tasks."
+                  : view.next === "complete"
+                    ? view.earned
+                      ? "Credit stays separate from your real Base USDC."
+                      : "Requirements verified. Waiting for the account credit record."
+                    : !live
+                      ? "Funding and predictions require a verified protocol launch."
+                      : "Only finalized onchain activity counts."}
+              </p>
+            </div>
+            <div className="mt-4">{action(view.next)}</div>
+          </section>
+          <section aria-labelledby="journey-title">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 id="journey-title" className="text-lg font-semibold">
+                Step by step
+              </h2>
+              <button
+                className="inline-flex min-h-11 items-center gap-2 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+                disabled={!q.user || q.isFetching}
+                onClick={() => void q.refetch()}
+              >
+                <RefreshCw size={13} className={q.isFetching ? "motion-safe:animate-spin" : ""} />
+                {q.isFetching ? "Checking…" : "Refresh"}
+              </button>
+            </div>
+            {q.isError && (
+              <div role="alert" className="finance-inline-alert mb-3">
+                Reward status unavailable. We could not refresh verified progress; no task has been
+                marked complete locally.
+              </div>
+            )}
+            <div className="finance-card !p-0 overflow-hidden">
+              {tasks.map((task, i) => (
+                <article
+                  className="finance-task"
+                  key={task.id}
+                  data-testid={`reward-task-${task.id}`}
+                >
+                  <div className={`finance-step ${view.done[i] ? "finance-step-done" : ""}`}>
+                    {view.done[i] ? <Check size={18} /> : String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold">{task.title}</h3>
+                      <span
+                        className={`text-[11px] ${view.done[i] ? "text-emerald-300" : "text-muted-foreground"}`}
+                      >
+                        {view.done[i]
+                          ? "Verified"
+                          : checking
+                            ? "Checking…"
+                            : q.isError
+                              ? "Unavailable"
+                              : (i === 1 || i === 2) && !live
+                                ? "Launch pending"
+                                : "To do"}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                      {task.description}
+                    </p>
+                    <p className="mt-3 text-xs tabular-nums text-muted-foreground">{task.detail}</p>
+                    {!view.done[i] && (i === 0 || i === 3 || live) && (
+                      <div className="mt-3">{action(task.id)}</div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+          {message && (
+            <p role="status" className="finance-inline-alert">
+              {message}
+            </p>
+          )}
+        </div>
+        <aside className="min-w-0 space-y-4">
+          <section className="finance-card">
+            <ShieldCheck className="text-primary" size={23} />
+            <h2 className="mt-4 text-base font-semibold">Clear by design</h2>
+            <p className="mt-2 text-xs leading-6 text-muted-foreground">
+              Your wallet USDC is yours. This reward is a separate, locked promotional account
+              credit—not collateral or cash you can withdraw.
+            </p>
+            <dl className="mt-5 space-y-3 text-xs">
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Reward asset</dt>
+                <dd>USDC</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Earned credit</dt>
+                <dd className="tabular-nums">
+                  {view.earned ? "15 USDC" : view.verified ? "Not earned" : "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Withdrawals</dt>
+                <dd className="text-primary">Locked</dd>
+              </div>
+            </dl>
+          </section>
+          <section className="finance-card">
+            <h2 className="text-sm font-semibold">How verification works</h2>
+            <p className="mt-3 text-xs leading-6 text-muted-foreground">
+              Account and X identities come from Supabase. Funding and predictions count only
+              finalized native Base protocol events linked to a proven wallet. Testnet activity
+              never qualifies.
+            </p>
+            <p className="mt-4 border-t border-white/10 pt-4 text-[11px] leading-5 text-muted-foreground">
+              {view.verified && q.data?.server_time
+                ? `Last checked ${new Date(q.data.server_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : "Sign in to load your verified status."}{" "}
+              · Auto-refreshes while this page is open.
+            </p>
+          </section>
+          <section className="finance-card !py-1" aria-label="Reward questions">
+            {[
+              [
+                "Can I withdraw the reward?",
+                "No. Earned promotional credit is locked, non-transferable and not spendable. Any future release requires separate funding and published terms.",
+              ],
+              [
+                "What counts as a prediction?",
+                "A distinct USDC-funded buy order settled on the native Base protocol. Partial fills of the same order count once; submitting an unfilled order does not count.",
+              ],
+              [
+                "Can I connect X first?",
+                "Yes. X linking is independent of the onchain launch. Sign in to the same account before linking.",
+              ],
+            ].map(([title, body]) => (
+              <details className="finance-disclosure" key={title}>
+                <summary>
+                  {title}
+                  <ChevronDown size={14} />
+                </summary>
+                <p>{body}</p>
+              </details>
+            ))}
+          </section>
+        </aside>
       </div>
-      {message && (
-        <p role="status" className="mt-4 text-sm text-muted-foreground">
-          {message}
-        </p>
-      )}
-      <details className="mt-5 rounded-2xl border border-border px-5 py-4 text-xs text-muted-foreground">
-        <summary className="cursor-pointer font-medium text-foreground">Reward details</summary>
-        <p className="mt-3 leading-6">
-          Complete all four verified steps to qualify for 15 USDC in locked promotional credit. This
-          credit is separate from your available balance and cannot currently be spent, transferred
-          or withdrawn. Deposits and predictions require the contract/indexer integration; clicks
-          alone never complete tasks. Any future withdrawals require a separately funded release.
-        </p>
-      </details>
     </div>
   );
 }

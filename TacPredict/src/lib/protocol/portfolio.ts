@@ -37,7 +37,27 @@ export function useNativePortfolio() {
       if (registered.error) throw Error("Verified wallet link is unavailable.");
       const { data, error } = await client.rpc("get_my_protocol_portfolio");
       if (error) throw Error("Native portfolio is temporarily unavailable.");
-      return { ...portfolioSchema.parse(data), walletLinked: Boolean(registered.data) };
+      const activity = await client.rpc("get_my_protocol_activity");
+      return {
+        ...portfolioSchema.parse(data),
+        walletLinked: Boolean(registered.data),
+        activity: activity.error
+          ? null
+          : z
+              .array(
+                z.object({
+                  id: z.string(),
+                  kind: z.string(),
+                  title: z.string(),
+                  marketId: z.string(),
+                  amountAtomic: atomic,
+                  txHash: z.string(),
+                  chainId: z.number(),
+                  timestamp: z.string(),
+                }),
+              )
+              .parse(activity.data),
+      };
     },
     staleTime: 15000,
     refetchInterval: 30000,

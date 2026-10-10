@@ -22,8 +22,8 @@ import {
 } from "./orders";
 import type { BookOrder } from "./read.functions";
 import { submitProtocolOrder } from "./orders.functions";
-async function clients(w: WalletState, d: ProtocolDeployment) {
-  if (!d.tradingEnabled || !w.provider || !w.address)
+async function clients(w: WalletState, d: ProtocolDeployment, newRisk = true) {
+  if ((newRisk && !d.tradingEnabled) || !w.provider || !w.address)
     throw Error("Verified trading deployment and connected wallet required.");
   const chain = d.chainId === 8453 ? base : baseSepolia;
   if (![8453, 84532].includes(d.chainId)) throw Error("Unsupported chain");
@@ -199,7 +199,7 @@ export async function claimPosition(
   marketId: string,
   voided: boolean,
 ) {
-  const { pub, wallet, account } = await clients(w, d);
+  const { pub, wallet, account } = await clients(w, d, false);
   const amount = await pub.readContract({
     address: d.positions as Address,
     abi: positionAbi,
