@@ -17,10 +17,12 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
         </div>
       </div>
       <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-        {outcome.probability > 0 ? `${(100 / outcome.probability).toFixed(2)}x` : "—"}
+        {outcome.probabilityKnown !== false && outcome.probability > 0
+          ? `${(100 / outcome.probability).toFixed(2)}x`
+          : "—"}
       </span>
       <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-base font-semibold tabular-nums">
-        {outcome.probability}%
+        {outcome.probabilityKnown === false ? "—" : `${outcome.probability}%`}
       </span>
     </>
   );

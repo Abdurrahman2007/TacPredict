@@ -1,3 +1,5 @@
+import { NativeMarketTerms, NativeActivity } from "@/components/native-market-data";
+import { atomicDecimal } from "@/lib/protocol/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
@@ -18,7 +20,7 @@ import { MarketCountdown } from "@/components/market-countdown";
 import { MarketDescription } from "@/components/market-description";
 import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
-import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 
 export const Route = createFileRoute("/markets/$marketId")({
   validateSearch: (search: Record<string, unknown>): { outcome?: string } =>
@@ -33,13 +35,13 @@ export const Route = createFileRoute("/markets/$marketId")({
       },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions),
   component: MarketDetailPage,
 });
 function MarketDetailPage() {
   const { marketId } = Route.useParams();
   const { outcome: initial } = Route.useSearch();
-  const { data: feed } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const [selected, setSelected] = useState(initial || "");
   const [amountOpen, setAmountOpen] = useState(false);
   const selectOutcome = (id: string) => {
@@ -129,7 +131,9 @@ function MarketDetailPage() {
               >
                 {market.outcomes.slice(0, 2).map((o, i) => (
                   <div key={o.id} className={`min-w-0 flex-1 ${i ? "text-right" : ""}`}>
-                    <p className="text-2xl font-semibold tabular-nums">{o.probability}%</p>
+                    <p className="text-2xl font-semibold tabular-nums">
+                      {o.probabilityKnown === false ? "—" : `${o.probability}%`}
+                    </p>
                     <p className="mt-1 truncate text-sm text-muted-foreground">{o.label}</p>
                   </div>
                 ))}
@@ -153,12 +157,13 @@ function MarketDetailPage() {
                 <span
                   className={`text-xl font-semibold tabular-nums ${index === 0 ? "text-positive" : index === 1 ? "text-destructive" : "text-primary"}`}
                 >
-                  {item.probability}%
+                  {item.probabilityKnown === false ? "—" : `${item.probability}%`}
                 </span>
               </button>
             ))}
           </section>
           <MarketDescription key={market.id} text={market.description} />
+          {market.native && <NativeMarketTerms market={market.native} />}
           <details className="mt-4 rounded-2xl border border-border/60 bg-card/40 p-4">
             <summary className="cursor-pointer text-sm font-semibold">Rules</summary>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -177,13 +182,27 @@ function MarketDetailPage() {
           <section className="mt-7" aria-label="Source statistics">
             <h2 className="text-xl font-semibold">Statistics</h2>
             {[
-              { label: "Source volume", value: market.volume },
+              ...(market.native
+                ? [
+                    {
+                      label: "Open interest",
+                      value: `${atomicDecimal(market.native.openInterestAtomic)} USDC`,
+                    },
+                    { label: "Traders", value: String(market.participants) },
+                    {
+                      label: "Liquidity",
+                      value:
+                        market.liquidity === undefined ? "Not measured" : money(market.liquidity),
+                    },
+                  ]
+                : []),
+              { label: "Traded volume", value: market.volume },
               ...(market.volume24h === undefined
                 ? []
-                : [{ label: "24h source volume", value: money(market.volume24h) }]),
+                : [{ label: "24h traded volume", value: money(market.volume24h) }]),
               ...(market.liquidity === undefined
                 ? []
-                : [{ label: "Source liquidity", value: money(market.liquidity) }]),
+                : [{ label: "Liquidity", value: money(market.liquidity) }]),
             ].map((stat) => (
               <div key={stat.label} className="flex items-baseline gap-3 py-3 text-sm">
                 <span className="text-muted-foreground">{stat.label}</span>
@@ -213,10 +232,7 @@ function MarketDetailPage() {
               </div>
             </section>
           )}
-          <section className="mt-7" aria-label="Market activity">
-            <h2 className="text-xl font-semibold">Activity</h2>
-            <p className="mt-4 text-sm text-muted-foreground">Trade activity is not available.</p>
-          </section>
+          <NativeActivity marketId={market.id} />
         </article>
         <div className="hidden min-w-0 lg:block">
           <PredictionAmountCard

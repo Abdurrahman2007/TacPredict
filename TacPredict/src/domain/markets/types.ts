@@ -5,9 +5,11 @@ export type MarketOutcome = {
   id: string;
   label: string;
   probability: number;
+  probabilityKnown?: boolean;
 };
 
 export type Market = {
+  native?: import("@/lib/protocol/types").NativeMarket;
   id: string;
   title: string;
   category: MarketCategory;

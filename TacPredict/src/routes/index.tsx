@@ -8,7 +8,7 @@ import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
 import { categories } from "@/domain/markets/demo-markets";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
-import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 
 const feeds = ["Trending", "Live", "Upcoming", "New"] as const;
 type Feed = (typeof feeds)[number];
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions),
   errorComponent: ({ error }) => (
     <div role="alert" className="py-16 text-center">
       <h1 className="page-title">Markets unavailable</h1>
@@ -49,9 +49,9 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { feed = "Trending" } = Route.useSearch();
   const { data: crypto } = useQuery(cryptoMarketQueryOptions);
-  const { data: polymarket } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const feedMarkets = useMemo(() => {
-    const liveMarkets = polymarket.markets;
+    const liveMarkets = nativeFeed.markets;
     const sorted = [...liveMarkets];
     if (feed === "New")
       sorted.sort(
@@ -64,7 +64,7 @@ function HomePage() {
           (Date.parse(b.endsAt ?? "") || Number.MAX_SAFE_INTEGER),
       );
     return sorted.slice(0, 9);
-  }, [feed, polymarket.markets]);
+  }, [feed, nativeFeed.markets]);
 
   return (
     <div className="animate-enter">
@@ -90,21 +90,27 @@ function HomePage() {
         ))}
       </div>
 
-      {polymarket.error && (
+      {nativeFeed.error && (
         <p
           role="status"
           className="mt-4 rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
         >
-          {polymarket.error}
-          {polymarket.markets.length === 0 && " Try refreshing in a moment."}
+          {nativeFeed.error}
+          {nativeFeed.markets.length === 0 && " Try refreshing in a moment."}
         </p>
       )}
 
+      {!nativeFeed.error && nativeFeed.markets.length === 0 && (
+        <p className="mt-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+          Own-market launch pending. No TacPredict markets have been published yet; spot prices
+          below are reference data only.
+        </p>
+      )}
       <UpDownSection
         crypto={crypto}
         histories={crypto?.histories}
-        liveMarkets={polymarket.cryptoUpDown}
-        snapshotTime={polymarket.updatedAt}
+        liveMarkets={nativeFeed.cryptoUpDown}
+        snapshotTime={nativeFeed.updatedAt}
       />
 
       <SportsCarousel markets={feedMarkets} />
@@ -124,8 +130,8 @@ function HomePage() {
 
       <MarketSection title={feed} markets={feedMarkets} />
       <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
-        Market odds and volume supplied by {polymarket.source} · refreshed{" "}
-        {new Date(polymarket.updatedAt).toISOString().slice(11, 16) + " UTC"}
+        Own-market trades and volume indexed by {nativeFeed.source} · refreshed{" "}
+        {new Date(nativeFeed.updatedAt).toISOString().slice(11, 16) + " UTC"}
       </p>
     </div>
   );

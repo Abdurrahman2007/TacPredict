@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
 import { categories } from "@/domain/markets/demo-markets";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useMemo } from "react";
 
 const sortOptions = ["Trending", "Most active", "Ending soon", "New"] as const;
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/markets/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions),
   errorComponent: ({ error }) => (
     <div role="alert" className="py-16 text-center">
       <h1 className="page-title">Markets unavailable</h1>
@@ -56,7 +56,7 @@ function MarketsPage() {
   const category = search.category ?? "All";
   const sort = search.sort ?? "Trending";
   const query = search.q ?? "";
-  const { data: liveFeed } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const { data: liveFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const filtered = useMemo(() => {
     const allMarkets = liveFeed.markets;
     return allMarkets

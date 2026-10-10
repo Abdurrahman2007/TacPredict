@@ -9,6 +9,7 @@ export type WalletProvider = {
 };
 export type WalletChoice = { id: string; name: string; provider: WalletProvider };
 export type WalletState = {
+  provider: WalletProvider | null;
   wallets: WalletChoice[];
   address: string | null;
   chainId: number | null;
@@ -200,6 +201,7 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         wallets,
+        provider,
         address,
         chainId,
         usdc,

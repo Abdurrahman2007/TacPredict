@@ -1,10 +1,11 @@
+import { NativePortfolio } from "@/components/native-portfolio";
+import { useNativePortfolio } from "@/lib/protocol/portfolio";
+import { atomicDecimal } from "@/lib/protocol/types";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowUpRight,
   Check,
   Copy,
-  ExternalLink,
-  Layers3,
   LogOut,
   RefreshCw,
   ShieldCheck,
@@ -41,6 +42,14 @@ export const Route = createFileRoute("/profile")({
 
 function PortfolioPage() {
   const wallet = useBaseWallet();
+  const native = useNativePortfolio();
+  const totalClaimable = native.data?.walletLinked
+    ? native.data.positions.reduce((n, p) => n + BigInt(p.claimableAtomic), 0n).toString()
+    : null;
+  const totalValue =
+    native.data?.walletLinked && native.data.positions.every((p) => p.valueAtomic !== null)
+      ? native.data.positions.reduce((n, p) => n + BigInt(p.valueAtomic!), 0n).toString()
+      : null;
   const [transfer, setTransfer] = useState<"Deposit" | "Withdraw" | null>(null);
   const [tab, setTab] = useState("Positions");
   const [copied, setCopied] = useState(false);
@@ -222,16 +231,24 @@ function PortfolioPage() {
       <div className="mt-4 grid grid-cols-2 gap-4">
         <section className="rounded-[24px] border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">USDC in markets</p>
-          <p className="mt-3 text-2xl font-semibold">0</p>
+          <p className="mt-3 break-all text-2xl font-semibold">
+            {totalValue === null ? "—" : atomicDecimal(totalValue)}
+          </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {connected ? "Preview · Indexer pending" : "Preview · Not connected"}
+            {native.data?.walletLinked
+              ? "Finalized on-chain read model"
+              : "Verified wallet link required"}
           </p>
         </section>
         <section className="rounded-[24px] border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Claimable winnings</p>
-          <p className="mt-3 text-2xl font-semibold">0</p>
+          <p className="mt-3 break-all text-2xl font-semibold">
+            {totalClaimable === null ? "—" : atomicDecimal(totalClaimable)}
+          </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {connected ? "Preview · Indexer pending" : "Preview · Not connected"}
+            {native.data?.walletLinked
+              ? "Finalized on-chain read model"
+              : "Verified wallet link required"}
           </p>
         </section>
       </div>
@@ -287,30 +304,7 @@ function PortfolioPage() {
             </button>
           ))}
         </div>
-        <div className="mt-4 flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 px-6 py-8 text-center">
-          <div className="grid size-12 place-items-center rounded-xl bg-secondary text-primary">
-            <Layers3 className="size-5" />
-          </div>
-          <h2 className="mt-4 text-base font-semibold">
-            {tab === "Activity" ? "No activity yet" : "No positions yet"}
-          </h2>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            {connected
-              ? "Position indexer pending."
-              : "Connect a wallet. Trading contracts pending."}
-          </p>
-          {tab === "Activity" && wallet.address && (
-            <a
-              href={`${BASE_NETWORK.explorer}/address/${wallet.address}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary"
-            >
-              Open Basescan
-              <ExternalLink className="size-4" />
-            </a>
-          )}
-        </div>
+        <NativePortfolio tab={tab} />
       </section>
       {wallet.error && (
         <p

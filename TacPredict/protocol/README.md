@@ -1,0 +1,67 @@
+# TacPredict native USDC protocol — implementation / launch runbook
+
+**Status:** Local implementation; NOT audited, NOT mainnet deployed, NOT activated for real money. The app fails closed without verified deployment configuration. Never use TestUSDC outside isolated tests. Home/Search/Markets/Rewards/Portfolio navigation remains unchanged. Welcome rewards are separate locked promotional credit, never contract collateral.
+
+## Architecture
+
+| Contract | Responsibility |
+|---|---|
+| MarketFactory | Authorized creation, question IDs, immutable metadata/rule/source hashes; reusable infrastructure, no per-market manual deployment |
+| MarketRegistry | Unique markets, state/timing, pause new risk, immutable oracle/terms, final payout weights, permissionless timeout void |
+| ConditionalPositions | Six-decimal ERC1155 outcome shares, complete-set split/merge, exact USDC collateral vault, burn-before-pay redemption |
+| Exchange | EIP-712 signed BUY/SELL limit orders; partial fills, nonce/cancel, ERC1271 validation, atomic on-chain settlement |
+| ResolutionOracle | Bonded trusted proposer, public counter-bond dispute, role-protected arbitrator, permissionless unchallenged finalization, timeout bond recovery |
+| Settlement | Claims and timeout void redemption; pays share owner, never caller-controlled recipient |
+
+Existing official Base native USDC is used; no new production stablecoin contract. No TAC, swap, staking or games are added to prediction execution. Mainnet collateral: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; Base Sepolia: `0x036CbD53842c5426634e7929541eC2318f3dCF7e`.
+
+### IDs and units
+- Database: UUID; chain: `uint256 marketId`; original display: `TACP-000001`; unambiguous API/route ID: `TACP-8453-000001` (includes chain).
+- Question/condition: `bytes32`, locked oracle + question + outcome count derivation. This implementation is **not** a claim of Gnosis CTF binary compatibility.
+- All USDC and shares: six decimal atomic integer strings across HTTP/database; all transaction math uses BigInt, never JS floating point. Prices are atomic USDC/share, strictly between 0 and 1 USDC.
+- Winning share pays 1 USDC. Uniform void payout is 1/outcome-count per current share. Complete-set holders recover principal. Secondary-market holders are **not** guaranteed their original purchase price on void.
+- Redemption aggregates fractional remainders across an owner's outcomes before flooring. Cross-holder sub-atomic dust can remain locked; there is deliberately no admin sweep.
+- Display probabilities are actual last filled share prices, NOT executable quotes or externally imported probabilities. No trades means unknown, shown as `—`.
+
+## Commands (from app root)
+```
+npm ci
+npm ci --prefix protocol
+npm --prefix protocol run compile
+npm --prefix protocol test
+node protocol/scripts/deploy-testnet.mjs                 # dry run; no transactions
+# Only after explicit operator approval with TESTNET credentials:
+node protocol/scripts/deploy-testnet.mjs --execute-testnet
+node protocol/scripts/indexer.mjs                       # requires verified deployment + server key + RPC
+node protocol/scripts/matcher.mjs                       # dry-run matching
+node protocol/scripts/matcher.mjs --execute              # explicit relayer execution
+```
+Test compiler: pinned solc 0.8.30, optimizer 200, viaIR, Shanghai; OpenZeppelin 5.2.0. Ganache is test-only. Fourteen local scenarios cover collateral conservation, pause/merge, signatures/partial fills/cancel/nonces, wrong chain/self-trades, insufficient allowances/atomic rollback, close/evidence source/time, dispute authorization, double claims, timeout bonds, signed matching, secondary void payouts and one-atomic-unit full-set recovery. This is NOT exhaustive fuzzing, an independent audit, or a production security guarantee.
+
+## Database/main project
+Main Supabase project: `lmqaiqvwcytmgwgwyfwx`. Migrations 0004–0012 are additive native `protocol_*` schema/read APIs; old accounts/data remain intact. Every native table has RLS. Anonymous/authenticated clients cannot write financial read models; only a privileged finalized-event indexer can. Own positions/claims/refunds are scoped to proven wallets. API numeric values are strings to preserve uint256 precision.
+
+Tables include deployments, immutable metadata, markets/outcomes/sources/rules, wallets/ownership challenges, positions, signed orders, trades, transactions/event ledger, prices, proposals/evidence/disputes, claims/refunds, notifications/audit log/checkpoints. Order signatures are intentionally public for independent taker verification; account UUIDs and login tokens are not public orderbook fields.
+
+`/admin` is protected by the server-owned `user_roles.admin` role, not user-editable metadata. It prepares canonical metadata and keccak hashes in Supabase. Metadata is served at `/api/protocol/metadata/<hash>`. **The admin form does not submit Factory/oracle transactions yet.** Use a reviewed creator transaction with the returned hashes and predetermined timings. No user has been self-promoted to admin.
+
+## Required launch configuration (not created by this change)
+- Reviewed Base Sepolia deployment, then mainnet deployment only after explicit approval and independent audit. Do not mark `verified=true` merely because transactions mined.
+- Admin Safe/multisig, creator, guardian, proposer and arbitrator owners; grant Registry FACTORY_ROLE to Factory and ORACLE_ROLE to Oracle; no private keys in source/client/chat.
+- Reviewed `protocol_deployments` row with actual runtime code hashes, official USDC and deployment block. Default `verified=false`, `trading_enabled=false`.
+- Server-only `SUPABASE_SERVICE_ROLE_KEY`, `BASE_PROTOCOL_RPC_URL` and/or `BASE_SEPOLIA_PROTOCOL_RPC_URL`; indexer `PROTOCOL_RPC_URL`, `PROTOCOL_CHAIN_ID`; relayer key only if automated matching is explicitly enabled. No service key is bundled in the frontend.
+- Indexer scheduler, single writer per chain, retries/monitoring/alerts/backups and finalized RPC support. Run sequentially. Checkpoint/hash mismatch halts; no silent reorg rollback.
+- Relayer funding/rate limits/private-key custody, executable liquidity makers/complete sets. Matching is price-time deterministic, re-simulates approvals/signatures/state, and never credits a trade before the indexer sees finalized receipts. Outstanding orders do not reserve wallet balances; approvals/liquidity may change.
+- Predetermined per-market sources/rules/evidence format and oracle operators. CoinGecko is **chart reference only**, not an automatically authorized settlement oracle. Sports/news settlement jobs are not implemented.
+- Real account-to-wallet proof (SIWE challenge binds account/domain/nonce, expires in 5 minutes, consumes once). Social/email sessions alone do not establish wallet ownership. The wallet link backend requires the server key and Base RPC.
+- Testnet end-to-end funded trade + disputes + claim/refund, independent security review/fuzzing, source verification and legal/compliance/geographic eligibility review before real-money launch.
+- SMTP/MAU capacity appropriate to actual user traffic; no paid plan was upgraded.
+
+## Current application behavior and remaining work
+- Own Supabase feed replaces external Polymarket odds. No published native markets or verified deployment exists yet, so market lists are honestly empty; BTC/ETH/SOL spot reference cards still work.
+- Detail has immutable IDs/oracle/rules/timeouts, real-trade history/statistics/activity, signed orderbook, exact limit buy quote and gated approval/signature/fill flows.
+- Portfolio uses authenticated native positions/value/claim estimates and an on-chain verified claim/refund transaction flow. Wallet balance remains a direct USDC wallet read, not an app-generated number. Full position cost-basis/P&L and per-account transaction timeline are not implemented.
+- Complete-set split/merge, sell orders/cancellation and oracle actions exist in contracts/API, but dedicated maker/sell/cancel/oracle UI is not complete. Deposit/withdraw remain explicit unavailable previews, not app-custody transfers.
+- Indexed liquidity is null until an executable depth calculation is implemented. Do not confuse volume with liquidity or open interest.
+- Notifications/audit/event persistence are schema foundations; notification delivery, robust order cancellation synchronization under missed RPC jobs, indexer SQL integration tests, backfills and operational monitoring still need production completion.
+- Testnet deployment script produces a manifest and multisig bootstrap calldata but does not register/activate a deployment in the database. No mainnet deployment/keys/real-money activation has occurred.

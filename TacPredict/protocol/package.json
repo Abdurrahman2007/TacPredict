@@ -1,0 +1,1 @@
+{"name":"tacpredict-protocol","private":true,"type":"module","scripts":{"test":"node test/protocol.test.mjs","compile":"node scripts/compile.mjs"},"devDependencies":{"@openzeppelin/contracts":"5.2.0","ganache":"7.9.2","solc":"0.8.30"}}

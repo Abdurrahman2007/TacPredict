@@ -50,7 +50,7 @@ export function MobileOutcomeDock({
                   : "#a24353",
           }}
         >
-          {item.label} {item.probability}%
+          {item.label} {item.probabilityKnown === false ? "—" : `${item.probability}%`}
         </button>
       ))}
     </div>,

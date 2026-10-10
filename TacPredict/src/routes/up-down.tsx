@@ -3,14 +3,14 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
 import { UpDownSection } from "@/components/up-down-section";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
-import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 export const Route = createFileRoute("/up-down")({
   head: () => ({ meta: [{ title: "Up/Down — TacPredict" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions),
   component: UpDownPage,
 });
 function UpDownPage() {
-  const { data: feed } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const { data: crypto, isError } = useQuery(cryptoMarketQueryOptions);
   const hasMarkets = Object.values(feed.cryptoUpDown).some(Boolean);
   return (
@@ -45,7 +45,7 @@ function UpDownPage() {
         </section>
       )}
       <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-        CoinGecko prices · Polymarket odds · Trading unavailable
+        CoinGecko chart prices · TacPredict USDC markets
       </p>
     </div>
   );

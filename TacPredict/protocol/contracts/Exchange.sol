@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {MarketRegistry} from "./MarketRegistry.sol";
+import {ConditionalPositions} from "./ConditionalPositions.sol";
+/// @notice Non-custodial signed limit orders, off-chain discovery/matching, atomic on-chain settlement.
+contract Exchange is EIP712, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+    uint256 public constant PRICE_SCALE = 1_000_000;
+    bytes32 public constant ORDER_TYPEHASH = keccak256("Order(uint256 marketId,uint8 outcome,address maker,bool isBuy,uint256 price,uint256 shares,uint256 nonce,uint64 expiration,address taker)");
+    struct Order { uint256 marketId; uint8 outcome; address maker; bool isBuy; uint256 price; uint256 shares; uint256 nonce; uint64 expiration; address taker; }
+    MarketRegistry public immutable registry; ConditionalPositions public immutable positions; IERC20 public immutable usdc;
+    mapping(bytes32 => uint256) public filledShares; mapping(bytes32 => bool) public cancelled; mapping(address => uint256) public minimumNonce;
+    event OrderFilled(bytes32 indexed orderId, uint256 indexed marketId, address indexed maker, uint256 shares, uint256 totalFilled);
+    event OrderCancelled(bytes32 indexed orderId, address indexed maker);
+    event NonceInvalidated(address indexed maker, uint256 nonce);
+    event TradeExecuted(bytes32 indexed buyOrderId, bytes32 indexed sellOrderId, uint256 indexed marketId, address buyer, address seller, uint8 outcome, uint256 price, uint256 shares, uint256 usdcAmount);
+    constructor(MarketRegistry r, ConditionalPositions p) EIP712("TacPredictExchange", "1") { require(address(p.registry()) == address(r), "Registry mismatch"); registry = r; positions = p; usdc = IERC20(r.collateralToken()); }
+    function orderId(Order calldata o) public view returns (bytes32) { return _hashTypedDataV4(keccak256(abi.encode(ORDER_TYPEHASH, o.marketId, o.outcome, o.maker, o.isBuy, o.price, o.shares, o.nonce, o.expiration, o.taker))); }
+    function _consume(Order calldata o, bytes calldata signature, uint256 quantity, address taker) private returns (bytes32 digest, uint256 beforeFilled) {
+        MarketRegistry.Market memory m = registry.getMarket(o.marketId);
+        require(registry.isTradingOpen(o.marketId) && o.outcome < m.outcomeCount, "Market closed");
+        require(o.maker != address(0) && o.maker != taker && (o.taker == address(0) || o.taker == taker), "Invalid counterparty");
+        require(o.price > 0 && o.price < PRICE_SCALE && o.shares > 0 && quantity > 0 && block.timestamp < o.expiration && o.expiration <= m.closeAt && o.nonce >= minimumNonce[o.maker], "Invalid order");
+        digest = orderId(o); beforeFilled = filledShares[digest];
+        require(!cancelled[digest] && quantity <= o.shares - beforeFilled && SignatureChecker.isValidSignatureNow(o.maker, digest, signature), "Invalid signature/fill");
+        filledShares[digest] = beforeFilled + quantity; emit OrderFilled(digest, o.marketId, o.maker, quantity, beforeFilled + quantity);
+    }
+    function fillOrder(Order calldata o, bytes calldata signature, uint256 quantity) external nonReentrant {
+        (bytes32 digest, uint256 beforeFilled) = _consume(o, signature, quantity, msg.sender);
+        uint256 cost = Math.mulDiv(beforeFilled + quantity, o.price, PRICE_SCALE) - Math.mulDiv(beforeFilled, o.price, PRICE_SCALE);
+        require(cost > 0, "Fill too small"); address buyer = o.isBuy ? o.maker : msg.sender; address seller = o.isBuy ? msg.sender : o.maker;
+        usdc.safeTransferFrom(buyer, seller, cost); positions.safeTransferFrom(seller, buyer, positions.tokenId(o.marketId, o.outcome), quantity, "");
+        emit TradeExecuted(o.isBuy ? digest : bytes32(0), o.isBuy ? bytes32(0) : digest, o.marketId, buyer, seller, o.outcome, o.price, quantity, cost);
+    }
+    function matchOrders(Order calldata buy, bytes calldata buySignature, Order calldata sell, bytes calldata sellSignature, uint256 quantity) external nonReentrant {
+        require(buy.isBuy && !sell.isBuy && buy.marketId == sell.marketId && buy.outcome == sell.outcome && buy.price >= sell.price, "Orders do not cross");
+        (bytes32 buyId, uint256 buyBeforeFilled) = _consume(buy, buySignature, quantity, sell.maker); (bytes32 sellId, uint256 beforeFilled) = _consume(sell, sellSignature, quantity, buy.maker);
+        uint256 cost = Math.mulDiv(beforeFilled + quantity, sell.price, PRICE_SCALE) - Math.mulDiv(beforeFilled, sell.price, PRICE_SCALE);
+        require(cost > 0 && cost <= Math.mulDiv(buyBeforeFilled + quantity, buy.price, PRICE_SCALE) - Math.mulDiv(buyBeforeFilled, buy.price, PRICE_SCALE), "Invalid execution price");
+        usdc.safeTransferFrom(buy.maker, sell.maker, cost); positions.safeTransferFrom(sell.maker, buy.maker, positions.tokenId(buy.marketId, buy.outcome), quantity, "");
+        emit TradeExecuted(buyId, sellId, buy.marketId, buy.maker, sell.maker, buy.outcome, sell.price, quantity, cost);
+    }
+    function cancelOrder(Order calldata o) external { require(msg.sender == o.maker, "Not maker"); bytes32 digest = orderId(o); cancelled[digest] = true; emit OrderCancelled(digest, msg.sender); }
+    function invalidateNonce(uint256 nonce) external { require(nonce > minimumNonce[msg.sender], "Nonce must increase"); minimumNonce[msg.sender] = nonce; emit NonceInvalidated(msg.sender, nonce); }
+}

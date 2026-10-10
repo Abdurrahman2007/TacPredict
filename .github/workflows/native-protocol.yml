@@ -1,0 +1,28 @@
+name: Native USDC protocol checks
+on:
+  push:
+    branches: [development/base-usdc]
+  pull_request:
+    paths: ['TacPredict/protocol/**', 'TacPredict/src/lib/protocol/**', 'TacPredict/supabase/migrations/**']
+permissions:
+  contents: read
+jobs:
+  local-validation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TacPredict
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: TacPredict/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix protocol
+      - run: npm run build
+      - run: npx tsc --noEmit
+      - run: npm --prefix protocol run compile
+      - run: npm --prefix protocol test
+# No secrets, wallet funding, deployment or mainnet activation in CI.

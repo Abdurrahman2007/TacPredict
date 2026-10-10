@@ -2,16 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
 import { Search, X, Flame, Radio, CalendarDays, Sparkles } from "lucide-react";
-import { polymarketFeedQueryOptions } from "@/lib/polymarket.functions";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { MarketIcon } from "@/components/market-icon";
 const filters = ["Trending", "Live", "Upcoming", "New"] as const;
 export const Route = createFileRoute("/search")({
   head: () => ({ meta: [{ title: "Search — TacPredict" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(polymarketFeedQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions),
   component: SearchPage,
 });
 function SearchPage() {
-  const { data: feed } = useSuspenseQuery(polymarketFeedQueryOptions);
+  const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.trim().toLowerCase());
   const [filter, setFilter] = useState<(typeof filters)[number]>("Trending");

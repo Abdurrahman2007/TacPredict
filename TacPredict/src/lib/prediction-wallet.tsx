@@ -151,24 +151,19 @@ export function PredictionWalletProvider({ children }: { children: ReactNode }) 
     async (input: EntryInput): Promise<Result> => {
       if (!user) return { ok: false, message: "Sign in to make a prediction." };
       if (lock.current) return { ok: false, message: "Your previous entry is still processing." };
-      if (!Number.isInteger(input.amount) || input.amount < 10)
-        return { ok: false, message: "Enter at least 10 TAC." };
       lock.current = true;
       try {
         const result = await placePrediction({
           data: { ...input, idempotencyKey: crypto.randomUUID() },
         });
-        if (!result.ok) return { ok: false, message: result.message };
-        setProfile((c) => ({ ...c, balance: result.balance }));
-        await load(user.id);
-        return { ok: true };
+        return { ok: false, message: result.message };
       } catch {
         return { ok: false, message: "Could not place prediction. Please try again." };
       } finally {
         lock.current = false;
       }
     },
-    [user, load],
+    [user],
   );
 
   useEffect(() => {
