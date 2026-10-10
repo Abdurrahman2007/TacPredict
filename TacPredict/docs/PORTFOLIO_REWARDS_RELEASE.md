@@ -22,7 +22,9 @@ User-authorized TwinMind review selected UI labels **Claude Opus 5.5 Thinking** 
 
 ## Validation and launch limits
 - TypeScript / scoped ESLint / production build.
-- Local 14 contract scenarios + exact atomic-money tests + four reward-display state tests.
+- Local 14 contract scenarios + exact atomic-money tests + five reward-display state tests.
 - Responsive 320 / 375 / 1200px checks: no horizontal page overflow, no page errors, navigation preserved, signed-out amount unknown, transfer controls disabled, four tasks rendered, disclosure interaction works.
 - Supabase migration applied; anonymous execution denied, authenticated credit insertion denied, credit RLS enabled. Rolled-back empty-account RPC test returned no qualification or credit. No production test credits created.
 - No verified Base mainnet deployment, audited contracts, funded campaign, live indexer/relayer or full authenticated mainnet end-to-end test. Server-side wallet proof / order admission still need service-role key, trusted Base RPC and verified deployment configuration. Never expose these in the browser or repository.
+
+Once qualified, an immutable account credit remains visible even if X is later unlinked. Current task progress and the previously awarded credit are different facts.

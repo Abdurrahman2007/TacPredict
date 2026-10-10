@@ -62,3 +62,14 @@ test("only fully verified recorded credit displays earned", () => {
   assert.equal(v.earned, true);
   assert.equal(v.next, "complete");
 });
+
+test("previously recorded credit remains visible if X is later unlinked", () => {
+  const v = rewardView(
+    { ...partial, deposit_usdc: 5, predictions: 4, eligible: false, locked_credit: 15 },
+    true,
+    false,
+  );
+  assert.equal(v.earned, true);
+  assert.equal(v.complete, 3);
+  assert.equal(v.next, "complete");
+});

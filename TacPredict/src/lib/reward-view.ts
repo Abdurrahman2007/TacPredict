@@ -16,24 +16,26 @@ export function rewardView(data: RewardSnapshot | undefined, hasUser: boolean, f
     ? [data!.account_created, data!.deposit_usdc >= 5, data!.predictions >= 4, data!.x_connected]
     : [false, false, false, false];
   const complete = done.filter(Boolean).length;
-  const earned = verified && data!.eligible && complete === 4 && data!.locked_credit === 15;
+  const earned = verified && data!.locked_credit === 15;
   return {
     verified,
     done,
     complete,
     earned,
-    next: !hasUser
-      ? "account"
-      : !verified
-        ? "retry"
-        : !done[0]
-          ? "account"
-          : !done[3]
-            ? "x"
-            : !done[1]
-              ? "deposit"
-              : !done[2]
-                ? "prediction"
-                : "complete",
+    next: earned
+      ? "complete"
+      : !hasUser
+        ? "account"
+        : !verified
+          ? "retry"
+          : !done[0]
+            ? "account"
+            : !done[3]
+              ? "x"
+              : !done[1]
+                ? "deposit"
+                : !done[2]
+                  ? "prediction"
+                  : "complete",
   };
 }

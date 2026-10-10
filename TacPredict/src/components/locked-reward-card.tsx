@@ -3,7 +3,7 @@ import { Gift, LockKeyhole, ChevronRight } from "lucide-react";
 import { useRewardTasks } from "@/lib/use-reward-tasks";
 export function LockedRewardCard() {
   const { user, data, isError } = useRewardTasks();
-  const earned = !isError && data?.eligible && data.locked_credit === 15;
+  const earned = !isError && data?.locked_credit === 15;
   return (
     <Link
       to="/rewards"
