@@ -33,3 +33,12 @@ No other page or shared header/navigation modified. Admin QR repair from previou
 - Live QA identified native-select reparenting: React expected SELECT under tp-filters, but it was nested in a replacement DIV, causing removeChild/418 hydration failures on tab changes.
   Replaced the native select with a custom Popover listbox; no authentication/permission bypass.
 - Financial trading, rewards, contract ownership and navigation unchanged.
+
+## Interactive chart and one-time motion
+- Read-only SVG P/L chart with pointer/touch and keyboard scrubbing. No signing/USDC transaction calls.
+- Empty portfolio renders a flat $0.00 baseline with No trades tooltip. Unknown historical performance stays unavailable; no synthetic price curve.
+- Period buttons enlarged to12px mobile /13px desktop; selected period has a short chart transition.
+- Route entrance is380ms opacity/8px translate on mount only. Data/query refreshes never re-key or restart the entrance.
+- Reduced-motion preferences disable entrance/range animation and cursor transitions.
+- Live320/375/1200px checks: no overflow, tooltip/keyboard, range selection work; refresh does not restart entrance; Home->Portfolio entry works; reduced motion respected; zero JS errors.
+- TypeScript and production build pass. Backend financial behavior unchanged; existing full P/L history requires cost-basis indexing, not fabricated in UI.

@@ -13,6 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { NativePortfolio } from "@/components/native-portfolio";
 import { WalletFundingDialog } from "@/components/wallet-funding-dialog";
 import { useLoginDialog } from "@/components/login-dialog";
@@ -122,7 +123,7 @@ function PortfolioPage() {
     }
   }
   return (
-    <div className="tp-portfolio">
+    <div className="tp-portfolio tp-portfolio-enter">
       <section className="tp-balances" aria-label="Portfolio balances">
         <div className="tp-b-left">
           <div className="tp-label">
@@ -225,15 +226,7 @@ function PortfolioPage() {
             All-time <b>{money(pnl, hidden)}</b>
           </span>
         </div>
-        <div
-          className="tp-chart"
-          aria-label={noHistory ? "No trading performance yet" : "Performance history unavailable"}
-        >
-          <span>{noHistory ? "" : "No verified performance history"}</span>
-          <i aria-hidden="true" />
-          {noHistory && <b className="tp-zero-line">$0.00</b>}
-        </div>
-        <div className="tp-glow" aria-hidden="true" />
+        <PortfolioPerformanceChart key={range} empty={noHistory} period={periods[range]} />
       </section>
       <div className="tp-segment" aria-label="Portfolio views">
         {["Positions", "Open", "History"].map((item) => (
