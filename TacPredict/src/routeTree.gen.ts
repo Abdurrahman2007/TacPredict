@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -19,10 +20,16 @@ import { Route as UpDownRouteImport } from './routes/up-down'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
+import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -70,9 +77,15 @@ const MarketsMarketIdRoute = MarketsMarketIdRouteImport.update({
   path: '/$marketId',
   getParentRoute: () => MarketsRoute,
 } as any)
+const ApiProtocolMetadataHashRoute = ApiProtocolMetadataHashRouteImport.update({
+  id: '/api/protocol/metadata/$hash',
+  path: '/api/protocol/metadata/$hash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
@@ -82,9 +95,11 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
+  '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
@@ -93,10 +108,12 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets': typeof MarketsIndexRoute
+  '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
@@ -106,11 +123,13 @@ export interface FileRoutesById {
   '/auth_/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
+  '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/markets'
     | '/profile'
@@ -120,9 +139,11 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/markets/$marketId'
     | '/markets/'
+    | '/api/protocol/metadata/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
     | '/profile'
     | '/rewards'
@@ -131,9 +152,11 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/markets/$marketId'
     | '/markets'
+    | '/api/protocol/metadata/$hash'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
     | '/markets'
     | '/profile'
@@ -143,10 +166,12 @@ export interface FileRouteTypes {
     | '/auth_/callback'
     | '/markets/$marketId'
     | '/markets/'
+    | '/api/protocol/metadata/$hash'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
@@ -154,6 +179,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   UpDownRoute: typeof UpDownRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -228,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketsMarketIdRouteImport
       parentRoute: typeof MarketsRoute
     }
+    '/api/protocol/metadata/$hash': {
+      id: '/api/protocol/metadata/$hash'
+      path: '/api/protocol/metadata/$hash'
+      fullPath: '/api/protocol/metadata/$hash'
+      preLoaderRoute: typeof ApiProtocolMetadataHashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -246,6 +286,7 @@ const MarketsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
@@ -253,6 +294,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   UpDownRoute: UpDownRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

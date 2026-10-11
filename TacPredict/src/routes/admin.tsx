@@ -5,10 +5,23 @@ import { NativeOperatorConsole } from "@/components/native-operator-console";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { getProtocolAdminAccess, prepareNativeMarket } from "@/lib/protocol/admin.functions";
+import { BASE_NETWORK, USDC_DECIMALS } from "@/lib/onchain/base";
+
 export const Route = createFileRoute("/admin")({ component: NativeAdmin });
+
+const CATEGORIES = [
+  "Crypto",
+  "Sports",
+  "News",
+  "Technology",
+  "Business",
+  "Culture",
+  "Other",
+] as const;
+
 function NativeAdmin() {
   const { user } = useProtocolUser();
   const access = useQuery({
@@ -18,24 +31,42 @@ function NativeAdmin() {
     retry: 0,
   });
   const [prepared, setPrepared] = useState<PreparedTerms | null>(null);
-  const [notice, setNotice] = useState(""),
-    [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [marketType, setMarketType] = useState<"binary" | "multi">("binary");
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "Crypto" as
-      "Crypto" | "Sports" | "News" | "Technology" | "Business" | "Culture" | "Other",
+    category: "Crypto" as (typeof CATEGORIES)[number],
     outcomes: "Yes,No",
     rules: "",
     source: "",
     sourceUrl: "",
   });
+
+  const outcomeList = useMemo(
+    () =>
+      form.outcomes
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean),
+    [form.outcomes],
+  );
+
   if (!user)
     return (
-      <section className="mx-auto max-w-md">
+      <section className="mx-auto max-w-md space-y-4 py-10">
+        <div>
+          <h1 className="page-title">Admin sign-in</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Use your TacPredict Supabase administrator account, then complete TOTP (AAL2). A shared
+            password pasted in chat is <strong>not</strong> accepted and is never stored in the app.
+          </p>
+        </div>
         <AuthPanel onSuccess={() => window.location.assign("/admin")} />
       </section>
     );
+
   if (!access.data?.allowed)
     return (
       <section className="mx-auto max-w-xl py-16">
@@ -47,51 +78,125 @@ function NativeAdmin() {
         </p>
       </section>
     );
+
   if (access.data.mfaRequired) return <AdminMfa onVerified={() => void access.refetch()} />;
+
   return (
     <AdminWorkspace
       operator={
-        <NativeOperatorConsole prepared={prepared} outcomeCount={form.outcomes.split(",").length} />
+        <NativeOperatorConsole prepared={prepared} outcomeCount={outcomeList.length || 2} />
       }
     >
-      <section className="mx-auto max-w-3xl">
-        <h1 className="page-title">Native market administration</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Prepare immutable resolution terms in the main Supabase project. Publishing requires an
-          authorized on-chain Factory transaction and a finalized indexer event.
-        </p>
+      <section className="mx-auto max-w-3xl space-y-5">
+        <div>
+          <h3 className="text-lg font-semibold">Prepare market (immutable terms)</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Saves approved metadata hashes in Supabase. Publishing requires a Factory wallet
+            signature in the operator console — preparing alone does not create an on-chain market.
+          </p>
+        </div>
+
+        <div className="grid gap-3 rounded-[26px] border border-border bg-card p-5 sm:grid-cols-2">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Collateral
+            </p>
+            <p className="mt-1 text-sm font-semibold">Native USDC only</p>
+            <p className="mt-1 break-all text-xs text-muted-foreground">
+              {BASE_NETWORK.usdc} · {USDC_DECIMALS} decimals · {BASE_NETWORK.name} ({BASE_NETWORK.id}
+              )
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Not available here
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              No TAC Points, fee %, treasury withdraw, or AMM liquidity knobs — deployed Exchange has
+              no configurable platform fees.
+            </p>
+          </div>
+        </div>
+
         <form
-          className="mt-6 space-y-4 rounded-[26px] border border-border bg-card p-5"
+          className="space-y-4 rounded-[26px] border border-border bg-card p-5"
           onSubmit={(e) => {
             e.preventDefault();
             setBusy(true);
             setPrepared(null);
             void prepareNativeMarket({
-              data: { ...form, outcomes: form.outcomes.split(",").map((x) => x.trim()), tags: [] },
+              data: {
+                ...form,
+                outcomes: outcomeList,
+                tags: [],
+              },
             })
               .then((r) => {
                 setPrepared(r);
                 setNotice(
-                  `Metadata prepared, not published.\nMetadata hash: ${r.metadataHash}\nRules hash: ${r.rulesHash}\nSource hash: ${r.sourceHash}\nURI: ${r.metadataUri}\nReview these immutable terms in the operator console below. A verified Base deployment and your wallet approval are required to create the market. Preparing metadata does not submit a transaction.`,
+                  [
+                    "Metadata prepared — not published.",
+                    `Metadata hash: ${r.metadataHash}`,
+                    `Rules hash: ${r.rulesHash}`,
+                    `Source hash: ${r.sourceHash}`,
+                    `URI: ${r.metadataUri}`,
+                    "Next: set open/close/resolve times in the operator console, acknowledge costs, then Create on-chain market with your authorized wallet.",
+                    "Trading remains paused until an explicit reviewed unpause.",
+                  ].join("\n"),
                 );
               })
-              .catch((e) => setNotice(e instanceof Error ? e.message : "Preparation failed."))
+              .catch((err) =>
+                setNotice(err instanceof Error ? err.message : "Preparation failed."),
+              )
               .finally(() => setBusy(false));
           }}
         >
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">Market type</legend>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                className={`min-h-10 rounded-full px-4 text-sm ${marketType === "binary" ? "bg-primary text-primary-foreground" : "border border-border"}`}
+                onClick={() => {
+                  setMarketType("binary");
+                  setPrepared(null);
+                  setForm((f) => ({ ...f, outcomes: "Yes,No" }));
+                }}
+              >
+                Binary (Yes / No)
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                className={`min-h-10 rounded-full px-4 text-sm ${marketType === "multi" ? "bg-primary text-primary-foreground" : "border border-border"}`}
+                onClick={() => {
+                  setMarketType("multi");
+                  setPrepared(null);
+                  setForm((f) => ({
+                    ...f,
+                    outcomes: f.outcomes.includes(",") && f.outcomes !== "Yes,No" ? f.outcomes : "A,B,C",
+                  }));
+                }}
+              >
+                Multi-outcome (2–8)
+              </button>
+            </div>
+          </fieldset>
+
           {(
             [
-              "title",
-              "description",
-              "category",
-              "outcomes",
-              "rules",
-              "source",
-              "sourceUrl",
+              ["title", "Title"],
+              ["description", "Description / question detail"],
+              ["category", "Category"],
+              ["outcomes", "Outcomes (comma-separated)"],
+              ["rules", "Resolution criteria"],
+              ["source", "Resolution source name"],
+              ["sourceUrl", "Evidence / source URL (https)"],
             ] as const
-          ).map((key) => (
+          ).map(([key, label]) => (
             <label className="block text-sm" key={key}>
-              <span className="capitalize">{key}</span>
+              <span>{label}</span>
               {key === "category" ? (
                 <select
                   value={form.category}
@@ -102,16 +207,14 @@ function NativeAdmin() {
                   }}
                   className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background px-3"
                 >
-                  {["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"].map(
-                    (c) => (
-                      <option key={c}>{c}</option>
-                    ),
-                  )}
+                  {CATEGORIES.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
                 </select>
               ) : (
                 <textarea
                   required
-                  disabled={busy}
+                  disabled={busy || (key === "outcomes" && marketType === "binary")}
                   value={form[key]}
                   onChange={(e) => {
                     setPrepared(null);
@@ -123,9 +226,16 @@ function NativeAdmin() {
               )}
             </label>
           ))}
+
+          <p className="text-xs text-muted-foreground">
+            Outcomes parsed: {outcomeList.length ? outcomeList.join(" · ") : "(none)"} (must be 2–8
+            unique labels). Timing (open/close/resolve/deadline) is set at on-chain create — not in
+            this metadata document.
+          </p>
+
           <button
-            disabled={busy}
-            className="min-h-12 rounded-full bg-primary px-5 font-semibold text-primary-foreground"
+            disabled={busy || outcomeList.length < 2}
+            className="min-h-12 rounded-full bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50"
           >
             {busy ? "Preparing…" : "Prepare locked market terms"}
           </button>
@@ -134,7 +244,7 @@ function NativeAdmin() {
         {notice && (
           <p
             role="status"
-            className="mt-5 whitespace-pre-wrap break-all rounded-xl border border-border p-4 text-xs"
+            className="whitespace-pre-wrap break-all rounded-xl border border-border p-4 text-xs"
           >
             {notice}
           </p>

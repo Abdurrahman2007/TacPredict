@@ -27,6 +27,10 @@ Six contracts publicly source-verified, not independently audited; trading pause
 ## TwinMind assistance
 A sanitized, memory-context-disabled code/review request was sent through the authenticated MAX account using the visible Claude Opus 5.5 Thinking option. It returned “Failed to generate a response”; no code from that request has been accepted. A smaller independent request was sent using the visible GPT-6 Astra Thinking option. Record an actual response, review it, adapt it to this repository and test it before claiming TwinMind-generated implementation or deployment. No secrets, real user records or signing material were included.
 
+## Phase-2 shell expansion — 2026-10-11 (UI)
+
+Expanded `/admin` navigation into A→Z groups (Overview/Markets/Trading/Resolution/Users/Blockchain/Finance/System) with explicit live/read/operator/blocked capability badges. Create-market form now locks collateral to native Base USDC, Binary vs Multi-outcome (2–8), and clarifies prepare≠publish. Shared password unlock remains forbidden; auth is still Supabase admin role + AAL2. RPC snapshot sections remain the existing ten — no fabricated fee/treasury endpoints. Full four-role matrix, risk workflows, notifications, and funded Mainnet E2E remain pending.
+
 ## First workspace phase — implemented 2026-10-11
 
 TwinMind's visible GPT-6 Astra Thinking option returned illustrative formatter, shell and SQL authorization code. The example targeted Next.js and included automatic-link formatting artifacts; it was reviewed and adapted to this project's TanStack Start, existing main-Supabase tables and existing assigned admin role, not copied as a fake new database. Code provenance is assistance, not an independent security audit or a claim of the provider's underlying model identity. Opus's separate request failed; no successful Opus review is claimed.

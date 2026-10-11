@@ -106,6 +106,15 @@ function HomePage() {
         <p className="mt-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
           Own-market launch pending. No TacPredict markets have been published yet; spot prices
           below are reference data only.
+          {nativeFeed.deployments.some((d) => d.chainId === 8453) && (
+            <>
+              {" "}
+              Base Mainnet deployment is verified
+              {nativeFeed.deployments.some((d) => d.chainId === 8453 && !d.tradingEnabled)
+                ? "; trading remains paused."
+                : "."}
+            </>
+          )}
         </p>
       )}
       <UpDownSection
