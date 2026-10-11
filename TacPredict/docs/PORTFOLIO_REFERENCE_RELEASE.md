@@ -23,3 +23,13 @@ No remote scripts, analytics beacon, fake example positions/history/P&L, brandin
 Local 320/375/462/1200px: no overflow; tabs, period and active-only control work; Deposit opens actual login.
 Anonymous private-order read denied HTTP401. Real signed-in order/withdraw/claim end-to-end requires owner session/wallet; not performed.
 No other page or shared header/navigation modified. Admin QR repair from previous source commit remains intact.
+
+## Owner compact/theme follow-up
+- Portfolio background is transparent and inherits site colors; no isolated black rounded page panel.
+- Card/secondary/border/primary use the TacPredict theme. Card whitespace/chart height reduced.
+- Removed paused-trading badge from balance summary; it does not restrict reading zero wallet balances.
+- Empty-state zero baseline is clearly empty performance, not a fabricated asset-price history.
+- Portfolio CSS registered via route stylesheet URL.
+- Live QA identified native-select reparenting: React expected SELECT under tp-filters, but it was nested in a replacement DIV, causing removeChild/418 hydration failures on tab changes.
+  Replaced the native select with a custom Popover listbox; no authentication/permission bypass.
+- Financial trading, rewards, contract ownership and navigation unchanged.

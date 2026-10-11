@@ -158,10 +158,7 @@ export function NativePortfolio({
         )
       ) : !q.data?.walletLinked ? (
         <div className="finance-card text-center">
-          <span className="finance-icon mx-auto">
-            <ShieldCheck size={22} />
-          </span>
-          <h3 className="mt-4 font-semibold">Verify your wallet</h3>
+          <h3 className="text-sm font-semibold">Verify your wallet</h3>
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
             Verify wallet ownership to view positions.
           </p>

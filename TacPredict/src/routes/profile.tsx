@@ -12,6 +12,7 @@ import {
   Share2,
   Wallet,
 } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { NativePortfolio } from "@/components/native-portfolio";
 import { WalletFundingDialog } from "@/components/wallet-funding-dialog";
 import { useLoginDialog } from "@/components/login-dialog";
@@ -21,9 +22,12 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { money } from "@/lib/protocol/portfolio-view.mjs";
-import "@/styles/portfolio-reference.css";
+import portfolioCss from "@/styles/portfolio-reference.css?url";
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [{ title: "Portfolio — TacPredict" }] }),
+  head: () => ({
+    meta: [{ title: "Portfolio — TacPredict" }],
+    links: [{ rel: "stylesheet", href: portfolioCss }],
+  }),
   component: PortfolioPage,
 });
 const periods = {
@@ -41,6 +45,7 @@ function PortfolioPage() {
     auth = useProtocolUser(),
     login = useLoginDialog(),
     feed = useQuery(nativeMarketFeedQueryOptions);
+  const [sortOpen, setSortOpen] = useState(false);
   const [funding, setFunding] = useState<"deposit" | "withdraw" | null>(null),
     [range, setRange] = useState<keyof typeof periods>("1D"),
     [tab, setTab] = useState("Positions"),
@@ -158,15 +163,7 @@ function PortfolioPage() {
           <p className="tp-big tp-med">{money(cash, hidden)}</p>
           {claimable !== null && claimable > 0n ? (
             <span className="tp-status">Claimable {money(claimable, hidden)}</span>
-          ) : (
-            <span className="tp-status">
-              {deployment
-                ? deployment.tradingEnabled
-                  ? "Self-custody"
-                  : "Trading paused"
-                : "Base Mainnet"}
-            </span>
-          )}
+          ) : null}
           <div>
             <span className="tp-chain">
               <i />
@@ -234,6 +231,7 @@ function PortfolioPage() {
         >
           <span>{noHistory ? "" : "No verified performance history"}</span>
           <i aria-hidden="true" />
+          {noHistory && <b className="tp-zero-line">$0.00</b>}
         </div>
         <div className="tp-glow" aria-hidden="true" />
       </section>
@@ -262,16 +260,39 @@ function PortfolioPage() {
         </label>
         {tab === "Positions" && (
           <>
-            <select
-              className="tp-select"
-              aria-label="Sort positions"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="value">Current value</option>
-              <option value="shares">Shares</option>
-              <option value="recent">Recent</option>
-            </select>
+            <Popover open={sortOpen} onOpenChange={setSortOpen}>
+              <PopoverTrigger asChild>
+                <button className="tp-select" aria-label="Sort positions">
+                  {sort === "value" ? "Current value" : sort === "shares" ? "Shares" : "Recent"}
+                  <span aria-hidden="true">⌄</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="tp-sort-menu w-44 p-1" align="end">
+                <div role="listbox" aria-label="Position sort order">
+                  {(
+                    [
+                      ["value", "Current value"],
+                      ["shares", "Shares"],
+                      ["recent", "Recent"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      role="option"
+                      aria-selected={sort === value}
+                      className="flex min-h-10 w-full items-center justify-between rounded-lg px-3 text-sm hover:bg-secondary"
+                      onClick={() => {
+                        setSort(value);
+                        setSortOpen(false);
+                      }}
+                    >
+                      {label}
+                      {sort === value && <span aria-hidden="true">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <button
               className="tp-sort"
               aria-label={descending ? "Sort ascending" : "Sort descending"}

@@ -494,3 +494,195 @@
   font-weight: 600;
   margin-bottom: 7px;
 }
+/* Owner follow-up: merge with TacPredict rather than a separate dark template. */
+.tp-portfolio {
+  --tp-bg: var(--background);
+  --tp-card: var(--card);
+  --tp-card2: var(--secondary);
+  --tp-line: var(--border);
+  --tp-muted: var(--muted-foreground);
+  --tp-dim: var(--muted-foreground);
+  --tp-blue: var(--primary);
+  background: transparent;
+  margin: -8px auto 0;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+  font-family: inherit;
+}
+.tp-balances {
+  padding: 12px 0 16px;
+}
+.tp-actions {
+  padding: 0 0 16px;
+}
+.tp-big {
+  font-size: 32px;
+}
+.tp-big.tp-med {
+  font-size: 25px;
+}
+.tp-sub {
+  opacity: 0.72;
+  font-size: 11px;
+}
+.tp-status,
+.tp-periods button.on {
+  background: color-mix(in srgb, var(--primary) 15%, var(--card));
+  color: var(--primary);
+}
+.tp-chain {
+  margin-top: 8px;
+}
+.tp-primary {
+  color: var(--primary-foreground);
+  box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.tp-primary:hover {
+  background: color-mix(in srgb, var(--primary) 90%, white);
+}
+.tp-secondary {
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+.tp-secondary:hover {
+  background: var(--card);
+}
+.tp-pl {
+  margin: 0 0 16px;
+  border-radius: 18px;
+  padding-top: 14px;
+}
+.tp-pl-head {
+  gap: 6px;
+}
+.tp-pl-head h2 {
+  font-size: 13px;
+}
+.tp-periods {
+  gap: 0;
+}
+.tp-periods button {
+  padding: 6px;
+  min-height: 30px;
+  font-size: 10px;
+}
+.tp-pl-value {
+  padding-top: 12px;
+}
+.tp-pl-value strong {
+  font-size: 29px;
+}
+.tp-watermark {
+  opacity: 0.6;
+}
+.tp-chart {
+  height: 74px;
+}
+.tp-chart i {
+  bottom: 12px;
+  background: var(--border);
+}
+.tp-zero-line {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.tp-glow {
+  height: 14px;
+  margin: 0 16px 14px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary) 24%, transparent),
+    color-mix(in srgb, var(--primary) 7%, transparent)
+  );
+  box-shadow: none;
+}
+.tp-segment {
+  margin: 0;
+  background: var(--background);
+  border-color: var(--border);
+}
+.tp-segment button.on {
+  background: var(--secondary);
+}
+.tp-filters {
+  margin: 12px 0 4px;
+}
+.tp-search,
+.tp-select,
+.tp-sort {
+  background: var(--card);
+  border-color: var(--border);
+}
+.tp-toggle {
+  background: var(--secondary);
+}
+.tp-results {
+  padding: 0;
+}
+.tp-results .finance-card {
+  padding: 16px;
+}
+.tp-results .finance-icon {
+  background: color-mix(in srgb, var(--primary) 15%, var(--card));
+  color: var(--primary);
+}
+.tp-results .finance-pill-primary {
+  color: var(--primary-foreground);
+}
+.tp-results .tp-empty {
+  padding: 40px 8px 46px;
+}
+@media (min-width: 640px) {
+  .tp-portfolio {
+    padding: 0;
+  }
+  .tp-balances {
+    padding: 14px 0 20px;
+  }
+  .tp-big {
+    font-size: 40px;
+  }
+  .tp-big.tp-med {
+    font-size: 30px;
+  }
+  .tp-chart {
+    height: 100px;
+  }
+  .tp-periods button {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+}
+@media (max-width: 360px) {
+  .tp-big {
+    font-size: 28px;
+  }
+  .tp-big.tp-med {
+    font-size: 23px;
+  }
+  .tp-periods {
+    width: auto;
+    margin-left: auto;
+    gap: 0;
+  }
+  .tp-periods button {
+    font-size: 9px;
+    padding: 6px 5px;
+  }
+}
+.tp-portfolio button.tp-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tp-sort-menu {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
