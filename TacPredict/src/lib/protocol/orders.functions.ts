@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { signedOrderSchema } from "./orders";
+import { signedOrderSchema, signatureSchema } from "./orders";
 export const submitProtocolOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) =>
@@ -10,7 +10,7 @@ export const submitProtocolOrder = createServerFn({ method: "POST" })
         chainId: z.union([z.literal(8453), z.literal(84532)]),
         marketUuid: z.string().uuid(),
         order: signedOrderSchema,
-        signature: z.string().regex(/^0x[0-9a-fA-F]{130}$/),
+        signature: signatureSchema,
       })
       .parse(v),
   )

@@ -26,6 +26,9 @@ contract MarketRegistry is AccessControl {
     event ResolutionFinalized(uint256 indexed marketId, uint256[] weights, bool voided);
     event TradingPaused(bool paused);
     constructor(address admin, address usdc) {
+        require(block.chainid == 8453 || block.chainid == 84532, "Base only");
+        address nativeUSDC = block.chainid == 8453 ? 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 : 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
+        require(usdc == nativeUSDC, "Native Base USDC only");
         require(admin != address(0) && usdc.code.length > 0, "Bad deployment");
         require(IERC20Metadata(usdc).decimals() == 6, "USDC decimals");
         collateralToken = usdc;

@@ -1,6 +1,120 @@
 /** No mainnet deployment path. Testnet execution requires an explicit operator flag. */
-import fs from 'node:fs';import path from 'node:path';import {createPublicClient,createWalletClient,http,encodeFunctionData,keccak256,stringToHex} from 'viem';import {privateKeyToAccount} from 'viem/accounts';import {baseSepolia} from 'viem/chains';
-if(!process.argv.includes('--execute-testnet')){console.log('Dry run: six contracts, Base Sepolia 84532, existing native USDC. Compile first. No transactions submitted. Set testnet RPC, testnet deployer key and admin address, then explicitly pass --execute-testnet.');process.exit(0)}
-for(const key of ['BASE_SEPOLIA_PROTOCOL_RPC_URL','TESTNET_DEPLOYER_PRIVATE_KEY','PROTOCOL_ADMIN_ADDRESS'])if(!process.env[key])throw Error(`Missing ${key}`);const account=privateKeyToAccount(process.env.TESTNET_DEPLOYER_PRIVATE_KEY);const transport=http(process.env.BASE_SEPOLIA_PROTOCOL_RPC_URL);const pub=createPublicClient({chain:baseSepolia,transport}),wallet=createWalletClient({account,chain:baseSepolia,transport});if(await pub.getChainId()!==84532)throw Error('Testnet-only guard');const usdc='0x036CbD53842c5426634e7929541eC2318f3dCF7e';const usdcCode=await pub.getBytecode({address:usdc});if(!usdcCode)throw Error('Native test USDC missing');const admin=process.env.PROTOCOL_ADMIN_ADDRESS;const names=['MarketRegistry','ResolutionOracle','MarketFactory','ConditionalPositions','Exchange','Settlement'];const root=path.resolve(import.meta.dirname,'../artifacts');const artifacts=Object.fromEntries(names.map(n=>[n,JSON.parse(fs.readFileSync(root+'/'+n+'.json','utf8'))]));const addresses={},codeHashes={};let deploymentBlock;
-async function deploy(name,args){const {abi,bytecode}=artifacts[name];const gas=await pub.estimateContractGas({account,abi,bytecode,args});if(gas>5_000_000n)throw Error('Unexpected deployment gas, review required');const hash=await wallet.deployContract({abi,bytecode,args,gas:gas+gas/5n});const receipt=await pub.waitForTransactionReceipt({hash});if(receipt.status!=='success'||!receipt.contractAddress)throw Error('Deployment failed');addresses[name]=receipt.contractAddress;const code=await pub.getBytecode({address:receipt.contractAddress});codeHashes[name]=keccak256(code);deploymentBlock??=receipt.blockNumber;console.log(JSON.stringify({contract:name,address:receipt.contractAddress,txHash:hash}));return receipt.contractAddress}
-await deploy('MarketRegistry',[admin,usdc]);await deploy('ResolutionOracle',[admin,addresses.MarketRegistry,5_000_000n,86400n]);await deploy('MarketFactory',[admin,addresses.MarketRegistry,addresses.ResolutionOracle]);await deploy('ConditionalPositions',[addresses.MarketRegistry]);await deploy('Exchange',[addresses.MarketRegistry,addresses.ConditionalPositions]);await deploy('Settlement',[addresses.MarketRegistry,addresses.ConditionalPositions]);const grants=[['FACTORY_ROLE',addresses.MarketFactory],['ORACLE_ROLE',addresses.ResolutionOracle]].map(([role,to])=>({to:addresses.MarketRegistry,value:'0',data:encodeFunctionData({abi:artifacts.MarketRegistry.abi,functionName:'grantRole',args:[keccak256(stringToHex(role)),to]})}));const keys={registry:'MarketRegistry',factory:'MarketFactory',positions:'ConditionalPositions',exchange:'Exchange',oracle:'ResolutionOracle',settlement:'Settlement'};const manifest={chain_id:84532,collateral_token:usdc,...Object.fromEntries(Object.entries(keys).map(([k,n])=>[k,addresses[n]])),deployment_block:deploymentBlock.toString(),code_hashes:Object.fromEntries(Object.entries(keys).map(([k,n])=>[k,codeHashes[n]])),verified:false,trading_enabled:false,admin,requiredAdminBootstrap:grants};fs.writeFileSync(path.resolve(import.meta.dirname,'../testnet-deployment.json'),JSON.stringify(manifest,null,2));console.log('Testnet deployed, not activated. Admin must grant bootstrap roles; review source/roles/manifest before marking database deployment verified.');
+import fs from "node:fs";
+import path from "node:path";
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  encodeFunctionData,
+  keccak256,
+  stringToHex,
+  isAddress,
+  zeroAddress,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "viem/chains";
+if (!process.argv.includes("--execute-testnet")) {
+  console.log(
+    "Dry run: six contracts, Base Sepolia 84532, existing native USDC. Compile first. No transactions submitted. Set testnet RPC, testnet deployer key and admin address, then explicitly pass --execute-testnet.",
+  );
+  process.exit(0);
+}
+for (const key of [
+  "BASE_SEPOLIA_PROTOCOL_RPC_URL",
+  "TESTNET_DEPLOYER_PRIVATE_KEY",
+  "PROTOCOL_ADMIN_ADDRESS",
+])
+  if (!process.env[key]) throw Error(`Missing ${key}`);
+const account = privateKeyToAccount(process.env.TESTNET_DEPLOYER_PRIVATE_KEY);
+const transport = http(process.env.BASE_SEPOLIA_PROTOCOL_RPC_URL);
+const pub = createPublicClient({ chain: baseSepolia, transport }),
+  wallet = createWalletClient({ account, chain: baseSepolia, transport });
+if ((await pub.getChainId()) !== 84532) throw Error("Testnet-only guard");
+const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+const usdcCode = await pub.getBytecode({ address: usdc });
+if (!usdcCode) throw Error("Native test USDC missing");
+const admin = process.env.PROTOCOL_ADMIN_ADDRESS;
+if (!isAddress(admin) || admin.toLowerCase() === zeroAddress)
+  throw Error("Nonzero admin address required");
+const names = [
+  "MarketRegistry",
+  "ResolutionOracle",
+  "MarketFactory",
+  "ConditionalPositions",
+  "Exchange",
+  "Settlement",
+];
+const root = path.resolve(import.meta.dirname, "../artifacts");
+const artifacts = Object.fromEntries(
+  names.map((n) => [n, JSON.parse(fs.readFileSync(root + "/" + n + ".json", "utf8"))]),
+);
+const addresses = {},
+  codeHashes = {},
+  creationProofs = {};
+let deploymentBlock;
+async function deploy(name, args) {
+  const { abi, bytecode } = artifacts[name];
+  const gas = await pub.estimateContractGas({ account, abi, bytecode, args });
+  if (gas > 5_000_000n) throw Error("Unexpected deployment gas, review required");
+  const hash = await wallet.deployContract({ abi, bytecode, args, gas: gas + gas / 5n });
+  const receipt = await pub.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success" || !receipt.contractAddress) throw Error("Deployment failed");
+  addresses[name] = receipt.contractAddress;
+  creationProofs[name] = {
+    txHash: hash,
+    args: args.map((v) => (typeof v === "bigint" ? v.toString() : v)),
+    blockNumber: receipt.blockNumber.toString(),
+  };
+  const code = await pub.getBytecode({ address: receipt.contractAddress });
+  codeHashes[name] = keccak256(code);
+  deploymentBlock ??= receipt.blockNumber;
+  console.log(JSON.stringify({ contract: name, address: receipt.contractAddress, txHash: hash }));
+  return receipt.contractAddress;
+}
+await deploy("MarketRegistry", [admin, usdc]);
+await deploy("ResolutionOracle", [admin, addresses.MarketRegistry, 5_000_000n, 86400n]);
+await deploy("MarketFactory", [admin, addresses.MarketRegistry, addresses.ResolutionOracle]);
+await deploy("ConditionalPositions", [addresses.MarketRegistry]);
+await deploy("Exchange", [addresses.MarketRegistry, addresses.ConditionalPositions]);
+await deploy("Settlement", [addresses.MarketRegistry, addresses.ConditionalPositions]);
+const grants = [
+  ["FACTORY_ROLE", addresses.MarketFactory],
+  ["ORACLE_ROLE", addresses.ResolutionOracle],
+].map(([role, to]) => ({
+  to: addresses.MarketRegistry,
+  value: "0",
+  data: encodeFunctionData({
+    abi: artifacts.MarketRegistry.abi,
+    functionName: "grantRole",
+    args: [keccak256(stringToHex(role)), to],
+  }),
+}));
+const keys = {
+  registry: "MarketRegistry",
+  factory: "MarketFactory",
+  positions: "ConditionalPositions",
+  exchange: "Exchange",
+  oracle: "ResolutionOracle",
+  settlement: "Settlement",
+};
+const manifest = {
+  chain_id: 84532,
+  collateral_token: usdc,
+  ...Object.fromEntries(Object.entries(keys).map(([k, n]) => [k, addresses[n]])),
+  deployment_block: deploymentBlock.toString(),
+  code_hashes: Object.fromEntries(Object.entries(keys).map(([k, n]) => [k, codeHashes[n]])),
+  deployment_transactions: Object.fromEntries(
+    Object.entries(keys).map(([k, n]) => [k, creationProofs[n]]),
+  ),
+  verified: false,
+  trading_enabled: false,
+  admin,
+  requiredAdminBootstrap: grants,
+};
+fs.writeFileSync(
+  path.resolve(import.meta.dirname, "../testnet-deployment.json"),
+  JSON.stringify(manifest, null, 2),
+);
+console.log(
+  "Testnet deployed, not activated. Admin must grant bootstrap roles; review source/roles/manifest before marking database deployment verified.",
+);

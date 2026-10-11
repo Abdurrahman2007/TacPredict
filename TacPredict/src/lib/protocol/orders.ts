@@ -15,6 +15,7 @@ export const signedOrderSchema = z.object({
   expiration: uint.refine((v) => BigInt(v) < 2n ** 64n),
   taker: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
 });
+export const signatureSchema = z.string().regex(/^0x(?:[0-9a-fA-F]{2}){1,8192}$/);
 export type SignedOrder = z.infer<typeof signedOrderSchema>;
 export const orderTypes = {
   Order: [

@@ -1,3 +1,5 @@
+import { NativeOperatorConsole } from "@/components/native-operator-console";
+import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -12,6 +14,7 @@ function NativeAdmin() {
     queryFn: () => getProtocolAdminAccess(),
     retry: 0,
   });
+  const [prepared, setPrepared] = useState<PreparedTerms | null>(null);
   const [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -47,14 +50,16 @@ function NativeAdmin() {
         onSubmit={(e) => {
           e.preventDefault();
           setBusy(true);
+          setPrepared(null);
           void prepareNativeMarket({
             data: { ...form, outcomes: form.outcomes.split(",").map((x) => x.trim()), tags: [] },
           })
-            .then((r) =>
+            .then((r) => {
+              setPrepared(r);
               setNotice(
-                `Metadata prepared, not published.\nMetadata hash: ${r.metadataHash}\nRules hash: ${r.rulesHash}\nSource hash: ${r.sourceHash}\nURI: ${r.metadataUri}\nUse the testnet deployment/market-creation runbook. No contract transaction has been submitted.`,
-              ),
-            )
+                `Metadata prepared, not published.\nMetadata hash: ${r.metadataHash}\nRules hash: ${r.rulesHash}\nSource hash: ${r.sourceHash}\nURI: ${r.metadataUri}\nReview these immutable terms in the operator console below. A verified Base deployment and your wallet approval are required to create the market. Preparing metadata does not submit a transaction.`,
+              );
+            })
             .catch((e) => setNotice(e instanceof Error ? e.message : "Preparation failed."))
             .finally(() => setBusy(false));
         }}
@@ -67,9 +72,11 @@ function NativeAdmin() {
             {key === "category" ? (
               <select
                 value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as typeof form.category })
-                }
+                disabled={busy}
+                onChange={(e) => {
+                  setPrepared(null);
+                  setForm({ ...form, category: e.target.value as typeof form.category });
+                }}
                 className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background px-3"
               >
                 {["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"].map(
@@ -81,8 +88,12 @@ function NativeAdmin() {
             ) : (
               <textarea
                 required
+                disabled={busy}
                 value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                onChange={(e) => {
+                  setPrepared(null);
+                  setForm({ ...form, [key]: e.target.value });
+                }}
                 rows={["description", "rules"].includes(key) ? 4 : 1}
                 className="mt-2 w-full rounded-xl border border-border bg-background p-3"
               />
@@ -96,6 +107,7 @@ function NativeAdmin() {
           {busy ? "Preparing…" : "Prepare locked market terms"}
         </button>
       </form>
+      <NativeOperatorConsole prepared={prepared} outcomeCount={form.outcomes.split(",").length} />
       {notice && (
         <p
           role="status"

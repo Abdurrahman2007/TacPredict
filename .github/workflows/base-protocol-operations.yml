@@ -1,0 +1,62 @@
+name: Base protocol operations
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: base-protocol-single-writer
+  cancel-in-progress: false
+jobs:
+  finalized-indexing-and-matching:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: TacPredict
+    env:
+      SUPABASE_URL: https://lmqaiqvwcytmgwgwyfwx.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROTOCOL_SUPABASE_SERVICE_ROLE_KEY }}
+      PROTOCOL_RPC_URL: ${{ secrets.BASE_PROTOCOL_OPERATIONS_RPC }}
+      PROTOCOL_CHAIN_ID: ${{ vars.PROTOCOL_CHAIN_ID }}
+      PROTOCOL_RELAYER_PRIVATE_KEY: ${{ secrets.BASE_PROTOCOL_RELAYER_PRIVATE_KEY }}
+      PROTOCOL_MAX_FEE_WEI: '2000000000'
+      MAINNET_MATCHING_APPROVED: 'false'
+      MATCHER_MODE: ${{ vars.BASE_MATCHER_MODE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: development/base-usdc
+      - name: Check explicit operator configuration
+        id: gate
+        run: |
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -z "$PROTOCOL_RPC_URL" ]; then
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+            echo 'No configured server credentials: operations skipped, not simulated.'
+          elif [ "$PROTOCOL_CHAIN_ID" != '8453' ] && [ "$PROTOCOL_CHAIN_ID" != '84532' ]; then
+            echo 'Base Mainnet or Base Sepolia chain ID must be configured.'
+            exit 1
+          else
+            echo 'configured=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.configured == 'true'
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: TacPredict/package-lock.json
+      - if: steps.gate.outputs.configured == 'true'
+        run: npm ci && npm ci --prefix protocol && npm --prefix protocol run compile
+      - name: Index finalized Base receipts
+        if: steps.gate.outputs.configured == 'true'
+        run: node protocol/scripts/indexer.mjs
+      - name: Match only under separately reviewed testnet activation
+        if: steps.gate.outputs.configured == 'true'
+        run: |
+          if [ "$PROTOCOL_CHAIN_ID" = '84532' ] && [ "$MATCHER_MODE" = 'testnet-execute' ] && [ -n "$PROTOCOL_RELAYER_PRIVATE_KEY" ]; then
+            node protocol/scripts/matcher.mjs --execute
+          else
+            node protocol/scripts/matcher.mjs
+          fi
+# No automatic mainnet settlement/deployment. DB leases also fence manual/concurrent jobs.

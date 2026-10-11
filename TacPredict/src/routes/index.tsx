@@ -2,7 +2,7 @@ import { OutcomeRow } from "@/components/outcome-row";
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { CalendarDays, ChevronRight, Flame, Radio, Sparkles, TrendingUp } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
@@ -47,6 +47,8 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const { feed = "Trending" } = Route.useSearch();
   const { data: crypto } = useQuery(cryptoMarketQueryOptions);
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
@@ -131,7 +133,7 @@ function HomePage() {
       <MarketSection title={feed} markets={feedMarkets} />
       <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
         Own-market trades and volume indexed by {nativeFeed.source} · refreshed{" "}
-        {new Date(nativeFeed.updatedAt).toISOString().slice(11, 16) + " UTC"}
+        {hydrated ? new Date(nativeFeed.updatedAt).toISOString().slice(11, 16) + " UTC" : "—"}
       </p>
     </div>
   );

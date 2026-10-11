@@ -1,3 +1,5 @@
+import { NativePublicResolution } from "@/components/native-public-resolution";
+import { NativeMakerTools } from "@/components/native-maker-tools";
 import { NativeMarketTerms, NativeActivity } from "@/components/native-market-data";
 import { atomicDecimal } from "@/lib/protocol/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -163,7 +165,19 @@ function MarketDetailPage() {
             ))}
           </section>
           <MarketDescription key={market.id} text={market.description} />
-          {market.native && <NativeMarketTerms market={market.native} />}
+          {market.native && (
+            <>
+              <NativeMarketTerms market={market.native} />
+              <NativeMakerTools
+                market={market.native}
+                deployment={feed.deployments.find((d) => d.chainId === market.native!.chainId)}
+              />
+              <NativePublicResolution
+                market={market.native}
+                deployment={feed.deployments.find((d) => d.chainId === market.native!.chainId)}
+              />
+            </>
+          )}
           <details className="mt-4 rounded-2xl border border-border/60 bg-card/40 p-4">
             <summary className="cursor-pointer text-sm font-semibold">Rules</summary>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">

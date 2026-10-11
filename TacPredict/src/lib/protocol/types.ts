@@ -2,7 +2,7 @@ import { z } from "zod";
 const atomic = z.string().regex(/^\d+$/);
 const hex = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 export const deploymentSchema = z.object({
-  chainId: z.number().int(),
+  chainId: z.union([z.literal(8453), z.literal(84532)]),
   collateral: hex,
   registry: hex,
   factory: hex,
@@ -11,12 +11,20 @@ export const deploymentSchema = z.object({
   oracle: hex,
   settlement: hex,
   tradingEnabled: z.boolean(),
+  codeHashes: z.object(
+    Object.fromEntries(
+      ["registry", "factory", "positions", "exchange", "oracle", "settlement"].map((k) => [
+        k,
+        z.string().regex(/^0x[0-9a-f]{64}$/),
+      ]),
+    ),
+  ),
 });
 export const nativeMarketSchema = z.object({
   id: z.string().uuid(),
   marketId: z.string().regex(/^TACP-\d+-\d+$/),
   onchainId: atomic,
-  chainId: z.number().int(),
+  chainId: z.union([z.literal(8453), z.literal(84532)]),
   questionId: z.string(),
   conditionId: z.string(),
   metadataHash: z.string(),

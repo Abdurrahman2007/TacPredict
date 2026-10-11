@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/protocol.test.mjs test/ui-order-math.test.mjs test/reward-view.test.mjs",
-    "compile": "node scripts/compile.mjs"
+    "test": "node --test test/protocol.test.mjs test/ui-order-math.test.mjs test/reward-view.test.mjs test/deployment-verifier.test.mjs test/job-fencing.test.mjs",
+    "compile": "node scripts/compile.mjs",
+    "verify:deployment": "node scripts/verify-deployment.mjs"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.2.0",

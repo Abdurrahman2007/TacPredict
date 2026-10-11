@@ -71,3 +71,36 @@ export const prepareNativeMarket = createServerFn({ method: "POST" })
       document,
     };
   });
+
+export const getProtocolAdminDeployments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const client = context.supabase as unknown as SupabaseClient;
+    const role = await client
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin");
+    if (role.error || !role.data?.length) throw Error("Assigned administrator required");
+    const { data, error } = await client
+      .from("protocol_deployments")
+      .select("*")
+      .eq("verified", true)
+      .in("chain_id", [8453, 84532]);
+    if (error) throw Error("Verified Base deployments unavailable");
+    const { deploymentSchema } = await import("./types");
+    return (data ?? []).map((d) =>
+      deploymentSchema.parse({
+        chainId: d.chain_id,
+        collateral: d.collateral_token,
+        registry: d.registry,
+        factory: d.factory,
+        positions: d.positions,
+        exchange: d.exchange,
+        oracle: d.oracle,
+        settlement: d.settlement,
+        tradingEnabled: d.trading_enabled,
+        codeHashes: d.code_hashes,
+      }),
+    );
+  });
