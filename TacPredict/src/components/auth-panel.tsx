@@ -30,6 +30,7 @@ export function AuthPanel({
   const [clock, setClock] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [chooseWallet, setChooseWallet] = useState(false);
   const verificationStep = !!sentTo || useExistingCode;
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [farcasterBusy, setFarcasterBusy] = useState(false);
@@ -297,14 +298,14 @@ export function AuthPanel({
       await finish();
     });
   return (
-    <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-5 pb-5 pt-7 text-white sm:px-6">
+    <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-6 pb-6 pt-9 text-white sm:px-8">
       <div className="text-center">
         <img
           src="/brand/tacpredict.svg"
           alt="TacPredict"
-          className="mx-auto mb-2 size-9 rounded-xl"
+          className="mx-auto mb-3 size-11 rounded-xl"
         />
-        <h1 className="text-[22px] font-semibold tracking-[-.025em]">
+        <h1 className="text-[28px] font-semibold tracking-[-.025em]">
           {user ? "Your account" : mode === "signup" ? "Create account" : "Sign in"}
         </h1>
       </div>
@@ -314,6 +315,46 @@ export function AuthPanel({
             <CheckCircle2 className="size-5 shrink-0 text-emerald-400" />
             <span className="min-w-0 break-all text-sm">{user.email || "Wallet account"}</span>
           </div>
+          <Button
+            variant="outline"
+            className="h-12 w-full rounded-full border-white/25 bg-transparent"
+            disabled={locked}
+            onClick={() =>
+              void attempt(async () => {
+                const installed = wallets.find((w) => /coinbase/i.test(w.name));
+                const provider =
+                  installed?.provider ??
+                  (await import("@/lib/onchain/coinbase-auth").then((m) =>
+                    m.getCoinbaseAuthProvider(),
+                  ));
+                if (!provider) throw Error("Coinbase Wallet is unavailable. Please try again.");
+                await connect(
+                  installed ?? { id: "coinbase-sdk", name: "Coinbase Wallet", provider },
+                );
+                await finish();
+              })
+            }
+          >
+            Connect Coinbase Wallet
+          </Button>
+          {wallets
+            .filter((w) => !/coinbase/i.test(w.name))
+            .map((w) => (
+              <Button
+                key={w.id}
+                variant="outline"
+                className="h-12 w-full rounded-full border-white/25 bg-transparent"
+                disabled={locked}
+                onClick={() =>
+                  void attempt(async () => {
+                    await connect(w);
+                    await finish();
+                  })
+                }
+              >
+                Connect {w.name}
+              </Button>
+            ))}
           <Button className="h-12 w-full rounded-full" onClick={() => void finish()}>
             Continue
           </Button>
@@ -334,56 +375,60 @@ export function AuthPanel({
         </div>
       ) : (
         <>
-          <div className="auth-social mt-5 grid grid-cols-4 gap-2">
-            <Button
-              aria-label="Continue with Google"
-              title={
-                !authFeatures.google ? "Google is disabled in Supabase" : "Continue with Google"
-              }
-              variant="outline"
-              className="h-11 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
-              disabled={locked || !authFeatures.google}
-              onClick={() =>
-                void attempt(async () => {
-                  sessionStorage.setItem("tac-auth-next", safeAuthNext(next));
-                  const { error } = await supabase.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                      redirectTo: `${window.location.origin}/auth/callback`,
-                      scopes: "openid email profile",
-                    },
-                  });
-                  if (error) throw error;
-                })
-              }
-            >
-              <span aria-hidden="true" className="text-2xl font-bold">
-                <svg viewBox="0 0 24 24" className="size-6" fill="currentColor">
-                  <path d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.61 4.61 0 0 1-2 3.02v2.5h3.24c1.9-1.75 2.98-4.32 2.98-7.35ZM12 22c2.7 0 4.97-.89 6.63-2.42l-3.24-2.5c-.9.6-2.05.96-3.39.96-2.6 0-4.8-1.75-5.59-4.1H3.07v2.58A10 10 0 0 0 12 22ZM6.41 13.94a6 6 0 0 1 0-3.88V7.48H3.07a10 10 0 0 0 0 9.04l3.34-2.58ZM12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.93 5.48l3.34 2.58A6 6 0 0 1 12 5.96Z" />
+          <div className="auth-social mt-6 flex gap-2 [&>button]:flex-1">
+            {authFeatures.google && (
+              <Button
+                aria-label="Continue with Google"
+                title={
+                  !authFeatures.google ? "Google is disabled in Supabase" : "Continue with Google"
+                }
+                variant="outline"
+                className="h-14 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
+                disabled={locked || !authFeatures.google}
+                onClick={() =>
+                  void attempt(async () => {
+                    sessionStorage.setItem("tac-auth-next", safeAuthNext(next));
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: "google",
+                      options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        scopes: "openid email profile",
+                      },
+                    });
+                    if (error) throw error;
+                  })
+                }
+              >
+                <span aria-hidden="true" className="text-2xl font-bold">
+                  <svg viewBox="0 0 24 24" className="size-6" fill="currentColor">
+                    <path d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.61 4.61 0 0 1-2 3.02v2.5h3.24c1.9-1.75 2.98-4.32 2.98-7.35ZM12 22c2.7 0 4.97-.89 6.63-2.42l-3.24-2.5c-.9.6-2.05.96-3.39.96-2.6 0-4.8-1.75-5.59-4.1H3.07v2.58A10 10 0 0 0 12 22ZM6.41 13.94a6 6 0 0 1 0-3.88V7.48H3.07a10 10 0 0 0 0 9.04l3.34-2.58ZM12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.93 5.48l3.34 2.58A6 6 0 0 1 12 5.96Z" />
+                  </svg>
+                </span>
+              </Button>
+            )}
+            {authFeatures.x && (
+              <Button
+                aria-label="Continue with X"
+                title={!authFeatures.x ? "X is disabled in Supabase" : "Continue with X"}
+                variant="outline"
+                className="h-14 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
+                disabled={locked || !authFeatures.x}
+                onClick={() =>
+                  void attempt(async () => {
+                    sessionStorage.setItem("tac-auth-next", safeAuthNext(next));
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: authFeatures.xProvider,
+                      options: { redirectTo: `${window.location.origin}/auth/callback` },
+                    });
+                    if (error) throw error;
+                  })
+                }
+              >
+                <svg viewBox="0 0 24 24" className="size-6" fill="currentColor" aria-hidden="true">
+                  <path d="M18.9 2H22l-6.8 7.8L23.2 22H17l-4.85-7.35L5.7 22H2.55l7.2-8.24L1 2h6.35l4.4 6.65L18.9 2ZM17.5 20h1.7L6.35 3.9H4.52L17.5 20Z" />
                 </svg>
-              </span>
-            </Button>
-            <Button
-              aria-label="Continue with X"
-              title={!authFeatures.x ? "X is disabled in Supabase" : "Continue with X"}
-              variant="outline"
-              className="h-11 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
-              disabled={locked || !authFeatures.x}
-              onClick={() =>
-                void attempt(async () => {
-                  sessionStorage.setItem("tac-auth-next", safeAuthNext(next));
-                  const { error } = await supabase.auth.signInWithOAuth({
-                    provider: authFeatures.xProvider,
-                    options: { redirectTo: `${window.location.origin}/auth/callback` },
-                  });
-                  if (error) throw error;
-                })
-              }
-            >
-              <svg viewBox="0 0 24 24" className="size-6" fill="currentColor" aria-hidden="true">
-                <path d="M18.9 2H22l-6.8 7.8L23.2 22H17l-4.85-7.35L5.7 22H2.55l7.2-8.24L1 2h6.35l4.4 6.65L18.9 2ZM17.5 20h1.7L6.35 3.9H4.52L17.5 20Z" />
-              </svg>
-            </Button>
+              </Button>
+            )}
             <FarcasterSignIn
               compact
               disabled={busy}
@@ -391,41 +436,36 @@ export function AuthPanel({
               onSuccess={finish}
               onError={setMessage}
             />
-            <Button
-              aria-label="Sign-in options"
-              variant="outline"
-              className="h-11 rounded-full border-[#697180] bg-transparent text-xl hover:bg-white/[.055]"
-              onClick={() =>
-                setMessage(
-                  `Google: ${authFeatures.google ? "available" : "disabled in Supabase"} · Email: ${authFeatures.emailOtp ? "available" : "disabled in Supabase"} · X: ${authFeatures.x ? "available" : "disabled in Supabase"}. Wallet sign-in only requests a message signature, never a token approval.`,
-                )
-              }
+          </div>
+          {authFeatures.emailOtp && <div className="mt-3">{emailForm}</div>}
+          {authFeatures.loading && (
+            <p role="status" className="mt-3 text-center text-xs text-slate-400">
+              Checking sign-in methods…
+            </p>
+          )}
+          {authFeatures.emailOtp && (
+            <button
+              type="button"
+              disabled={locked}
+              onClick={() => {
+                setUseExistingCode(true);
+                setCode("");
+                setMessage("");
+              }}
+              className="mt-2 block w-full text-center text-[11px] text-slate-400 hover:text-white"
             >
-              •••
-            </Button>
-          </div>
-          <div className="mt-2.5">{emailForm}</div>
-          <button
-            type="button"
-            disabled={locked}
-            onClick={() => {
-              setUseExistingCode(true);
-              setCode("");
-              setMessage("");
-            }}
-            className="mt-1.5 block w-full text-center text-[11px] text-slate-400 hover:text-white"
-          >
-            Already have a code?
-          </button>
-          <div className="my-4 flex items-center gap-3 text-[11px] text-muted-foreground">
-            <span className="h-px flex-1 bg-white/20" />
+              Already have a code?
+            </button>
+          )}
+          <div className="my-5 flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-white/25" />
             OR
-            <span className="h-px flex-1 bg-white/20" />
+            <span className="h-px flex-1 bg-white/25" />
           </div>
-          <div className="space-y-2" aria-label="Wallet sign-in methods">
+          <div className="space-y-2.5" aria-label="Wallet sign-in methods">
             <Button
               variant="outline"
-              className="h-11 w-full justify-between rounded-full border-[#697180] bg-transparent px-4 text-sm font-normal hover:bg-white/[.055]"
+              className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
               disabled={locked}
               onClick={() =>
                 void attempt(async () => {
@@ -446,7 +486,7 @@ export function AuthPanel({
               }
             >
               <span>Coinbase Wallet</span>
-              <img src="/brand/providers/coinbase.svg" className="size-6 rounded-lg" alt="" />
+              <img src="/brand/providers/coinbase.svg" className="size-7 rounded-lg" alt="" />
             </Button>
             <FarcasterSignIn
               disabled={busy}
@@ -455,30 +495,59 @@ export function AuthPanel({
               onError={setMessage}
               walletRow
             />
-            {wallets.length ? (
+            {chooseWallet && (
+              <div className="space-y-2 rounded-2xl border border-white/10 p-3">
+                <p className="text-xs text-slate-400">Open in a wallet app to sign in</p>
+                <a
+                  className="flex min-h-11 items-center justify-between rounded-full border border-white/20 px-4 text-sm"
+                  href="https://metamask.app.link/dapp/tacpredict.fun/auth"
+                >
+                  MetaMask <span className="text-xs text-slate-400">Open app ↗</span>
+                </a>
+                <a
+                  className="flex min-h-11 items-center justify-between rounded-full border border-white/20 px-4 text-sm"
+                  href="https://link.trustwallet.com/open_url?coin_id=60&url=https%3A%2F%2Ftacpredict.fun%2Fauth"
+                >
+                  Trust Wallet <span className="text-xs text-slate-400">Open app ↗</span>
+                </a>
+              </div>
+            )}
+            {chooseWallet &&
               wallets.map((wallet, index) => (
                 <Button
                   key={wallet.id}
                   variant="outline"
-                  className="h-11 w-full justify-between rounded-full border-[#697180] bg-transparent px-4 text-sm"
+                  className="h-12 w-full justify-between rounded-full border-[#697180] bg-transparent px-5"
                   disabled={locked}
                   onClick={() => signInWallet(index)}
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <Wallet className="size-4 opacity-70" />
-                    {wallet.name}
-                  </span>
-                  <span className="text-[11px] text-blue-400">Installed</span>
+                  <span>{wallet.name}</span>
+                  <span className="text-xs text-blue-400">Installed</span>
                 </Button>
-              ))
-            ) : (
-              <p className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2.5 text-[11px] leading-5 text-slate-400">
-                No browser wallet detected yet. Open TacPredict in MetaMask/Trust, or use Coinbase
-                Wallet above. WalletConnect QR is not configured.
-              </p>
+              ))}
+            {true && (
+              <Button
+                variant="outline"
+                className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
+                disabled={locked}
+                onClick={() => {
+                  setChooseWallet(!chooseWallet);
+                }}
+              >
+                <span>
+                  {wallets.length
+                    ? chooseWallet
+                      ? "Show fewer wallets"
+                      : "All wallets"
+                    : "All wallets"}
+                </span>
+                <span className="rounded-full border border-primary/60 px-2 py-0.5 text-xs text-primary">
+                  {wallets.length || <Wallet className="size-4" />}
+                </span>
+              </Button>
             )}
           </div>
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-5 text-center text-xs text-slate-400">
             {mode === "signin" ? "New here? " : "Already have an account? "}
             <button
               disabled={locked}
@@ -499,14 +568,14 @@ export function AuthPanel({
         <p
           role="status"
           aria-live="polite"
-          className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-5 text-muted-foreground"
+          className="mt-4 rounded-xl bg-white/5 p-3 text-sm leading-5 text-muted-foreground"
         >
           {message}
         </p>
       )}
-      <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500">
         Powered by
-        <span className="text-xs font-semibold text-slate-300">TacPredict</span>
+        <span className="text-sm font-semibold text-slate-300">TacPredict</span>
       </div>
     </div>
   );

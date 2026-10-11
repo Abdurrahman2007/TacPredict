@@ -1,3 +1,4 @@
+import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
@@ -81,6 +82,7 @@ function MarketsPage() {
 
   return (
     <div className="animate-enter">
+      <PrelaunchMarkets query={query} category={category} />
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
           <h1 className="page-title truncate">Markets</h1>

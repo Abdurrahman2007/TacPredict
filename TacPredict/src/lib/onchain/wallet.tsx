@@ -58,7 +58,9 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
         provider: detail.provider,
       };
       setWallets((current) =>
-        current.some((item) => item.id === wallet.id) ? current : [...current, wallet],
+        current.some((item) => item.id === wallet.id)
+          ? current
+          : [...current.filter((item) => item.provider !== wallet.provider), wallet],
       );
     };
     window.addEventListener("eip6963:announceProvider", announce);

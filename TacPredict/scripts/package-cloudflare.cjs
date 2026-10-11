@@ -85,9 +85,25 @@ modules.push({
   name: "protocol-indexer-artifacts.mjs",
   content: "export default " + JSON.stringify(arts) + ";",
 });
-const entry = `import {runFinalizedIndexer,safeError} from './protocol-indexer.mjs';import protocolArts from './protocol-indexer-artifacts.mjs';import app from './index.mjs';import assets from './static-assets.mjs';
+const discovery = esbuild.buildSync({
+  entryPoints: [path.join(root, "src/lib/agent/import-core.mjs")],
+  bundle: true,
+  write: false,
+  format: "esm",
+  platform: "browser",
+  target: "es2022",
+  minify: true,
+}).outputFiles[0].text;
+modules.push({ name: "market-discovery.mjs", content: discovery });
+const entry = `import {runMarketDiscovery} from './market-discovery.mjs';import {runFinalizedIndexer,safeError} from './protocol-indexer.mjs';import protocolArts from './protocol-indexer-artifacts.mjs';import app from './index.mjs';import assets from './static-assets.mjs';
 function staticResponse(input,init){const req=input instanceof Request?input:new Request(input,init);const asset=assets[new URL(req.url).pathname];if(!asset)return new Response('Not found',{status:404});if(!['GET','HEAD'].includes(req.method))return new Response('Method not allowed',{status:405});const bytes=Uint8Array.from(atob(asset.data),c=>c.charCodeAt(0));return new Response(req.method==='HEAD'?null:bytes,{encodeBody:'manual',headers:{'Content-Type':asset.type,'Content-Encoding':'gzip','Cache-Control':asset.cache,'X-Content-Type-Options':'nosniff'}});}
-export default {async scheduled(controller,env,ctx){const config={SUPABASE_URL:env.SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY:env.SUPABASE_SERVICE_ROLE_KEY,PROTOCOL_RPC_URL:env.BASE_PROTOCOL_RPC_URL,PROTOCOL_CHAIN_ID:'8453',INDEXER_REQUEST_LIMIT:'48'};ctx.waitUntil(runFinalizedIndexer(config,protocolArts,6).then(result=>console.log(JSON.stringify({job:"indexer",status:result?"SUCCESS":"SKIPPED",...result}))).catch(e=>console.error(safeError(e,config))));},async fetch(req,env,ctx){if(assets[new URL(req.url).pathname])return staticResponse(req);return app.fetch(req,{...env,ASSETS:{fetch:(input,init)=>Promise.resolve(staticResponse(input,init))}},ctx);}};`;
+export default {async scheduled(controller,env,ctx){if(controller.cron === '*/15 * * * *'){ctx.waitUntil(runMarketDiscovery(env).then(r=>console.log(JSON.stringify({job:"market-discovery",...r}))).catch(()=>console.error("Market discovery failed; no financial action submitted")));return;}const config={SUPABASE_URL:env.SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY:env.SUPABASE_SERVICE_ROLE_KEY,PROTOCOL_RPC_URL:env.BASE_PROTOCOL_RPC_URL,PROTOCOL_CHAIN_ID:'8453',INDEXER_REQUEST_LIMIT:'48'};ctx.waitUntil(runFinalizedIndexer(config,protocolArts,6).then(result=>console.log(JSON.stringify({job:"indexer",status:result?"SUCCESS":"SKIPPED",...result}))).catch(e=>console.error(safeError(e,config))));},async fetch(req,env,ctx){if(new URL(req.url).pathname === '/api/agent/discover'){
+if(req.method!=='POST')return new Response('Method not allowed',{status:405});
+const auth=req.headers.get('Authorization');if(!auth?.startsWith('Bearer '))return new Response('Unauthorized',{status:401});
+const permission=await fetch(env.SUPABASE_URL+'/rest/v1/rpc/get_market_import_admin',{method:'POST',headers:{apikey:env.SUPABASE_PUBLISHABLE_KEY,Authorization:auth,'Content-Type':'application/json'},body:'{}'});
+if(!permission.ok){await permission.body?.cancel();return new Response('Assigned administrator with MFA required',{status:403});}await permission.body?.cancel();
+try{return Response.json(await runMarketDiscovery(env));}catch{return new Response('Discovery failed',{status:503});}}
+if(assets[new URL(req.url).pathname])return staticResponse(req);return app.fetch(req,{...env,ASSETS:{fetch:(input,init)=>Promise.resolve(staticResponse(input,init))}},ctx);}};`;
 modules.push({ name: "entry.mjs", content: entry });
 const packed = zlib.gzipSync(Buffer.from(JSON.stringify(modules)), { level: 9 }).toString("base64");
 fs.writeFileSync(root + "/.output/worker-packed.b64", packed);

@@ -1,3 +1,4 @@
+import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
@@ -96,6 +97,7 @@ function SearchPage() {
           </button>
         )}
       </div>
+      <PrelaunchMarkets query={q} />
       {!q && (
         <div
           className="scrollbar-none mt-4 flex gap-2 overflow-x-auto"

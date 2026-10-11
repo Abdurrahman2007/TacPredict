@@ -430,52 +430,41 @@
 
 /* True perspective/extrusion logo intro; rendered at native resolution, not a video. */
 .brand-intro-3d {
-  animation: intro-dismiss 3.6s ease both;
+  animation: intro-dismiss 3.2s ease both;
 }
 .intro-ambient {
   position: absolute;
-  width: min(92vw, 720px);
+  width: min(90vw, 650px);
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(117, 74, 255, 0.22),
-    rgba(88, 64, 192, 0.04) 48%,
+    rgba(117, 74, 255, 0.18),
+    rgba(88, 64, 192, 0.03) 48%,
     transparent 70%
   );
-  animation: intro-ambient-pulse 3.6s ease both;
-}
-.intro-ring {
-  position: absolute;
-  width: min(70vw, 420px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 1px solid rgba(160, 130, 255, 0.22);
-  box-shadow:
-    0 0 80px rgba(99, 65, 218, 0.18),
-    inset 0 0 60px rgba(99, 65, 218, 0.08);
-  animation: intro-ring-spin 3.6s ease both;
+  animation: intro-ambient-pulse 3.2s ease both;
 }
 .intro-stage {
   position: relative;
-  width: 280px;
-  height: 340px;
+  width: 260px;
+  height: 320px;
 }
 .intro-camera {
   position: absolute;
-  top: 28px;
+  top: 25px;
   left: 50%;
-  width: 156px;
-  height: 156px;
-  margin-left: -78px;
-  perspective: 980px;
+  width: 144px;
+  height: 144px;
+  margin-left: -72px;
+  perspective: 800px;
 }
 .intro-logo-model {
   position: relative;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  animation: intro-orbit 3.6s cubic-bezier(0.22, 0.75, 0.25, 1) both;
+  animation: intro-orbit 3.2s cubic-bezier(0.22, 0.75, 0.25, 1) both;
 }
 .intro-logo-depth {
   position: absolute;
@@ -515,25 +504,25 @@
 }
 .intro-floor {
   position: absolute;
-  top: 206px;
+  top: 192px;
   left: 50%;
-  width: 146px;
-  height: 22px;
-  margin-left: -73px;
+  width: 130px;
+  height: 20px;
+  margin-left: -65px;
   border-radius: 50%;
-  background: rgba(113, 72, 229, 0.34);
+  background: rgba(113, 72, 229, 0.3);
   filter: blur(16px);
-  animation: intro-floor-glow 3.6s ease both;
+  animation: intro-floor-glow 3.2s ease both;
 }
 .intro-wordmark {
   position: absolute;
-  inset: 240px 0 auto;
+  inset: 225px 0 auto;
   text-align: center;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 650;
   letter-spacing: -0.035em;
   color: #f4f2ff;
-  animation: intro-wordmark-reveal 3.6s ease both;
+  animation: intro-wordmark-reveal 3.2s ease both;
 }
 .intro-wordmark span {
   display: block;
@@ -610,22 +599,9 @@
     transform: scale(1.1);
   }
 }
-@keyframes intro-ring-spin {
-  0% {
-    opacity: 0;
-    transform: scale(0.7) rotateX(60deg);
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.55;
-    transform: scale(1.08) rotateX(66deg);
-  }
-}
 @keyframes intro-dismiss {
   0%,
-  86% {
+  88% {
     opacity: 1;
   }
   100% {
@@ -638,8 +614,7 @@
   .intro-wordmark,
   .intro-floor,
   .intro-ambient,
-  .intro-logo-shine,
-  .intro-ring {
+  .intro-logo-shine {
     animation: none;
   }
 }
@@ -647,95 +622,8 @@
 /* Compact sign-in and a dedicated accessible six-digit verification step. */
 .auth-compact .auth-social button,
 .auth-compact [aria-label="Wallet sign-in methods"] > button {
-  height: 44px;
-  font-size: 13px;
-}
-
-/* Public header */
-.site-nav-link {
-  transition:
-    color 200ms ease,
-    background-color 200ms ease,
-    transform 200ms ease;
-}
-.site-nav-link:hover {
-  color: var(--foreground);
-  background: color-mix(in oklab, white 6%, transparent);
-}
-.site-nav-link-active {
-  color: var(--primary) !important;
-  background: color-mix(in oklab, var(--primary) 14%, transparent);
-}
-.site-header-icon {
-  transition:
-    color 200ms ease,
-    background-color 200ms ease,
-    transform 200ms ease;
-}
-.site-header-avatar {
-  animation: header-avatar-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes header-avatar-in {
-  from {
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Portfolio (public) */
-.portfolio-hero {
-  border-radius: 22px;
-  border: 1px solid color-mix(in oklab, white 8%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, white 4%, transparent),
-    color-mix(in oklab, white 1.5%, transparent)
-  );
-  padding: 1.25rem 1.15rem 1.1rem;
-}
-@media (min-width: 640px) {
-  .portfolio-hero {
-    padding: 1.5rem 1.4rem 1.25rem;
-  }
-}
-.portfolio-card {
-  border-radius: 18px;
-  border: 1px solid color-mix(in oklab, white 8%, transparent);
-  background: color-mix(in oklab, white 3%, transparent);
-  padding: 1rem 1.1rem;
-}
-.portfolio-action {
-  display: inline-flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  border-radius: 14px;
-  border: 1px solid color-mix(in oklab, white 10%, transparent);
-  background: color-mix(in oklab, white 5%, transparent);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--foreground);
-  opacity: 0.55;
-}
-.portfolio-action-primary {
-  border-color: color-mix(in oklab, #3d6bff 45%, transparent);
-  background: #3d6bff;
-  color: white;
-  opacity: 0.7;
-}
-.portfolio-spark {
-  height: 72px;
-  border-radius: 12px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, #3d6bff 28%, transparent),
-    color-mix(in oklab, #3d6bff 4%, transparent)
-  );
+  height: 48px;
+  font-size: 14px;
 }
 .auth-email-entry {
   display: flex;
@@ -1073,3 +961,23 @@
     transition: none !important;
   }
 }
+
+/* Pixel assembly uses the actual brand artwork, transform-only, once per session. */
+.pixel-logo { width: 150px; height: 150px; position: relative; margin: 0 auto; perspective: 700px; filter: drop-shadow(0 24px 28px #7950ed55); }
+.pixel-logo-tile { position: absolute; width: 12.6%; height: 12.6%; background-image: url('/brand/tacpredict.svg'); background-size: 800% 800%; animation: pixel-assemble 1050ms cubic-bezier(.16,1,.3,1) var(--delay) both; backface-visibility: hidden; }
+@keyframes pixel-assemble { from { opacity: 0; transform: translate3d(var(--px),var(--py),100px) rotateY(var(--turn)) scale(.3); } to { opacity: 1; transform: translate3d(0,0,0) rotateY(0) scale(1); } }
+.header-reward svg { animation: reward-glint 5s ease-in-out infinite; transform-origin: center bottom; }
+@keyframes reward-glint { 0%,80%,100% { transform: rotate(0); } 85% { transform: rotate(-9deg); } 90% { transform: rotate(9deg); } 95% { transform: rotate(-4deg); } }
+.login-popup { animation: auth-arrive 180ms cubic-bezier(.16,1,.3,1); }
+@keyframes auth-arrive { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .header-reward svg, .pixel-logo-tile, .login-popup { animation: none !important; } }
+
+.portfolio-funding { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); font-weight: 600; }
+.portfolio-funding:disabled { cursor: not-allowed; color: var(--muted-foreground); }
+.portfolio-funding-primary:disabled { background: color-mix(in srgb, var(--primary) 15%, var(--card)); }
+/* Never animate translate on a centered dialog: it overrides Tailwind's centering. */
+.login-popup[data-state="open"] { animation: auth-arrive 180ms cubic-bezier(.16,1,.3,1); }
+.login-popup[data-state="closed"] { animation: auth-dismiss 120ms ease-out; }
+@keyframes auth-dismiss { from { opacity: 1; scale: 1; } to { opacity: 0; scale: .98; } }
+.intro-wordmark { animation-duration: 1.6s; }
+@media (prefers-reduced-motion: reduce) { .login-popup[data-state] { animation: none !important; } }

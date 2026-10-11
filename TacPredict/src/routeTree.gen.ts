@@ -17,6 +17,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as UpDownRouteImport } from './routes/up-down'
+import { Route as AdminMarketImporterRouteImport } from './routes/admin_.market-importer'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
@@ -62,6 +63,11 @@ const UpDownRoute = UpDownRouteImport.update({
   path: '/up-down',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMarketImporterRoute = AdminMarketImporterRouteImport.update({
+  id: '/admin_/market-importer',
+  path: '/admin/market-importer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth_/callback',
   path: '/auth/callback',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin/market-importer': typeof AdminMarketImporterRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin/market-importer': typeof AdminMarketImporterRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets': typeof MarketsIndexRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin_/market-importer': typeof AdminMarketImporterRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin/market-importer'
     | '/auth/callback'
     | '/markets/$marketId'
     | '/markets/'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin/market-importer'
     | '/auth/callback'
     | '/markets/$marketId'
     | '/markets'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin_/market-importer'
     | '/auth_/callback'
     | '/markets/$marketId'
     | '/markets/'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
   UpDownRoute: typeof UpDownRoute
+  AdminMarketImporterRoute: typeof AdminMarketImporterRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
 }
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UpDownRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/market-importer': {
+      id: '/admin_/market-importer'
+      path: '/admin/market-importer'
+      fullPath: '/admin/market-importer'
+      preLoaderRoute: typeof AdminMarketImporterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth_/callback': {
       id: '/auth_/callback'
       path: '/auth/callback'
@@ -293,6 +313,7 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
   UpDownRoute: UpDownRoute,
+  AdminMarketImporterRoute: AdminMarketImporterRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
 }

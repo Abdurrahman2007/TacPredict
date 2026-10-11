@@ -12,7 +12,7 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { atomicDecimal } from "@/lib/protocol/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { claimPosition } from "@/lib/protocol/execution";
-export function NativePortfolio({ tab }: { tab: string }) {
+export function NativePortfolio({ tab, search = "" }: { tab: string; search?: string }) {
   const q = useNativePortfolio(),
     auth = useProtocolUser(),
     login = useLoginDialog(),
@@ -20,7 +20,12 @@ export function NativePortfolio({ tab }: { tab: string }) {
     feed = useQuery(nativeMarketFeedQueryOptions);
   const [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
-  const positions = (q.data?.positions ?? []).filter((p) => p.chainId === 8453);
+  const positions = (q.data?.positions ?? []).filter(
+    (p) =>
+      p.chainId === 8453 &&
+      p.title.toLowerCase().includes(search.trim().toLowerCase()) &&
+      (tab !== "Open" || ["OPEN", "UPCOMING"].includes(p.status)),
+  );
   async function claim(p: (typeof positions)[number]) {
     const d = feed.data?.deployments.find((d) => d.chainId === p.chainId);
     if (!d) return;
@@ -80,6 +85,8 @@ export function NativePortfolio({ tab }: { tab: string }) {
             <RefreshCw size={14} />
           </button>
         </div>
+      ) : !auth.user ? (
+        <div className="py-10 text-center text-sm text-muted-foreground">No positions yet</div>
       ) : !q.data?.walletLinked ? (
         <div className="finance-card text-center">
           <span className="finance-icon mx-auto">
@@ -87,8 +94,7 @@ export function NativePortfolio({ tab }: { tab: string }) {
           </span>
           <h3 className="mt-4 font-semibold">Your positions, privately linked</h3>
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
-            Sign in and prove wallet ownership to load your finalized positions. Connecting an
-            address alone does not authorize account access.
+            Verify wallet ownership to view positions.
           </p>
           {!auth.user ? (
             <button

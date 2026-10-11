@@ -1,271 +1,201 @@
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Eye,
+  EyeOff,
+  Copy,
+  Gift,
+  RefreshCw,
+  Search,
+  Wallet,
+} from "lucide-react";
 import { NativePortfolio } from "@/components/native-portfolio";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { atomicDecimal } from "@/lib/protocol/types";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowUpRight,
-  Check,
-  Copy,
-  Eye,
-  EyeOff,
-  LogOut,
-  RefreshCw,
-  ShieldCheck,
-  ArrowDownLeft,
-  LockKeyhole,
-  Layers,
-} from "lucide-react";
-import { useState } from "react";
-import { BASE_NETWORK, formatUsdc, shortAddress } from "@/lib/onchain/base";
-import { LockedRewardCard } from "@/components/locked-reward-card";
-import { ConnectWallet } from "@/components/connect-wallet";
-import { AccountCard } from "@/components/account-card";
+import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-
+import { formatUsdc, shortAddress } from "@/lib/onchain/base";
 export const Route = createFileRoute("/profile")({
-  head: () => ({
-    meta: [
-      { title: "Portfolio — TacPredict" },
-      {
-        name: "description",
-        content:
-          "Your real Base USDC wallet, finalized positions and separate locked reward credit.",
-      },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Portfolio — TacPredict" }] }),
   component: PortfolioPage,
 });
-
 function PortfolioPage() {
   const wallet = useBaseWallet(),
-    native = useNativePortfolio();
-  const positions = native.data?.positions.filter((p) => p.chainId === 8453) ?? [];
-  const known = Boolean(native.data?.walletLinked) && !native.isError;
-  const claimable = known
-    ? positions.reduce((n, p) => n + BigInt(p.claimableAtomic), 0n).toString()
-    : null;
-  const value =
-    known && positions.every((p) => p.valueAtomic !== null)
-      ? positions.reduce((n, p) => n + BigInt(p.valueAtomic!), 0n).toString()
-      : null;
+    q = useNativePortfolio();
+  const auth = useProtocolUser();
   const [tab, setTab] = useState("Positions"),
-    [copied, setCopied] = useState(false),
     [hidden, setHidden] = useState(false),
+    [search, setSearch] = useState(""),
     [notice, setNotice] = useState("");
-  const connected = Boolean(wallet.address),
-    onBase = wallet.chainId === BASE_NETWORK.id;
-  const balanceLabel =
-    connected && onBase && wallet.usdc !== null ? formatUsdc(wallet.usdc) : "—";
-
-  async function copy() {
-    if (!wallet.address) return;
-    try {
-      await navigator.clipboard.writeText(wallet.address);
-      setCopied(true);
-      setNotice("Wallet address copied.");
-    } catch {
-      setNotice("Could not copy the address. Open the explorer to view it.");
-    }
-  }
-
+  const positions = (q.data?.positions ?? []).filter((p) => p.chainId === 8453);
+  const known = Boolean(q.data?.walletLinked) && !q.isError && !q.isPending;
+  const positionValue =
+    known && positions.every((p) => p.valueAtomic !== null)
+      ? positions.reduce((a, p) => a + BigInt(p.valueAtomic!), 0n)
+      : null;
+  const claimable = known ? positions.reduce((a, p) => a + BigInt(p.claimableAtomic), 0n) : null;
+  const walletKnown = wallet.address && wallet.chainId === 8453 && wallet.usdc !== null;
+  const display = (value: bigint | null) =>
+    hidden
+      ? "••••"
+      : value === null
+        ? auth.ready && !auth.user
+          ? "0.00"
+          : "—"
+        : atomicDecimal(value.toString());
   return (
-    <div className="portfolio-page animate-enter" data-testid="portfolio-page">
-      <section className="portfolio-hero" aria-label="Portfolio overview">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Portfolio</span>
-              {wallet.address ? (
-                <button
-                  type="button"
-                  className="rounded-md p-1 hover:bg-white/5"
-                  onClick={() => void copy()}
-                  aria-label="Copy wallet address"
-                >
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
-                </button>
-              ) : null}
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <p className="text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">
-                {hidden ? "••••" : balanceLabel}
-                {!hidden && balanceLabel !== "—" ? (
-                  <span className="ml-2 text-lg font-medium text-muted-foreground">USDC</span>
-                ) : null}
-              </p>
-              <button
-                type="button"
-                className="rounded-full p-2 text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                aria-label={hidden ? "Show balance" : "Hide balance"}
-                onClick={() => setHidden((v) => !v)}
-              >
-                {hidden ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {!connected
-                ? "Connect a wallet to read native Base USDC."
-                : !onBase
-                  ? "Switch to Base to read native USDC."
-                  : "Wallet balance · read directly from Base"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Available to trade</p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              {hidden ? "••••" : claimable === null ? "—" : `${atomicDecimal(claimable)} USDC`}
-            </p>
-            <Link
-              to="/rewards"
-              className="mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-full bg-[#3d6bff]/15 px-3 text-xs font-medium text-[#8fb0ff]"
-            >
-              <LockKeyhole size={12} />
-              Rewards
-            </Link>
-          </div>
-        </div>
-
-        {!connected ? (
-          <div className="mt-5">
-            <ConnectWallet className="min-h-11 rounded-full" />
-          </div>
-        ) : !onBase ? (
-          <button
-            className="finance-pill finance-pill-primary mt-5"
-            disabled={wallet.busy}
-            onClick={() => void wallet.switchToBase()}
-          >
-            Switch to Base <ArrowUpRight size={15} />
-          </button>
-        ) : null}
-
-        {connected && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-card/40 px-3 py-2.5">
-            <span className="font-mono text-xs">{shortAddress(wallet.address!)}</span>
-            <div className="flex gap-1">
-              <button
-                className="finance-icon-button"
-                disabled={wallet.busy}
-                onClick={() => void wallet.refresh()}
-                aria-label="Refresh USDC balance"
-              >
-                <RefreshCw size={15} className={wallet.busy ? "motion-safe:animate-spin" : ""} />
-              </button>
-              <button
-                className="finance-icon-button"
-                onClick={wallet.disconnect}
-                aria-label="Disconnect locally"
-              >
-                <LogOut size={15} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <button type="button" className="portfolio-action portfolio-action-primary" disabled>
-            <ArrowDownLeft size={18} />
-            Deposit
-            <LockKeyhole size={12} className="opacity-70" />
-          </button>
-          <button type="button" className="portfolio-action" disabled>
-            <ArrowUpRight size={18} />
-            Withdraw
-            <LockKeyhole size={12} className="opacity-70" />
-          </button>
-        </div>
-        <p className="mt-2 text-[11px] leading-5 text-muted-foreground">
-          Deposit/withdraw stay locked until protocol funding is reviewed. No funds move here.
-        </p>
-      </section>
-
-      <section className="portfolio-card mt-4" aria-label="Position summary">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Position value</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
-              {value === null ? "—" : `${atomicDecimal(value)} USDC`}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {known ? "Last settled trade · not cost basis" : "Verified wallet link required"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Claimable</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums">
-              {claimable === null ? "—" : `${atomicDecimal(claimable)} USDC`}
-            </p>
-          </div>
-        </div>
-        <div className="portfolio-spark mt-4" aria-hidden="true" />
-      </section>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section aria-label="Your market positions">
-          <div className="flex items-center justify-between gap-3">
-            <div className="portfolio-tabs flex gap-1 rounded-xl bg-card/60 p-1">
-              {["Positions", "Activity"].map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={tab === item}
-                  className={`min-h-10 rounded-lg px-4 text-sm font-medium transition-colors ${tab === item ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                  onClick={() => setTab(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-            <span className="finance-badge !px-2 !py-1">
-              <Layers size={12} />
-              {known ? positions.filter((p) => BigInt(p.sharesAtomic) > 0n).length : "—"}
-            </span>
-          </div>
-          <div className="mt-3">
-            <NativePortfolio tab={tab} />
-          </div>
-        </section>
-
-        <aside className="min-w-0 space-y-4">
-          <LockedRewardCard />
-          <section className="finance-card">
-            <span className="finance-badge">
-              <ShieldCheck size={12} />
-              Self-custody
-            </span>
-            <h2 className="mt-4 text-base font-semibold">A real wallet. A careful launch.</h2>
-            <p className="mt-2 text-xs leading-6 text-muted-foreground">
-              Wallet balances come from Base. Native markets need a verified deployment before new
-              trading opens.
-            </p>
-            {wallet.address ? (
-              <a
-                className="finance-pill mt-5"
-                href={`${BASE_NETWORK.explorer}/address/${wallet.address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on BaseScan
-                <ArrowUpRight size={15} />
-              </a>
-            ) : (
-              <Link to="/markets" className="finance-pill mt-5">
-                Explore markets
-                <ArrowUpRight size={15} />
-              </Link>
-            )}
-          </section>
-          <AccountCard />
-        </aside>
+    <div className="mx-auto max-w-5xl animate-enter">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-lg font-medium text-muted-foreground">Portfolio</h1>
+        <span className="finance-badge">
+          <span className="size-1.5 rounded-full bg-blue-400" />
+          Base · USDC
+        </span>
       </div>
-
-      {wallet.error && (
-        <p role="alert" className="finance-inline-alert mt-4">
-          {wallet.error}
-        </p>
-      )}
-      <p role="status" aria-live="polite" className="mt-3 min-h-5 text-xs text-muted-foreground">
-        {notice}
+      <section className="mt-5 grid grid-cols-2 gap-4" aria-label="Portfolio balances">
+        <div>
+          <div className="flex items-center gap-3">
+            <p className="text-[36px] font-semibold tracking-tight tabular-nums sm:text-5xl">
+              {display(positionValue)}
+              <span className="ml-2 text-sm font-normal text-muted-foreground">USDC</span>
+            </p>
+            <button
+              className="grid size-11 place-items-center text-muted-foreground"
+              onClick={() => setHidden(!hidden)}
+              aria-label={hidden ? "Show balances" : "Hide balances"}
+            >
+              {hidden ? <EyeOff size={19} /> : <Eye size={19} />}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Position value</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-muted-foreground">Wallet balance</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">
+            {hidden
+              ? "••••"
+              : walletKnown
+                ? formatUsdc(wallet.usdc)
+                : auth.ready && !auth.user
+                  ? "0.00"
+                  : "—"}
+            <span className="ml-2 text-sm font-normal text-muted-foreground">USDC</span>
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">Trading paused</p>
+        </div>
+      </section>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {!wallet.address ? (
+          <span className="text-xs text-muted-foreground">Sign in above to view your balance</span>
+        ) : (
+          <button
+            className="finance-pill"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(wallet.address!);
+                setNotice("Wallet address copied");
+              } catch {
+                setNotice("Could not copy address");
+              }
+            }}
+          >
+            <Wallet size={15} />
+            {shortAddress(wallet.address)}
+            <Copy size={14} />
+          </button>
+        )}
+        <button
+          className="finance-pill"
+          aria-label="Refresh balances"
+          disabled={wallet.busy || q.isFetching}
+          onClick={() => {
+            void wallet.refresh();
+            if (q.data) void q.refetch();
+          }}
+        >
+          <RefreshCw size={15} />
+        </button>
+        {wallet.address && wallet.chainId !== 8453 && (
+          <button className="finance-pill" onClick={() => void wallet.switchToBase()}>
+            Switch to Base
+          </button>
+        )}
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <button disabled className="portfolio-funding portfolio-funding-primary">
+          <ArrowDownToLine size={20} />
+          Deposit
+        </button>
+        <button disabled className="portfolio-funding">
+          <ArrowUpFromLine size={20} />
+          Withdraw
+        </button>
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground">Funding opens at launch.</p>
+      <section
+        className="mt-6 rounded-[24px] border border-border bg-card p-5 sm:p-7"
+        aria-label="Portfolio performance"
+      >
+        <div className="flex flex-wrap justify-between gap-4">
+          <div>
+            <h2 className="text-sm text-muted-foreground">Profit / Loss</h2>
+            <p className="mt-3 text-3xl font-semibold">
+              {hidden ? "••••" : auth.ready && !auth.user ? "0.00" : "—"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Claimable USDC</p>
+            <p className="mt-3 text-xl font-semibold tabular-nums">{display(claimable)}</p>
+          </div>
+        </div>
+        <div className="mt-7 grid min-h-32 place-items-center rounded-xl border border-dashed border-border bg-background/30 px-6 text-center text-xs leading-6 text-muted-foreground">
+          Performance history appears after verified trading and cost-basis indexing. No estimated
+          P&amp;L is substituted.
+        </div>
+      </section>
+      <section className="mt-7" aria-label="Your positions">
+        <div className="grid grid-cols-3 gap-1 rounded-2xl border border-border p-1">
+          {["Positions", "Open", "History"].map((item) => (
+            <button
+              key={item}
+              onClick={() => setTab(item)}
+              aria-pressed={tab === item}
+              className={`min-h-11 rounded-xl text-sm font-semibold transition-colors ${tab === item ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+        {tab !== "History" && (
+          <label className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border border-border bg-card px-4">
+            <Search size={17} className="text-muted-foreground" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search your positions"
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+            />
+          </label>
+        )}
+        <NativePortfolio tab={tab === "History" ? "Activity" : tab} search={search} />
+      </section>
+      <Link
+        to="/rewards"
+        className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-4"
+      >
+        <Gift size={20} className="text-primary" />
+        <div>
+          <p className="text-sm font-semibold">Welcome journey · 15 USDC</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Locked promotional credit · separate from wallet funds
+          </p>
+        </div>
+      </Link>
+      <p role="status" className="mt-3 text-xs text-muted-foreground">
+        {notice || wallet.error}
       </p>
     </div>
   );
