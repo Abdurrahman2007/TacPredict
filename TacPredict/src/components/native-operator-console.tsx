@@ -21,7 +21,7 @@ export function NativeOperatorConsole({
       queryFn: () => getProtocolAdminDeployments(),
       retry: 0,
     });
-  const [chain, setChain] = useState(84532),
+  const [chain, setChain] = useState(8453),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(""),
     [ack, setAck] = useState(false);
@@ -74,7 +74,6 @@ export function NativeOperatorConsole({
           }}
           className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background p-3"
         >
-          <option value={84532}>Base Sepolia · test USDC only</option>
           <option value={8453}>Base Mainnet · real USDC and gas</option>
         </select>
       </label>

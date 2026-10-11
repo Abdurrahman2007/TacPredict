@@ -86,7 +86,7 @@ export const getProtocolAdminDeployments = createServerFn({ method: "GET" })
       .from("protocol_deployments")
       .select("*")
       .eq("verified", true)
-      .in("chain_id", [8453, 84532]);
+      .eq("chain_id", 8453);
     if (error) throw Error("Verified Base deployments unavailable");
     const { deploymentSchema } = await import("./types");
     return (data ?? []).map((d) =>

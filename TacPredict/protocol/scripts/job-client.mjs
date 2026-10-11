@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-export function createDatabaseClient(env) {
+export function createDatabaseClient(env, fetcher = fetch) {
   const base = env.SUPABASE_URL,
     key = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!base || new URL(base).hostname !== "lmqaiqvwcytmgwgwyfwx.supabase.co" || !key)
@@ -11,7 +11,7 @@ export function createDatabaseClient(env) {
       Prefer: "return=representation,resolution=merge-duplicates",
     };
     if (!key.startsWith("sb_secret_")) headers.Authorization = `Bearer ${key}`;
-    const r = await fetch(`${base}/rest/v1/${resource}${query}`, {
+    const r = await fetcher(`${base}/rest/v1/${resource}${query}`, {
       method: body === undefined ? "GET" : "POST",
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),

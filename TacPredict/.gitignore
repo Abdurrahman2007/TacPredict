@@ -38,3 +38,5 @@ dist-ssr
 
 # Generated from the source base64 video during prebuild
 /public/brand/tacpredict-intro.mp4
+
+/protocol/verification/
