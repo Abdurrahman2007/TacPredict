@@ -962,7 +962,7 @@
   }
 }
 
-/* Pixel assembly uses the actual brand artwork, transform-only, once per session. */
+/* Pixel assembly uses the actual brand artwork, transform-only, on every page load. */
 .pixel-logo { width: 150px; height: 150px; position: relative; margin: 0 auto; perspective: 700px; filter: drop-shadow(0 24px 28px #7950ed55); }
 .pixel-logo-tile { position: absolute; width: 12.6%; height: 12.6%; background-image: url('/brand/tacpredict.svg'); background-size: 800% 800%; animation: pixel-assemble 1050ms cubic-bezier(.16,1,.3,1) var(--delay) both; backface-visibility: hidden; }
 @keyframes pixel-assemble { from { opacity: 0; transform: translate3d(var(--px),var(--py),100px) rotateY(var(--turn)) scale(.3); } to { opacity: 1; transform: translate3d(0,0,0) rotateY(0) scale(1); } }

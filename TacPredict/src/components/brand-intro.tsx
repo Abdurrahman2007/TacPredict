@@ -1,35 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
-const introKey = "tacpredict-brand-intro-3d-pixels-v4";
+import { useEffect, useState } from "react";
+
 export function BrandIntro() {
   const [visible, setVisible] = useState(false);
-  const finish = useCallback(() => {
-    setVisible(false);
-    try {
-      sessionStorage.setItem(introKey, "1");
-    } catch {
-      /* Optional intro. */
-    }
-  }, []);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    try {
-      if (sessionStorage.getItem(introKey)) return;
-    } catch {
-      return;
-    }
+    // Root shell stays mounted during navigation; a full reload starts a new intro.
+    // No storage gate: every page load gets the same opening treatment.
     setVisible(true);
-    const timer = setTimeout(finish, 2100);
-    return () => clearTimeout(timer);
-  }, [finish]);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => setVisible(false), reducedMotion ? 900 : 2100);
+    return () => window.clearTimeout(timer);
+  }, []);
   if (!visible) return null;
   return (
     <div
       className="brand-intro-3d fixed inset-0 z-[110] grid place-items-center overflow-hidden bg-[#0b1018]"
-      aria-label="TacPredict opening animation"
+      aria-label="Tac Predict opening animation"
+      style={{ animationDuration: "2100ms" }}
     >
-      <div className="intro-ambient" aria-hidden="true" />
       <div className="intro-stage" aria-hidden="true">
-        <div className="intro-floor" />
         <div className="pixel-logo" aria-hidden="true">
           {Array.from({ length: 64 }, (_, i) => {
             const x = i % 8,
@@ -54,16 +42,9 @@ export function BrandIntro() {
           })}
         </div>
         <div className="intro-wordmark">
-          TacPredict<span>Predict what’s next.</span>
+          Tac Predict
         </div>
       </div>
-      <button
-        type="button"
-        onClick={finish}
-        className="absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] min-h-11 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-white/70 transition hover:bg-white/10"
-      >
-        Skip
-      </button>
     </div>
   );
 }
