@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
 export function BrandIntro() {
-  const [visible, setVisible] = useState(false);
+  // Render the overlay on the server too, so Home never flashes before hydration.
+  const [visible, setVisible] = useState(true);
   useEffect(() => {
     // Root shell stays mounted during navigation; a full reload starts a new intro.
     // No storage gate: every page load gets the same opening treatment.
-    setVisible(true);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => setVisible(false), reducedMotion ? 900 : 2100);
     return () => window.clearTimeout(timer);
