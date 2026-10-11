@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AuthPanel } from "@/components/auth-panel";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,8 +23,8 @@ export function LoginDialogProvider({ children }: { children: ReactNode }) {
       {children}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          overlayClassName="z-[70] bg-black/70 backdrop-blur-sm"
-          className="login-popup fixed bottom-0 left-0 top-auto z-[80] block max-h-[92dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-t-[30px] border-[#36404e] bg-[#0f1827] p-0 pb-[env(safe-area-inset-bottom)] text-white shadow-2xl sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-[400px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[32px]"
+          overlayClassName="z-[70] bg-black/70 backdrop-blur-md"
+          className="login-popup fixed left-1/2 top-1/2 z-[80] block max-h-[min(92dvh,720px)] w-[min(100%-1.5rem,360px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto overscroll-contain rounded-[26px] border-[#36404e] bg-[#0f1827] p-0 text-white shadow-2xl"
         >
           <DialogTitle className="sr-only">TacPredict sign in</DialogTitle>
           <DialogDescription className="sr-only">
@@ -71,35 +72,32 @@ export function LoginButton() {
     : displayName?.trim().split(/\s+/)[0]?.slice(0, 18) ||
       user?.email?.split("@")[0]?.slice(0, 18) ||
       "Signed in";
+  const initial = label.slice(0, 1).toUpperCase();
   const balance =
     user && wallet.address && wallet.chainId === BASE_NETWORK.id
       ? `${formatUsdc(wallet.usdc)} USDC`
       : null;
+
+  if (user) {
+    return (
+      <Link
+        to="/profile"
+        aria-label={`Open portfolio · ${label}`}
+        title={balance ?? label}
+        className="site-header-avatar grid size-10 place-items-center rounded-full bg-[linear-gradient(135deg,#5b8cff_0%,#a78bfa_55%,#f472b6_100%)] text-sm font-bold text-white shadow-[0_0_0_2px_rgba(255,255,255,0.08)] transition-transform duration-200 hover:scale-105 active:scale-95"
+      >
+        {initial}
+      </Link>
+    );
+  }
+
   return (
     <Button
-      onClick={() => showLogin()}
-      aria-label={user ? "Open your account" : "Login"}
-      className={
-        user
-          ? "h-11 max-w-[180px] gap-2 rounded-full border border-white/10 bg-card px-3 text-foreground shadow-sm hover:bg-secondary"
-          : "h-10 rounded-full bg-white px-6 text-sm font-semibold text-[#10171c] shadow-sm hover:bg-white/90"
-      }
+      onClick={() => showLogin("/profile")}
+      aria-label="Connect wallet"
+      className="h-9 rounded-full bg-white px-4 text-sm font-semibold text-[#10171c] shadow-sm transition-transform duration-200 hover:bg-white/90 hover:scale-[1.02] active:scale-95 sm:h-10 sm:px-5"
     >
-      {user ? (
-        <>
-          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-            {label.slice(0, 1).toUpperCase()}
-          </span>
-          <span className="min-w-0 text-left">
-            <span className="block truncate text-xs font-semibold">{balance ?? label}</span>
-            <span className="block truncate text-[10px] font-normal text-muted-foreground">
-              {balance ? label : address ? "Wallet connected" : "Signed in"}
-            </span>
-          </span>
-        </>
-      ) : (
-        "Login"
-      )}
+      Connect wallet
     </Button>
   );
 }

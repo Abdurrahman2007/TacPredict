@@ -430,41 +430,52 @@
 
 /* True perspective/extrusion logo intro; rendered at native resolution, not a video. */
 .brand-intro-3d {
-  animation: intro-dismiss 3.2s ease both;
+  animation: intro-dismiss 3.6s ease both;
 }
 .intro-ambient {
   position: absolute;
-  width: min(90vw, 650px);
+  width: min(92vw, 720px);
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(117, 74, 255, 0.18),
-    rgba(88, 64, 192, 0.03) 48%,
+    rgba(117, 74, 255, 0.22),
+    rgba(88, 64, 192, 0.04) 48%,
     transparent 70%
   );
-  animation: intro-ambient-pulse 3.2s ease both;
+  animation: intro-ambient-pulse 3.6s ease both;
+}
+.intro-ring {
+  position: absolute;
+  width: min(70vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(160, 130, 255, 0.22);
+  box-shadow:
+    0 0 80px rgba(99, 65, 218, 0.18),
+    inset 0 0 60px rgba(99, 65, 218, 0.08);
+  animation: intro-ring-spin 3.6s ease both;
 }
 .intro-stage {
   position: relative;
-  width: 260px;
-  height: 320px;
+  width: 280px;
+  height: 340px;
 }
 .intro-camera {
   position: absolute;
-  top: 25px;
+  top: 28px;
   left: 50%;
-  width: 144px;
-  height: 144px;
-  margin-left: -72px;
-  perspective: 800px;
+  width: 156px;
+  height: 156px;
+  margin-left: -78px;
+  perspective: 980px;
 }
 .intro-logo-model {
   position: relative;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  animation: intro-orbit 3.2s cubic-bezier(0.22, 0.75, 0.25, 1) both;
+  animation: intro-orbit 3.6s cubic-bezier(0.22, 0.75, 0.25, 1) both;
 }
 .intro-logo-depth {
   position: absolute;
@@ -504,25 +515,25 @@
 }
 .intro-floor {
   position: absolute;
-  top: 192px;
+  top: 206px;
   left: 50%;
-  width: 130px;
-  height: 20px;
-  margin-left: -65px;
+  width: 146px;
+  height: 22px;
+  margin-left: -73px;
   border-radius: 50%;
-  background: rgba(113, 72, 229, 0.3);
+  background: rgba(113, 72, 229, 0.34);
   filter: blur(16px);
-  animation: intro-floor-glow 3.2s ease both;
+  animation: intro-floor-glow 3.6s ease both;
 }
 .intro-wordmark {
   position: absolute;
-  inset: 225px 0 auto;
+  inset: 240px 0 auto;
   text-align: center;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 650;
   letter-spacing: -0.035em;
   color: #f4f2ff;
-  animation: intro-wordmark-reveal 3.2s ease both;
+  animation: intro-wordmark-reveal 3.6s ease both;
 }
 .intro-wordmark span {
   display: block;
@@ -599,9 +610,22 @@
     transform: scale(1.1);
   }
 }
+@keyframes intro-ring-spin {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotateX(60deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(1.08) rotateX(66deg);
+  }
+}
 @keyframes intro-dismiss {
   0%,
-  88% {
+  86% {
     opacity: 1;
   }
   100% {
@@ -614,7 +638,8 @@
   .intro-wordmark,
   .intro-floor,
   .intro-ambient,
-  .intro-logo-shine {
+  .intro-logo-shine,
+  .intro-ring {
     animation: none;
   }
 }
@@ -622,8 +647,95 @@
 /* Compact sign-in and a dedicated accessible six-digit verification step. */
 .auth-compact .auth-social button,
 .auth-compact [aria-label="Wallet sign-in methods"] > button {
-  height: 48px;
-  font-size: 14px;
+  height: 44px;
+  font-size: 13px;
+}
+
+/* Public header */
+.site-nav-link {
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease;
+}
+.site-nav-link:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, white 6%, transparent);
+}
+.site-nav-link-active {
+  color: var(--primary) !important;
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+}
+.site-header-icon {
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease;
+}
+.site-header-avatar {
+  animation: header-avatar-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes header-avatar-in {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Portfolio (public) */
+.portfolio-hero {
+  border-radius: 22px;
+  border: 1px solid color-mix(in oklab, white 8%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, white 4%, transparent),
+    color-mix(in oklab, white 1.5%, transparent)
+  );
+  padding: 1.25rem 1.15rem 1.1rem;
+}
+@media (min-width: 640px) {
+  .portfolio-hero {
+    padding: 1.5rem 1.4rem 1.25rem;
+  }
+}
+.portfolio-card {
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, white 8%, transparent);
+  background: color-mix(in oklab, white 3%, transparent);
+  padding: 1rem 1.1rem;
+}
+.portfolio-action {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, white 10%, transparent);
+  background: color-mix(in oklab, white 5%, transparent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--foreground);
+  opacity: 0.55;
+}
+.portfolio-action-primary {
+  border-color: color-mix(in oklab, #3d6bff 45%, transparent);
+  background: #3d6bff;
+  color: white;
+  opacity: 0.7;
+}
+.portfolio-spark {
+  height: 72px;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, #3d6bff 28%, transparent),
+    color-mix(in oklab, #3d6bff 4%, transparent)
+  );
 }
 .auth-email-entry {
   display: flex;

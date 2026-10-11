@@ -30,7 +30,6 @@ export function AuthPanel({
   const [clock, setClock] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const [chooseWallet, setChooseWallet] = useState(false);
   const verificationStep = !!sentTo || useExistingCode;
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [farcasterBusy, setFarcasterBusy] = useState(false);
@@ -298,14 +297,14 @@ export function AuthPanel({
       await finish();
     });
   return (
-    <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-6 pb-6 pt-9 text-white sm:px-8">
+    <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-5 pb-5 pt-7 text-white sm:px-6">
       <div className="text-center">
         <img
           src="/brand/tacpredict.svg"
           alt="TacPredict"
-          className="mx-auto mb-3 size-11 rounded-xl"
+          className="mx-auto mb-2 size-9 rounded-xl"
         />
-        <h1 className="text-[28px] font-semibold tracking-[-.025em]">
+        <h1 className="text-[22px] font-semibold tracking-[-.025em]">
           {user ? "Your account" : mode === "signup" ? "Create account" : "Sign in"}
         </h1>
       </div>
@@ -335,14 +334,14 @@ export function AuthPanel({
         </div>
       ) : (
         <>
-          <div className="auth-social mt-6 grid grid-cols-4 gap-2">
+          <div className="auth-social mt-5 grid grid-cols-4 gap-2">
             <Button
               aria-label="Continue with Google"
               title={
                 !authFeatures.google ? "Google is disabled in Supabase" : "Continue with Google"
               }
               variant="outline"
-              className="h-14 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
+              className="h-11 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
               disabled={locked || !authFeatures.google}
               onClick={() =>
                 void attempt(async () => {
@@ -368,7 +367,7 @@ export function AuthPanel({
               aria-label="Continue with X"
               title={!authFeatures.x ? "X is disabled in Supabase" : "Continue with X"}
               variant="outline"
-              className="h-14 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
+              className="h-11 rounded-full border-[#697180] bg-transparent text-base hover:bg-white/[.055]"
               disabled={locked || !authFeatures.x}
               onClick={() =>
                 void attempt(async () => {
@@ -395,7 +394,7 @@ export function AuthPanel({
             <Button
               aria-label="Sign-in options"
               variant="outline"
-              className="h-14 rounded-full border-[#697180] bg-transparent text-2xl hover:bg-white/[.055]"
+              className="h-11 rounded-full border-[#697180] bg-transparent text-xl hover:bg-white/[.055]"
               onClick={() =>
                 setMessage(
                   `Google: ${authFeatures.google ? "available" : "disabled in Supabase"} · Email: ${authFeatures.emailOtp ? "available" : "disabled in Supabase"} · X: ${authFeatures.x ? "available" : "disabled in Supabase"}. Wallet sign-in only requests a message signature, never a token approval.`,
@@ -405,7 +404,7 @@ export function AuthPanel({
               •••
             </Button>
           </div>
-          <div className="mt-3">{emailForm}</div>
+          <div className="mt-2.5">{emailForm}</div>
           <button
             type="button"
             disabled={locked}
@@ -414,19 +413,19 @@ export function AuthPanel({
               setCode("");
               setMessage("");
             }}
-            className="mt-2 block w-full text-center text-[11px] text-slate-400 hover:text-white"
+            className="mt-1.5 block w-full text-center text-[11px] text-slate-400 hover:text-white"
           >
             Already have a code?
           </button>
-          <div className="my-5 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-white/25" />
+          <div className="my-4 flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className="h-px flex-1 bg-white/20" />
             OR
-            <span className="h-px flex-1 bg-white/25" />
+            <span className="h-px flex-1 bg-white/20" />
           </div>
-          <div className="space-y-2.5" aria-label="Wallet sign-in methods">
+          <div className="space-y-2" aria-label="Wallet sign-in methods">
             <Button
               variant="outline"
-              className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
+              className="h-11 w-full justify-between rounded-full border-[#697180] bg-transparent px-4 text-sm font-normal hover:bg-white/[.055]"
               disabled={locked}
               onClick={() =>
                 void attempt(async () => {
@@ -447,7 +446,7 @@ export function AuthPanel({
               }
             >
               <span>Coinbase Wallet</span>
-              <img src="/brand/providers/coinbase.svg" className="size-7 rounded-lg" alt="" />
+              <img src="/brand/providers/coinbase.svg" className="size-6 rounded-lg" alt="" />
             </Button>
             <FarcasterSignIn
               disabled={busy}
@@ -456,46 +455,30 @@ export function AuthPanel({
               onError={setMessage}
               walletRow
             />
-            {chooseWallet &&
+            {wallets.length ? (
               wallets.map((wallet, index) => (
                 <Button
                   key={wallet.id}
                   variant="outline"
-                  className="h-12 w-full justify-between rounded-full border-[#697180] bg-transparent px-5"
+                  className="h-11 w-full justify-between rounded-full border-[#697180] bg-transparent px-4 text-sm"
                   disabled={locked}
                   onClick={() => signInWallet(index)}
                 >
-                  <span>{wallet.name}</span>
-                  <span className="text-xs text-blue-400">Installed</span>
+                  <span className="inline-flex items-center gap-2">
+                    <Wallet className="size-4 opacity-70" />
+                    {wallet.name}
+                  </span>
+                  <span className="text-[11px] text-blue-400">Installed</span>
                 </Button>
-              ))}
-            {wallets.length > 0 && (
-              <Button
-                variant="outline"
-                className="h-14 w-full justify-between rounded-full border-[#697180] bg-transparent px-5 text-base font-normal hover:bg-white/[.055]"
-                disabled={locked}
-                onClick={() => {
-                  setChooseWallet(!chooseWallet);
-                  if (!wallets.length)
-                    setMessage(
-                      "Open TacPredict in MetaMask/Trust Wallet’s browser, or install a compatible Ethereum wallet. WalletConnect QR is not configured yet.",
-                    );
-                }}
-              >
-                <span>
-                  {wallets.length
-                    ? chooseWallet
-                      ? "Show fewer wallets"
-                      : "All wallets"
-                    : "All wallets"}
-                </span>
-                <span className="rounded-full border border-primary/60 px-2 py-0.5 text-xs text-primary">
-                  {wallets.length || <Wallet className="size-4" />}
-                </span>
-              </Button>
+              ))
+            ) : (
+              <p className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2.5 text-[11px] leading-5 text-slate-400">
+                No browser wallet detected yet. Open TacPredict in MetaMask/Trust, or use Coinbase
+                Wallet above. WalletConnect QR is not configured.
+              </p>
             )}
           </div>
-          <p className="mt-5 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-slate-400">
             {mode === "signin" ? "New here? " : "Already have an account? "}
             <button
               disabled={locked}
@@ -516,14 +499,14 @@ export function AuthPanel({
         <p
           role="status"
           aria-live="polite"
-          className="mt-4 rounded-xl bg-white/5 p-3 text-sm leading-5 text-muted-foreground"
+          className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-5 text-muted-foreground"
         >
           {message}
         </p>
       )}
-      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+      <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
         Powered by
-        <span className="text-sm font-semibold text-slate-300">TacPredict</span>
+        <span className="text-xs font-semibold text-slate-300">TacPredict</span>
       </div>
     </div>
   );
