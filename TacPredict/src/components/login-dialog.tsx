@@ -102,7 +102,7 @@ export function LoginButton() {
       aria-label={user ? "Open your account" : "Login"}
       className={
         user
-          ? "h-11 max-w-[180px] gap-2 rounded-full border border-white/10 bg-card px-3 text-foreground shadow-sm hover:bg-secondary"
+          ? "app-account-button h-11 max-w-[180px] gap-2 rounded-full border border-white/10 bg-card px-3 text-foreground shadow-sm hover:bg-secondary"
           : "h-10 rounded-full bg-white px-6 text-sm font-semibold text-[#10171c] shadow-sm hover:bg-white/90"
       }
     >

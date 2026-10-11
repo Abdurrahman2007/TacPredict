@@ -30,7 +30,7 @@ function SearchPage() {
   ], q);
   const loading = events.isPending || previews.isPending;
   return (
-    <section className="tp-search animate-enter" aria-label="Market search">
+    <section className="tp-search-page animate-enter" aria-label="Market search">
       <h1 className="sr-only">Search markets</h1>
       <div className="tp-search-field">
         <Search aria-hidden="true" className="size-6 shrink-0" strokeWidth={2} />
@@ -45,10 +45,11 @@ function SearchPage() {
         {rows.slice(0, q ? 40 : 10).map(m => (
           <Link key={m.id} to="/markets/$marketId" params={{ marketId: m.id }} className="tp-search-row ios-press">
             <MarketIcon market={m} className="size-11 shrink-0" />
-            <span className="tp-search-title">{m.title}</span>
-            <span className="tp-search-meta">
-              {m.native ? <>{m.volume}<small>Vol</small></> : m.id.startsWith("event-") ? "Listing pending" : "Preview"}
+            <span className="tp-search-copy">
+              <span className="tp-search-title">{m.title}</span>
+              <span className="tp-search-caption">{m.category}{!m.native && (m.id.startsWith("event-") ? " · Listing pending" : " · Preview")}</span>
             </span>
+            {m.native && <span className="tp-search-meta">{m.volume}<small>Vol</small></span>}
           </Link>
         ))}
         {loading && rows.length === 0 && [0, 1, 2, 3].map(i => <div key={i} className="tp-search-skeleton" aria-hidden="true" />)}

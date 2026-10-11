@@ -13,7 +13,7 @@ export function BrandIntro() {
   if (!visible) return null;
   return (
     <div
-      className="brand-intro-3d fixed inset-0 z-[110] grid place-items-center overflow-hidden bg-[#0b1018]"
+      className="brand-intro-3d fixed inset-0 z-[110] grid place-items-center overflow-hidden bg-background"
       aria-label="Tac Predict opening animation"
       style={{ animationDuration: "2100ms" }}
     >

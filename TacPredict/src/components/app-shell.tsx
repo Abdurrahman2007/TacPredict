@@ -16,11 +16,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <BrandIntro />
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
+      <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="TacPredict home">
+          <Link to="/" className="app-header-brand flex min-w-0 items-center gap-2.5" aria-label="TacPredict home">
             <BrandMark className="size-10" />
-            <span className="text-lg font-semibold tracking-tight">TacPredict</span>
+            <span className="app-header-name text-lg font-semibold tracking-tight">TacPredict</span>
           </Link>
           <nav className="ml-8 hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navItems.map((item) => (
@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="app-header-actions ml-auto flex shrink-0 items-center gap-3">
             <span className="hidden items-center gap-1.5 text-xs text-muted-foreground lg:inline-flex">
               <span className="size-1.5 rounded-full bg-[#527dff]" />
               Base
