@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { adminSectionSchema, adminSnapshotSchema } from "./admin-view";
 import { keccak256, stringToHex } from "viem";
 import type { SupabaseClient } from "@supabase/supabase-js";
 const documentSchema = z
@@ -43,12 +44,14 @@ export const getProtocolAdminAccess = createServerFn({ method: "GET" })
       .select("role")
       .eq("user_id", context.userId)
       .eq("role", "admin");
-    return { allowed: !error && Boolean(data?.length) };
+    return { allowed: !error && Boolean(data?.length), mfaRequired: context.claims.aal !== "aal2" };
   });
 export const prepareNativeMarket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => documentSchema.parse(v))
   .handler(async ({ data, context }) => {
+    if (context.claims.aal !== "aal2")
+      throw Error("Administrator authenticator verification required");
     const document = canonical(data);
     const metadataHash = keccak256(stringToHex(document));
     const rulesHash = keccak256(stringToHex(data.rules));
@@ -75,6 +78,8 @@ export const prepareNativeMarket = createServerFn({ method: "POST" })
 export const getProtocolAdminDeployments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    if (context.claims.aal !== "aal2")
+      throw Error("Administrator authenticator verification required");
     const client = context.supabase as unknown as SupabaseClient;
     const role = await client
       .from("user_roles")
@@ -103,4 +108,18 @@ export const getProtocolAdminDeployments = createServerFn({ method: "GET" })
         codeHashes: d.code_hashes,
       }),
     );
+  });
+
+export const getProtocolAdminSnapshot = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ section: adminSectionSchema }).strict().parse(v))
+  .handler(async ({ data, context }) => {
+    if (context.claims.aal !== "aal2")
+      throw Error("Administrator authenticator verification required");
+    const client = context.supabase as unknown as SupabaseClient;
+    const { data: snapshot, error } = await client.rpc("get_protocol_admin_snapshot", {
+      _section: data.section,
+    });
+    if (error) throw Error("Administrator snapshot unavailable or permission denied");
+    return adminSnapshotSchema.parse(snapshot);
   });

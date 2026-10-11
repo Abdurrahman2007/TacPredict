@@ -26,3 +26,15 @@ Six contracts publicly source-verified, not independently audited; trading pause
 
 ## TwinMind assistance
 A sanitized, memory-context-disabled code/review request was sent through the authenticated MAX account using the visible Claude Opus 5.5 Thinking option. It returned “Failed to generate a response”; no code from that request has been accepted. A smaller independent request was sent using the visible GPT-6 Astra Thinking option. Record an actual response, review it, adapt it to this repository and test it before claiming TwinMind-generated implementation or deployment. No secrets, real user records or signing material were included.
+
+## First workspace phase — implemented 2026-10-11
+
+TwinMind's visible GPT-6 Astra Thinking option returned illustrative formatter, shell and SQL authorization code. The example targeted Next.js and included automatic-link formatting artifacts; it was reviewed and adapted to this project's TanStack Start, existing main-Supabase tables and existing assigned admin role, not copied as a fake new database. Code provenance is assistance, not an independent security audit or a claim of the provider's underlying model identity. Opus's separate request failed; no successful Opus review is claimed.
+
+Implemented: responsive 10-section admin shell; real read-only native-market/prepared-term, finalized-trade, resolution, account/wallet-count, deployment/checkpoint, 24h/7d-volume and audit views; truthful unavailable treasury/settings capabilities; existing wallet-signed operator console retained. AAL2 is now checked in new server reads, metadata preparation and deployment access, and explicitly in the database snapshot/preparation RPCs. TOTP enrollment/challenge verification uses Supabase MFA. No shared password or new role grants were installed. Password/username admin-login mode, the separate `/admin/login` path, four-role management and complete investigations/workflows remain pending.
+
+Validation: production build passed; full TypeScript no-emit check passed; three new local tests passed for exact BigInt formatting, snapshot validation and authorization invariants. The migration was first exercised and rolled back: anonymous and existing-admin AAL1 denied, existing-admin AAL2 read shapes validated for all ten sections. The tested migration was then applied to the MAIN Supabase project. This database-owner test does not substitute for a real administrator signing in, enrolling TOTP, testing session revocation and completing on-chain actions.
+
+Deployed to the existing production Worker at 08:21 UTC, preserving the one-minute indexer schedule and existing server-only credentials. Temporary release staging was deleted. Public trading remains paused; full A–Z completion is NOT claimed.
+
+Live anonymous checks: all 12 width/route combinations (320/375/1200 × /admin, /, /rewards, /profile) returned 200, no page errors, no document-width overflow and all five public navigation labels. The new admin RPC returned HTTP 401 to the actual anonymous publishable-key request. A real administrator TOTP enrollment/session-revocation and wallet-action E2E remain untested, not completed.
