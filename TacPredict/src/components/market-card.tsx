@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Clock3 } from "lucide-react";
+import { atomicDecimal } from "@/lib/protocol/types";
 import { memo } from "react";
 import type { Market } from "@/domain/markets/types";
 import { MarketIcon } from "./market-icon";
@@ -7,6 +8,13 @@ import { OutcomeRow } from "./outcome-row";
 export const MarketCard = memo(function MarketCard({ market }: { market: Market }) {
   return (
     <article className="market-list-item group rounded-[24px] border border-border bg-card p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <span>{market.category}</span>
+        <span className="flex items-center gap-1">
+          <Clock3 className="size-3.5" />
+          {market.closesAt}
+        </span>
+      </div>
       <Link
         to="/markets/$marketId"
         params={{ marketId: market.id }}
@@ -16,7 +24,7 @@ export const MarketCard = memo(function MarketCard({ market }: { market: Market 
         <h3 className="line-clamp-2 min-w-0 text-lg font-semibold leading-snug">{market.title}</h3>
       </Link>
       <div className="mt-5 space-y-3">
-        {market.outcomes.slice(0, 3).map((outcome, index) => (
+        {market.outcomes.slice(0, 2).map((outcome, index) => (
           <Link
             key={outcome.id}
             to="/markets/$marketId"
@@ -29,13 +37,12 @@ export const MarketCard = memo(function MarketCard({ market }: { market: Market 
         ))}
       </div>
       <footer className="mt-5 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Clock3 className="size-3.5" />
-          {market.closesAt}
-        </span>
         <span className="tabular-nums">
-          {market.volume} · {market.source}
+          {market.outcomes.length > 2
+            ? `${market.outcomes.length} outcomes`
+            : `${market.native ? atomicDecimal(market.native.openInterestAtomic) + " USDC" : "—"} OI`}
         </span>
+        <span className="tabular-nums">{market.volume} Vol</span>
       </footer>
     </article>
   );

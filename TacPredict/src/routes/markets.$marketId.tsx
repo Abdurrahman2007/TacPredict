@@ -1,9 +1,11 @@
+import { PreviewMarketDetail } from "@/components/preview-market-detail";
+import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { NativePublicResolution } from "@/components/native-public-resolution";
 import { NativeMakerTools } from "@/components/native-maker-tools";
 import { NativeMarketTerms, NativeActivity } from "@/components/native-market-data";
 import { atomicDecimal } from "@/lib/protocol/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -44,6 +46,10 @@ function MarketDetailPage() {
   const { marketId } = Route.useParams();
   const { outcome: initial } = Route.useSearch();
   const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
+  const previews = useQuery({
+    ...marketPreviewsQueryOptions,
+    enabled: marketId.startsWith("preview-"),
+  });
   const [selected, setSelected] = useState(initial || "");
   const [amountOpen, setAmountOpen] = useState(false);
   const selectOutcome = (id: string) => {
@@ -57,6 +63,14 @@ function MarketDetailPage() {
   const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
     (item) => item?.id === marketId,
   );
+  const preview = previews.data?.find((p) => p.id === marketId);
+  if (preview) return <PreviewMarketDetail key={preview.id} preview={preview} initial={initial} />;
+  if (marketId.startsWith("preview-") && previews.isPending)
+    return (
+      <div role="status" className="py-16 text-center text-muted-foreground">
+        Loading prediction…
+      </div>
+    );
   if (!market)
     return (
       <div className="py-16 text-center">

@@ -1,4 +1,3 @@
-import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { OutcomeRow } from "@/components/outcome-row";
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -106,7 +105,7 @@ function HomePage() {
 
       {!nativeFeed.error && nativeFeed.markets.length === 0 && (
         <p className="mt-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-          Base · USDC only. Trading is paused while native markets prepare to launch.
+          Pre-launch · USDC trading paused.
         </p>
       )}
       <UpDownSection
@@ -120,7 +119,6 @@ function HomePage() {
         snapshotTime={nativeFeed.updatedAt}
       />
 
-      <PrelaunchMarkets />
       <SportsCarousel markets={feedMarkets} />
 
       <div className="scrollbar-none -mx-4 mt-7 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
@@ -136,11 +134,13 @@ function HomePage() {
         ))}
       </div>
 
-      <MarketSection title={feed} markets={feedMarkets} />
-      <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
-        Own-market trades and volume indexed by {nativeFeed.source} · refreshed{" "}
-        {hydrated ? new Date(nativeFeed.updatedAt).toISOString().slice(11, 16) + " UTC" : "—"}
-      </p>
+      {feedMarkets.length > 0 && <MarketSection title={feed} markets={feedMarkets} />}
+      {nativeFeed.markets.length > 0 && (
+        <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
+          Own-market trades and volume indexed by {nativeFeed.source} · refreshed{" "}
+          {hydrated ? new Date(nativeFeed.updatedAt).toISOString().slice(11, 16) + " UTC" : "—"}
+        </p>
+      )}
     </div>
   );
 }

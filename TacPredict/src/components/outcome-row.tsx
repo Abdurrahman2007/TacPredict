@@ -12,11 +12,16 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
         <div className="mt-2 h-[3px] w-full rounded-full bg-border/40">
           <div
             className={`h-full rounded-full ${index === 0 ? "bg-positive" : "bg-destructive"}`}
-            style={{ width: `${Math.max(0, Math.min(100, outcome.probability))}%` }}
+            style={{
+              width: `${outcome.probabilityKnown === false ? 0 : Math.max(0, Math.min(100, outcome.probability))}%`,
+            }}
           />
         </div>
       </div>
-      <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+      <span
+        title="Implied multiple from observed probability; not an executable quote"
+        className="shrink-0 text-sm tabular-nums text-muted-foreground"
+      >
         {outcome.probabilityKnown !== false && outcome.probability > 0
           ? `${(100 / outcome.probability).toFixed(2)}x`
           : "—"}

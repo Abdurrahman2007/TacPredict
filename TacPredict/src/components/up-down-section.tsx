@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { MarketSparkline } from "@/components/market-sparkline";
@@ -21,6 +23,7 @@ export function UpDownSection({
   detailed?: boolean;
   snapshotTime?: string;
 }) {
+  const { data: previews } = useQuery(marketPreviewsQueryOptions);
   const assets = [
     { key: "bitcoin" as const, name: "Bitcoin", logo: "btc" },
     { key: "ethereum" as const, name: "Ethereum", logo: "eth" },
@@ -30,7 +33,7 @@ export function UpDownSection({
     <section className={detailed ? "" : "mt-5"}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
-          Trending Up &amp; Down
+          {Object.values(liveMarkets).some(Boolean) ? "Trending Up & Down" : "Crypto Predictions"}
         </h2>
         <Link
           to="/search"
@@ -43,9 +46,10 @@ export function UpDownSection({
       <div className="grid gap-3 sm:grid-cols-2">
         {assets.map((asset, index) => {
           const market = liveMarkets[asset.key];
+          const preview = previews?.find((p) => p.asset === asset.key);
           const title = market
             ? `${asset.name} Up or Down - ${marketDurationLabel(market) ?? "USDC market"}`
-            : asset.name;
+            : (preview?.title ?? asset.name);
           const observations = [...(histories?.[asset.key] ?? [])].sort((a, b) => a.time - b.time);
           const end =
             observations.at(-1)?.time ??
@@ -73,6 +77,10 @@ export function UpDownSection({
                       <Link to="/markets/$marketId" params={{ marketId: market.id }}>
                         {title}
                       </Link>
+                    ) : preview ? (
+                      <Link to="/markets/$marketId" params={{ marketId: preview.id }}>
+                        {title}
+                      </Link>
                     ) : (
                       title
                     )}
@@ -85,7 +93,9 @@ export function UpDownSection({
                     snapshotTime={snapshotTime ?? market.startsAt ?? "1970-01-01T00:00:00Z"}
                   />
                 ) : (
-                  <span className="shrink-0 text-xs text-muted-foreground">USDC</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {preview ? "Preview" : "USDC"}
+                  </span>
                 )}
               </div>
               {market && (
@@ -138,10 +148,49 @@ export function UpDownSection({
                     </Link>
                   ))}
                 </div>
+              ) : preview ? (
+                <>
+                  <div className={index === 0 ? "mt-5 grid grid-cols-2 gap-3" : "mt-5 space-y-3"}>
+                    {["Yes", "No"].map((label, i) => (
+                      <Link
+                        key={label}
+                        to="/markets/$marketId"
+                        params={{ marketId: preview.id }}
+                        search={{ outcome: String(i) }}
+                        aria-label={`Predict ${label}: ${preview.title}`}
+                        className={
+                          index === 0
+                            ? "ios-press flex min-h-12 items-center justify-center rounded-full bg-secondary text-sm font-semibold"
+                            : "ios-press flex min-h-12 items-center gap-3"
+                        }
+                      >
+                        {index === 0 ? (
+                          `${label} —`
+                        ) : (
+                          <OutcomeRow
+                            outcome={{
+                              id: String(i),
+                              label,
+                              probability: 0,
+                              probabilityKnown: false,
+                            }}
+                            index={i}
+                          />
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-5 flex justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
+                    <span>— OI</span>
+                    <span>— Vol</span>
+                  </div>
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Spot reference · Trading paused
+                  </p>
+                </>
               ) : (
-                <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-                  No published TacPredict {asset.name} market yet. This price is a chart reference,
-                  not a settlement oracle.
+                <p className="mt-5 text-xs text-muted-foreground">
+                  Spot reference · No published prediction yet
                 </p>
               )}
             </article>

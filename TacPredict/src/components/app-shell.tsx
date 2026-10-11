@@ -8,7 +8,6 @@ const navItems = [
   { to: "/" as const, label: "Home", icon: House },
   { to: "/search" as const, label: "Search", icon: Search },
   { to: "/markets" as const, label: "Markets", icon: LineChart },
-  { to: "/rewards" as const, label: "Rewards", icon: Gift },
   { to: "/profile" as const, label: "Portfolio", icon: Wallet },
 ];
 export function AppShell({ children }: { children: ReactNode }) {
@@ -32,14 +31,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 activeProps={{ className: "bg-primary/10 text-primary" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
-                {item.label === "Rewards" ? (
-                  <span className="header-reward inline-flex items-center gap-1.5">
-                    <Gift size={14} />
-                    {item.label}
-                  </span>
-                ) : (
-                  item.label
-                )}
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -51,7 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               to="/rewards"
               aria-label="Your rewards"
-              className="header-reward grid size-10 place-items-center rounded-full border border-border bg-card text-primary transition-colors hover:bg-primary/10 lg:hidden"
+              className="header-reward grid size-10 place-items-center rounded-full border border-border bg-card text-primary transition-colors hover:bg-primary/10"
             >
               <Gift className="size-[19px]" />
             </Link>
@@ -78,7 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         aria-label="Mobile navigation"
       >
-        <div className="mx-auto grid max-w-md grid-cols-5">
+        <div className="mx-auto grid max-w-md grid-cols-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (

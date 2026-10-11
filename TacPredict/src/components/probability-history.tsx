@@ -30,7 +30,9 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
           <span key={o.id} className="flex items-center gap-2 text-sm">
             <span className="size-2 rounded-full" style={{ background: colors[i] }} />
             {o.label}
-            <span className="text-muted-foreground">{o.probability}%</span>
+            <span className="text-muted-foreground">
+              {o.probabilityKnown === false ? "—" : `${o.probability}%`}
+            </span>
           </span>
         ))}
       </div>

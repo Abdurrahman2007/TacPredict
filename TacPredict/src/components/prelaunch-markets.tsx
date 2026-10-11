@@ -1,8 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { marketPreviewsQueryOptions, type MarketPreview } from "@/lib/agent/discovery.functions";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
-import { ArrowUpRight, LockKeyhole } from "lucide-react";
+import type { Market } from "@/domain/markets/types";
+import { OutcomeRow } from "./outcome-row";
+
+export function previewMarket(p: MarketPreview): Market {
+  return {
+    id: p.id,
+    title: p.title,
+    category: p.category,
+    closesAt:
+      new Date(p.closeAt).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "UTC",
+      }) + " UTC",
+    endsAt: p.closeAt,
+    volume: "—",
+    participants: 0,
+    outcomes: [
+      { id: "0", label: "Yes", probability: 0, probabilityKnown: false },
+      { id: "1", label: "No", probability: 0, probabilityKnown: false },
+    ],
+    description: p.rules,
+    source: "TacPredict preview",
+    sourceUrl: p.sourceUrl,
+    resolutionCriteria: p.rules,
+    image: `/brand/crypto/${p.asset === "bitcoin" ? "btc" : p.asset === "ethereum" ? "eth" : "sol"}.svg`,
+  };
+}
 export function PrelaunchMarkets({
   query = "",
   category = "All",
@@ -10,8 +38,7 @@ export function PrelaunchMarkets({
   query?: string;
   category?: string;
 }) {
-  const q = useQuery(marketPreviewsQueryOptions),
-    [selected, setSelected] = useState<MarketPreview | null>(null);
+  const q = useQuery(marketPreviewsQueryOptions);
   const rows = (q.data ?? []).filter(
     (p) =>
       (category === "All" || category === "Crypto") &&
@@ -20,14 +47,14 @@ export function PrelaunchMarkets({
   if (q.isPending)
     return (
       <div
-        className="mt-6 grid gap-3 sm:grid-cols-3"
+        className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
         aria-label="Loading market previews"
         aria-busy="true"
       >
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-44 rounded-3xl border border-border bg-card motion-safe:animate-pulse"
+            className="h-72 rounded-[28px] border border-border bg-card motion-safe:animate-pulse"
           />
         ))}
       </div>
@@ -36,80 +63,51 @@ export function PrelaunchMarkets({
   return (
     <section className="mt-7" aria-label="TacPredict pre-launch markets">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Next on TacPredict</h2>
-        <span className="text-[11px] text-muted-foreground">Pre-launch · trading paused</span>
+        <h2 className="text-lg font-semibold">Predictions</h2>
+        <span className="text-[11px] text-muted-foreground">Pre-launch</span>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {rows.map((p) => (
-          <button
-            type="button"
-            key={p.id}
-            onClick={() => setSelected(p)}
-            className="group rounded-[24px] border border-border bg-card p-5 text-left transition-colors hover:border-primary/40 focus-visible:outline-primary"
-          >
-            <div className="flex justify-between">
-              <img
-                alt=""
-                src={`/brand/crypto/${p.asset === "bitcoin" ? "btc" : p.asset === "ethereum" ? "eth" : "sol"}.svg`}
-                className="size-9"
-              />
-              <span className="finance-badge !text-[10px]">Preview</span>
-            </div>
-            <h3 className="mt-4 text-sm font-semibold leading-6">{p.title}</h3>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <span className="rounded-full bg-secondary py-2 text-center text-xs text-muted-foreground">
-                Yes —
-              </span>
-              <span className="rounded-full bg-secondary py-2 text-center text-xs text-muted-foreground">
-                No —
-              </span>
-            </div>
-            <div className="mt-4 flex justify-between text-[10px] text-muted-foreground">
-              <span>No on-chain trades yet</span>
-              <ArrowUpRight size={14} />
-            </div>
-          </button>
-        ))}
-      </div>
-      <Dialog
-        open={!!selected}
-        onOpenChange={(v) => {
-          if (!v) setSelected(null);
-        }}
-      >
-        <DialogContent className="w-[calc(100%_-_2rem)] max-h-[85dvh] overflow-auto rounded-3xl">
-          {selected && (
-            <>
-              <DialogTitle className="pr-5 leading-7">{selected.title}</DialogTitle>
-              <DialogDescription>
-                Original TacPredict question · Base Mainnet · native USDC. Preview only, not an
-                on-chain market.
-              </DialogDescription>
-              <p className="text-sm leading-7">{selected.rules}</p>
-              <div className="rounded-xl border border-border p-4 text-xs leading-6 text-muted-foreground">
-                Share price — · Volume — · On-chain ID —<br />A Factory transaction, locked approved
-                terms, liquidity and a verified oracle workflow are required before trading.
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {rows.map((p) => {
+          const market = previewMarket(p);
+          return (
+            <article
+              key={p.id}
+              className="market-list-item rounded-[28px] border border-border bg-card p-5 sm:p-6"
+            >
+              <div className="mb-4 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                <span>Crypto · Preview</span>
+                <span>{market.closesAt}</span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Draft reference observation: ${selected.observedPrice.toLocaleString("en-US")} ·{" "}
-                {selected.observedAt}
-              </p>
-              <a
-                href={selected.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary"
+              <Link
+                to="/markets/$marketId"
+                params={{ marketId: p.id }}
+                className="flex items-start gap-3"
               >
-                Proposed resolution source ↗
-              </a>
-              <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <LockKeyhole size={14} />
-                Trading is not enabled
-              </span>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+                <img src={market.image} alt="" className="size-9 shrink-0" />
+                <h3 className="min-w-0 text-lg font-semibold leading-snug">{p.title}</h3>
+              </Link>
+              <div className="mt-5 space-y-3">
+                {market.outcomes.map((outcome, index) => (
+                  <Link
+                    key={outcome.id}
+                    to="/markets/$marketId"
+                    params={{ marketId: p.id }}
+                    search={{ outcome: outcome.id }}
+                    aria-label={`Predict ${outcome.label}: ${p.title}`}
+                    className="ios-press flex min-h-14 items-center gap-3 rounded-xl"
+                  >
+                    <OutcomeRow outcome={outcome} index={index} />
+                  </Link>
+                ))}
+              </div>
+              <footer className="mt-5 flex justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
+                <span>— OI</span>
+                <span>— Vol</span>
+              </footer>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }
