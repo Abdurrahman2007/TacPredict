@@ -1,0 +1,25 @@
+{
+  "chainId": 8453,
+  "sourceAndRolesVerified": true,
+  "audited": false,
+  "tradingActivated": false,
+  "tradingPaused": true,
+  "codeHashes": {
+    "registry": "0x3014b10cebcaaf179998c1040d6cd6c0fb5ae6ba7d56429c487f420ae452bfed",
+    "factory": "0x580eb779b6e319b865387cd27d23f3f4215f57ee8915582f9323748a74688405",
+    "positions": "0x6bed0ba45fcd3b82d6419d7224872cf695edafc9863d657b702c391add0e6ef4",
+    "exchange": "0x85de7121dbc41994d46d62ec2d8731ac000c13a99437d8e299292fe42ac7bc5b",
+    "oracle": "0x59396a37bbb2cf6d5e5e1c22a4081adc40e5b01f177d71e2b91209b9ad664ce8",
+    "settlement": "0x3705aec1eafcc02542356f1fc06bf55798ac0f02c97abb70903c24c4776ead86"
+  },
+  "finalizedThrough": "52453800",
+  "checks": [
+    "MarketRegistry: source, constructor and receipt match",
+    "MarketFactory: source, constructor and receipt match",
+    "ConditionalPositions: source, constructor and receipt match",
+    "Exchange: source, constructor and receipt match",
+    "ResolutionOracle: source, constructor and receipt match",
+    "Settlement: source, constructor and receipt match"
+  ],
+  "warning": "Source/role verification is not an independent security audit. Registration and activation remain separate operator decisions."
+}

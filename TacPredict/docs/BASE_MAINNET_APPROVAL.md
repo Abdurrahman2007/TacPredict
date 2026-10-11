@@ -14,4 +14,7 @@
 - Sixteen isolated contract scenarios pass, but these are not an independent audit or exhaustive fuzzing. Real funded Mainnet trading/settlement/claim E2E has not run.
 - App `/admin` access is separate from on-chain roles. The explicitly requested, existing verified login account has been granted the admin role in the main Supabase project. No new account or wallet ownership link was fabricated.
 
-Next: wait for finalized source/role verification, confirm the scheduled finalized indexer writes real checkpoints, then separately review launch readiness. No production market or financial event should be fabricated while waiting.
+Finalized source/role verification succeeded through block 52453800; the main database record is verified and trading remains disabled. Next: confirm real finalized indexer checkpoints and separately review launch readiness. No production market or financial event should be fabricated while waiting.
+
+## Operational validation
+The requested existing app administrator is assigned; all six runtime hashes, pointers, bootstrap roles and finalized canonical receipts matched. Mainnet registration is verified with trading disabled. Cloudflare cron is configured every five minutes. A real bounded indexer run succeeded and persisted checkpoint 52453985; initial RPC-limit failures are retained in private run logs. The free Base dRPC fallback and four 50-block batches are bootstrap configuration, not a production SLA. Independent audit, first native market terms/liquidity, operational monitoring and real funded trading/settlement/claim E2E still remain.

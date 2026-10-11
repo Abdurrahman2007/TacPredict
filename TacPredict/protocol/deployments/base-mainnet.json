@@ -16,7 +16,7 @@
     "exchange": "0x85de7121dbc41994d46d62ec2d8731ac000c13a99437d8e299292fe42ac7bc5b",
     "settlement": "0x3705aec1eafcc02542356f1fc06bf55798ac0f02c97abb70903c24c4776ead86"
   },
-  "verified": false,
+  "verified": true,
   "trading_enabled": false,
   "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
   "tx_hash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
@@ -78,5 +78,6 @@
       "salt": "0xf8a8319c3993aeb156bd3b7db05e3abdefc89e1726bd61dc28c32236bb23b060",
       "initCodeHash": "0x80bf430ece9ca2bd24d27fd8a5414137c54cbda44efa9aabe9ab2e3b16ade037"
     }
-  }
+  },
+  "verification_report": "base-mainnet.json.verification.json"
 }

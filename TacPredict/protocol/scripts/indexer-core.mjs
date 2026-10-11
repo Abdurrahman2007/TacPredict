@@ -91,7 +91,7 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
       ? BigInt(checkpoint.block_number) + 1n
       : BigInt(deployment.deployment_block);
     const finalized = await client.getBlock({ blockTag: "finalized" });
-    const chunk = 200n;
+    const chunk = 50n;
     let applied = 0;
     let chunks = 0;
     for (; from <= finalized.number && chunks < maxChunks; from += chunk, chunks++) {

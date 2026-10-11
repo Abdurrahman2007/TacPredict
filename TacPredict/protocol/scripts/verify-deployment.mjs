@@ -129,6 +129,9 @@ export async function verifyDeployment(pub, manifest, artifacts) {
   await requireRole("factory", "MARKET_CREATOR_ROLE", manifest.creator ?? manifest.admin);
   await requireRole("oracle", "PROPOSER_ROLE", manifest.proposer ?? manifest.admin);
   await requireRole("oracle", "ARBITER_ROLE", manifest.arbiter ?? manifest.admin);
+  const tradingPaused = await read("registry", "tradingPaused");
+  if (!manifest.trading_enabled && !tradingPaused)
+    throw Error("Expected initial trading pause missing");
   const finalized = await pub.getBlock({ blockTag: "finalized" });
   for (const d of Object.values(manifest.deployment_transactions)) {
     const r = await pub.getTransactionReceipt({ hash: d.txHash });
@@ -141,6 +144,7 @@ export async function verifyDeployment(pub, manifest, artifacts) {
     sourceAndRolesVerified: true,
     audited: false,
     tradingActivated: false,
+    tradingPaused,
     codeHashes: hashes,
     finalizedThrough: finalized.number.toString(),
     checks,
