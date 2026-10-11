@@ -252,3 +252,28 @@ Never put service/relayer/RPC secrets in `VITE_*`, frontend bundles, screenshots
 ## Cursor paste-in directive
 
 > Read this handoff and the existing development/base-usdc branch first. Six Base Mainnet contracts are ALREADY deployed and publicly source-verified; do not redeploy. Use the existing main Supabase project and real native protocol integrations. Financial truth is finalized Base events, not editable admin balances. Keep public navigation unchanged. No invented market IDs, quotes, balances, fees, treasury functions or completed workflow claims. First inspect/test/read current state; produce a concrete done/partial/missing checklist. Finish integration/admin work safely, then request human funding/terms/wallet approval for genuine Mainnet E2E. Preserve pause and AAL2/role checks until an explicit reviewed launch. Use private environment secrets, not credentials in prompts.
+
+## Confirmed first market update — 2026-10-11
+Base mainnet Factory creation approved by owner and receipt succeeded:
+- TX: 0x4ce6d5f3455d5226a4f7e11633266a4ca76a0a1db9719e6e7c734f7e3f09e8fc
+- Registry marketId: 1
+- questionId: 0x476339e15ad512dbe6f14dc3ad62a2f46bcf0f5700ba905d33d9b9b9ea9fe461
+- conditionId: 0x0b9a919f23d76af9fe5f34fbe5377a152f735e42eb421e2db6631a0060147444
+- Question: Will Bitcoin close above $85,000 on October 12, 2026?
+- Open: 2026-10-11T16:10:32Z; close: 2026-10-12T23:59:00Z.
+- Metadata: https://tacpredict.fun/api/protocol/metadata/0x918e9f7f283d968e354be59cbd46c9b2c91a5b6afcf7732a0d2f0bb868cadb1f
+- Creation is NOT trading activation, collateral funding or an executed order.
+- At 15:50Z public native feed still empty / deployment tradingEnabled=false;
+  indexer backlog needs canonical catch-up. Never manufacture DB financial rows.
+- CLOB offers require actual signed and funded maker positions. No native USDC liquidity/E2E yet.
+- Oracle requires 5 USDC bond and 24-hour challenge; never bypass to claim E2E.
+
+Metadata discovery is separate: public event drafts30 with no imported financial prices,
+volume, tokens or results. Database cron `tacpredict-market-discovery` runs every15minutes;
+Vault `tacpredict_market_discovery_scheduler` and Worker
+`MARKET_DISCOVERY_SCHEDULER_SECRET` must match. The protected metadata-only endpoint
+is `/api/agent/scheduled`; no signing or financial permissions.
+Migration0018 defines extensions/RPCs; deployment must separately provision the random scoped
+Vault/Worker secret and cron (no secret is committed). AI editorial review uses real
+`@cf/meta/llama-3.3-70b-instruct-fp8-fast`; last proven import succeeded with review PARTIAL,
+so do not claim reliable automatic review/publishing until verified run counters show success.

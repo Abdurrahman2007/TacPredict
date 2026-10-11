@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
+import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
+import { DiscoveredEvents } from "@/components/discovered-events";
 import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -12,6 +16,8 @@ export const Route = createFileRoute("/search")({
   component: SearchPage,
 });
 function SearchPage() {
+  const events = useQuery(eventDraftsQueryOptions);
+  const previews = useQuery(marketPreviewsQueryOptions);
   const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.trim().toLowerCase());
@@ -36,14 +42,16 @@ function SearchPage() {
             ? ["sol", "solana"]
             : [word],
     );
-  const results = markets.filter((m) =>
-    words.every((aliases) =>
-      aliases.some((word) =>
-        `${m.title} ${m.category} ${m.outcomes.map((o) => o.label).join(" ")}`
-          .toLowerCase()
-          .includes(word),
+  const results = markets.filter(
+    (m) =>
+      (filter !== "Live" || m.native?.status === "OPEN") &&
+      words.every((aliases) =>
+        aliases.some((word) =>
+          `${m.title} ${m.category} ${m.outcomes.map((o) => o.label).join(" ")}`
+            .toLowerCase()
+            .includes(word),
+        ),
       ),
-    ),
   );
   if (filter === "New")
     results.sort(
@@ -97,7 +105,12 @@ function SearchPage() {
           </button>
         )}
       </div>
-      <PrelaunchMarkets query={q} />
+      {filter !== "Live" && (
+        <>
+          <PrelaunchMarkets query={q} />
+          <DiscoveredEvents query={q} />
+        </>
+      )}
       {!q && (
         <div
           className="scrollbar-none mt-4 flex gap-2 overflow-x-auto"
@@ -121,9 +134,11 @@ function SearchPage() {
             ))}
         </div>
       )}
-      <h2 className="mb-3 mt-7 text-base font-medium text-muted-foreground">
-        {q ? `Results · ${results.length}` : "Featured"}
-      </h2>
+      {results.length > 0 && (
+        <h2 className="mb-3 mt-7 text-base font-medium text-muted-foreground">
+          {q ? `Results · ${results.length}` : "Featured"}
+        </h2>
+      )}
       <div className="space-y-1" aria-live="polite">
         {results.slice(0, q ? 30 : 8).map((m) => (
           <Link
@@ -143,11 +158,15 @@ function SearchPage() {
             </span>
           </Link>
         ))}
-        {results.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            {q ? "No matches" : "Markets unavailable"}
-          </p>
-        )}
+        {results.length === 0 &&
+          (filter === "Live" ||
+            ![...(events.data ?? []), ...(previews.data ?? [])].some((p) =>
+              p.title.toLowerCase().includes(q),
+            )) && (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              {q ? "No matches" : "Markets unavailable"}
+            </p>
+          )}
       </div>
     </div>
   );

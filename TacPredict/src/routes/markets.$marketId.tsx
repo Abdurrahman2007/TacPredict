@@ -1,3 +1,5 @@
+import { EventDraftDetail } from "@/components/discovered-events";
+import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { PreviewMarketDetail } from "@/components/preview-market-detail";
 import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { NativePublicResolution } from "@/components/native-public-resolution";
@@ -50,6 +52,10 @@ function MarketDetailPage() {
     ...marketPreviewsQueryOptions,
     enabled: marketId.startsWith("preview-"),
   });
+  const eventDrafts = useQuery({
+    ...eventDraftsQueryOptions,
+    enabled: marketId.startsWith("event-"),
+  });
   const [selected, setSelected] = useState(initial || "");
   const [amountOpen, setAmountOpen] = useState(false);
   const selectOutcome = (id: string) => {
@@ -63,6 +69,14 @@ function MarketDetailPage() {
   const market = [...feed.markets, ...Object.values(feed.cryptoUpDown)].find(
     (item) => item?.id === marketId,
   );
+  const draftEvent = eventDrafts.data?.find((p) => p.id === marketId);
+  if (draftEvent) return <EventDraftDetail event={draftEvent} />;
+  if (marketId.startsWith("event-") && eventDrafts.isPending)
+    return (
+      <div role="status" className="py-16 text-center">
+        Loading event…
+      </div>
+    );
   const preview = previews.data?.find((p) => p.id === marketId);
   if (preview) return <PreviewMarketDetail key={preview.id} preview={preview} initial={initial} />;
   if (marketId.startsWith("preview-") && previews.isPending)

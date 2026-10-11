@@ -1,12 +1,14 @@
+import { WalletFundingDialog } from "@/components/wallet-funding-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
   Eye,
   EyeOff,
   Copy,
-  Gift,
   RefreshCw,
   Search,
   Wallet,
@@ -25,6 +27,10 @@ function PortfolioPage() {
   const wallet = useBaseWallet(),
     q = useNativePortfolio();
   const auth = useProtocolUser();
+  const feed = useQuery(nativeMarketFeedQueryOptions);
+  const deployment = feed.data?.deployments.find((d) => d.chainId === 8453);
+  const [funding, setFunding] = useState<"deposit" | "withdraw" | null>(null);
+  const [range, setRange] = useState("1D");
   const [tab, setTab] = useState("Positions"),
     [hidden, setHidden] = useState(false),
     [search, setSearch] = useState(""),
@@ -57,8 +63,8 @@ function PortfolioPage() {
       <section className="mt-5 grid grid-cols-2 gap-4" aria-label="Portfolio balances">
         <div>
           <div className="flex items-center gap-3">
-            <p className="text-[36px] font-semibold tracking-tight tabular-nums sm:text-5xl">
-              {display(positionValue)}
+            <p className="text-[32px] font-semibold tracking-tight tabular-nums sm:text-5xl">
+              {hidden ? display(positionValue) : `$${display(positionValue)}`}
               <span className="ml-2 text-sm font-normal text-muted-foreground">USDC</span>
             </p>
             <button
@@ -77,18 +83,18 @@ function PortfolioPage() {
             {hidden
               ? "••••"
               : walletKnown
-                ? formatUsdc(wallet.usdc)
+                ? `$${formatUsdc(wallet.usdc)}`
                 : auth.ready && !auth.user
-                  ? "0.00"
+                  ? "$0.00"
                   : "—"}
             <span className="ml-2 text-sm font-normal text-muted-foreground">USDC</span>
           </p>
-          <p className="mt-2 text-xs text-muted-foreground">Trading paused</p>
+          <p className="mt-2 text-xs text-muted-foreground">{deployment ? deployment.tradingEnabled ? "Base wallet" : "Trading paused" : "Base wallet"}</p>
         </div>
       </section>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         {!wallet.address ? (
-          <span className="text-xs text-muted-foreground">Sign in above to view your balance</span>
+          null
         ) : (
           <button
             className="finance-pill"
@@ -124,25 +130,49 @@ function PortfolioPage() {
         )}
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <button disabled className="portfolio-funding portfolio-funding-primary">
+        <button
+          disabled={!wallet.address || wallet.chainId !== 8453}
+          onClick={() => setFunding("deposit")}
+          className="portfolio-funding portfolio-funding-primary"
+        >
           <ArrowDownToLine size={20} />
           Deposit
         </button>
-        <button disabled className="portfolio-funding">
+        <button
+          disabled={
+            !wallet.address || wallet.chainId !== 8453 || wallet.usdc === null || wallet.usdc <= 0n
+          }
+          onClick={() => setFunding("withdraw")}
+          className="portfolio-funding"
+        >
           <ArrowUpFromLine size={20} />
           Withdraw
         </button>
       </div>
-      <p className="mt-3 text-[11px] text-muted-foreground">Funding opens at launch.</p>
+
       <section
         className="mt-6 rounded-[24px] border border-border bg-card p-5 sm:p-7"
         aria-label="Portfolio performance"
       >
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm text-muted-foreground">Profit / Loss</h2>
+          <div className="flex gap-1">
+            {["1D", "1W", "1M", "1Y", "YTD", "ALL"].map((period) => (
+              <button
+                key={period}
+                onClick={() => setRange(period)}
+                aria-pressed={range === period}
+                className={`min-h-9 rounded-xl px-2 text-xs font-semibold ${range === period ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}
+              >
+                {period}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-wrap justify-between gap-4">
           <div>
-            <h2 className="text-sm text-muted-foreground">Profit / Loss</h2>
             <p className="mt-3 text-3xl font-semibold">
-              {hidden ? "••••" : auth.ready && !auth.user ? "0.00" : "—"}
+              {hidden ? "••••" : auth.ready && !auth.user ? "$0.00" : "—"}
             </p>
           </div>
           <div className="text-right">
@@ -150,9 +180,8 @@ function PortfolioPage() {
             <p className="mt-3 text-xl font-semibold tabular-nums">{display(claimable)}</p>
           </div>
         </div>
-        <div className="mt-7 grid min-h-32 place-items-center rounded-xl border border-dashed border-border bg-background/30 px-6 text-center text-xs leading-6 text-muted-foreground">
-          Performance history appears after verified trading and cost-basis indexing. No estimated
-          P&amp;L is substituted.
+        <div className="mt-7 grid min-h-44 place-items-center rounded-xl bg-gradient-to-t from-primary/10 to-transparent px-6 text-center text-xs leading-6 text-muted-foreground">
+          No verified performance history · {range}
         </div>
       </section>
       <section className="mt-7" aria-label="Your positions">
@@ -182,18 +211,11 @@ function PortfolioPage() {
         )}
         <NativePortfolio tab={tab === "History" ? "Activity" : tab} search={search} />
       </section>
-      <Link
-        to="/rewards"
-        className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-4"
-      >
-        <Gift size={20} className="text-primary" />
-        <div>
-          <p className="text-sm font-semibold">Welcome journey · 15 USDC</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Locked promotional credit · separate from wallet funds
-          </p>
-        </div>
-      </Link>
+      <WalletFundingDialog
+        kind={funding ?? "deposit"}
+        open={funding !== null}
+        onClose={() => setFunding(null)}
+      />
       <p role="status" className="mt-3 text-xs text-muted-foreground">
         {notice || wallet.error}
       </p>

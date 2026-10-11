@@ -1,3 +1,5 @@
+import { DiscoveredEvents } from "@/components/discovered-events";
+import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { OutcomeRow } from "@/components/outcome-row";
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -50,12 +52,14 @@ function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const { feed = "Trending" } = Route.useSearch();
+  const { data: events } = useQuery(eventDraftsQueryOptions);
   const { data: crypto } = useQuery(cryptoMarketQueryOptions);
   const { data: btcHistory } = useQuery(cryptoHistoryQueryOptions("bitcoin"));
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const feedMarkets = useMemo(() => {
     const liveMarkets = nativeFeed.markets;
-    const sorted = [...liveMarkets];
+    const sorted =
+      feed === "Live" ? liveMarkets.filter((m) => m.native?.status === "OPEN") : [...liveMarkets];
     if (feed === "New")
       sorted.sort(
         (a, b) => (Date.parse(b.createdAt ?? "") || 0) - (Date.parse(a.createdAt ?? "") || 0),
@@ -93,6 +97,28 @@ function HomePage() {
         ))}
       </div>
 
+      <div className="scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        {categories
+          .slice(0, 7)
+          .filter(
+            (c) =>
+              c === "All" ||
+              c === "Crypto" ||
+              events?.some((e) => e.category === c) ||
+              nativeFeed.markets.some((m) => m.category === c),
+          )
+          .map((category, index) => (
+            <Link
+              key={category}
+              to="/markets"
+              search={{ category, sort: "Trending", q: "" }}
+              className={index === 0 ? "filter-chip-active" : "filter-chip"}
+            >
+              {category}
+            </Link>
+          ))}
+      </div>
+
       {nativeFeed.error && (
         <p
           role="status"
@@ -120,19 +146,7 @@ function HomePage() {
       />
 
       <SportsCarousel markets={feedMarkets} />
-
-      <div className="scrollbar-none -mx-4 mt-7 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        {categories.slice(0, 7).map((category, index) => (
-          <Link
-            key={category}
-            to="/markets"
-            search={{ category, sort: "Trending", q: "" }}
-            className={index === 0 ? "filter-chip-active" : "filter-chip"}
-          >
-            {category}
-          </Link>
-        ))}
-      </div>
+      {feed !== "Live" && <DiscoveredEvents />}
 
       {feedMarkets.length > 0 && <MarketSection title={feed} markets={feedMarkets} />}
       {nativeFeed.markets.length > 0 && (

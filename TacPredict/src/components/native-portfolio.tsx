@@ -92,7 +92,7 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
           <span className="finance-icon mx-auto">
             <ShieldCheck size={22} />
           </span>
-          <h3 className="mt-4 font-semibold">Your positions, privately linked</h3>
+          <h3 className="mt-4 font-semibold">Verify your wallet</h3>
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
             Verify wallet ownership to view positions.
           </p>
@@ -121,7 +121,7 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
         ) : !activity?.length ? (
           <EmptyState
             title="No finalized activity yet"
-            description="Settled buys, sells and redemptions will appear here with their Base transaction."
+            description="Your confirmed transactions will appear here."
           />
         ) : (
           activity.map((a) => (
@@ -159,7 +159,7 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
       ) : !positions.length ? (
         <EmptyState
           title="No positions yet"
-          description="Your native Base prediction positions will appear here after finalized activity is indexed."
+          description="Your settled Base positions will appear here."
         />
       ) : (
         positions.map((p) => (

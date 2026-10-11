@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
+import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
+import { DiscoveredEvents } from "@/components/discovered-events";
 import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
@@ -57,6 +61,13 @@ function MarketsPage() {
   const category = search.category ?? "All";
   const sort = search.sort ?? "Trending";
   const query = search.q ?? "";
+  const events = useQuery(eventDraftsQueryOptions);
+  const previews = useQuery(marketPreviewsQueryOptions);
+  const otherMatches = [...(events.data ?? []), ...(previews.data ?? [])].some(
+    (p) =>
+      (category === "All" || p.category === category) &&
+      p.title.toLowerCase().includes(query.toLowerCase()),
+  );
   const { data: liveFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const filtered = useMemo(() => {
     const allMarkets = liveFeed.markets;
@@ -142,6 +153,7 @@ function MarketsPage() {
       </div>
 
       <PrelaunchMarkets query={query} category={category} />
+      <DiscoveredEvents query={query} category={category} />
       {liveFeed.error && (
         <p
           role="status"
@@ -157,14 +169,14 @@ function MarketsPage() {
             <MarketCard key={market.id} market={market} />
           ))}
         </div>
-      ) : (
+      ) : !otherMatches ? (
         <div className="py-16 text-center">
           <p className="font-bold">No matching markets</p>
           <p className="mt-1 text-sm text-muted-foreground">Try another search or category.</p>
         </div>
-      )}
+      ) : null}
       <p className="mt-5 text-center text-[0.65rem] font-semibold text-muted-foreground">
-        Odds and volume from Polymarket · Base execution contracts not connected
+        Base Mainnet · Native USDC · Financial state from TacPredict contracts
       </p>
     </div>
   );
