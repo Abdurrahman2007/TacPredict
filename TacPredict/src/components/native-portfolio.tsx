@@ -1,10 +1,12 @@
 import { createWalletClient, custom, type Address } from "viem";
 import { base } from "viem/chains";
 import { getWalletLinkChallenge, proveWalletLink } from "@/lib/protocol/wallet-link.functions";
+import { visiblePositions } from "@/lib/protocol/portfolio-view.mjs";
+import { useOwnProtocolOrders } from "@/lib/protocol/portfolio-orders";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Layers, ShieldCheck, ArrowUpRight, RefreshCw } from "lucide-react";
+import { ShieldCheck, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useLoginDialog } from "@/components/login-dialog";
@@ -12,20 +14,28 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { atomicDecimal } from "@/lib/protocol/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { claimPosition } from "@/lib/protocol/execution";
-export function NativePortfolio({ tab, search = "" }: { tab: string; search?: string }) {
+export function NativePortfolio({
+  tab,
+  search = "",
+  sort = "value",
+  descending = true,
+  activeOnly = false,
+}: {
+  tab: string;
+  search?: string;
+  sort?: string;
+  descending?: boolean;
+  activeOnly?: boolean;
+}) {
   const q = useNativePortfolio(),
     auth = useProtocolUser(),
     login = useLoginDialog(),
     wallet = useBaseWallet(),
     feed = useQuery(nativeMarketFeedQueryOptions);
+  const orders = useOwnProtocolOrders();
   const [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
-  const positions = (q.data?.positions ?? []).filter(
-    (p) =>
-      p.chainId === 8453 &&
-      p.title.toLowerCase().includes(search.trim().toLowerCase()) &&
-      (tab !== "Open" || ["OPEN", "UPCOMING"].includes(p.status)),
-  );
+  const positions = visiblePositions(q.data?.positions ?? [], search, sort, descending, activeOnly);
   async function claim(p: (typeof positions)[number]) {
     const d = feed.data?.deployments.find((d) => d.chainId === p.chainId);
     if (!d) return;
@@ -86,7 +96,66 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
           </button>
         </div>
       ) : !auth.user ? (
-        <div className="py-10 text-center text-sm text-muted-foreground">No positions yet</div>
+        <EmptyState
+          title={
+            tab === "Open"
+              ? "No open orders."
+              : tab === "Activity"
+                ? "No history yet."
+                : "No positions found."
+          }
+          description={
+            tab === "Open"
+              ? "You have no unfilled orders right now."
+              : tab === "Activity"
+                ? "Your confirmed transactions will appear here."
+                : "Your confirmed positions will appear here."
+          }
+        />
+      ) : tab === "Open" ? (
+        orders.isPending ? (
+          <div className="finance-card" role="status">
+            Loading orders…
+          </div>
+        ) : orders.isError ? (
+          <div className="finance-card" role="alert">
+            Open orders unavailable.
+            <button className="finance-pill mt-3" onClick={() => void orders.refetch()}>
+              Retry
+            </button>
+          </div>
+        ) : !(orders.data ?? []).filter((o) => o.title.toLowerCase().includes(search.toLowerCase()))
+            .length ? (
+          <EmptyState
+            title="No open orders."
+            description="You have no unfilled orders right now."
+          />
+        ) : (
+          (orders.data ?? [])
+            .filter((o) => o.title.toLowerCase().includes(search.toLowerCase()))
+            .map((o) => (
+              <article className="finance-card !p-4" key={o.id}>
+                <Link
+                  to="/markets/$marketId"
+                  params={{ marketId: o.marketId }}
+                  className="text-sm font-semibold"
+                >
+                  {o.title}
+                </Link>
+                <div className="mt-3 flex justify-between gap-3 text-xs text-muted-foreground">
+                  <span>
+                    {o.side} · Outcome {o.outcomeIndex + 1} · {atomicDecimal(o.remainingAtomic)}{" "}
+                    shares
+                  </span>
+                  <span>Limit {atomicDecimal(o.priceAtomic)} USDC</span>
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  {o.status === "PARTIAL" ? "Partially filled" : "Unfilled"} · Expires{" "}
+                  {new Date(o.expiration).toLocaleString()}
+                </p>
+              </article>
+            ))
+        )
       ) : !q.data?.walletLinked ? (
         <div className="finance-card text-center">
           <span className="finance-icon mx-auto">
@@ -120,7 +189,7 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
           </div>
         ) : !activity?.length ? (
           <EmptyState
-            title="No finalized activity yet"
+            title="No history yet."
             description="Your confirmed transactions will appear here."
           />
         ) : (
@@ -158,8 +227,8 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
         )
       ) : !positions.length ? (
         <EmptyState
-          title="No positions yet"
-          description="Your settled Base positions will appear here."
+          title="No positions found."
+          description="Your confirmed positions will appear here."
         />
       ) : (
         positions.map((p) => (
@@ -231,16 +300,9 @@ export function NativePortfolio({ tab, search = "" }: { tab: string; search?: st
 }
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="finance-card !bg-transparent text-center">
-      <span className="finance-icon mx-auto">
-        <Layers size={21} />
-      </span>
-      <h3 className="mt-4 text-sm font-semibold">{title}</h3>
-      <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">{description}</p>
-      <Link to="/markets" className="finance-pill mt-5">
-        Explore markets
-        <ArrowUpRight size={15} />
-      </Link>
+    <div className="tp-empty" role="status">
+      <h3>{title}</h3>
+      <p>{description}</p>
     </div>
   );
 }
