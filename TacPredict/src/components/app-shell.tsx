@@ -1,9 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { House, LineChart, Wallet, Gift, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { BrandIntro } from "./brand-intro";
 import { LoginButton } from "./login-dialog";
+
 const navItems = [
   { to: "/" as const, label: "Home", icon: House },
   { to: "/search" as const, label: "Search", icon: Search },
@@ -11,7 +12,37 @@ const navItems = [
   { to: "/rewards" as const, label: "Rewards", icon: Gift },
   { to: "/profile" as const, label: "Portfolio", icon: Wallet },
 ];
-export function AppShell({ children }: { children: ReactNode }) {
+
+function AdminShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-dvh bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <BrandMark className="size-8" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold tracking-tight">TacPredict Admin</p>
+              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Operations · not the public app
+              </p>
+            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              to="/"
+              className="rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Public site
+            </Link>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 md:py-8">{children}</main>
+    </div>
+  );
+}
+
+function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <BrandIntro />
@@ -82,4 +113,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
     </div>
   );
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  if (isAdmin) return <AdminShell>{children}</AdminShell>;
+  return <PublicShell>{children}</PublicShell>;
 }

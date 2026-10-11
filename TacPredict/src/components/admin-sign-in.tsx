@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthPanel } from "@/components/auth-panel";
 
-/** Admin-only sign-in: email+password (Supabase Auth) plus existing OTP/social panel. */
+/** Admin-only sign-in: email + password. No public OTP/social/wallet chrome. */
 export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +24,7 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
       setMessage(
         e instanceof Error
           ? e.message.slice(0, 240)
-          : "Sign-in failed. Check email/password or use another method below.",
+          : "Sign-in failed. Use the administrator email and password from Supabase Auth.",
       );
     } finally {
       setBusy(false);
@@ -33,28 +32,27 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <section className="mx-auto max-w-md space-y-6 py-10">
-      <div>
-        <h1 className="page-title">Admin sign-in</h1>
+    <section className="mx-auto max-w-md space-y-6 py-6">
+      <div className="text-center sm:text-left">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Restricted access
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Admin login</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Sign in with the Supabase administrator account that has the{" "}
-          <code className="text-foreground">admin</code> role, then complete TOTP (AAL2). A shared
-          password from chat is never hardcoded into the app — use the password set on that account
-          in Supabase Auth.
+          Email and password for the assigned Supabase <code className="text-foreground">admin</code>{" "}
+          account only. After login you must complete TOTP (AAL2). Public Google / X / wallet sign-in
+          is not used here.
         </p>
       </div>
 
       <form
-        className="space-y-3 rounded-[26px] border border-border bg-card p-5"
+        className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm"
         onSubmit={(e) => {
           e.preventDefault();
           void signInPassword();
         }}
       >
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Email + password
-        </p>
-        <label className="block text-sm">
+        <label className="block text-sm font-medium">
           Email
           <input
             type="email"
@@ -64,9 +62,10 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background px-3"
+            placeholder="admin@…"
           />
         </label>
-        <label className="block text-sm">
+        <label className="block text-sm font-medium">
           Password
           <input
             type="password"
@@ -76,6 +75,7 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-2 min-h-11 w-full rounded-xl border border-border bg-background px-3"
+            placeholder="••••••••"
           />
         </label>
         <button
@@ -84,7 +84,7 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-semibold text-primary-foreground disabled:opacity-50"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-          {busy ? "Signing in…" : "Sign in to admin"}
+          {busy ? "Signing in…" : "Continue to admin"}
         </button>
         {message && (
           <p role="alert" className="text-xs text-destructive">
@@ -92,12 +92,6 @@ export function AdminSignIn({ onSuccess }: { onSuccess: () => void }) {
           </p>
         )}
       </form>
-
-      <div className="relative text-center text-xs text-muted-foreground">
-        <span className="bg-background px-2">or other methods</span>
-      </div>
-
-      <AuthPanel onSuccess={onSuccess} />
     </section>
   );
 }
