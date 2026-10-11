@@ -5,7 +5,7 @@ import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useEffect, useState } from "react";
-import { CalendarDays, ChevronRight, Flame, Radio, Sparkles, TrendingUp } from "lucide-react";
+import { CalendarDays, ChevronRight, Flame, Sparkles, TrendingUp } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
 import { categories } from "@/domain/markets/demo-markets";
@@ -75,7 +75,7 @@ function HomePage() {
 
   return (
     <div className="animate-enter">
-      <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 py-2.5 sm:mx-0 sm:px-0">
+      <div className="home-feed-tabs scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 py-2.5 sm:mx-0 sm:px-0">
         {feeds.map((item) => (
           <Link
             key={item}
@@ -84,13 +84,13 @@ function HomePage() {
             className={feed === item ? "filter-chip-active" : "filter-chip"}
           >
             {item === "Trending" ? (
-              <Flame className="mr-1 inline size-3.5" />
+              <Flame className="home-feed-icon" aria-hidden="true" strokeWidth={2} />
             ) : item === "Live" ? (
-              <Radio className="mr-1 inline size-3.5 text-primary" />
+              <span className="home-live-dot" aria-hidden="true" />
             ) : item === "Upcoming" ? (
-              <CalendarDays className="mr-1 inline size-3.5" />
+              <CalendarDays className="home-feed-icon" aria-hidden="true" strokeWidth={2} />
             ) : (
-              <Sparkles className="mr-1 inline size-3.5" />
+              <Sparkles className="home-feed-icon" aria-hidden="true" strokeWidth={2} />
             )}
             {item}
           </Link>

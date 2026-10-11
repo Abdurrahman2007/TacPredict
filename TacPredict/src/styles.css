@@ -981,3 +981,9 @@
 @keyframes auth-dismiss { from { opacity: 1; scale: 1; } to { opacity: 0; scale: .98; } }
 .intro-wordmark { animation-duration: 1.6s; }
 @media (prefers-reduced-motion: reduce) { .login-popup[data-state] { animation: none !important; } }
+
+/* Crisp vector icons and generous iOS-style targets on the Home feed rail. */
+.home-feed-tabs > a { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; min-height: 46px; padding: 10px 17px; font-size: 15px; line-height: 1.2; }
+.home-feed-icon { width: 21px; height: 21px; flex-shrink: 0; }
+.home-live-dot { width: 11px; height: 11px; flex-shrink: 0; border-radius: 50%; background: #51c77d; box-shadow: 0 0 0 4px #51c77d15; }
+.home-feed-tabs > a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
