@@ -78,4 +78,4 @@ The frontend separates native wallet USDC, indexed positions/claimable proceeds 
 
 ### Wallet approval integration
 
-Base MCP is connected and exposes user-approved `send_calls` with Base Account approval URLs. Its schema requires a target address for every call: it does not expose bare CREATE contract deployment. Do not fabricate a missing target or assume an agent wallet is the user wallet. New deployment needs a reviewed deployment mechanism, explicit admin address and gas approval. No mainnet transaction has been submitted.
+Base MCP is connected and exposes user-approved `send_calls` with Base Account approval URLs. Its schema requires a target address for every call: it does not expose bare CREATE contract deployment. Do not fabricate a missing target or assume an agent wallet is the user wallet. A read-only nine-call Mainnet deployment batch has now been simulated through the exact-runtime-checked public deterministic CREATE2 proxy. The user confirmed their Base Account as admin. Gas funding, immutable parameter review and actual Base Account approval remain pending. See docs/BASE_MAINNET_APPROVAL.md. No Mainnet transaction has been submitted.
