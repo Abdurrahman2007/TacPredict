@@ -1,6 +1,6 @@
 import { AdminWorkspace } from "@/components/admin-workspace";
 import { AdminMfa } from "@/components/admin-mfa";
-import { AuthPanel } from "@/components/auth-panel";
+import { AdminSignIn } from "@/components/admin-sign-in";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { createFileRoute } from "@tanstack/react-router";
@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { getProtocolAdminAccess, prepareNativeMarket } from "@/lib/protocol/admin.functions";
 import { BASE_NETWORK, USDC_DECIMALS } from "@/lib/onchain/base";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({ component: NativeAdmin });
 
@@ -23,7 +24,7 @@ const CATEGORIES = [
 ] as const;
 
 function NativeAdmin() {
-  const { user } = useProtocolUser();
+  const { user, ready } = useProtocolUser();
   const access = useQuery({
     queryKey: ["protocol-admin", user?.id],
     enabled: !!user,
@@ -53,29 +54,49 @@ function NativeAdmin() {
     [form.outcomes],
   );
 
-  if (!user)
+  if (!ready)
     return (
-      <section className="mx-auto max-w-md space-y-4 py-10">
-        <div>
-          <h1 className="page-title">Admin sign-in</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Use your TacPredict Supabase administrator account, then complete TOTP (AAL2). A shared
-            password pasted in chat is <strong>not</strong> accepted and is never stored in the app.
-          </p>
-        </div>
-        <AuthPanel onSuccess={() => window.location.assign("/admin")} />
+      <section className="mx-auto max-w-md py-16">
+        <p role="status" className="text-sm text-muted-foreground">
+          Checking administrator session…
+        </p>
+      </section>
+    );
+
+  if (!user)
+    return <AdminSignIn onSuccess={() => window.location.assign("/admin")} />;
+
+  if (access.isPending)
+    return (
+      <section className="mx-auto max-w-xl py-16">
+        <h1 className="page-title">Protocol administration</h1>
+        <p className="mt-4 text-sm text-muted-foreground">Checking assigned administrator role…</p>
       </section>
     );
 
   if (!access.data?.allowed)
     return (
-      <section className="mx-auto max-w-xl py-16">
+      <section className="mx-auto max-w-xl space-y-4 py-16">
         <h1 className="page-title">Protocol administration</h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          {access.isPending && user
-            ? "Checking assigned administrator role…"
-            : "An administrator role assigned in the main database is required. Login alone does not grant admin access."}
+        <p className="text-sm text-muted-foreground">
+          Signed in as <span className="break-all text-foreground">{user.email ?? user.id}</span>, but
+          this account does not have the database <code>admin</code> role. Login alone does not open
+          the admin workspace.
         </p>
+        <p className="text-sm text-muted-foreground">
+          An owner must insert your user id into <code>user_roles</code> with{" "}
+          <code>role = &apos;admin&apos;</code> on the main Supabase project, then refresh and
+          complete TOTP.
+        </p>
+        <button
+          type="button"
+          className="finance-pill"
+          onClick={() =>
+            void supabase.auth.signOut().then(() => window.location.assign("/admin"))
+          }
+        >
+          Sign out and try another account
+        </button>
       </section>
     );
 

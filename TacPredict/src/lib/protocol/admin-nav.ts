@@ -161,6 +161,13 @@ export const adminNavGroups: AdminNavGroup[] = [
         note: "Append-only protocol_audit_logs (bounded).",
       },
       {
+        id: "automation",
+        label: "AI market agent",
+        section: "Settings",
+        capability: "blocked",
+        note: "Discovery/draft scaffolding only. No auto Mainnet publish; AI never sets price/outcome.",
+      },
+      {
         id: "settings",
         label: "Settings / roles",
         section: "Settings",
