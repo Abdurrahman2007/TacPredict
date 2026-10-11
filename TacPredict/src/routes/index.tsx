@@ -1,5 +1,4 @@
 import { DiscoveredEvents } from "@/components/discovered-events";
-import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { OutcomeRow } from "@/components/outcome-row";
 import { MarketIcon } from "@/components/market-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -8,7 +7,7 @@ import { useMemo, useEffect, useState } from "react";
 import { CalendarDays, ChevronRight, Flame, Sparkles, TrendingUp } from "lucide-react";
 import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
-import { categories } from "@/domain/markets/demo-markets";
+import { homeFeedListings } from "@/lib/markets/home-feed.mjs";
 import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 
@@ -52,26 +51,12 @@ function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const { feed = "Trending" } = Route.useSearch();
-  const { data: events } = useQuery(eventDraftsQueryOptions);
   const { data: crypto } = useQuery(cryptoMarketQueryOptions);
   const { data: btcHistory } = useQuery(cryptoHistoryQueryOptions("bitcoin"));
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
-  const feedMarkets = useMemo(() => {
-    const liveMarkets = nativeFeed.markets;
-    const sorted =
-      feed === "Live" ? liveMarkets.filter((m) => m.native?.status === "OPEN") : [...liveMarkets];
-    if (feed === "New")
-      sorted.sort(
-        (a, b) => (Date.parse(b.createdAt ?? "") || 0) - (Date.parse(a.createdAt ?? "") || 0),
-      );
-    if (feed === "Upcoming")
-      sorted.sort(
-        (a, b) =>
-          (Date.parse(a.endsAt ?? "") || Number.MAX_SAFE_INTEGER) -
-          (Date.parse(b.endsAt ?? "") || Number.MAX_SAFE_INTEGER),
-      );
-    return sorted.slice(0, 9);
-  }, [feed, nativeFeed.markets]);
+  const feedMarkets = useMemo(() => homeFeedListings(
+    nativeFeed.markets, feed, Date.parse(nativeFeed.updatedAt),
+  ).slice(0, 9), [feed, nativeFeed.markets, nativeFeed.updatedAt]);
 
   return (
     <div className="animate-enter">
@@ -97,27 +82,6 @@ function HomePage() {
         ))}
       </div>
 
-      <div className="scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        {categories
-          .slice(0, 7)
-          .filter(
-            (c) =>
-              c === "All" ||
-              c === "Crypto" ||
-              events?.some((e) => e.category === c) ||
-              nativeFeed.markets.some((m) => m.category === c),
-          )
-          .map((category, index) => (
-            <Link
-              key={category}
-              to="/markets"
-              search={{ category, sort: "Trending", q: "" }}
-              className={index === 0 ? "filter-chip-active" : "filter-chip"}
-            >
-              {category}
-            </Link>
-          ))}
-      </div>
 
       {nativeFeed.error && (
         <p
@@ -134,7 +98,7 @@ function HomePage() {
           Pre-launch · USDC trading paused.
         </p>
       )}
-      <UpDownSection
+      {feed === "Trending" && <UpDownSection
         crypto={crypto}
         histories={
           crypto
@@ -143,12 +107,17 @@ function HomePage() {
         }
         liveMarkets={nativeFeed.cryptoUpDown}
         snapshotTime={nativeFeed.updatedAt}
-      />
+      />}
 
       <SportsCarousel markets={feedMarkets} />
-      {feed !== "Live" && <DiscoveredEvents />}
+      {(feed === "Trending" || feed === "New") && <DiscoveredEvents sort={feed} />}
 
       {feedMarkets.length > 0 && <MarketSection title={feed} markets={feedMarkets} />}
+      {(feed === "Live" || feed === "Upcoming") && !feedMarkets.length && !nativeFeed.error && (
+        <p role="status" className="mt-6 rounded-2xl border border-border bg-card px-5 py-8 text-center text-sm text-muted-foreground">
+          {feed === "Live" ? "No live native markets right now." : "No upcoming native markets scheduled yet."}
+        </p>
+      )}
       {nativeFeed.markets.length > 0 && (
         <p className="mt-3 text-center text-[0.65rem] font-semibold text-muted-foreground">
           Own-market trades and volume indexed by {nativeFeed.source} · refreshed{" "}
