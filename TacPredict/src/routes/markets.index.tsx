@@ -82,14 +82,12 @@ function MarketsPage() {
 
   return (
     <div className="animate-enter">
-      <PrelaunchMarkets query={query} category={category} />
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
           <h1 className="page-title truncate">Markets</h1>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-positive">
-          <span className="size-1.5 rounded-full bg-positive motion-safe:animate-pulse" />
-          {filtered.length} live
+        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+          {filtered.length} native markets
         </span>
       </div>
 
@@ -143,6 +141,7 @@ function MarketsPage() {
         ))}
       </div>
 
+      <PrelaunchMarkets query={query} category={category} />
       {liveFeed.error && (
         <p
           role="status"

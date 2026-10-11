@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {buildSync} from 'esbuild';
+test('spot prices never wait for three history calls; histories are cached separately',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'tac-spot-'));const out=path.join(dir,'coingecko.mjs');buildSync({entryPoints:['src/lib/coingecko.server.ts'],bundle:true,write:true,outfile:out,platform:'node',format:'esm'});
+ const previous=globalThis.fetch,key=process.env.COINGECKO_DEMO_API_KEY;process.env.COINGECKO_DEMO_API_KEY='unit-fixture-not-a-real-key';const calls=[];
+ globalThis.fetch=async url=>{calls.push(String(url));const now=Math.floor(Date.now()/1000);return Response.json(String(url).includes('/simple/price')?Object.fromEntries(['bitcoin','ethereum','solana'].map(a=>[a,{usd:100,last_updated_at:now,usd_24h_change:1}])):{prices:[[Date.now()-120000,98],[Date.now()-60000,99],[Date.now(),100]]});};
+ try{const m=await import(out);const s=await m.coingeckoSnapshot();assert.equal(calls.length,1);assert.equal(s.ethereum.price,100);await m.coingeckoAssetHistory('bitcoin');await m.coingeckoAssetHistory('bitcoin');assert.equal(calls.length,2);await assert.rejects(m.coingeckoAssetHistory('wrong'));}finally{globalThis.fetch=previous;if(key===undefined)delete process.env.COINGECKO_DEMO_API_KEY;else process.env.COINGECKO_DEMO_API_KEY=key;fs.rmSync(dir,{recursive:true,force:true});}
+});

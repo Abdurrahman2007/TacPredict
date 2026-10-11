@@ -8,7 +8,7 @@ import { CalendarDays, ChevronRight, Flame, Radio, Sparkles, TrendingUp } from "
 import { MarketCard } from "@/components/market-card";
 import { UpDownSection } from "@/components/up-down-section";
 import { categories } from "@/domain/markets/demo-markets";
-import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
+import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 
 const feeds = ["Trending", "Live", "Upcoming", "New"] as const;
@@ -52,6 +52,7 @@ function HomePage() {
   useEffect(() => setHydrated(true), []);
   const { feed = "Trending" } = Route.useSearch();
   const { data: crypto } = useQuery(cryptoMarketQueryOptions);
+  const { data: btcHistory } = useQuery(cryptoHistoryQueryOptions("bitcoin"));
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const feedMarkets = useMemo(() => {
     const liveMarkets = nativeFeed.markets;
@@ -110,7 +111,11 @@ function HomePage() {
       )}
       <UpDownSection
         crypto={crypto}
-        histories={crypto?.histories}
+        histories={
+          crypto
+            ? { ...crypto.histories, bitcoin: [...(btcHistory ?? []), ...crypto.histories.bitcoin] }
+            : undefined
+        }
         liveMarkets={nativeFeed.cryptoUpDown}
         snapshotTime={nativeFeed.updatedAt}
       />

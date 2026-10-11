@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
 import { UpDownSection } from "@/components/up-down-section";
-import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
+import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 export const Route = createFileRoute("/up-down")({
   head: () => ({ meta: [{ title: "Up/Down — TacPredict" }] }),
@@ -12,6 +12,11 @@ export const Route = createFileRoute("/up-down")({
 function UpDownPage() {
   const { data: feed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const { data: crypto, isError } = useQuery(cryptoMarketQueryOptions);
+  const historyQueries = useQueries({
+    queries: (["bitcoin", "ethereum", "solana"] as const).map((asset) =>
+      cryptoHistoryQueryOptions(asset),
+    ),
+  });
   const hasMarkets = Object.values(feed.cryptoUpDown).some(Boolean);
   return (
     <div className="animate-enter mx-auto max-w-5xl">
@@ -25,7 +30,11 @@ function UpDownPage() {
         <UpDownSection
           detailed
           crypto={crypto}
-          histories={crypto.histories}
+          histories={{
+            bitcoin: [...(historyQueries[0]?.data ?? []), ...crypto.histories.bitcoin],
+            ethereum: [...(historyQueries[1]?.data ?? []), ...crypto.histories.ethereum],
+            solana: [...(historyQueries[2]?.data ?? []), ...crypto.histories.solana],
+          }}
           liveMarkets={feed.cryptoUpDown}
         />
       ) : (

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
+import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
 import { sourcePriceWindow } from "@/lib/price-window";
 import { MarketSparkline } from "@/components/market-sparkline";
 export function CryptoDetailChart({
@@ -10,8 +10,11 @@ export function CryptoDetailChart({
   initialMinutes?: number;
 }) {
   const { data } = useQuery(cryptoMarketQueryOptions);
+  const { data: history } = useQuery(cryptoHistoryQueryOptions(asset));
   const minutes = Math.min(Math.max(initialMinutes, 1), 60);
-  const observations = [...(data?.histories[asset] ?? [])].sort((a, b) => a.time - b.time),
+  const observations = [...(history ?? []), ...(data?.histories[asset] ?? [])].sort(
+      (a, b) => a.time - b.time,
+    ),
     last = observations.at(-1)?.time ?? 0;
   return (
     <section className="mt-6" aria-label="Market spot chart">

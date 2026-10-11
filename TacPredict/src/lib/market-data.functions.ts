@@ -26,3 +26,24 @@ export const cryptoMarketQueryOptions = queryOptions({
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
 });
+
+export const getCryptoAssetHistory = createServerFn({ method: "GET" })
+  .inputValidator((value: unknown) => {
+    if (value !== "bitcoin" && value !== "ethereum" && value !== "solana")
+      throw Error("Unsupported crypto asset");
+    return value;
+  })
+  .handler(async ({ data }) => {
+    const { coingeckoAssetHistory } = await import("./coingecko.server");
+    return coingeckoAssetHistory(data);
+  });
+export const cryptoHistoryQueryOptions = (asset: "bitcoin" | "ethereum" | "solana") =>
+  queryOptions({
+    queryKey: ["crypto-asset-history", "coingecko-v2", asset],
+    queryFn: () => getCryptoAssetHistory({ data: asset }),
+    staleTime: 600000,
+    gcTime: 3600000,
+    refetchInterval: 600000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });

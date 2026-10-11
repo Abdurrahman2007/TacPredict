@@ -52,7 +52,7 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
         time = num(item?.["last_updated_at"]) * 1000;
       if (price <= 0 || time <= 0 || time > now + 5000 || now - time > 900_000)
         throw new Error("No recent CoinGecko price.");
-      const historical = await history(asset);
+      const historical = histories.get(asset)?.points ?? [];
       const old = cached?.value.histories[asset] ?? [];
       const points = [
         ...new Map(
@@ -90,7 +90,7 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
 async function edgeSnapshot(): Promise<CryptoMarketSnapshot | null> {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v1");
+    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v2");
     if (!response) return null;
     const value = (await response.json()) as CryptoMarketSnapshot;
     return value.source === "CoinGecko" && Date.now() - Date.parse(value.updatedAt) < 900_000
@@ -104,7 +104,7 @@ async function saveEdge(value: CryptoMarketSnapshot) {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
     await edge?.put(
-      "https://tacpredict.fun/__cache/coingecko/snapshot-v1",
+      "https://tacpredict.fun/__cache/coingecko/snapshot-v2",
       new Response(JSON.stringify(value), {
         headers: { "Content-Type": "application/json", "Cache-Control": "public,max-age=60" },
       }),
@@ -121,7 +121,7 @@ export async function coingeckoSnapshot(): Promise<CryptoMarketSnapshot> {
     if (shared) {
       cached = { value: shared, expires: Date.now() + ttl };
       for (const asset of assets)
-        if (!histories.has(asset))
+        if (!histories.has(asset) && shared.histories[asset].length > 1)
           histories.set(asset, { points: shared.histories[asset], expires: Date.now() + 600_000 });
       return shared;
     }
@@ -142,4 +142,14 @@ export async function coingeckoSnapshot(): Promise<CryptoMarketSnapshot> {
       pending = undefined;
     });
   return pending;
+}
+
+const historyPending = new Map<string, Promise<PricePoint[]>>();
+export async function coingeckoAssetHistory(asset: "bitcoin" | "ethereum" | "solana") {
+  if (!assets.includes(asset)) throw Error("Unsupported crypto asset");
+  const existing = historyPending.get(asset);
+  if (existing) return existing;
+  const promise = history(asset).finally(() => historyPending.delete(asset));
+  historyPending.set(asset, promise);
+  return promise;
 }
