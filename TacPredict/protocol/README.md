@@ -1,6 +1,6 @@
 # TacPredict native USDC protocol — implementation / launch runbook
 
-**Status:** Local implementation; NOT audited, NOT mainnet deployed, NOT activated for real money. The app fails closed without verified deployment configuration. Never use TestUSDC outside isolated tests. Home/Search/Markets/Rewards/Portfolio navigation remains unchanged. Welcome rewards are separate locked promotional credit, never contract collateral.
+**Status:** Six contracts deployed on Base Mainnet through a user-approved Base Account batch. NOT independently audited and NOT activated for real-money trading. The app fails closed without verified deployment configuration. Never use TestUSDC outside isolated tests. Home/Search/Markets/Rewards/Portfolio navigation remains unchanged. Welcome rewards are separate locked promotional credit, never contract collateral.
 
 ## Architecture
 
@@ -64,13 +64,13 @@ Tables include deployments, immutable metadata, markets/outcomes/sources/rules, 
 
 ## Current application behavior and remaining work
 
-- Own Supabase feed replaces external Polymarket odds. No published native markets or verified deployment exists yet, so market lists are honestly empty; BTC/ETH/SOL spot reference cards still work.
+- Own Supabase feed replaces external Polymarket odds. No published native markets exist yet; deployment registration is separate from financial launch, so market lists are honestly empty; BTC/ETH/SOL spot reference cards still work.
 - Detail has immutable IDs/oracle/rules/timeouts, real-trade history/statistics/activity, signed orderbook, exact limit buy quote and gated approval/signature/fill flows.
 - Portfolio uses authenticated native positions/value/claim estimates and an on-chain verified claim/refund transaction flow. Wallet balance remains a direct USDC wallet read, not an app-generated number. Finalized per-account buys/sells/claims/refunds have an authenticated activity timeline. Full position cost-basis/P&L is not implemented.
 - Dedicated maker UI now supports complete-set split/merge, exact share sell orders, explicit operator-approval acknowledgment, revocation and maker-only cancellation. Admin creation/resolution and public dispute/finalization/timeout UI are wired. Deposit/withdraw remain explicit unavailable previews, not app-custody transfers.
 - Indexed liquidity is null until an executable depth calculation is implemented. Do not confuse volume with liquidity or open interest.
 - Notifications/audit/event persistence are schema foundations; notification delivery, robust order cancellation synchronization under missed RPC jobs, indexer SQL integration tests, backfills and operational monitoring still need production completion.
-- Testnet deployment script produces a manifest and multisig bootstrap calldata but does not register/activate a deployment in the database. No mainnet deployment/keys/real-money activation has occurred.
+- Testnet deployment script produces a manifest and multisig bootstrap calldata but does not register/activate a deployment in the database. The Mainnet batch is mined, with trading paused. No relayer private key or real-money activation is configured.
 
 ### Portfolio / Rewards follow-up
 
@@ -79,3 +79,9 @@ The frontend separates native wallet USDC, indexed positions/claimable proceeds 
 ### Wallet approval integration
 
 Base MCP is connected and exposes user-approved `send_calls` with Base Account approval URLs. Its schema requires a target address for every call: it does not expose bare CREATE contract deployment. Do not fabricate a missing target or assume an agent wallet is the user wallet. A read-only nine-call Mainnet deployment batch has now been simulated through the exact-runtime-checked public deterministic CREATE2 proxy. The user confirmed their Base Account as admin. Gas funding, immutable parameter review and actual Base Account approval remain pending. See docs/BASE_MAINNET_APPROVAL.md. No Mainnet transaction has been submitted.
+
+### Deployed Mainnet / scheduled indexing
+
+Actual receipt: `0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966`, deployment block `52453630`. See `protocol/deployments/base-mainnet.json`. The standard verifier supports exact EntryPoint UserOperation success, the nine-call smart-account batch, CREATE2 init-code/address proofs, runtime matching, role/pointer checks and finalized canonical receipts. A successful outer bundle alone is insufficient.
+
+Cloudflare scheduled indexing is configured every five minutes, uses the existing server-only key and Base RPC, and is bounded to two 200-block chunks per invocation. DB leases/checkpoint fencing remain mandatory; no indexer call signs or submits blockchain transactions. The initial database registration is unverified and trading-disabled until finalized source/role verification succeeds. `scripts/package-cloudflare.cjs` preserves the scheduled handler in future releases; compile protocol artifacts before packaging. GitHub operations credentials and automated Mainnet matching remain separately unconfigured.

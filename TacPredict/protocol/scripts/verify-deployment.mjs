@@ -12,6 +12,7 @@ import {
   zeroAddress,
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
+import { verifyBaseAccountCreation } from "./base-account-proof.mjs";
 export const contractNames = {
   registry: "MarketRegistry",
   factory: "MarketFactory",
@@ -49,6 +50,10 @@ export async function verifyDeployment(pub, manifest, artifacts) {
   const addresses = Object.keys(contractNames).map((k) => manifest[k]?.toLowerCase());
   if (addresses.some((a) => !isAddress(a) || a === zeroAddress) || new Set(addresses).size !== 6)
     throw Error("Six distinct protocol contract addresses required");
+  const batchReceipt =
+    manifest.creation_mode === "base_account_create2"
+      ? await verifyBaseAccountCreation(pub, manifest, artifacts)
+      : null;
   const hashes = {},
     checks = [];
   for (const [key, name] of Object.entries(contractNames)) {
@@ -61,25 +66,30 @@ export async function verifyDeployment(pub, manifest, artifacts) {
     const deployment = manifest.deployment_transactions?.[key];
     if (!deployment?.txHash || !deployment.args)
       throw Error(`Creation transaction proof missing: ${name}`);
-    const [tx, receipt] = await Promise.all([
-      pub.getTransaction({ hash: deployment.txHash }),
-      pub.getTransactionReceipt({ hash: deployment.txHash }),
-    ]);
-    if (
-      receipt.status !== "success" ||
-      receipt.contractAddress?.toLowerCase() !== manifest[key].toLowerCase() ||
-      tx.to !== null
-    )
-      throw Error(`Invalid creation receipt: ${name}`);
-    const wanted = encodeDeployData({
-      abi: artifact.abi,
-      bytecode: artifact.bytecode,
-      args: deployment.args,
-    });
-    if (tx.input.toLowerCase() !== wanted.toLowerCase())
-      throw Error(`Constructor bytecode/arguments mismatch: ${name}`);
-    if (receipt.blockNumber < BigInt(manifest.deployment_block))
-      throw Error("Deployment block does not include all creations");
+    if (batchReceipt) {
+      if (batchReceipt.blockNumber < BigInt(manifest.deployment_block))
+        throw Error("Creation block mismatch");
+    } else {
+      const [tx, receipt] = await Promise.all([
+        pub.getTransaction({ hash: deployment.txHash }),
+        pub.getTransactionReceipt({ hash: deployment.txHash }),
+      ]);
+      if (
+        receipt.status !== "success" ||
+        receipt.contractAddress?.toLowerCase() !== manifest[key].toLowerCase() ||
+        tx.to !== null
+      )
+        throw Error(`Invalid creation receipt: ${name}`);
+      const wanted = encodeDeployData({
+        abi: artifact.abi,
+        bytecode: artifact.bytecode,
+        args: deployment.args,
+      });
+      if (tx.input.toLowerCase() !== wanted.toLowerCase())
+        throw Error(`Constructor bytecode/arguments mismatch: ${name}`);
+      if (receipt.blockNumber < BigInt(manifest.deployment_block))
+        throw Error("Deployment block does not include all creations");
+    }
     checks.push(name + ": source, constructor and receipt match");
   }
   const read = async (key, fn, args = []) =>

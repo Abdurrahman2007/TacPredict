@@ -1,0 +1,82 @@
+{
+  "chain_id": 8453,
+  "collateral_token": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "registry": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+  "oracle": "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f",
+  "factory": "0xe01c23aac6f152a2eA437A7E6Eb0a664A1908568",
+  "positions": "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7",
+  "exchange": "0x7e5e40bAE779ebabB2295Ef6d009ab95b0307F85",
+  "settlement": "0x9b272C68F3338655a440B44DBc9CCB993D7650B3",
+  "deployment_block": "52453630",
+  "code_hashes": {
+    "registry": "0x3014b10cebcaaf179998c1040d6cd6c0fb5ae6ba7d56429c487f420ae452bfed",
+    "oracle": "0x59396a37bbb2cf6d5e5e1c22a4081adc40e5b01f177d71e2b91209b9ad664ce8",
+    "factory": "0x580eb779b6e319b865387cd27d23f3f4215f57ee8915582f9323748a74688405",
+    "positions": "0x6bed0ba45fcd3b82d6419d7224872cf695edafc9863d657b702c391add0e6ef4",
+    "exchange": "0x85de7121dbc41994d46d62ec2d8731ac000c13a99437d8e299292fe42ac7bc5b",
+    "settlement": "0x3705aec1eafcc02542356f1fc06bf55798ac0f02c97abb70903c24c4776ead86"
+  },
+  "verified": false,
+  "trading_enabled": false,
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "tx_hash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+  "creation_mode": "base_account_create2",
+  "deployment_transactions": {
+    "registry": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+        "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+      ],
+      "salt": "0x59a005302f3e2cd208fa708c44bf5e09652ae11fab6e284e35be0d129279d000",
+      "initCodeHash": "0x4202b9d63fd731b1178875b302a02c212848a7a71f6ef207cad4ba817c8c3e0b"
+    },
+    "factory": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+        "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f"
+      ],
+      "salt": "0xd8ccd168273fc85ea94ee706fddc8b3fd16a8cd45eeaaa62106e5cdbcd97e85a",
+      "initCodeHash": "0x0c21217ed86e4eda9937c8ce161c0b82999b77f177bbccbc702e3945e2b61fab"
+    },
+    "positions": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A"
+      ],
+      "salt": "0xeb4182de3b74d52402d57235f79612c9c8291616c31d31dd57411177358bdc03",
+      "initCodeHash": "0xc7506294844db89cf0c0aa895fca37279e6308c426920fe45b32f6523077ed1e"
+    },
+    "exchange": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7"
+      ],
+      "salt": "0xc50ed33c271bd969a9c2ac96c86e65c36d2987accd67cb5b650f8e2bd5f33ba7",
+      "initCodeHash": "0x0fbe2781110c1399ae3a5e4247cfdd7155d695729f93cf3b114023c49d575ad0"
+    },
+    "oracle": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+        "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "5000000",
+        "86400"
+      ],
+      "salt": "0x90345f7db5ba5adf5f351af9c128f553f4b6d8607e7e3256635a30b404185435",
+      "initCodeHash": "0x2e38eb8e253ab11da1d3153a2dc492ba209043aef3481c25786549010cd01baa"
+    },
+    "settlement": {
+      "txHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+      "args": [
+        "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7"
+      ],
+      "salt": "0xf8a8319c3993aeb156bd3b7db05e3abdefc89e1726bd61dc28c32236bb23b060",
+      "initCodeHash": "0x80bf430ece9ca2bd24d27fd8a5414137c54cbda44efa9aabe9ab2e3b16ade037"
+    }
+  }
+}

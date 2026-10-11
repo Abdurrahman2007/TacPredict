@@ -46,7 +46,7 @@ export async function withProtocolLease(db, chain, job, work) {
         pending = false;
       });
   }, 45000);
-  heartbeat.unref();
+  heartbeat.unref?.();
   const assert = async () => {
     if (lost || !(await db("rpc/renew_protocol_job_lease", { ...args, _seconds: 180 }))) {
       lost = true;
@@ -57,8 +57,9 @@ export async function withProtocolLease(db, chain, job, work) {
   try {
     const rows = await db("protocol_job_runs", { chain_id: chain, job, status: "RUNNING" });
     run = rows?.[0]?.id;
-    await work({ owner, assert });
+    const result = await work({ owner, assert });
     if (run) await fetchUpdate(db, run, "SUCCESS");
+    return result;
   } catch (e) {
     if (run) await fetchUpdate(db, run, "FAILED").catch(() => {});
     throw e;

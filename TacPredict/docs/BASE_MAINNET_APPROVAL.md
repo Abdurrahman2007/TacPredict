@@ -1,4 +1,4 @@
-# Base Mainnet deployment approval — prepared, not submitted
+# Base Mainnet deployment — approved and mined, trading paused
 
 - Network: Base Mainnet, chain 8453. Public markets remain Mainnet-only.
 - User-confirmed on-chain administrator: `0x57828f1aa32fd6be3988f240068df53ed94b7aef` (Base Account).
@@ -9,9 +9,9 @@
 - Constructors explicitly assign the confirmed admin, not the proxy. Salts/init-code hashes and predicted addresses are retained in the private operator workspace plan, not registered as real deployments.
 - Initial Oracle parameters in the prepared batch are 5 USDC bond and 86,400-second challenge period. These must be reviewed before signing; constructor settings are not casually adjustable afterwards.
 - A read-only simulation of the full smart-account `executeBatch` passed. Estimated execution gas was 7,856,243; execution-only estimate at the observed gas price was 0.000047137458 ETH. Base L1 data fees and account-abstraction overhead are additional. Estimates are not guarantees or a payment quote.
-- The observed account ETH balance was below even that execution-only estimate. No approval request or transaction was submitted; fund gas and review the actual Base Account approval fee first.
+- The owner funded gas and approved the batch in Base Account. Transaction `0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966` succeeded in block 52453630. The account UserOperation also succeeded; its actual gas charge was 0.0000554915205 ETH.
 - Deployment is not activation: trading remains paused and database `verified` / `trading_enabled` remain false until actual finalized deployment, source/runtime/role checks, independent review and an explicit launch decision.
 - Sixteen isolated contract scenarios pass, but these are not an independent audit or exhaustive fuzzing. Real funded Mainnet trading/settlement/claim E2E has not run.
-- App `/admin` access is separate from on-chain roles. The owner's login email is still needed; no account has been self-promoted.
+- App `/admin` access is separate from on-chain roles. The explicitly requested, existing verified login account has been granted the admin role in the main Supabase project. No new account or wallet ownership link was fabricated.
 
-Next: review immutable Oracle parameters, ensure an appropriate gas balance, request Base Account approval, poll actual completion, verify finalized receipts and deployment evidence, then configure indexing/operations and separately review launch readiness. No production market or financial event should be fabricated while waiting.
+Next: wait for finalized source/role verification, confirm the scheduled finalized indexer writes real checkpoints, then separately review launch readiness. No production market or financial event should be fabricated while waiting.
