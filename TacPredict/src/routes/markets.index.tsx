@@ -3,8 +3,9 @@ import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { DiscoveredEvents } from "@/components/discovered-events";
 import { PrelaunchMarkets } from "@/components/prelaunch-markets";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { sortListings } from "@/lib/markets/listing-sort.mjs";
+import marketsCss from "@/styles/markets-compact.css?url";
 import { MarketCard } from "@/components/market-card";
 import { categories } from "@/domain/markets/demo-markets";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -18,13 +19,16 @@ export const Route = createFileRoute("/markets/")({
   validateSearch: (
     search: Record<string, unknown>,
   ): { category?: string; sort?: SortOption; q?: string } => ({
-    ...(typeof search["category"] === "string" ? { category: search["category"] } : {}),
+    ...(typeof search["category"] === "string" &&
+    categories.includes(search["category"] as (typeof categories)[number])
+      ? { category: search["category"] }
+      : {}),
     ...(sortOptions.includes(search["sort"] as SortOption)
       ? { sort: search["sort"] as SortOption }
       : {}),
-    ...(typeof search["q"] === "string" ? { q: search["q"] } : {}),
   }),
   head: () => ({
+    links: [{ rel: "stylesheet", href: marketsCss }],
     meta: [
       { title: "Markets — TacPredict" },
       {
@@ -57,10 +61,9 @@ export const Route = createFileRoute("/markets/")({
 
 function MarketsPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/markets/" });
   const category = search.category ?? "All";
   const sort = search.sort ?? "Trending";
-  const query = search.q ?? "";
+  const query = "";
   const events = useQuery(eventDraftsQueryOptions);
   const previews = useQuery(marketPreviewsQueryOptions);
   const otherMatches = [...(events.data ?? []), ...(previews.data ?? [])].some(
@@ -69,61 +72,37 @@ function MarketsPage() {
       p.title.toLowerCase().includes(query.toLowerCase()),
   );
   const { data: liveFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
-  const filtered = useMemo(() => {
-    const allMarkets = liveFeed.markets;
-    return allMarkets
-      .filter((market) => {
-        const categoryMatches = category === "All" || market.category === category;
-        const queryMatches = market.title.toLowerCase().includes(query.toLowerCase());
-        return categoryMatches && queryMatches;
-      })
-      .sort((a, b) => {
-        if (sort === "Most active")
-          return (b.volume24h ?? b.participants) - (a.volume24h ?? a.participants);
-        if (sort === "Ending soon")
-          return (
-            (Date.parse(a.endsAt ?? "") || Number.MAX_SAFE_INTEGER) -
-            (Date.parse(b.endsAt ?? "") || Number.MAX_SAFE_INTEGER)
-          );
-        if (sort === "New")
-          return (Date.parse(b.createdAt ?? "") || 0) - (Date.parse(a.createdAt ?? "") || 0);
-        return (b.volume24h ?? 0) - (a.volume24h ?? 0);
-      });
-  }, [category, liveFeed.markets, query, sort]);
+  const filtered = useMemo(
+    () =>
+      sortListings(
+        liveFeed.markets.filter((market) => category === "All" || market.category === category),
+        sort,
+      ),
+    [category, liveFeed.markets, sort],
+  );
 
   return (
-    <div className="animate-enter">
+    <div className="markets-compact animate-enter">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
           <h1 className="page-title truncate">Markets</h1>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-          {filtered.length} native markets
+          {filtered.length} native {filtered.length === 1 ? "market" : "markets"}
         </span>
       </div>
 
-      <label className="mt-4 flex h-11 items-center gap-2 rounded-full border border-input bg-card px-4 transition-shadow focus-within:ring-2 focus-within:ring-ring/30">
-        <Search className="size-4 shrink-0 text-muted-foreground" />
-        <input
-          value={query}
-          onChange={(event) =>
-            navigate({
-              search: (previous) => ({ ...previous, q: event.target.value }),
-              replace: true,
-            })
-          }
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          placeholder="Search markets"
-          aria-label="Search markets"
-        />
-      </label>
-
-      <div className="scrollbar-none -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+      <div
+        className="markets-categories scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+        role="navigation"
+        aria-label="Market categories"
+      >
         {categories.map((category) => (
           <Link
             key={category}
             to="/markets"
             search={(previous) => ({ ...previous, category })}
+            aria-current={category === (search.category ?? "All") ? "true" : undefined}
             className={
               search.category === category || (category === "All" && !search.category)
                 ? "filter-chip-active"
@@ -135,12 +114,17 @@ function MarketsPage() {
         ))}
       </div>
 
-      <div className="scrollbar-none -mx-4 mt-3 flex gap-5 overflow-x-auto border-b border-border px-4 sm:mx-0 sm:px-0">
+      <div
+        className="markets-sorting scrollbar-none -mx-4 mt-2 flex gap-1 overflow-x-auto border-b border-border px-4 sm:mx-0 sm:px-0"
+        role="navigation"
+        aria-label="Market sorting"
+      >
         {sortOptions.map((sort) => (
           <Link
             key={sort}
             to="/markets"
             search={(previous) => ({ ...previous, sort })}
+            aria-current={sort === (search.sort ?? "Trending") ? "true" : undefined}
             className={
               search.sort === sort || (sort === "Trending" && !search.sort)
                 ? "market-tab-active"
@@ -152,8 +136,6 @@ function MarketsPage() {
         ))}
       </div>
 
-      <PrelaunchMarkets query={query} category={category} />
-      <DiscoveredEvents query={query} category={category} />
       {liveFeed.error && (
         <p
           role="status"
@@ -169,12 +151,24 @@ function MarketsPage() {
             <MarketCard key={market.id} market={market} />
           ))}
         </div>
-      ) : !otherMatches ? (
+      ) : sort === "Most active" || !otherMatches ? (
         <div className="py-16 text-center">
-          <p className="font-bold">No matching markets</p>
-          <p className="mt-1 text-sm text-muted-foreground">Try another search or category.</p>
+          <p className="font-bold">
+            {sort === "Most active" ? "No native activity yet" : "No markets in this category"}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Try another category.</p>
         </div>
       ) : null}
+      {sort === "Most active" ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Activity ranks native TacPredict markets only.
+        </p>
+      ) : (
+        <>
+          <PrelaunchMarkets query={query} category={category} sort={sort} />
+          <DiscoveredEvents query={query} category={category} sort={sort} />
+        </>
+      )}
       <p className="mt-5 text-center text-[0.65rem] font-semibold text-muted-foreground">
         Base Mainnet · Native USDC · Financial state from TacPredict contracts
       </p>

@@ -1,3 +1,4 @@
+import { sortListings, type ListingSort } from "@/lib/markets/listing-sort.mjs";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ExternalLink, LockKeyhole } from "lucide-react";
@@ -31,15 +32,20 @@ export function eventMarket(p: EventDraft): Market {
 export function DiscoveredEvents({
   query = "",
   category = "All",
+  sort = "Trending",
 }: {
   query?: string;
   category?: string;
+  sort?: ListingSort;
 }) {
   const q = useQuery(eventDraftsQueryOptions);
-  const rows = (q.data ?? []).filter(
-    (p) =>
-      (category === "All" || p.category === category) &&
-      p.title.toLowerCase().includes(query.trim().toLowerCase()),
+  const rows = sortListings(
+    (q.data ?? []).filter(
+      (p) =>
+        (category === "All" || p.category === category) &&
+        p.title.toLowerCase().includes(query.trim().toLowerCase()),
+    ),
+    sort,
   );
   if (q.isPending)
     return (

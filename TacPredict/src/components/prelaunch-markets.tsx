@@ -1,3 +1,4 @@
+import { sortListings, type ListingSort } from "@/lib/markets/listing-sort.mjs";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { marketPreviewsQueryOptions, type MarketPreview } from "@/lib/agent/discovery.functions";
@@ -34,15 +35,20 @@ export function previewMarket(p: MarketPreview): Market {
 export function PrelaunchMarkets({
   query = "",
   category = "All",
+  sort = "Trending",
 }: {
   query?: string;
   category?: string;
+  sort?: ListingSort;
 }) {
   const q = useQuery(marketPreviewsQueryOptions);
-  const rows = (q.data ?? []).filter(
-    (p) =>
-      (category === "All" || category === "Crypto") &&
-      p.title.toLowerCase().includes(query.trim().toLowerCase()),
+  const rows = sortListings(
+    (q.data ?? []).filter(
+      (p) =>
+        (category === "All" || category === "Crypto") &&
+        p.title.toLowerCase().includes(query.trim().toLowerCase()),
+    ),
+    sort,
   );
   if (q.isPending)
     return (
