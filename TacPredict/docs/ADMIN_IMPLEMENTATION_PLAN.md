@@ -38,3 +38,5 @@ Validation: production build passed; full TypeScript no-emit check passed; three
 Deployed to the existing production Worker at 08:21 UTC, preserving the one-minute indexer schedule and existing server-only credentials. Temporary release staging was deleted. Public trading remains paused; full A–Z completion is NOT claimed.
 
 Live anonymous checks: all 12 width/route combinations (320/375/1200 × /admin, /, /rewards, /profile) returned 200, no page errors, no document-width overflow and all five public navigation labels. The new admin RPC returned HTTP 401 to the actual anonymous publishable-key request. A real administrator TOTP enrollment/session-revocation and wallet-action E2E remain untested, not completed.
+
+Full protocol regression after admin integration: 26 top-level tests, 26 passed, 0 failed (including the isolated contract scenarios). After the new admin deployment, the real scheduled indexer continued SUCCESS at 08:22/08:23/08:24 UTC and checkpoint 52457637. No production trading was activated.
