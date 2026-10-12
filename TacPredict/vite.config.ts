@@ -17,6 +17,20 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    plugins: [{
+      name: "tacpredict-wallet-browser-builtins",
+      enforce: "pre" as const,
+      // Nitro normalizes builtin aliases to node:*, so resolve the browser modules
+      // before Vite turns them into empty external stubs. SSR keeps native builtins.
+      resolveId(id: string, _importer: string | undefined, options: { ssr?: boolean | undefined }) {
+        if (options?.ssr) return null;
+        if (id === "buffer" || id === "node:buffer")
+          return path.resolve(rootDir, "node_modules/buffer/index.js");
+        if (id === "events" || id === "node:events")
+          return path.resolve(rootDir, "node_modules/events/events.js");
+        return null;
+      },
+    }],
     resolve: {
       alias: {
         // WalletConnect → Cloudflare/workerd has no node/browser match for "." export.
