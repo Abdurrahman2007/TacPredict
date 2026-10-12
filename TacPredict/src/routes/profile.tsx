@@ -1,25 +1,12 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  Copy,
-  RefreshCw,
-  Search,
-  ArrowDown,
-  ArrowUp,
-  Share2,
-  Wallet,
-} from "lucide-react";
+import { Copy, RefreshCw, Search, ArrowDown, ArrowUp, Share2, Wallet } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { NativePortfolio } from "@/components/native-portfolio";
-import { WalletFundingDialog } from "@/components/wallet-funding-dialog";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useOwnProtocolOrders } from "@/lib/protocol/portfolio-orders";
-import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { money } from "@/lib/protocol/portfolio-view.mjs";
@@ -44,18 +31,15 @@ function PortfolioPage() {
     q = useNativePortfolio(),
     orders = useOwnProtocolOrders(),
     auth = useProtocolUser(),
-    login = useLoginDialog(),
-    feed = useQuery(nativeMarketFeedQueryOptions);
+    login = useLoginDialog();
   const [sortOpen, setSortOpen] = useState(false);
-  const [funding, setFunding] = useState<"deposit" | "withdraw" | null>(null),
-    [range, setRange] = useState<keyof typeof periods>("1D"),
+  const [range, setRange] = useState<keyof typeof periods>("1D"),
     [tab, setTab] = useState("Positions"),
     [search, setSearch] = useState(""),
     [sort, setSort] = useState("value"),
     [descending, setDescending] = useState(true),
     [activeOnly, setActiveOnly] = useState(false),
     [notice, setNotice] = useState("");
-  const deployment = feed.data?.deployments.find((d) => d.chainId === 8453);
   const signedOut = auth.ready && !auth.user;
   const walletKnown = Boolean(
     wallet.address && wallet.chainId === 8453 && wallet.usdc !== null && !wallet.error,
@@ -69,7 +53,7 @@ function PortfolioPage() {
       : null;
   // Wallet + last-trade marked positions; claimable is not added twice.
   const emptyAccount =
-    signedOut ||
+    (signedOut && !wallet.address) ||
     Boolean(
       auth.ready &&
       !wallet.address &&
@@ -80,7 +64,7 @@ function PortfolioPage() {
       positions.length === 0,
     );
   const total = emptyAccount ? 0n : walletKnown && marked !== null ? wallet.usdc! + marked : null;
-  const cash = emptyAccount ? 0n : walletKnown ? wallet.usdc : null;
+  const cash = walletKnown ? wallet.usdc : emptyAccount ? 0n : null;
   const claimable = linked
     ? positions.reduce((sum, p) => sum + BigInt(p.claimableAtomic), 0n)
     : null;
@@ -98,17 +82,6 @@ function PortfolioPage() {
     } catch {
       setNotice("Copy unavailable");
     }
-  }
-  async function fundingAction(kind: "deposit" | "withdraw") {
-    if (!auth.user || !wallet.address) {
-      login("/profile");
-      return;
-    }
-    if (wallet.chainId !== 8453) {
-      await wallet.switchToBase();
-      return;
-    }
-    setFunding(kind);
   }
   async function share() {
     try {
@@ -155,28 +128,12 @@ function PortfolioPage() {
           </div>
         </div>
         <div className="tp-b-right">
-          <p className="tp-label">
-            {deployment?.tradingEnabled ? "Wallet USDC" : "Wallet balance"}
-          </p>
+          <p className="tp-label">Wallet USDC</p>
           <p className="tp-big tp-med">{money(cash, hidden)}</p>
           {claimable !== null && claimable > 0n ? (
             <span className="tp-status">Claimable {money(claimable, hidden)}</span>
           ) : null}
         </div>
-      </section>
-      <section className="tp-actions" aria-label="Wallet actions">
-        <button className="tp-btn tp-primary" onClick={() => void fundingAction("deposit")}>
-          <ArrowDownToLine size={18} />
-          Deposit
-        </button>
-        <button
-          className="tp-btn tp-secondary"
-          disabled={Boolean(auth.user && walletKnown && wallet.usdc === 0n)}
-          onClick={() => void fundingAction("withdraw")}
-        >
-          <ArrowUpFromLine size={18} />
-          Withdraw
-        </button>
       </section>
       <section className="tp-pl" aria-label="Portfolio performance">
         <div className="tp-pl-head">
@@ -315,11 +272,6 @@ function PortfolioPage() {
           {wallet.error}
         </p>
       )}
-      <WalletFundingDialog
-        kind={funding ?? "deposit"}
-        open={funding !== null}
-        onClose={() => setFunding(null)}
-      />
     </div>
   );
 }

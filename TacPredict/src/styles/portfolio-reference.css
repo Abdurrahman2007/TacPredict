@@ -843,3 +843,6 @@
 /* Separate funding actions visually from the performance card. */
 .tp-portfolio .tp-actions { padding-bottom: 28px; }
 @media(min-width:640px) { .tp-portfolio .tp-actions { padding-bottom: 32px; } }
+
+/* Direct wallet collateral: no app deposit/withdraw layer. */
+.tp-portfolio .tp-balances { padding-bottom: 28px; }

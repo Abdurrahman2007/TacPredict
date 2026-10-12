@@ -42,7 +42,7 @@ export function inferCategory(title, raw = {}) {
             ? "Culture"
             : "News";
 }
-export function normalizeGamma(raw, now = Date.now(), allowed = categories) {
+export function normalizeGamma(raw, now = Date.now(), allowed = categories, categoryHint = null) {
   const title = clean(raw.question),
     outcomes = array(raw.outcomes).map(clean),
     closeAt = clean(raw.endDate),
@@ -70,7 +70,7 @@ export function normalizeGamma(raw, now = Date.now(), allowed = categories) {
     invalid.push("Unsupported outcomes");
   if (!clean(raw.description) || clean(raw.description).length < 20)
     invalid.push("Missing objective rules");
-  const category = inferCategory(title, raw);
+  const category = categories.includes(categoryHint) ? categoryHint : inferCategory(title, raw);
   if (!allowed.includes(category)) invalid.push("Category excluded by policy");
   const outcomePrices = array(raw.outcomePrices)
     .map((p) => Number(p))
@@ -211,14 +211,20 @@ export async function runMarketDiscovery(env, deps = {}) {
     offset = policy.offset,
     status = "SUCCESS";
   const candidates = [];
-  try {
-    const feeds = [
-      { tag: 21, category: "Crypto" },
-      { tag: 1, category: "Sports" },
-    ].filter((f) => policy.categories.includes(f.category));
-    for (const feed of feeds) {
+  // Verified Gamma tags. Politics remains News in the existing database category enum.
+  const feeds = [
+    { tag: 21, category: "Crypto", topic: "Crypto" },
+    { tag: 1, category: "Sports", topic: "Sports" },
+    { tag: 100350, category: "Sports", topic: "Football" },
+    { tag: 2, category: "News", topic: "Politics" },
+    { tag: 38, category: "News", topic: "News" },
+    { tag: 22, category: "Technology", topic: "Technology" },
+    { tag: 107, category: "Business", topic: "Business" },
+  ].filter((f) => policy.categories.includes(f.category));
+  for (const feed of feeds) {
+    try {
       const gamma = await fetcher(
-        `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=15&offset=${Math.floor(offset / 2)}&tag_id=${feed.tag}&order=id&ascending=false`,
+        `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=30&offset=${Math.floor(offset / 2)}&tag_id=${feed.tag}&order=id&ascending=false`,
         {
           headers: {
             "User-Agent": "TacPredictDiscovery/1.0 (metadata-only; contact support@tacpredict.fun)",
@@ -230,31 +236,34 @@ export async function runMarketDiscovery(env, deps = {}) {
       if (!gamma.ok) throw Error("Discovery provider unavailable");
       const rows = await gamma.json();
       if (!Array.isArray(rows)) throw Error("Invalid discovery response");
-      for (const event of rows.slice(0, 15)) {
-        const raw = event.markets?.find((m) => m.active === true && m.closed !== true);
-        if (!raw) continue;
-        const c = normalizeGamma(
-          { ...raw, events: [{ slug: event.slug }], endDate: raw.endDate || event.endDate },
-          Date.now(),
-          policy.categories,
-        );
-        c.category = feed.category;
-        c.validation.sourceEventId = String(event.id ?? "").slice(0, 100);
-        if (
-          c.source_market_id &&
-          c.title.length >= 5 &&
-          c.outcomes.length >= 2 &&
-          c.outcomes.length <= 8 &&
-          !candidates.some((p) => p.source_market_id === c.source_market_id)
-        )
+      let added = 0;
+      for (const event of rows.slice(0, 30)) {
+        for (const raw of event.markets ?? []) {
+          const c = normalizeGamma(
+            { ...raw, events: [{ slug: event.slug }], endDate: raw.endDate || event.endDate },
+            Date.now(),
+            policy.categories,
+            feed.category,
+          );
+          if (
+            c.status === "REJECTED" ||
+            candidates.some((p) => p.source_market_id === c.source_market_id)
+          )
+            continue;
+          c.validation.sourceEventId = String(event.id ?? "").slice(0, 100);
+          c.validation.discoveryTopic = feed.topic;
           candidates.push(c);
+          added++;
+          break; // One market per event; avoid a single event dominating the feed.
+        }
+        if (added >= 4) break; // Balanced, bounded supply: at most 28 discovered markets.
       }
+    } catch {
+      status = "PARTIAL";
+      error = "Some discovery feeds unavailable; remaining categories continue";
     }
-    offset = offset + 30 > 300 ? 0 : offset + 30;
-  } catch {
-    status = "PARTIAL";
-    error = "Polymarket discovery unavailable; no external odds substituted";
   }
+  offset = offset + 30 > 300 ? 0 : offset + 30;
   try {
     if (!env.COINGECKO_DEMO_API_KEY) throw Error("Price key unavailable");
     const r = await fetcher(

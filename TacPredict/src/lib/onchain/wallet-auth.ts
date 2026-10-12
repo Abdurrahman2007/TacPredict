@@ -5,7 +5,11 @@ import type { WalletProvider } from "./wallet";
 export async function signInWithEthereumWallet(wallet: WalletProvider) {
   const siwe = import.meta.env.SSR ? null : await import("viem/siwe");
   if (!siwe) throw new Error("Wallet sign-in needs a browser.");
-  const accounts = await wallet.request({ method: "eth_requestAccounts" });
+  const existing = await wallet.request({ method: "eth_accounts" });
+  const accounts =
+    Array.isArray(existing) && existing.length
+      ? existing
+      : await wallet.request({ method: "eth_requestAccounts" });
   const chain = await wallet.request({ method: "eth_chainId" });
   if (
     !Array.isArray(accounts) ||

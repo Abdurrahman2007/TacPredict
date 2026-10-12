@@ -148,7 +148,11 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     setError("");
     try {
-      const accounts = await wallet.provider.request({ method: "eth_requestAccounts" });
+      const existing = await wallet.provider.request({ method: "eth_accounts" });
+      const accounts =
+        Array.isArray(existing) && existing.length
+          ? existing
+          : await wallet.provider.request({ method: "eth_requestAccounts" });
       if (!Array.isArray(accounts) || !isAddress(accounts[0])) throw new Error("No wallet account");
       setAddress(accounts[0]);
       setProvider(wallet.provider);

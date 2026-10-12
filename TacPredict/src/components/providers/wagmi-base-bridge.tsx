@@ -4,7 +4,11 @@ import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import type { WalletProvider } from "@/lib/onchain/wallet";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { PRIMARY_CHAIN_ID } from "@/lib/web3/constants";
+import { sessionMatchesWallet } from "@/lib/onchain/wallet-session.mjs";
+
+// Shared across React remounts: one login attempt per connection, including rejection.
+const attempted = new Set<string>();
+const pending = new Map<string, Promise<void>>();
 
 /**
  * Keeps legacy BaseWalletProvider in sync with RainbowKit/Wagmi,
@@ -12,17 +16,13 @@ import { PRIMARY_CHAIN_ID } from "@/lib/web3/constants";
  */
 export function WagmiBaseBridge() {
   const { address, isConnected, connector, chainId, status } = useAccount();
-  const {
-    address: baseAddress,
-    connect,
-    disconnect,
-    switchToBase,
-  } = useBaseWallet();
+  const { address: baseAddress, connect, disconnect } = useBaseWallet();
   const siweDone = useRef<string | null>(null);
   const bridging = useRef(false);
 
   useEffect(() => {
     if (status === "disconnected") {
+      if (siweDone.current) attempted.delete(siweDone.current);
       siweDone.current = null;
       if (baseAddress) disconnect();
       return;
@@ -33,10 +33,6 @@ export function WagmiBaseBridge() {
     bridging.current = true;
     void (async () => {
       try {
-        if (chainId && chainId !== PRIMARY_CHAIN_ID) {
-          await switchToBase();
-        }
-
         const provider = (await connector.getProvider()) as WalletProvider | undefined;
         if (!provider?.request) return;
 
@@ -52,19 +48,20 @@ export function WagmiBaseBridge() {
         if (siweDone.current === key) return;
 
         const { data } = await supabase.auth.getSession();
-        const sessionUser = data.session?.user;
-        const identities =
-          sessionUser?.identities?.flatMap((i) => [
-            i.identity_data?.["address"],
-            i.identity_data?.["sub"],
-          ]) ?? [];
-        const alreadyWallet =
-          typeof identities.find(
-            (v) => typeof v === "string" && v.toLowerCase() === key,
-          ) === "string";
-
-        if (!alreadyWallet) {
-          await signInWithEthereumWallet(provider);
+        if (!sessionMatchesWallet(data.session, key)) {
+          const inFlight = pending.get(key);
+          if (inFlight) await inFlight;
+          else if (!attempted.has(key)) {
+            attempted.add(key);
+            siweDone.current = key;
+            const login = signInWithEthereumWallet(provider).then(() => undefined);
+            pending.set(key, login);
+            try {
+              await login;
+            } finally {
+              pending.delete(key);
+            }
+          } else return; // Never repeatedly open signatures after cancellation.
         }
         siweDone.current = key;
 
@@ -81,17 +78,7 @@ export function WagmiBaseBridge() {
         bridging.current = false;
       }
     })();
-  }, [
-    address,
-    baseAddress,
-    isConnected,
-    connector,
-    chainId,
-    status,
-    connect,
-    disconnect,
-    switchToBase,
-  ]);
+  }, [address, baseAddress, isConnected, connector, chainId, status, connect, disconnect]);
 
   return null;
 }
