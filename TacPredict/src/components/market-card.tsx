@@ -7,11 +7,11 @@ import { MarketIcon } from "./market-icon";
 import { OutcomeRow } from "./outcome-row";
 export const MarketCard = memo(function MarketCard({ market }: { market: Market }) {
   return (
-    <article className="market-list-item group rounded-[24px] border border-border bg-card p-5 sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+    <article className="market-list-item min-w-0 group rounded-[24px] border border-border bg-card p-5 sm:p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{market.category}</span>
         <span className="flex items-center gap-1">
-          <Clock3 className="size-3.5" />
+          <Clock3 className="size-3.5 shrink-0" />
           {market.closesAt}
         </span>
       </div>
