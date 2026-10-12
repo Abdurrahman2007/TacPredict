@@ -153,9 +153,6 @@ function PortfolioPage() {
           <div className="tp-big">
             <span>{money(total, hidden)}</span>
           </div>
-          <p className="tp-sub">
-            {hidden ? "••••" : noHistory ? "$0.00 (0%) past day" : "Performance unavailable"}
-          </p>
         </div>
         <div className="tp-b-right">
           <p className="tp-label">
@@ -165,12 +162,6 @@ function PortfolioPage() {
           {claimable !== null && claimable > 0n ? (
             <span className="tp-status">Claimable {money(claimable, hidden)}</span>
           ) : null}
-          <div>
-            <span className="tp-chain">
-              <i />
-              USDC · Base
-            </span>
-          </div>
         </div>
       </section>
       <section className="tp-actions" aria-label="Wallet actions">

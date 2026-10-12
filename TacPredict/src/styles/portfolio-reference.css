@@ -839,3 +839,7 @@
     transition: none;
   }
 }
+
+/* Separate funding actions visually from the performance card. */
+.tp-portfolio .tp-actions { padding-bottom: 28px; }
+@media(min-width:640px) { .tp-portfolio .tp-actions { padding-bottom: 32px; } }

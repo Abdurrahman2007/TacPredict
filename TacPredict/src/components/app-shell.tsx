@@ -1,9 +1,10 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { House, LineChart, Wallet, Gift, Search } from "lucide-react";
+import { House, LineChart, Wallet, Gift, Search, Info } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { BrandIntro } from "./brand-intro";
 import { LoginButton } from "./login-dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 const navItems = [
   { to: "/" as const, label: "Home", icon: House },
   { to: "/search" as const, label: "Search", icon: Search },
@@ -54,15 +55,19 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
         {children}
         {showSource && (
-          <footer className="mt-8 text-center text-[10px] text-muted-foreground/70">
-            <a
-              href="https://www.coingecko.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground"
-            >
-              Market data · CoinGecko
-            </a>
+          <footer className="mt-6 flex justify-center">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" aria-label="Market data information" className="grid size-11 place-items-center rounded-full text-muted-foreground/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary">
+                  <Info size={15} aria-hidden="true" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="top" className="rounded-2xl text-xs leading-5">
+                <p className="font-semibold">Market data</p>
+                <p className="mt-2">Crypto spot data provided by <a href="https://www.coingecko.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">CoinGecko</a>. These reference prices are not prediction odds.</p>
+                <p className="mt-2 text-muted-foreground">Native volume and positions come from indexed TacPredict Base transactions. Preview and discovered listings are not tradeable.</p>
+              </PopoverContent>
+            </Popover>
           </footer>
         )}
       </main>

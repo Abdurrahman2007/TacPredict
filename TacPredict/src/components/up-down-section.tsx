@@ -85,7 +85,6 @@ export function UpDownSection({
                       title
                     )}
                   </h3>
-                  {!market && <p className="mt-1 text-xs text-muted-foreground">Spot reference</p>}
                 </div>
                 {market ? (
                   <MarketCountdown
@@ -94,7 +93,7 @@ export function UpDownSection({
                   />
                 ) : (
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {preview ? "Preview" : "USDC"}
+                    {preview ? "Preview" : "Reference"}
                   </span>
                 )}
               </div>
@@ -184,15 +183,8 @@ export function UpDownSection({
                     <span>— OI</span>
                     <span>— Vol</span>
                   </div>
-                  <p className="mt-3 text-[11px] text-muted-foreground">
-                    Spot reference · Trading paused
-                  </p>
                 </>
-              ) : (
-                <p className="mt-5 text-xs text-muted-foreground">
-                  Spot reference · No published prediction yet
-                </p>
-              )}
+              ) : null}
             </article>
           );
         })}
