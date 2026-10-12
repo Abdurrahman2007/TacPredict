@@ -72,6 +72,11 @@ export function normalizeGamma(raw, now = Date.now(), allowed = categories) {
     invalid.push("Missing objective rules");
   const category = inferCategory(title, raw);
   if (!allowed.includes(category)) invalid.push("Category excluded by policy");
+  const outcomePrices = array(raw.outcomePrices)
+    .map((p) => Number(p))
+    .filter((p) => Number.isFinite(p) && p >= 0 && p <= 1);
+  const volume24hr = Number(raw.volume24hr ?? raw.volume24hrClob ?? NaN);
+
   return {
     source: "polymarket",
     source_market_id: String(raw.id ?? "").slice(0, 120),
@@ -89,6 +94,13 @@ export function normalizeGamma(raw, now = Date.now(), allowed = categories) {
       rightsReviewed: false,
       sourceReference: clean(raw.resolutionSource).slice(0, 500),
       aiReview: null,
+      // External comparison only — never becomes TacPredict live mid/CLOB price.
+      externalReference: {
+        provider: "polymarket-gamma",
+        outcomePrices: outcomePrices.length === outcomes.length ? outcomePrices : null,
+        volume24hr: Number.isFinite(volume24hr) ? volume24hr : null,
+        note: "Reference metadata only. TacPredict prices come from native USDC orders.",
+      },
     },
     preview_document: null,
   };

@@ -42,9 +42,13 @@ const stateSchema = z.object({
     last_success_at: z.string().nullable(),
     last_error: z.string().nullable(),
     page_offset: z.number(),
+    categories: z.array(z.string()).optional(),
+    interval_minutes: z.number().optional(),
+    updated_at: z.string().optional(),
   }),
   counts: z.object({
     discovered: z.number(),
+    validated: z.number().optional(),
     rejected: z.number(),
     reviewRequired: z.number(),
     previews: z.number(),
@@ -55,18 +59,26 @@ const stateSchema = z.object({
       id: z.string(),
       status: z.string(),
       started_at: z.string(),
+      finished_at: z.string().nullable().optional(),
+      discovered: z.number().optional(),
+      rejected: z.number().optional(),
       ai_reviewed: z.boolean(),
+      error: z.string().nullable().optional(),
     }),
   ),
   candidates: z.array(
     z.object({
       id: z.string(),
       source: z.string(),
+      source_market_id: z.string().optional(),
       title: z.string(),
       status: z.string(),
       category: z.string(),
+      outcomes: z.array(z.string()).optional(),
+      close_at: z.string().optional(),
       source_url: z.string().url(),
       proposed_rules: z.string(),
+      fingerprint: z.string().optional(),
       validation: z.object({
         reasons: z.array(z.string()).optional(),
         aiReview: z
@@ -77,6 +89,14 @@ const stateSchema = z.object({
             unavailable: z.boolean().optional(),
           })
           .nullable()
+          .optional(),
+        externalReference: z
+          .object({
+            provider: z.string().optional(),
+            outcomePrices: z.array(z.number()).nullable().optional(),
+            volume24hr: z.number().nullable().optional(),
+            note: z.string().optional(),
+          })
           .optional(),
       }),
     }),
