@@ -4,7 +4,8 @@ import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { shortAddress } from "@/lib/onchain/base";
 import { useLoginDialog } from "./login-dialog";
 import { Link } from "@tanstack/react-router";
-/** A single authentication entry: wallet ownership is proven by the real AuthPanel. */
+
+/** Opens RainbowKit wallets-only modal; shows short address when connected. */
 export function ConnectWallet({ className }: { className?: string }) {
   const wallet = useBaseWallet();
   const login = useLoginDialog();

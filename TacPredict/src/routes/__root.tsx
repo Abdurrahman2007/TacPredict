@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -14,7 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/app-shell";
 import { LoginDialogProvider } from "../components/login-dialog";
-import { BaseWalletProvider } from "../lib/onchain/wallet";
+import { Web3ProviderGate } from "../components/providers/Web3ProviderGate";
 
 function NotFoundComponent() {
   return (
@@ -119,14 +119,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BaseWalletProvider>
-        <LoginDialogProvider>
-          <AppShell>
-            <Outlet />
-          </AppShell>
-        </LoginDialogProvider>
-      </BaseWalletProvider>
-    </QueryClientProvider>
+    <Web3ProviderGate queryClient={queryClient}>
+      <LoginDialogProvider>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </LoginDialogProvider>
+    </Web3ProviderGate>
   );
 }
