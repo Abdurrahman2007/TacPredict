@@ -8,6 +8,74 @@ export type Database = {
   };
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string;
+          wallet_address: string;
+          chain_id: number;
+          usdc_balance: number;
+          total_trades: number;
+          last_active: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          wallet_address: string;
+          chain_id?: number;
+          usdc_balance?: number;
+          total_trades?: number;
+          last_active?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          wallet_address?: string;
+          chain_id?: number;
+          usdc_balance?: number;
+          total_trades?: number;
+          last_active?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      wallets: {
+        Row: {
+          id: string;
+          user_id: string;
+          address: string;
+          chain_id: number;
+          last_seen: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          address: string;
+          chain_id?: number;
+          last_seen?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          address?: string;
+          chain_id?: number;
+          last_seen?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       points_transactions: {
         Row: {
           amount: number;

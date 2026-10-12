@@ -3,6 +3,7 @@ import { CircleUserRound, Gift, House, LineChart, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { Button } from "./ui/button";
+import { WalletConnectButton } from "./wallet-connect-button";
 import { usePredictionWallet } from "@/lib/prediction-wallet";
 
 const navItems = [
@@ -34,12 +35,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
             <Button
               variant="ghost"
               size="icon"
               aria-label="Search markets"
               title="Search markets"
+              className="hidden sm:inline-flex"
               asChild
             >
               <Link to="/markets">
@@ -47,11 +49,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </Button>
             <BalancePill />
+            <WalletConnectButton />
             <Button
               variant="outline"
               size="icon"
               aria-label="Open profile"
               title="Open profile"
+              className="hidden sm:inline-flex"
               asChild
             >
               <Link to="/profile">
@@ -98,11 +102,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function BalancePill() {
-  const { balance } = usePredictionWallet();
+  const { balance, user } = usePredictionWallet();
+  if (!user) return null;
   return (
     <Link
       to="/profile"
-      className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 transition-colors hover:border-primary/40"
+      className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-2 transition-colors hover:border-primary/40 md:flex"
       aria-label={`${balance.toLocaleString()} TAC Points, open profile`}
     >
       <span className="size-1.5 rounded-full bg-primary motion-safe:animate-pulse" />
