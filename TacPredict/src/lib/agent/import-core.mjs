@@ -223,40 +223,45 @@ export async function runMarketDiscovery(env, deps = {}) {
   ].filter((f) => policy.categories.includes(f.category));
   for (const feed of feeds) {
     try {
-      const gamma = await fetcher(
-        `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=30&offset=${Math.floor(offset / 2)}&tag_id=${feed.tag}&order=id&ascending=false`,
-        {
-          headers: {
-            "User-Agent": "TacPredictDiscovery/1.0 (metadata-only; contact support@tacpredict.fun)",
-            Accept: "application/json",
-          },
-          signal: AbortSignal.timeout(10000),
-        },
-      );
-      if (!gamma.ok) throw Error("Discovery provider unavailable");
-      const rows = await gamma.json();
-      if (!Array.isArray(rows)) throw Error("Invalid discovery response");
       let added = 0;
-      for (const event of rows.slice(0, 30)) {
-        for (const raw of event.markets ?? []) {
-          const c = normalizeGamma(
-            { ...raw, events: [{ slug: event.slug }], endDate: raw.endDate || event.endDate },
-            Date.now(),
-            policy.categories,
-            feed.category,
-          );
-          if (
-            c.status === "REJECTED" ||
-            candidates.some((p) => p.source_market_id === c.source_market_id)
-          )
-            continue;
-          c.validation.sourceEventId = String(event.id ?? "").slice(0, 100);
-          c.validation.discoveryTopic = feed.topic;
-          candidates.push(c);
-          added++;
-          break; // One market per event; avoid a single event dominating the feed.
+      // Sparse categories must not disappear when the rotating page is old.
+      for (const pageOffset of [...new Set([Math.floor(offset / 2), 0])]) {
+        const gamma = await fetcher(
+          `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=30&offset=${pageOffset}&tag_id=${feed.tag}&order=id&ascending=false`,
+          {
+            headers: {
+              "User-Agent":
+                "TacPredictDiscovery/1.0 (metadata-only; contact support@tacpredict.fun)",
+              Accept: "application/json",
+            },
+            signal: AbortSignal.timeout(10000),
+          },
+        );
+        if (!gamma.ok) throw Error("Discovery provider unavailable");
+        const rows = await gamma.json();
+        if (!Array.isArray(rows)) throw Error("Invalid discovery response");
+        for (const event of rows.slice(0, 30)) {
+          for (const raw of event.markets ?? []) {
+            const c = normalizeGamma(
+              { ...raw, events: [{ slug: event.slug }], endDate: raw.endDate || event.endDate },
+              Date.now(),
+              policy.categories,
+              feed.category,
+            );
+            if (
+              c.status === "REJECTED" ||
+              candidates.some((p) => p.source_market_id === c.source_market_id)
+            )
+              continue;
+            c.validation.sourceEventId = String(event.id ?? "").slice(0, 100);
+            c.validation.discoveryTopic = feed.topic;
+            candidates.push(c);
+            added++;
+            break; // One market per event; avoid a single event dominating the feed.
+          }
+          if (added >= 4) break; // Balanced, bounded supply: at most 28 discovered markets.
         }
-        if (added >= 4) break; // Balanced, bounded supply: at most 28 discovered markets.
+        if (added > 0) break;
       }
     } catch {
       status = "PARTIAL";

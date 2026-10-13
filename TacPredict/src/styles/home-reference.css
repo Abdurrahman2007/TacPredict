@@ -1,0 +1,271 @@
+.home-reference {
+  --home-surface: #1d2529;
+  --home-border: #354044;
+  min-width: 0;
+  padding-bottom: 8px;
+}
+.home-reference .home-reference-tabs {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 0 0 14px;
+  margin: 0;
+}
+.home-reference .home-reference-tabs > a {
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+.home-reference .home-feed-icon {
+  width: 17px;
+  height: 17px;
+}
+.home-reference .home-live-dot {
+  width: 8px;
+  height: 8px;
+}
+.home-featured {
+  margin-top: 0;
+}
+.home-featured-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  padding: 1px 0 3px;
+  position: relative;
+}
+.home-prediction-card {
+  min-width: 0;
+  background: var(--home-surface);
+  border: 1px solid var(--home-border);
+  border-radius: 25px;
+  padding: 20px;
+}
+.home-featured-card {
+  flex: 0 0 88%;
+  max-width: 400px;
+  scroll-snap-align: start;
+}
+.home-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+.home-card-meta time {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.home-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+}
+.home-card-title h3 {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.home-card-outcomes {
+  display: grid;
+  gap: 14px;
+  margin-top: 23px;
+}
+.home-card-outcome {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 47px;
+  border-radius: 12px;
+}
+.home-card-outcome > div {
+  min-width: 0;
+}
+.home-card-outcome > span:last-child {
+  min-width: 64px;
+  min-height: 42px;
+  font-size: 17px;
+  font-weight: 500;
+}
+.home-card-outcome > span:nth-last-child(2) {
+  font-size: 14px;
+}
+.home-card-outcome .text-base {
+  font-size: 15px;
+}
+.home-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  margin-top: 23px;
+  font-variant-numeric: tabular-nums;
+}
+.home-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+.home-carousel-controls > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 7px 11px;
+  border: 1px solid var(--home-border);
+  background: var(--home-surface);
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.home-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.home-carousel-dots button {
+  width: 19px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+}
+.home-carousel-dots button::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #354044;
+  transition:
+    width 180ms,
+    background 180ms;
+}
+.home-carousel-dots button.active::after {
+  width: 16px;
+  background: #f6f8fa;
+}
+.home-serial-section {
+  margin-top: 34px;
+}
+.home-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.home-section-head h2 {
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.home-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 3px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid var(--home-border);
+  border-radius: 999px;
+  background: var(--home-surface);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.home-serial-grid {
+  display: grid;
+  gap: 12px;
+}
+.home-crypto-chart {
+  margin-top: 30px;
+}
+.home-crypto-chart > section {
+  margin-top: 0;
+}
+.home-crypto-chart article {
+  border-radius: 25px;
+  background: var(--home-surface);
+}
+.home-feed-notice,
+.home-empty {
+  background: var(--home-surface);
+  border: 1px solid var(--home-border);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.home-empty {
+  padding: 40px 20px;
+  text-align: center;
+}
+.home-back-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--home-border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  margin: 24px auto 0;
+  color: var(--foreground);
+  background: var(--secondary);
+  font-size: 13px;
+  min-height: 44px;
+}
+.home-reference a:focus-visible,
+.home-reference button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (min-width: 640px) {
+  .home-serial-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .home-featured-card {
+    flex-basis: calc(50% - 6px);
+  }
+  .home-serial-section {
+    margin-top: 42px;
+  }
+  .home-prediction-card {
+    padding: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  .home-serial-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .home-featured-card {
+    flex-basis: calc(33.333% - 8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-reference *,
+  .home-reference *::after {
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+}
