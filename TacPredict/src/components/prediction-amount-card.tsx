@@ -71,7 +71,7 @@ export function PredictionAmountCard({
       : wallet.usdc === null
         ? wallet.error
           ? "Unavailable"
-          : "Loading…"
+          : "0"
         : formatUsdc(wallet.usdc);
   return (
     <aside

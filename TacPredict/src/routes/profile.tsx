@@ -45,6 +45,8 @@ function PortfolioPage() {
     wallet.address && wallet.chainId === 8453 && wallet.usdc !== null && !wallet.error,
   );
   const hidden = false;
+  // Never show a loading dash: a balance is either the real amount or zero.
+  const show = (value: bigint | null) => money(value ?? 0n, hidden);
   const linked = Boolean(q.data?.walletLinked) && !q.isError && !q.isPending;
   const positions = (q.data?.positions ?? []).filter((p) => p.chainId === 8453);
   const marked =
@@ -124,14 +126,14 @@ function PortfolioPage() {
             </button>
           </div>
           <div className="tp-big">
-            <span>{money(total, hidden)}</span>
+            <span>{show(total)}</span>
           </div>
         </div>
         <div className="tp-b-right">
           <p className="tp-label">Wallet USDC</p>
-          <p className="tp-big tp-med">{money(cash, hidden)}</p>
+          <p className="tp-big tp-med">{show(cash)}</p>
           {claimable !== null && claimable > 0n ? (
-            <span className="tp-status">Claimable {money(claimable, hidden)}</span>
+            <span className="tp-status">Claimable {show(claimable)}</span>
           ) : null}
         </div>
       </section>
@@ -155,7 +157,7 @@ function PortfolioPage() {
           </div>
         </div>
         <div className="tp-pl-value">
-          <strong>{money(pnl, hidden)}</strong>
+          <strong>{show(pnl)}</strong>
           <button
             aria-label="Share portfolio link"
             className="tp-icon"
@@ -171,7 +173,7 @@ function PortfolioPage() {
         <div className="tp-pl-sub">
           <span>{periods[range]}</span>
           <span>
-            All-time <b>{money(pnl, hidden)}</b>
+            All-time <b>{show(pnl)}</b>
           </span>
         </div>
         <PortfolioPerformanceChart key={range} empty={noHistory} period={periods[range]} />

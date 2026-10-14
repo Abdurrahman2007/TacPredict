@@ -14,6 +14,7 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { atomicDecimal } from "@/lib/protocol/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { claimPosition } from "@/lib/protocol/execution";
+import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
 export function NativePortfolio({
   tab,
   search = "",
@@ -54,6 +55,19 @@ export function NativePortfolio({
       setBusy(false);
     }
   }
+  async function signInWallet() {
+    if (!wallet.provider || busy) return;
+    setBusy(true);
+    setNotice("");
+    try {
+      await signInWithEthereumWallet(wallet.provider);
+    } catch (e) {
+      const code = (e as { code?: number })?.code;
+      setNotice(code === 4001 ? "Sign-in cancelled." : "Wallet sign-in failed. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
   async function linkWallet() {
     if (!wallet.provider || !wallet.address || !auth.user) return;
     setBusy(true);
@@ -78,13 +92,7 @@ export function NativePortfolio({
   const activity = q.data?.activity;
   return (
     <div className="mt-4 space-y-3">
-      {!auth.ready || (auth.user && q.isPending) ? (
-        <div className="finance-card space-y-4" aria-label="Loading portfolio" aria-busy="true">
-          <div className="h-4 w-2/3 rounded bg-secondary" />
-          <div className="h-3 w-1/2 rounded bg-secondary" />
-          <div className="h-11 rounded bg-secondary" />
-        </div>
-      ) : q.isError ? (
+      {!auth.ready || (auth.user && q.isPending) ? null : q.isError ? (
         <div role="alert" className="finance-card">
           <h3 className="text-sm font-semibold">Positions unavailable</h3>
           <p className="mt-2 text-xs leading-6 text-muted-foreground">
@@ -96,28 +104,42 @@ export function NativePortfolio({
           </button>
         </div>
       ) : !auth.user ? (
-        <EmptyState
-          title={
-            tab === "Open"
-              ? "No open orders."
-              : tab === "Activity"
-                ? "No history yet."
-                : "No positions found."
-          }
-          description={
-            tab === "Open"
-              ? "You have no unfilled orders right now."
-              : tab === "Activity"
-                ? "Your confirmed transactions will appear here."
-                : "Your confirmed positions will appear here."
-          }
-        />
-      ) : tab === "Open" ? (
-        orders.isPending ? (
-          <div className="finance-card" role="status">
-            Loading orders…
+        wallet.address && wallet.provider ? (
+          <div className="finance-card text-center">
+            <h3 className="text-sm font-semibold">Sign in to see your positions</h3>
+            <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
+              Your wallet is connected. Sign one free message to open your portfolio. It does not
+              authorize any transaction.
+            </p>
+            <button
+              className="finance-pill finance-pill-primary mt-5"
+              disabled={busy}
+              onClick={() => void signInWallet()}
+            >
+              {busy ? "Waiting for wallet…" : "Sign in with wallet"}
+              <ShieldCheck size={15} />
+            </button>
           </div>
-        ) : orders.isError ? (
+        ) : (
+          <EmptyState
+            title={
+              tab === "Open"
+                ? "No open orders."
+                : tab === "Activity"
+                  ? "No history yet."
+                  : "No positions found."
+            }
+            description={
+              tab === "Open"
+                ? "You have no unfilled orders right now."
+                : tab === "Activity"
+                  ? "Your confirmed transactions will appear here."
+                  : "Your confirmed positions will appear here."
+            }
+          />
+        )
+      ) : tab === "Open" ? (
+        orders.isPending ? null : orders.isError ? (
           <div className="finance-card" role="alert">
             Open orders unavailable.
             <button className="finance-pill mt-3" onClick={() => void orders.refetch()}>

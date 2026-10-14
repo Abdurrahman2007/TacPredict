@@ -9,7 +9,7 @@ function shortenAddress(address: string): string {
 }
 
 function formatUsdc(value: bigint | undefined): string {
-  if (value === undefined) return "—";
+  if (value === undefined) return "0.00";
   const n = Number(formatUnits(value, 6));
   return n.toLocaleString("en-US", {
     minimumFractionDigits: 2,

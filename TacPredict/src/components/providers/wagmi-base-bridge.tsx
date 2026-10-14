@@ -1,24 +1,43 @@
+import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useAccountEffect } from "wagmi";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import type { WalletProvider } from "@/lib/onchain/wallet";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
+import { shouldRequestWalletSignIn } from "@/lib/onchain/wallet-signin-policy.mjs";
 import { supabase } from "@/integrations/supabase/client";
 import { sessionMatchesWallet } from "@/lib/onchain/wallet-session.mjs";
+import { safeAuthNext } from "@/lib/auth-config";
 
 // Shared across React remounts: one login attempt per connection, including rejection.
 const attempted = new Set<string>();
 const pending = new Map<string, Promise<void>>();
 
 /**
- * Keeps legacy BaseWalletProvider in sync with RainbowKit/Wagmi,
- * then SIWE into Supabase once per address (no email/social).
+ * Keeps legacy BaseWalletProvider in sync with RainbowKit/Wagmi.
+ *
+ * A signature request (SIWE) is only ever opened right after the person
+ * connects a wallet in this page view. Wagmi silently restoring a previous
+ * connection on page load/reload (`isReconnected`) must NEVER open a wallet
+ * popup or navigate: with Coinbase Smart Wallet that opened keys.coinbase.com
+ * on every app start. Signed-out wallets can sign in from the Portfolio page.
  */
 export function WagmiBaseBridge() {
   const { address, isConnected, connector, chainId, status } = useAccount();
   const { address: baseAddress, connect, disconnect } = useBaseWallet();
+  const router = useRouter();
   const siweDone = useRef<string | null>(null);
   const bridging = useRef(false);
+  const freshConnect = useRef(false);
+
+  useAccountEffect({
+    onConnect({ isReconnected }) {
+      freshConnect.current = !isReconnected;
+    },
+    onDisconnect() {
+      freshConnect.current = false;
+    },
+  });
 
   useEffect(() => {
     if (status === "disconnected") {
@@ -48,10 +67,20 @@ export function WagmiBaseBridge() {
         if (siweDone.current === key) return;
 
         const { data } = await supabase.auth.getSession();
-        if (!sessionMatchesWallet(data.session, key)) {
+        const signedIn = sessionMatchesWallet(data.session, key);
+        const decision = shouldRequestWalletSignIn({
+          freshConnect: freshConnect.current,
+          signedIn,
+          alreadyAttempted: attempted.has(key),
+        });
+
+        // Restored connection: read-only. No signature request, no redirect.
+        if (decision === "skip") return;
+
+        if (decision === "sign") {
           const inFlight = pending.get(key);
           if (inFlight) await inFlight;
-          else if (!attempted.has(key)) {
+          else {
             attempted.add(key);
             siweDone.current = key;
             const login = signInWithEthereumWallet(provider).then(() => undefined);
@@ -61,15 +90,17 @@ export function WagmiBaseBridge() {
             } finally {
               pending.delete(key);
             }
-          } else return; // Never repeatedly open signatures after cancellation.
+          }
         }
         siweDone.current = key;
+        freshConnect.current = false;
 
         const next = sessionStorage.getItem("tac-auth-next");
         if (next) {
           sessionStorage.removeItem("tac-auth-next");
-          if (next.startsWith("/") && !next.startsWith("//")) {
-            window.location.assign(next);
+          const target = safeAuthNext(next);
+          if (next === target && target !== window.location.pathname) {
+            void router.navigate({ to: target });
           }
         }
       } catch (error) {
@@ -78,7 +109,7 @@ export function WagmiBaseBridge() {
         bridging.current = false;
       }
     })();
-  }, [address, baseAddress, isConnected, connector, chainId, status, connect, disconnect]);
+  }, [address, baseAddress, isConnected, connector, chainId, status, connect, disconnect, router]);
 
   return null;
 }

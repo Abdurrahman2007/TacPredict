@@ -26,7 +26,7 @@ Price charts use Coinbase Exchange closed one-minute candles plus validated publ
 
 Production target: https://tacpredict.fun and www via the tacpredict-app Cloudflare Worker. GitHub source branch is development/base-usdc (PR #1); main is not automatically merged. DNS website A/CNAME content is preserved behind the Worker routes; mail DNS is unchanged.
 
-Disconnected wallet/rewards balances display 0 as an empty state; connected RPC reads retain Loading/Unavailable until verified. Portfolio market/claim amounts show explicitly labelled preview zeros until contracts/indexing are configured.
+Wallet, portfolio and header balances never show a loading placeholder: they display 0 until the verified amount arrives, then the real amount. A failed read is reported as Unavailable in the trade ticket. Portfolio market/claim amounts show explicitly labelled preview zeros until contracts/indexing are configured.
 
 Bundled BTC/ETH/SOL logo SVGs: spothq/cryptocurrency-icons (CC0 license included under public/brand/crypto). Logo rendering does not depend on Unicode glyphs or external image requests.
 
