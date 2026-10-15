@@ -49,7 +49,15 @@ jobs:
             exit 1
           fi
       - name: Validate the Worker bundle (no credentials, no upload)
-        run: npx --yes wrangler@4 deploy --dry-run --name tacpredict-app --config "${{ steps.config.outputs.path }}"
+        run: |
+          npx --yes wrangler@4 deploy --dry-run --name tacpredict-app --config "${{ steps.config.outputs.path }}" 2>&1 | tee /tmp/dryrun.txt
+      - name: Show the Worker settings in the run annotations
+        run: |
+          {
+            echo "wrangler.json:"; cat "${{ steps.config.outputs.path }}"; echo
+            echo "dry-run:"; sed 's/\x1b\[[0-9;]*m//g' /tmp/dryrun.txt | head -40
+          } | head -c 3500 > /tmp/summary.txt
+          printf '::notice title=Worker settings::%s\n' "$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' /tmp/summary.txt)"
       - name: Check deploy prerequisites
         id: gate
         run: |
