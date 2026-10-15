@@ -63,6 +63,12 @@ export function WagmiBaseBridge() {
           });
         }
 
+        // The administrator workspace signs in with email + password and authenticator. A wallet
+        // connected there only signs contract transactions; a wallet sign-in would replace the
+        // admin session, so it is never requested on /admin pages.
+        const path = window.location.pathname;
+        if (path === "/admin" || path.startsWith("/admin/")) return;
+
         const key = address.toLowerCase();
         if (siweDone.current === key) return;
 

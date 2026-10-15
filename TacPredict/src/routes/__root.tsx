@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  useLocation,
   useRouter,
   HeadContent,
   Scripts,
@@ -117,13 +118,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useLocation({ select: (location) => location.pathname });
+  // The administrator workspace is a separate product surface: no public header, nav or intro.
+  const isAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
 
   return (
     <Web3ProviderGate queryClient={queryClient}>
       <LoginDialogProvider>
-        <AppShell>
+        {isAdminArea ? (
           <Outlet />
-        </AppShell>
+        ) : (
+          <AppShell>
+            <Outlet />
+          </AppShell>
+        )}
       </LoginDialogProvider>
     </Web3ProviderGate>
   );

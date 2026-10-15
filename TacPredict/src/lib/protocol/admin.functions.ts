@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { adminSectionSchema, adminSnapshotSchema } from "./admin-view";
-import { keccak256, stringToHex } from "viem";
+import { createPublicClient, http, keccak256, parseAbi, stringToHex, type Address } from "viem";
+import { base } from "viem/chains";
 import type { SupabaseClient } from "@supabase/supabase-js";
 const documentSchema = z
   .object({
@@ -122,4 +123,65 @@ export const getProtocolAdminSnapshot = createServerFn({ method: "GET" })
     });
     if (error) throw Error("Administrator snapshot unavailable or permission denied");
     return adminSnapshotSchema.parse(snapshot);
+  });
+
+const liveRegistryAbi = parseAbi([
+  "function tradingPaused() view returns(bool)",
+  "function nextMarketId() view returns(uint256)",
+]);
+const liveOracleAbi = parseAbi([
+  "function bond() view returns(uint256)",
+  "function challengePeriod() view returns(uint64)",
+]);
+
+/**
+ * Live Base Mainnet reads for the administrator Contracts/System views.
+ * Observation only: this never signs, writes or changes any state, and any failed read is
+ * reported as unavailable rather than as a default value.
+ */
+export const getProtocolLiveChainState = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (context.claims.aal !== "aal2")
+      throw Error("Administrator authenticator verification required");
+    const client = context.supabase as unknown as SupabaseClient;
+    const role = await client
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin");
+    if (role.error || !role.data?.length) throw Error("Assigned administrator required");
+    const { data: deployment, error } = await client
+      .from("protocol_deployments")
+      .select("registry, oracle, verified, chain_id")
+      .eq("verified", true)
+      .eq("chain_id", 8453)
+      .maybeSingle();
+    if (error || !deployment) throw Error("Verified Base deployment unavailable");
+    const configured = process.env["BASE_PROTOCOL_RPC_URL"];
+    const pub = createPublicClient({
+      chain: base,
+      transport: http(configured || "https://mainnet.base.org", { timeout: 8000, retryCount: 1 }),
+    });
+    const registry = deployment.registry as Address;
+    const oracle = deployment.oracle as Address;
+    const [block, paused, nextMarketId, bond, challengePeriod] = await Promise.allSettled([
+      pub.getBlockNumber(),
+      pub.readContract({ address: registry, abi: liveRegistryAbi, functionName: "tradingPaused" }),
+      pub.readContract({ address: registry, abi: liveRegistryAbi, functionName: "nextMarketId" }),
+      pub.readContract({ address: oracle, abi: liveOracleAbi, functionName: "bond" }),
+      pub.readContract({ address: oracle, abi: liveOracleAbi, functionName: "challengePeriod" }),
+    ]);
+    const text = (r: PromiseSettledResult<bigint | number>) =>
+      r.status === "fulfilled" ? r.value.toString() : null;
+    return {
+      chainId: 8453 as const,
+      rpcSource: configured ? ("protocol" as const) : ("public" as const),
+      observedAt: new Date().toISOString(),
+      blockNumber: text(block),
+      tradingPaused: paused.status === "fulfilled" ? Boolean(paused.value) : null,
+      nextMarketId: text(nextMarketId),
+      oracleBondAtomic: text(bond),
+      challengePeriodSeconds: text(challengePeriod),
+    };
   });

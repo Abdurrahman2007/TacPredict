@@ -1,192 +1,134 @@
-import type { AdminSection } from "./admin-view";
+/**
+ * Navigation for the separate administrator workspace (/admin).
+ * `capability` is honest about what each page can do today:
+ *  - "live":    shows real indexed / on-chain data
+ *  - "wallet":  real data plus wallet-signed on-chain actions
+ *  - "off":     no backend read/write exists yet; the page explains what is missing
+ */
+export type AdminCapability = "live" | "wallet" | "off";
 
-/** UI navigation for the A→Z admin shell. RPC section keys stay the existing ten. */
-export type AdminCapability = "live" | "read" | "operator" | "blocked";
+export const adminRouteSections = [
+  "markets",
+  "trading",
+  "resolution",
+  "users",
+  "blockchain",
+  "treasury",
+  "analytics",
+  "notifications",
+  "settings",
+] as const;
+export type AdminRouteSection = (typeof adminRouteSections)[number];
 
-export type AdminNavItem = {
-  id: string;
-  label: string;
-  section: AdminSection;
-  capability: AdminCapability;
-  note: string;
-};
+export function isAdminRouteSection(value: string): value is AdminRouteSection {
+  return (adminRouteSections as readonly string[]).includes(value);
+}
+
+export type AdminNavItem =
+  | { kind: "page"; id: string; label: string; section: AdminRouteSection; view: string; capability: AdminCapability }
+  | { kind: "importer"; id: string; label: string; capability: AdminCapability };
 
 export type AdminNavGroup = {
   title: string;
   items: AdminNavItem[];
 };
 
+const page = (
+  section: AdminRouteSection,
+  view: string,
+  label: string,
+  capability: AdminCapability,
+): AdminNavItem => ({ kind: "page", id: `${section}:${view}`, label, section, view, capability });
+
 export const adminNavGroups: AdminNavGroup[] = [
-  {
-    title: "Overview",
-    items: [
-      {
-        id: "dashboard",
-        label: "Dashboard",
-        section: "Dashboard",
-        capability: "read",
-        note: "Indexed market/volume/job counts only.",
-      },
-      {
-        id: "analytics",
-        label: "Analytics",
-        section: "Analytics",
-        capability: "read",
-        note: "24h/7d finalized trade volume.",
-      },
-    ],
-  },
   {
     title: "Markets",
     items: [
-      {
-        id: "markets-all",
-        label: "All markets",
-        section: "Markets",
-        capability: "read",
-        note: "Indexed markets + prepared metadata drafts.",
-      },
-      {
-        id: "markets-create",
-        label: "Create / prepare",
-        section: "Markets",
-        capability: "live",
-        note: "Prepare immutable terms; publish needs wallet + Factory role.",
-      },
+      page("markets", "all", "All markets", "live"),
+      page("markets", "create", "Create market", "wallet"),
+      page("markets", "live", "Live", "live"),
+      page("markets", "upcoming", "Upcoming", "live"),
+      page("markets", "closed", "Closed", "live"),
+      page("markets", "resolving", "Resolving", "live"),
+      page("markets", "resolved", "Resolved", "live"),
+      { kind: "importer", id: "importer", label: "AI market importer", capability: "live" },
     ],
   },
   {
     title: "Trading",
     items: [
-      {
-        id: "trades",
-        label: "Trades",
-        section: "Trading",
-        capability: "read",
-        note: "Finalized Exchange fills only. No balance edits.",
-      },
-      {
-        id: "orders-positions",
-        label: "Orders / positions",
-        section: "Trading",
-        capability: "read",
-        note: "Bounded investigation views; full export pending.",
-      },
+      page("trading", "orders", "Orders", "off"),
+      page("trading", "trades", "Trades", "live"),
+      page("trading", "positions", "Positions", "off"),
+      page("trading", "liquidity", "Liquidity", "off"),
     ],
   },
   {
     title: "Resolution",
     items: [
-      {
-        id: "resolution",
-        label: "Resolutions",
-        section: "Resolution",
-        capability: "operator",
-        note: "Propose/finalize via bonded oracle wallet actions.",
-      },
-      {
-        id: "disputes",
-        label: "Disputes / evidence",
-        section: "Resolution",
-        capability: "operator",
-        note: "24h challenge window is immutable on-chain.",
-      },
+      page("resolution", "pending", "Pending", "live"),
+      page("resolution", "resolve", "Resolve", "wallet"),
+      page("resolution", "disputes", "Disputes", "live"),
+      page("resolution", "evidence", "Evidence", "live"),
     ],
   },
   {
     title: "Users",
     items: [
-      {
-        id: "users",
-        label: "Users & wallets",
-        section: "Users",
-        capability: "read",
-        note: "Account + proven wallet counts. No USDC edits.",
-      },
-      {
-        id: "risk",
-        label: "Risk / abuse",
-        section: "Users",
-        capability: "blocked",
-        note: "Flag workflows not shipped; cannot freeze permissionless funds.",
-      },
+      page("users", "users", "Users", "live"),
+      page("users", "wallets", "Wallets", "live"),
+      page("users", "risk", "Risk", "off"),
     ],
   },
   {
     title: "Blockchain",
     items: [
-      {
-        id: "contracts",
-        label: "Contracts / indexer",
-        section: "Blockchain",
-        capability: "read",
-        note: "Verified deployment row + checkpoint. Not a live RPC probe.",
-      },
-      {
-        id: "operator",
-        label: "Operator console",
-        section: "Blockchain",
-        capability: "operator",
-        note: "Wallet-signed Factory/Oracle/Settlement actions.",
-      },
+      page("blockchain", "transactions", "Transactions", "off"),
+      page("blockchain", "contracts", "Contracts", "live"),
+      page("blockchain", "oracle", "Oracle", "live"),
+      page("blockchain", "indexer", "Indexer", "live"),
     ],
   },
   {
-    title: "Finance",
+    title: "Treasury",
     items: [
-      {
-        id: "treasury",
-        label: "Treasury / fees",
-        section: "Treasury",
-        capability: "blocked",
-        note: "No fee/treasury sweep on deployed Exchange.",
-      },
-      {
-        id: "settlement",
-        label: "Settlement / claims",
-        section: "Resolution",
-        capability: "operator",
-        note: "Users claim/refund on-chain; admin does not mint balances.",
-      },
+      page("treasury", "usdc", "USDC", "off"),
+      page("treasury", "fees", "Fees", "off"),
+      page("treasury", "withdrawals", "Withdrawals", "off"),
     ],
   },
   {
-    title: "System",
+    title: "Insights",
     items: [
-      {
-        id: "audit",
-        label: "Audit logs",
-        section: "Audit",
-        capability: "read",
-        note: "Append-only protocol_audit_logs (bounded).",
-      },
-      {
-        id: "automation",
-        label: "AI market agent",
-        section: "Settings",
-        capability: "blocked",
-        note: "Discovery/draft scaffolding only. No auto Mainnet publish; AI never sets price/outcome.",
-      },
-      {
-        id: "settings",
-        label: "Settings / roles",
-        section: "Settings",
-        capability: "blocked",
-        note: "Four-role matrix pending. Shared password unlock forbidden.",
-      },
+      page("analytics", "overview", "Analytics", "live"),
+      page("notifications", "overview", "Notifications", "off"),
+    ],
+  },
+  {
+    title: "Settings",
+    items: [
+      page("settings", "admins", "Admins & roles", "off"),
+      page("settings", "categories", "Categories", "live"),
+      page("settings", "providers", "Providers", "live"),
+      page("settings", "system", "System", "live"),
+      page("settings", "audit", "Audit logs", "live"),
     ],
   },
 ];
 
+/** First view of every section; used when the URL has no `view`. */
+export const defaultViews: Record<AdminRouteSection, string> = {
+  markets: "all",
+  trading: "trades",
+  resolution: "pending",
+  users: "users",
+  blockchain: "contracts",
+  treasury: "usdc",
+  analytics: "overview",
+  notifications: "overview",
+  settings: "system",
+};
+
 export function capabilityLabel(c: AdminCapability): string {
-  switch (c) {
-    case "live":
-      return "Write (guarded)";
-    case "read":
-      return "Read";
-    case "operator":
-      return "Wallet operator";
-    case "blocked":
-      return "Not enabled";
-  }
+  return c === "live" ? "Live data" : c === "wallet" ? "Wallet-signed actions" : "Not enabled yet";
 }

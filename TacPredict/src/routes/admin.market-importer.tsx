@@ -2,42 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { useProtocolUser } from "@/lib/protocol/use-auth-user";
-import { getProtocolAdminAccess } from "@/lib/protocol/admin.functions";
 import {
   getMarketImportAdmin,
   setMarketImportEnabled,
   reviewMarketCandidate,
 } from "@/lib/agent/discovery.functions";
 import { buildTacPredictFactoryDraft } from "@/lib/agent/factory-draft";
-import { AdminMfa } from "@/components/admin-mfa";
-import { AuthPanel } from "@/components/auth-panel";
 
-export const Route = createFileRoute("/admin_/market-importer")({ component: ImporterPage });
-
-function ImporterPage() {
-  const { user } = useProtocolUser();
-  const access = useQuery({
-    queryKey: ["protocol-admin", user?.id],
-    enabled: !!user,
-    queryFn: () => getProtocolAdminAccess(),
-    retry: 0,
-  });
-  if (!user)
-    return (
-      <div className="mx-auto max-w-sm">
-        <AuthPanel onSuccess={() => window.location.assign("/admin/market-importer")} />
-      </div>
-    );
-  if (!access.data?.allowed)
-    return (
-      <p className="py-14 text-muted-foreground">
-        {access.isPending ? "Checking administrator access…" : "Assigned administrator required."}
-      </p>
-    );
-  if (access.data.mfaRequired) return <AdminMfa onVerified={() => void access.refetch()} />;
-  return <ImporterWorkspace />;
-}
+// Access (session, admin role, authenticator) is enforced by the /admin layout route.
+export const Route = createFileRoute("/admin/market-importer")({ component: ImporterWorkspace });
 
 function ImporterWorkspace() {
   const q = useQuery({
@@ -96,8 +69,8 @@ function ImporterWorkspace() {
 
   return (
     <section className="mx-auto max-w-5xl">
-      <Link to="/admin" className="text-xs text-muted-foreground">
-        ← Admin workspace
+      <Link to="/admin" className="adm-link text-xs">
+        ← Dashboard
       </Link>
       <h1 className="mt-5 page-title">AI Market Importer</h1>
       <p className="mt-3 text-sm leading-7 text-muted-foreground">
