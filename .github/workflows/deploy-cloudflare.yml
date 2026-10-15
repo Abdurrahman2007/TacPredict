@@ -55,7 +55,7 @@ jobs:
         run: |
           {
             echo "wrangler.json:"; cat "${{ steps.config.outputs.path }}"; echo
-            echo "dry-run:"; sed 's/\x1b\[[0-9;]*m//g' /tmp/dryrun.txt | head -40
+            echo "dry-run totals:"; sed 's/\x1b\[[0-9;]*m//g' /tmp/dryrun.txt | grep -Ei "total upload|gzip|error|warn" | head -10
           } | head -c 3500 > /tmp/summary.txt
           printf '::notice title=Worker settings::%s\n' "$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' /tmp/summary.txt)"
       - name: Check deploy prerequisites
