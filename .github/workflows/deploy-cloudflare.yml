@@ -1,0 +1,66 @@
+name: Deploy TacPredict to Cloudflare
+# Builds the app on every push to main (and checks the Worker bundle on the development branch).
+# It only deploys to the production Worker `tacpredict-app` on main, and only when the three
+# repository secrets below exist. Without them the deploy step is skipped, never simulated.
+#   CLOUDFLARE_API_TOKEN            (Workers Scripts: Edit)
+#   CLOUDFLARE_ACCOUNT_ID
+#   VITE_SUPABASE_PUBLISHABLE_KEY   (public publishable key, baked into the browser bundle)
+on:
+  push:
+    branches: [main, development/base-usdc]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-production-deploy-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: TacPredict
+    env:
+      VITE_SUPABASE_URL: https://lmqaiqvwcytmgwgwyfwx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: TacPredict/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Locate the generated Worker config
+        id: config
+        run: |
+          echo "--- .output"
+          find .output -maxdepth 2 -not -path '*/node_modules/*' | sort | head -40
+          if [ -f .output/server/wrangler.json ]; then
+            echo "path=.output/server/wrangler.json" >> "$GITHUB_OUTPUT"
+            echo "--- generated wrangler.json"
+            cat .output/server/wrangler.json
+          else
+            echo "The build did not generate .output/server/wrangler.json" >&2
+            exit 1
+          fi
+      - name: Validate the Worker bundle (no credentials, no upload)
+        run: npx --yes wrangler@4 deploy --dry-run --name tacpredict-app --config "${{ steps.config.outputs.path }}"
+      - name: Check deploy prerequisites
+        id: gate
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"; echo "Not main: bundle validated only."
+          elif [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Deploy skipped: set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and VITE_SUPABASE_PUBLISHABLE_KEY as repository secrets."
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy to Cloudflare Worker tacpredict-app
+        if: steps.gate.outputs.deploy == 'true'
+        run: npx --yes wrangler@4 deploy --name tacpredict-app --keep-vars --config "${{ steps.config.outputs.path }}"
