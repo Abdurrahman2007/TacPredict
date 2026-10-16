@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { probabilityHistoryOptions } from "@/lib/probability-history.functions";
 import type { Market } from "@/domain/markets/types";
+import { pct } from "@/lib/protocol/display.mjs";
 const colors = ["#e0b627", "#2fc790", "#799aef"];
 export function ProbabilityHistoryChart({ market }: { market: Market }) {
   const [interval, setInterval] = useState<"1h" | "1d" | "1w" | "1m">("1d"),
@@ -31,7 +32,7 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
             <span className="size-2 rounded-full" style={{ background: colors[i] }} />
             {o.label}
             <span className="text-muted-foreground">
-              {o.probabilityKnown === false ? "—" : `${o.probability}%`}
+              {pct(o)}
             </span>
           </span>
         ))}

@@ -13,7 +13,7 @@ export function eventMarket(p: EventDraft): Market {
     category: p.category,
     closesAt: new Date(p.closeAt).toISOString().slice(0, 16).replace("T", " ") + " UTC",
     endsAt: p.closeAt,
-    volume: "—",
+    volume: "$0",
     participants: 0,
     outcomes: p.outcomes.map((label, i) => ({
       id: String(i),
@@ -115,7 +115,7 @@ export function EventDraftDetail({ event }: { event: EventDraft }) {
             className="flex min-h-16 justify-between items-center gap-4 rounded-2xl border border-border bg-card p-4"
           >
             <span className="font-medium">{o.label}</span>
-            <span className="text-xl text-muted-foreground">—</span>
+            <span className="text-xl text-muted-foreground">0%</span>
           </div>
         ))}
       </div>

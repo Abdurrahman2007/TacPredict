@@ -59,7 +59,7 @@ export function PreviewMarketDetail({
                 type="button"
                 className={`ios-press min-h-24 rounded-2xl bg-card p-4 ${i ? "text-right" : "text-left"}`}
               >
-                <span className="block text-3xl font-semibold">—</span>
+                <span className="block text-3xl font-semibold">0%</span>
                 <span className="mt-1 block text-sm text-muted-foreground">{o.label}</span>
               </button>
             ))}
@@ -89,7 +89,7 @@ export function PreviewMarketDetail({
               <div key={label} className="flex items-baseline gap-3 py-3 text-sm">
                 <span className="text-muted-foreground">{label}</span>
                 <span className="flex-1 border-b border-dashed border-border" />
-                <span>—</span>
+                <span className="tabular-nums">{label === "Traders" ? "0" : "$0"}</span>
               </div>
             ))}
           </section>
@@ -140,7 +140,7 @@ function PreviewAmount({
             onClick={() => onSelect(String(i))}
             className={`ios-press min-h-10 rounded-full border text-sm font-semibold ${selected === String(i) ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}
           >
-            {label} —
+            {label} 0%
           </button>
         ))}
       </div>
@@ -174,7 +174,7 @@ function PreviewAmount({
       </div>
       <div className="mt-4 flex justify-between text-xs text-muted-foreground">
         <span>Share price</span>
-        <span>—</span>
+        <span>0¢</span>
       </div>
       <button
         type="button"

@@ -5,6 +5,17 @@ import { adminSectionSchema, adminSnapshotSchema } from "./admin-view";
 import { createPublicClient, http, keccak256, parseAbi, stringToHex, type Address } from "viem";
 import { base } from "viem/chains";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  MARKET_IMAGE_BUCKET,
+  MARKET_IMAGE_MAX_BASE64,
+  MARKET_IMAGE_MAX_BYTES,
+  decodeBase64,
+  detectImage,
+  hexOf,
+  isImageFromProject,
+  isManagedImageUrl,
+  marketImageFileName,
+} from "./market-image.mjs";
 const documentSchema = z
   .object({
     title: z.string().min(5).max(200),
@@ -22,6 +33,10 @@ const documentSchema = z
       .url()
       .refine((v) => v.startsWith("https://")),
     tags: z.array(z.string().max(40)).max(20).default([]),
+    image: z
+      .string()
+      .refine(isManagedImageUrl, "Image must be uploaded through the admin image upload")
+      .optional(),
   })
   .strict();
 function canonical(v: unknown): string {
@@ -53,6 +68,8 @@ export const prepareNativeMarket = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (context.claims.aal !== "aal2")
       throw Error("Administrator authenticator verification required");
+    if (data.image && !isImageFromProject(data.image, process.env["SUPABASE_URL"] ?? ""))
+      throw Error("Market image must come from TacPredict image storage.");
     const document = canonical(data);
     const metadataHash = keccak256(stringToHex(document));
     const rulesHash = keccak256(stringToHex(data.rules));
@@ -74,6 +91,68 @@ export const prepareNativeMarket = createServerFn({ method: "POST" })
       metadataUri: `https://tacpredict.fun/api/protocol/metadata/${metadataHash}`,
       document,
     };
+  });
+
+/**
+ * Admin-only market picture upload. The browser sends a base64 PNG/JPEG/WebP (already resized);
+ * the server re-checks role + authenticator, identifies the file by its bytes (never SVG), stores
+ * it under a content hash in the public `market-images` bucket and returns the public URL that
+ * goes into the locked market metadata. No database migration is involved.
+ */
+export const uploadMarketImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) =>
+    z.object({ data: z.string().min(16).max(MARKET_IMAGE_MAX_BASE64) }).strict().parse(v),
+  )
+  .handler(async ({ data, context }) => {
+    if (context.claims.aal !== "aal2")
+      throw Error("Administrator authenticator verification required");
+    const { data: roles, error: roleError } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin");
+    if (roleError || !roles?.length)
+      throw Error("Only an assigned administrator may upload market images.");
+    const bytes = decodeBase64(data.data);
+    if (!bytes || bytes.length > MARKET_IMAGE_MAX_BYTES)
+      throw Error("Image is invalid or larger than 1.5 MB.");
+    const kind = detectImage(bytes);
+    if (!kind) throw Error("Only PNG, JPEG or WebP images are accepted.");
+    const name = marketImageFileName(
+      hexOf(await crypto.subtle.digest("SHA-256", bytes.buffer as ArrayBuffer)),
+      kind.ext,
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const upload = () =>
+      supabaseAdmin.storage.from(MARKET_IMAGE_BUCKET).upload(name, bytes, {
+        contentType: kind.mime,
+        upsert: true,
+        cacheControl: "31536000",
+      });
+    let result = await upload();
+    if (result.error && /bucket not found/i.test(result.error.message)) {
+      const created = await supabaseAdmin.storage.createBucket(MARKET_IMAGE_BUCKET, {
+        public: true,
+        fileSizeLimit: MARKET_IMAGE_MAX_BYTES,
+        allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
+      });
+      if (created.error && !/already exists/i.test(created.error.message))
+        throw Error("Image storage is not available. Please try again.");
+      result = await upload();
+    }
+    if (result.error) throw Error("Image upload failed. Please try again.");
+    const url = supabaseAdmin.storage.from(MARKET_IMAGE_BUCKET).getPublicUrl(name).data.publicUrl;
+    if (!isImageFromProject(url, process.env["SUPABASE_URL"] ?? ""))
+      throw Error("Image storage returned an unexpected address.");
+    try {
+      await (supabaseAdmin as unknown as SupabaseClient)
+        .from("protocol_audit_logs")
+        .insert({ actor: context.userId, action: "MARKET_IMAGE_UPLOADED", target: name });
+    } catch {
+      /* the audit row is best effort; the upload itself is already content-addressed */
+    }
+    return { url };
   });
 
 export const getProtocolAdminDeployments = createServerFn({ method: "GET" })

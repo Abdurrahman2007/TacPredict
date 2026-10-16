@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Clock3 } from "lucide-react";
-import { atomicDecimal } from "@/lib/protocol/types";
+import { usdcShort, volumeText } from "@/lib/protocol/display.mjs";
 import { memo } from "react";
 import type { Market } from "@/domain/markets/types";
 import { MarketIcon } from "./market-icon";
@@ -40,9 +40,9 @@ export const MarketCard = memo(function MarketCard({ market }: { market: Market 
         <span className="tabular-nums">
           {market.outcomes.length > 2
             ? `${market.outcomes.length} outcomes`
-            : `${market.native ? atomicDecimal(market.native.openInterestAtomic) + " USDC" : "—"} OI`}
+            : `${usdcShort(market.native?.openInterestAtomic)} OI`}
         </span>
-        <span className="tabular-nums">{market.volume} Vol</span>
+        <span className="tabular-nums">{volumeText(market.volume)} Vol</span>
       </footer>
     </article>
   );

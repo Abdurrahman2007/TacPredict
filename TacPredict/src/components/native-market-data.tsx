@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { nativeActivityOptions } from "@/lib/protocol/read.functions";
-import { atomicDecimal, type NativeMarket } from "@/lib/protocol/types";
+import type { NativeMarket } from "@/lib/protocol/types";
+import { usdcShort, sharesShort } from "@/lib/protocol/display.mjs";
 export function NativeMarketTerms({ market }: { market: NativeMarket }) {
   return (
     <details className="mt-5 rounded-2xl border border-border bg-card/40 p-4">
@@ -56,9 +57,9 @@ export function NativeActivity({ marketId }: { marketId: string }) {
             >
               <div className="flex justify-between gap-3">
                 <span>
-                  {t.outcome} · {atomicDecimal(t.sharesAtomic)} shares
+                  {t.outcome} · {sharesShort(t.sharesAtomic)} shares
                 </span>
-                <span>{atomicDecimal(t.usdcAtomic)} USDC</span>
+                <span>{usdcShort(t.usdcAtomic)}</span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {new Date(t.timestamp).toLocaleString()} · View transaction ↗

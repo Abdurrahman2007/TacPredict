@@ -10,6 +10,7 @@ import { sourcePriceWindow } from "@/lib/price-window";
 import { durationMinutes, marketDurationLabel } from "@/lib/market-timing";
 import type { CryptoMarketSnapshot } from "@/lib/market-data.functions";
 import type { NativeFeed } from "@/lib/protocol/market-feed.functions";
+import { pct } from "@/lib/protocol/display.mjs";
 export function UpDownSection({
   crypto,
   histories,
@@ -140,7 +141,7 @@ export function UpDownSection({
                       }
                     >
                       {index === 0 ? (
-                        `${o.label} ${o.probabilityKnown === false ? "—" : `${o.probability}%`}`
+                        `${o.label} ${pct(o)}`
                       ) : (
                         <OutcomeRow outcome={o} index={i} />
                       )}
@@ -164,7 +165,7 @@ export function UpDownSection({
                         }
                       >
                         {index === 0 ? (
-                          `${label} —`
+                          `${label} 0%`
                         ) : (
                           <OutcomeRow
                             outcome={{
@@ -180,8 +181,8 @@ export function UpDownSection({
                     ))}
                   </div>
                   <div className="mt-5 flex justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
-                    <span>— OI</span>
-                    <span>— Vol</span>
+                    <span>$0 OI</span>
+                    <span>$0 Vol</span>
                   </div>
                 </>
               ) : null}

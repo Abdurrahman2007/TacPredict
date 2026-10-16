@@ -1,7 +1,7 @@
 /** Exact six-decimal amounts; unknown monetary data never becomes a fabricated zero. */
 export function money(value, hidden = false) {
   if (hidden) return "••••";
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "$0.00";
   const text = String(value);
   if (!/^\d+$/.test(text)) throw Error("Invalid atomic amount");
   const n = BigInt(text);

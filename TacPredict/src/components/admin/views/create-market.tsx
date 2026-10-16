@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
-import { prepareNativeMarket } from "@/lib/protocol/admin.functions";
+import { prepareNativeMarket, uploadMarketImage } from "@/lib/protocol/admin.functions";
+import { prepareMarketImage } from "@/lib/protocol/market-image-client";
 import { BASE_NETWORK, USDC_DECIMALS } from "@/lib/onchain/base";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { Card, Notice, PageHeader } from "../admin-ui";
@@ -32,7 +33,9 @@ export function CreateMarket() {
     rules: "",
     source: "",
     sourceUrl: "",
+    image: "",
   });
+  const [uploading, setUploading] = useState(false);
 
   const outcomeList = useMemo(
     () =>
@@ -48,11 +51,29 @@ export function CreateMarket() {
     setForm((f) => ({ ...f, ...next }));
   }
 
+  async function pickImage(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setNotice(null);
+    try {
+      const body = await prepareMarketImage(file);
+      const { url } = await uploadMarketImage({ data: { data: body } });
+      edit({ image: url });
+    } catch (err) {
+      setNotice({ tone: "bad", text: err instanceof Error ? err.message : "Image upload failed." });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function submit() {
     setBusy(true);
     setPrepared(null);
     setNotice(null);
-    void prepareNativeMarket({ data: { ...form, outcomes: outcomeList, tags: [] } })
+    const { image, ...terms } = form;
+    void prepareNativeMarket({
+      data: { ...terms, outcomes: outcomeList, tags: [], ...(image ? { image } : {}) },
+    })
       .then((r) => {
         setPrepared(r);
         setNotice({
@@ -149,6 +170,48 @@ export function CreateMarket() {
             </label>
           ))}
 
+          <div className="adm-field">
+            Market picture (optional)
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              {form.image ? (
+                <img
+                  src={form.image}
+                  alt="Market picture preview"
+                  width={64}
+                  height={64}
+                  style={{ borderRadius: 12, objectFit: "cover", border: "1px solid var(--adm-line)" }}
+                />
+              ) : null}
+              <label className="adm-btn" style={{ cursor: uploading ? "wait" : "pointer" }}>
+                {uploading ? "Uploading…" : form.image ? "Change picture" : "Choose picture"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  disabled={busy || uploading}
+                  onChange={(e) => {
+                    void pickImage(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {form.image ? (
+                <button
+                  type="button"
+                  className="adm-btn"
+                  disabled={busy || uploading}
+                  onClick={() => edit({ image: "" })}
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+            <span className="adm-muted" style={{ fontSize: 12.5 }}>
+              PNG, JPEG or WebP. Resized automatically. The picture is locked into the market terms
+              with the rest of the metadata.
+            </span>
+          </div>
+
           <label className="adm-field">
             Category
             <select
@@ -172,7 +235,7 @@ export function CreateMarket() {
             <button
               type="submit"
               className="adm-btn adm-btn-primary"
-              disabled={busy || outcomeList.length < 2}
+              disabled={busy || uploading || outcomeList.length < 2}
             >
               {busy ? "Preparing…" : "Prepare locked market terms"}
             </button>

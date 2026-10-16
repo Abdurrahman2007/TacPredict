@@ -188,7 +188,7 @@ function ImporterWorkspace() {
                       <span className="finance-badge">{c.status}</span>
                     </div>
                     <p className="mt-2 text-[11px] text-muted-foreground">
-                      {c.source} · {c.category} · source id {c.source_market_id ?? "—"} · candidate{" "}
+                      {c.source} · {c.category} · source id {c.source_market_id ?? "none"} · candidate{" "}
                       {c.id}
                     </p>
                     {ref?.outcomePrices && (
@@ -270,8 +270,8 @@ function ImporterWorkspace() {
             <h2 className="mt-8 text-lg font-semibold">Audit · recent runs</h2>
             {q.data.runs.map((r) => (
               <p key={r.id} className="mt-3 text-xs text-muted-foreground">
-                {r.started_at} · {r.status} · discovered {r.discovered ?? "—"} · rejected{" "}
-                {r.rejected ?? "—"} · AI review {r.ai_reviewed ? "completed" : "not completed"}
+                {r.started_at} · {r.status} · discovered {r.discovered ?? 0} · rejected{" "}
+                {r.rejected ?? 0} · AI review {r.ai_reviewed ? "completed" : "not completed"}
                 {r.error ? ` · ${r.error}` : ""}
               </p>
             ))}

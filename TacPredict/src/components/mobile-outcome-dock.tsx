@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Market } from "@/domain/markets/types";
+import { pct } from "@/lib/protocol/display.mjs";
 export function MobileOutcomeDock({
   market,
   selected,
@@ -50,7 +51,7 @@ export function MobileOutcomeDock({
                   : "#a24353",
           }}
         >
-          {item.label} {item.probabilityKnown === false ? "—" : `${item.probability}%`}
+          {item.label} {pct(item)}
         </button>
       ))}
     </div>,

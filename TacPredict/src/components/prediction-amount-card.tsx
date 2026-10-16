@@ -4,12 +4,12 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { nativeOrderbookOptions } from "@/lib/protocol/read.functions";
 import { placeLimitBuy, fillOffer } from "@/lib/protocol/execution";
 import { limitQuote } from "@/lib/protocol/orders";
-import { atomicDecimal } from "@/lib/protocol/types";
 import { useId, useState } from "react";
 import { LockKeyhole } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { BASE_NETWORK, formatUsdc } from "@/lib/onchain/base";
+import { pct, usdcShort, sharesShort } from "@/lib/protocol/display.mjs";
 export function PredictionAmountCard({
   market,
   selected,
@@ -95,7 +95,7 @@ export function PredictionAmountCard({
           >
             {item.label}{" "}
             <span className="tabular-nums">
-              {item.probabilityKnown === false ? "—" : `${item.probability}%`}
+              {pct(item)}
             </span>
           </button>
         ))}
@@ -153,7 +153,7 @@ export function PredictionAmountCard({
       </label>
       {quote && (
         <p className="mt-3 text-xs text-muted-foreground">
-          {atomicDecimal(quote.sharesAtomic.toString())} shares · Maximum winning payout{" "}
+          {sharesShort(quote.sharesAtomic.toString())} shares · Maximum winning payout{" "}
           {quote.potentialPayout} USDC. Payout is not guaranteed.
         </p>
       )}
@@ -207,8 +207,8 @@ export function PredictionAmountCard({
                     .finally(() => setBusy(false));
                 }}
               >
-                Buy full remaining offer: {atomicDecimal(o.remainingAtomic)} shares @{" "}
-                {atomicDecimal(o.order.price)} USDC/share
+                Buy full remaining offer: {sharesShort(o.remainingAtomic)} shares @{" "}
+                {usdcShort(o.order.price)}/share
               </button>
             ))
         )}

@@ -16,7 +16,7 @@ export function balanceOfData(address: string) {
   return `0x70a08231${address.slice(2).toLowerCase().padStart(64, "0")}`;
 }
 export function formatUsdc(raw: bigint | null) {
-  if (raw === null) return "—";
+  if (raw === null) return "0.00";
   if (raw < 0n) throw new Error("Invalid balance");
   const whole = raw / 1_000_000n;
   const fraction = (raw % 1_000_000n).toString().padStart(6, "0").slice(0, 2);
