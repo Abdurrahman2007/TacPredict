@@ -5,7 +5,6 @@ import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { NativePublicResolution } from "@/components/native-public-resolution";
 import { NativeMakerTools } from "@/components/native-maker-tools";
 import { NativeMarketTerms, NativeActivity } from "@/components/native-market-data";
-import { atomicDecimal } from "@/lib/protocol/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
@@ -27,6 +26,7 @@ import { MarketDescription } from "@/components/market-description";
 import { durationMinutes, marketDurationText, marketWindowLabel } from "@/lib/market-timing";
 import { MarketIcon } from "@/components/market-icon";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
+import { pct, usdcShort, volumeText } from "@/lib/protocol/display.mjs";
 
 export const Route = createFileRoute("/markets/$marketId")({
   validateSearch: (search: Record<string, unknown>): { outcome?: string } =>
@@ -162,7 +162,7 @@ function MarketDetailPage() {
                 {market.outcomes.slice(0, 2).map((o, i) => (
                   <div key={o.id} className={`min-w-0 flex-1 ${i ? "text-right" : ""}`}>
                     <p className="text-2xl font-semibold tabular-nums">
-                      {o.probabilityKnown === false ? "—" : `${o.probability}%`}
+                      {pct(o)}
                     </p>
                     <p className="mt-1 truncate text-sm text-muted-foreground">{o.label}</p>
                   </div>
@@ -187,7 +187,7 @@ function MarketDetailPage() {
                 <span
                   className={`text-xl font-semibold tabular-nums ${index === 0 ? "text-positive" : index === 1 ? "text-destructive" : "text-primary"}`}
                 >
-                  {item.probabilityKnown === false ? "—" : `${item.probability}%`}
+                  {pct(item)}
                 </span>
               </button>
             ))}
@@ -228,7 +228,7 @@ function MarketDetailPage() {
                 ? [
                     {
                       label: "Open interest",
-                      value: `${atomicDecimal(market.native.openInterestAtomic)} USDC`,
+                      value: usdcShort(market.native.openInterestAtomic),
                     },
                     { label: "Traders", value: String(market.participants) },
                     {
@@ -238,7 +238,7 @@ function MarketDetailPage() {
                     },
                   ]
                 : []),
-              { label: "Traded volume", value: market.volume },
+              { label: "Traded volume", value: volumeText(market.volume) },
               ...(market.volume24h === undefined
                 ? []
                 : [{ label: "24h traded volume", value: money(market.volume24h) }]),

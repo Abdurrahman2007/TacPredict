@@ -8,7 +8,7 @@ import {
 test("USDC formatting stays exact beyond Number precision and distinguishes unknown", () => {
   assert.equal(money("12345678901234567890123456789"), "$12,345,678,901,234,567,890,123.45");
   assert.equal(money("0"), "$0.00");
-  assert.equal(money(null), "—");
+  assert.equal(money(null), "$0.00");
   assert.equal(money(null, true), "••••");
   assert.throws(() => money("-1"));
 });

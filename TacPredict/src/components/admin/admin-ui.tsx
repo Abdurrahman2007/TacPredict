@@ -143,7 +143,7 @@ export function Loaded<T>({
   return <>{children(query.data as T)}</>;
 }
 
-export function AddressLink({ address }: { address: string }) {
+export function AddressLink({ address, label }: { address: string; label?: string }) {
   return (
     <a
       className="adm-mono adm-link"
@@ -151,7 +151,7 @@ export function AddressLink({ address }: { address: string }) {
       target="_blank"
       rel="noopener noreferrer"
     >
-      {address}
+      {label ?? address}
     </a>
   );
 }

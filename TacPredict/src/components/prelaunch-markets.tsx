@@ -19,7 +19,7 @@ export function previewMarket(p: MarketPreview): Market {
         timeZone: "UTC",
       }) + " UTC",
     endsAt: p.closeAt,
-    volume: "—",
+    volume: "$0",
     participants: 0,
     outcomes: [
       { id: "0", label: "Yes", probability: 0, probabilityKnown: false },
@@ -107,8 +107,8 @@ export function PrelaunchMarkets({
                 ))}
               </div>
               <footer className="mt-5 flex justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
-                <span>— OI</span>
-                <span>— Vol</span>
+                <span>$0 OI</span>
+                <span>$0 Vol</span>
               </footer>
             </article>
           );

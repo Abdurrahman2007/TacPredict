@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
-import { prepareNativeMarket } from "@/lib/protocol/admin.functions";
-import { BASE_NETWORK, USDC_DECIMALS } from "@/lib/onchain/base";
+import { prepareNativeMarket, uploadMarketImage } from "@/lib/protocol/admin.functions";
+import { prepareMarketImage } from "@/lib/protocol/market-image-client";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { Card, Notice, PageHeader } from "../admin-ui";
 
@@ -32,7 +32,9 @@ export function CreateMarket() {
     rules: "",
     source: "",
     sourceUrl: "",
+    image: "",
   });
+  const [uploading, setUploading] = useState(false);
 
   const outcomeList = useMemo(
     () =>
@@ -48,16 +50,34 @@ export function CreateMarket() {
     setForm((f) => ({ ...f, ...next }));
   }
 
+  async function pickImage(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setNotice(null);
+    try {
+      const body = await prepareMarketImage(file);
+      const { url } = await uploadMarketImage({ data: { data: body } });
+      edit({ image: url });
+    } catch (err) {
+      setNotice({ tone: "bad", text: err instanceof Error ? err.message : "Image upload failed." });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function submit() {
     setBusy(true);
     setPrepared(null);
     setNotice(null);
-    void prepareNativeMarket({ data: { ...form, outcomes: outcomeList, tags: [] } })
+    const { image, ...terms } = form;
+    void prepareNativeMarket({
+      data: { ...terms, outcomes: outcomeList, tags: [], ...(image ? { image } : {}) },
+    })
       .then((r) => {
         setPrepared(r);
         setNotice({
           tone: "info",
-          text: "Metadata prepared and saved. It is not published: continue with step 2 below.",
+          text: "Terms saved. Not published yet. Continue with step 2.",
         });
       })
       .catch((err) =>
@@ -73,31 +93,10 @@ export function CreateMarket() {
     <div className="adm-stack">
       <PageHeader
         title="Create market"
-        subtitle="Two steps: lock the immutable terms, then publish them on Base with an authorized wallet. Trading stays paused until a separate, reviewed unpause."
+        subtitle="Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
       />
 
-      <div className="adm-two">
-        <Card title="Collateral">
-          <dl className="adm-kv">
-            <dt>Asset</dt>
-            <dd>Native USDC only</dd>
-            <dt>Token</dt>
-            <dd className="adm-mono">{BASE_NETWORK.usdc}</dd>
-            <dt>Network</dt>
-            <dd>
-              {BASE_NETWORK.name} (chain {BASE_NETWORK.id}), {USDC_DECIMALS} decimals
-            </dd>
-          </dl>
-        </Card>
-        <Card title="Not configurable here">
-          <p className="adm-muted" style={{ margin: 0 }}>
-            No TAC Points, fee percentage, treasury withdrawal or AMM liquidity settings exist. The
-            deployed Exchange has no configurable platform fee.
-          </p>
-        </Card>
-      </div>
-
-      <Card title="Step 1 · Prepare locked terms">
+      <Card title="Step 1 · Market details">
         <form
           style={{ display: "grid", gap: 14 }}
           onSubmit={(e) => {
@@ -149,6 +148,48 @@ export function CreateMarket() {
             </label>
           ))}
 
+          <div className="adm-field">
+            Market picture (optional)
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              {form.image ? (
+                <img
+                  src={form.image}
+                  alt="Market picture preview"
+                  width={64}
+                  height={64}
+                  style={{ borderRadius: 12, objectFit: "cover", border: "1px solid var(--adm-line)" }}
+                />
+              ) : null}
+              <label className="adm-btn" style={{ cursor: uploading ? "wait" : "pointer" }}>
+                {uploading ? "Uploading…" : form.image ? "Change picture" : "Choose picture"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  disabled={busy || uploading}
+                  onChange={(e) => {
+                    void pickImage(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {form.image ? (
+                <button
+                  type="button"
+                  className="adm-btn"
+                  disabled={busy || uploading}
+                  onClick={() => edit({ image: "" })}
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+            <span className="adm-muted" style={{ fontSize: 12.5 }}>
+              PNG, JPEG or WebP. Resized automatically. The picture is locked into the market terms
+              with the rest of the metadata.
+            </span>
+          </div>
+
           <label className="adm-field">
             Category
             <select
@@ -164,17 +205,17 @@ export function CreateMarket() {
           </label>
 
           <p className="adm-muted" style={{ margin: 0, fontSize: 12.5 }}>
-            Outcomes parsed: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8 unique
-            labels). Open, close and resolution times are set in step 2, not in the metadata.
+            Outcomes: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8, all different).
+            Open and close times are set in step 2.
           </p>
 
           <div>
             <button
               type="submit"
               className="adm-btn adm-btn-primary"
-              disabled={busy || outcomeList.length < 2}
+              disabled={busy || uploading || outcomeList.length < 2}
             >
-              {busy ? "Preparing…" : "Prepare locked market terms"}
+              {busy ? "Saving…" : "Save market terms"}
             </button>
           </div>
         </form>
@@ -187,19 +228,13 @@ export function CreateMarket() {
 
         {prepared ? (
           <dl className="adm-kv" style={{ marginTop: 14 }}>
-            <dt>Metadata hash</dt>
+            <dt>Terms ID</dt>
             <dd className="adm-mono">{prepared.metadataHash}</dd>
-            <dt>Rules hash</dt>
-            <dd className="adm-mono">{prepared.rulesHash}</dd>
-            <dt>Source hash</dt>
-            <dd className="adm-mono">{prepared.sourceHash}</dd>
-            <dt>Metadata URI</dt>
-            <dd className="adm-mono">{prepared.metadataUri}</dd>
           </dl>
         ) : null}
       </Card>
 
-      <Card title="Step 2 · Publish on Base (wallet-signed)">
+      <Card title="Step 2 · Publish on Base">
         <NativeOperatorConsole prepared={prepared} outcomeCount={outcomeList.length || 2} />
       </Card>
     </div>

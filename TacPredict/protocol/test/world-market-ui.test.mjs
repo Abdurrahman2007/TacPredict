@@ -13,7 +13,7 @@ test("Rewards remains a header route without duplicate public navigation", () =>
 test("Preview cards and detail have no invented financial observations", () => {
   const s = read("components/prelaunch-markets.tsx");
   assert.equal((s.match(/probabilityKnown: false/g) || []).length, 2);
-  assert(s.includes('volume: "—"'));
+  assert(s.includes('volume: "$0"'));
   assert(!s.includes("native:"));
   const detail = read("components/preview-market-detail.tsx");
   assert(detail.includes("No on-chain market ID yet"));
@@ -24,7 +24,11 @@ test("Preview cards and detail have no invented financial observations", () => {
   assert(detail.includes("disabled"));
   assert(detail.includes("MobileOutcomeDock"));
 });
-test("Unknown outcome probability never draws a fake progress bar or zero-percent legend", () => {
-  assert(read("components/outcome-row.tsx").includes("outcome.probabilityKnown === false"));
-  assert(read("components/probability-history.tsx").includes('o.probabilityKnown === false ? "—"'));
+test("Unknown outcome probability never draws a fake progress bar and never shows a dash", () => {
+  const row = read("components/outcome-row.tsx");
+  assert(row.includes("outcome.probabilityKnown === false"));
+  assert(row.includes("pct(outcome)"));
+  assert(read("components/probability-history.tsx").includes("pct(o)"));
+  for (const f of ["outcome-row", "probability-history", "market-card", "home-market-card"])
+    assert(!/>\s*—\s*</.test(read(`components/${f}.tsx`)), `${f} must not render a dash`);
 });

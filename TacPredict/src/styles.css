@@ -61,25 +61,25 @@
   --font-app: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   --radius: 0.875rem;
-  --background: #10171b;
+  --background: #0f161a;
   --foreground: oklch(0.974 0.004 250);
-  --card: #1d2529;
+  --card: #1d252a;
   --card-foreground: oklch(0.974 0.004 250);
   --popover: #1d2529;
   --popover-foreground: oklch(0.974 0.004 250);
-  --primary: #bea8ff;
-  --primary-foreground: #1c103d;
-  --secondary: #293237;
+  --primary: #b8c4d9;
+  --primary-foreground: #0f1720;
+  --secondary: #283138;
   --secondary-foreground: oklch(0.91 0.008 245);
   --muted: oklch(0.27 0.012 240);
   --muted-foreground: oklch(0.69 0.014 244);
-  --accent: #30383e;
+  --accent: #2d363d;
   --accent-foreground: oklch(0.974 0.004 250);
   --destructive: oklch(0.67 0.21 22);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: #354044;
-  --input: #354044;
-  --ring: #bea8ff;
+  --border: #2f3a41;
+  --input: #2f3a41;
+  --ring: #8fa8d6;
   --positive: oklch(0.79 0.16 151);
   --positive-soft: oklch(0.79 0.16 151 / 0.12);
   --streak: oklch(0.79 0.16 151);
@@ -89,8 +89,8 @@
   --featured: oklch(0.245 0.014 240);
   --featured-foreground: oklch(0.974 0.004 250);
   --featured-muted: oklch(0.69 0.014 244);
-  --surface-glass: rgb(29 37 41 / 0.94);
-  --chart: oklch(0.63 0.2 260);
+  --surface-glass: rgb(29 37 42 / 0.94);
+  --chart: #3355e6;
   --chart-label: oklch(0.82 0.018 235);
   --chart-label-foreground: oklch(0.22 0.02 245);
   --bitcoin: oklch(0.72 0.18 57);
@@ -299,13 +299,13 @@
 }
 
 .onchain-balance-card {
-  background: radial-gradient(ellipse at 100% 0, rgb(116 67 219 / 0.18), transparent 65%), #1d2529;
+  background: radial-gradient(ellipse at 100% 0, rgb(70 110 200 / 0.16), transparent 65%), #1d252a;
 }
 .onchain-brand-card {
-  background: radial-gradient(ellipse at 0 100%, rgb(92 50 211 / 0.16), transparent 70%), #15121e;
+  background: radial-gradient(ellipse at 0 100%, rgb(60 100 190 / 0.14), transparent 70%), #121a21;
 }
 .brand-intro {
-  background: #10171b;
+  background: #0f161a;
   animation: brand-intro-exit 800ms ease both;
 }
 .brand-intro-mark {

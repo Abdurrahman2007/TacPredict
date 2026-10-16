@@ -70,20 +70,19 @@ function ImporterWorkspace() {
   return (
     <section className="mx-auto max-w-5xl">
       <Link to="/admin" className="adm-link text-xs">
-        ← Dashboard
+        ← Overview
       </Link>
-      <h1 className="mt-5 page-title">AI Market Importer</h1>
+      <h1 className="mt-5 page-title">AI market importer</h1>
       <p className="mt-3 text-sm leading-7 text-muted-foreground">
-        Polymarket → candidate queue → AI clarity review → human validation. TacPredict then uses
-        its own Market ID, Base USDC collateral, CLOB prices, oracle and settlement. Polymarket
-        odds/volume are reference metadata only — never live TacPredict prices.
+        Finds markets on Polymarket, checks them with AI, and queues them for your review.
+        Polymarket odds are for reference only. TacPredict prices come from its own order book.
       </p>
 
       {q.isPending ? (
         <p className="mt-6 finance-card">Loading importer…</p>
       ) : q.isError ? (
         <div role="alert" className="mt-6 finance-card">
-          Importer unavailable.{" "}
+          Could not load the importer.{" "}
           <button onClick={() => void q.refetch()} className="text-primary">
             Retry
           </button>
@@ -95,21 +94,21 @@ function ImporterWorkspace() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <article className="finance-card">
                 <p className="text-xs text-muted-foreground">Auto Import</p>
-                <p className="mt-2 text-lg font-semibold">Polymarket discovery worker</p>
+                <p className="mt-2 text-lg font-semibold">Polymarket finder</p>
                 <p className="mt-3 finance-badge">
                   {q.data.policy.discovery_enabled ? "Enabled" : "Paused"}
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Interval: {q.data.policy.interval_minutes ?? 15} minutes · categories:{" "}
+                  Every {q.data.policy.interval_minutes ?? 15} minutes · categories:{" "}
                   {(q.data.policy.categories ?? ["Crypto", "Sports"]).join(", ")}
                 </p>
               </article>
               <article className="finance-card">
                 <p className="text-xs text-muted-foreground">Auto Publish</p>
-                <p className="mt-2 text-lg font-semibold">Validated markets only</p>
-                <p className="mt-3 finance-badge">Policy controlled · OFF</p>
+                <p className="mt-2 text-lg font-semibold">Publishing</p>
+                <p className="mt-3 finance-badge">Manual approval</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Locked until Factory publisher + oracle rules + USDC collateral are approved.
+                  Nothing goes live without your approval and wallet signature.
                 </p>
               </article>
             </div>
@@ -142,7 +141,7 @@ function ImporterWorkspace() {
                   )
                 }
               >
-                {q.data.policy.discovery_enabled ? "Emergency pause" : "Resume discovery"}
+                {q.data.policy.discovery_enabled ? "Pause finder" : "Resume finder"}
               </button>
               <button
                 disabled={busy}
@@ -155,13 +154,13 @@ function ImporterWorkspace() {
                       method: "POST",
                       headers: { Authorization: `Bearer ${data.session.access_token}` },
                     });
-                    if (!r.ok) throw Error("Importer retry requires an assigned admin with MFA");
+                    if (!r.ok) throw Error("Only an admin with an authenticator can run this");
                     const result = (await r.json()) as { status: string };
                     setNotice(`Discovery ${result.status}`);
                   })
                 }
               >
-                Run discovery now
+                Find markets now
               </button>
               <button
                 disabled={q.isFetching}
@@ -173,11 +172,11 @@ function ImporterWorkspace() {
             </div>
 
             <p className="mt-4 text-xs text-muted-foreground">
-              Last successful sync: {q.data.policy.last_success_at ?? "Not run yet"}
+              Last sync: {q.data.policy.last_success_at ?? "Not run yet"}
               {q.data.policy.last_error ? ` · ${q.data.policy.last_error}` : ""}
             </p>
 
-            <h2 className="mt-8 text-lg font-semibold">Candidate queue</h2>
+            <h2 className="mt-8 text-lg font-semibold">Review queue</h2>
             <div className="mt-4 space-y-3">
               {q.data.candidates.map((c) => {
                 const ref = c.validation.externalReference;
@@ -188,14 +187,14 @@ function ImporterWorkspace() {
                       <span className="finance-badge">{c.status}</span>
                     </div>
                     <p className="mt-2 text-[11px] text-muted-foreground">
-                      {c.source} · {c.category} · source id {c.source_market_id ?? "—"} · candidate{" "}
+                      {c.source} · {c.category} · source id {c.source_market_id ?? "none"} · candidate{" "}
                       {c.id}
                     </p>
                     {ref?.outcomePrices && (
                       <p className="mt-2 text-[11px] text-amber-200/80">
                         External reference odds: [{ref.outcomePrices.map((p) => p.toFixed(2)).join(", ")}]
                         {" · "}
-                        not TacPredict live price
+                        not a TacPredict price
                       </p>
                     )}
                     <ul className="mt-3 list-inside list-disc text-xs leading-6 text-muted-foreground">
@@ -204,7 +203,7 @@ function ImporterWorkspace() {
                       ))}
                     </ul>
                     <details className="mt-3 text-xs">
-                      <summary className="cursor-pointer">Proposed rules and AI review</summary>
+                      <summary className="cursor-pointer">Rules and AI review</summary>
                       <p className="mt-3 whitespace-pre-wrap leading-6">{c.proposed_rules}</p>
                       <pre className="mt-3 overflow-auto whitespace-pre-wrap text-[10px]">
                         {JSON.stringify(
@@ -228,7 +227,7 @@ function ImporterWorkspace() {
                         className="finance-pill"
                         onClick={() => setDraftId(draftId === c.id ? null : c.id)}
                       >
-                        {draftId === c.id ? "Hide factory draft" : "Preview TacPredict draft"}
+                        {draftId === c.id ? "Hide draft" : "Preview draft"}
                       </button>
                       {c.source === "polymarket" && (
                         <>
@@ -241,7 +240,7 @@ function ImporterWorkspace() {
                               )
                             }
                           >
-                            Mark validated · not publish
+                            Approve for review
                           </button>
                           <button
                             disabled={busy || c.status === "REJECTED"}
@@ -267,11 +266,11 @@ function ImporterWorkspace() {
               })}
             </div>
 
-            <h2 className="mt-8 text-lg font-semibold">Audit · recent runs</h2>
+            <h2 className="mt-8 text-lg font-semibold">Recent runs</h2>
             {q.data.runs.map((r) => (
               <p key={r.id} className="mt-3 text-xs text-muted-foreground">
-                {r.started_at} · {r.status} · discovered {r.discovered ?? "—"} · rejected{" "}
-                {r.rejected ?? "—"} · AI review {r.ai_reviewed ? "completed" : "not completed"}
+                {r.started_at} · {r.status} · discovered {r.discovered ?? 0} · rejected{" "}
+                {r.rejected ?? 0} · AI review {r.ai_reviewed ? "completed" : "not completed"}
                 {r.error ? ` · ${r.error}` : ""}
               </p>
             ))}

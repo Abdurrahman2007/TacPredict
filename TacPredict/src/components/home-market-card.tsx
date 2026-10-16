@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MarketIcon } from "./market-icon";
 import { OutcomeRow } from "./outcome-row";
-import { atomicDecimal } from "@/lib/protocol/types";
+import { usdcShort, volumeText } from "@/lib/protocol/display.mjs";
 import type { Market } from "@/domain/markets/types";
 
 export function HomeMarketCard({
@@ -49,10 +49,10 @@ export function HomeMarketCard({
           {market.outcomes.length > 2
             ? `${market.outcomes.length} outcomes`
             : market.native
-              ? `${atomicDecimal(market.native.openInterestAtomic)} USDC OI`
+              ? `${usdcShort(market.native.openInterestAtomic)} OI`
               : "Listing pending"}
         </span>
-        <span>{market.native ? `${market.volume} Vol` : "— Vol"}</span>
+        <span>{volumeText(market.volume)} Vol</span>
       </footer>
     </article>
   );

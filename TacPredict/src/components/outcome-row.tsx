@@ -1,4 +1,5 @@
 import type { MarketOutcome } from "@/domain/markets/types";
+import { pct } from "@/lib/protocol/display.mjs";
 export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: number }) {
   const binary = /^(yes|no|up|down)$/i.test(outcome.label);
   return (
@@ -24,10 +25,10 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
       >
         {outcome.probabilityKnown !== false && outcome.probability > 0
           ? `${(100 / outcome.probability).toFixed(2)}x`
-          : "—"}
+          : "0x"}
       </span>
       <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-base font-semibold tabular-nums">
-        {outcome.probabilityKnown === false ? "—" : `${outcome.probability}%`}
+        {pct(outcome)}
       </span>
     </>
   );

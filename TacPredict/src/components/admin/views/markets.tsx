@@ -3,14 +3,13 @@ import {
   atomicToDecimal,
   countMarketsByStatus,
   formatTimestamp,
-  MARKET_STATUSES,
   parseMarketRow,
   shortHash,
   type AdminRow,
   type ParsedMarket,
 } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot } from "../admin-data";
-import { Badge, Card, Loaded, Notice, PageHeader, statusTone, Tile } from "../admin-ui";
+import { Badge, Card, Loaded, PageHeader, statusTone, Tile } from "../admin-ui";
 import { CreateMarket } from "./create-market";
 
 type OnchainMarket = Extract<ParsedMarket, { kind: "market" }>;
@@ -19,32 +18,32 @@ type PreparedMarket = Extract<ParsedMarket, { kind: "terms" }>;
 const VIEWS: Record<string, { title: string; subtitle: string; statuses: string[] | null }> = {
   all: {
     title: "All markets",
-    subtitle: "Every indexed Base Mainnet market, newest first.",
+    subtitle: "Every market on Base, newest first.",
     statuses: null,
   },
   live: {
     title: "Live markets",
-    subtitle: "Indexed status OPEN. Close time and the trading pause still apply on-chain.",
+    subtitle: "Open for trading now.",
     statuses: ["OPEN"],
   },
   upcoming: {
     title: "Upcoming markets",
-    subtitle: "Created on-chain but not open for trading yet.",
+    subtitle: "Created, not open yet.",
     statuses: ["DRAFT", "UPCOMING"],
   },
   closed: {
     title: "Closed markets",
-    subtitle: "Trading has ended and no resolution is proposed yet.",
+    subtitle: "Trading ended, waiting for a resolution.",
     statuses: ["CLOSED"],
   },
   resolving: {
     title: "Resolving markets",
-    subtitle: "An outcome has been proposed and is inside the challenge window.",
+    subtitle: "Outcome proposed, challenge window running.",
     statuses: ["RESOLVING"],
   },
   resolved: {
     title: "Resolved markets",
-    subtitle: "Finalized, settled, voided or cancelled.",
+    subtitle: "Finished, voided or cancelled.",
     statuses: ["RESOLVED", "SETTLED", "VOID", "CANCELLED"],
   },
 };
@@ -57,19 +56,18 @@ function usdc(atomic: string | null) {
 export function MarketsView({ view }: { view: string }) {
   if (view === "create") return <CreateMarket />;
   const config = VIEWS[view] ?? VIEWS["all"]!;
-  return <MarketList key={view} config={config} showFilters={!VIEWS[view] || view === "all"} />;
+  return <MarketList key={view} config={config} showSummary={!VIEWS[view] || view === "all"} />;
 }
 
 function MarketList({
   config,
-  showFilters,
+  showSummary,
 }: {
   config: { title: string; subtitle: string; statuses: string[] | null };
-  showFilters: boolean;
+  showSummary: boolean;
 }) {
   const query = useAdminSnapshot("Markets");
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<string>("ALL");
   const [open, setOpen] = useState<string | null>(null);
 
   return (
@@ -80,11 +78,9 @@ function MarketList({
           <MarketTable
             snapshot={snapshot.rows}
             config={config}
-            showFilters={showFilters}
+            showSummary={showSummary}
             search={search}
             setSearch={setSearch}
-            status={status}
-            setStatus={setStatus}
             open={open}
             setOpen={setOpen}
           />
@@ -97,21 +93,17 @@ function MarketList({
 function MarketTable({
   snapshot,
   config,
-  showFilters,
+  showSummary,
   search,
   setSearch,
-  status,
-  setStatus,
   open,
   setOpen,
 }: {
   snapshot: AdminRow[];
   config: { statuses: string[] | null };
-  showFilters: boolean;
+  showSummary: boolean;
   search: string;
   setSearch: (value: string) => void;
-  status: string;
-  setStatus: (value: string) => void;
   open: string | null;
   setOpen: (value: string | null) => void;
 }) {
@@ -128,7 +120,6 @@ function MarketTable({
   const needle = search.trim().toLowerCase();
   const visible = markets.filter((m) => {
     if (config.statuses && !(m.status && config.statuses.includes(m.status))) return false;
-    if (showFilters && status !== "ALL" && m.status !== status) return false;
     if (!needle) return true;
     return [m.code, m.title, m.onchainId, m.questionId, m.conditionId]
       .filter(Boolean)
@@ -137,16 +128,16 @@ function MarketTable({
 
   return (
     <>
-      {showFilters ? (
+      {showSummary ? (
         <div className="adm-grid-tiles">
-          <Tile label="Indexed markets" value={markets.length} hint="Shown from the latest 50 records" />
+          <Tile label="Markets" value={markets.length} />
           <Tile label="Open" value={counts["OPEN"] ?? 0} />
           <Tile
-            label="Closed / resolving"
+            label="Closed or resolving"
             value={(counts["CLOSED"] ?? 0) + (counts["RESOLVING"] ?? 0)}
           />
           <Tile
-            label="Resolved / settled"
+            label="Resolved"
             value={(counts["RESOLVED"] ?? 0) + (counts["SETTLED"] ?? 0)}
           />
         </div>
@@ -163,28 +154,13 @@ function MarketTable({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          {showFilters ? (
-            <div className="adm-tabs" style={{ margin: 0 }}>
-              {["ALL", ...MARKET_STATUSES.filter((s) => (counts[s] ?? 0) > 0)].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className="adm-tab"
-                  aria-pressed={status === s}
-                  onClick={() => setStatus(s)}
-                >
-                  {s === "ALL" ? "All" : `${s} · ${counts[s] ?? 0}`}
-                </button>
-              ))}
-            </div>
-          ) : null}
         </div>
         {visible.length === 0 ? (
           <div className="adm-card-body">
             <p className="adm-muted" style={{ margin: 0 }}>
               {markets.length === 0
-                ? "No indexed markets yet. Markets appear here after the finalized indexer sees their on-chain creation."
-                : "No market matches this view or search."}
+                ? "No markets yet. They appear here once created on Base."
+                : "Nothing here."}
             </p>
           </div>
         ) : (
@@ -195,7 +171,7 @@ function MarketTable({
                   <th>Market</th>
                   <th>Status</th>
                   <th>Closes</th>
-                  <th className="num">Indexed liquidity</th>
+                  <th className="num">Liquidity</th>
                   <th aria-label="Details" />
                 </tr>
               </thead>
@@ -250,18 +226,17 @@ function MarketTable({
         )}
       </Card>
 
-      {showFilters && terms.length > 0 ? (
-        <Card title="Prepared terms (not on-chain yet)">
-          <Notice>
-            These are approved metadata records only. Nothing exists on Base until an authorized
-            wallet signs the Factory transaction under Create market.
-          </Notice>
+      {showSummary && terms.length > 0 ? (
+        <Card title="Prepared, not published yet">
+          <p className="adm-muted" style={{ marginTop: 0 }}>
+            Terms are saved. Publish them from Create market with your wallet.
+          </p>
           <div className="adm-table-wrap" style={{ marginTop: 12 }}>
             <table className="adm-table">
               <thead>
                 <tr>
                   <th>Title</th>
-                  <th>Metadata hash</th>
+                  <th>Hash</th>
                   <th>Prepared</th>
                 </tr>
               </thead>

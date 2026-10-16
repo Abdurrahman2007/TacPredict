@@ -8,7 +8,7 @@ import {
   type ParsedResolution,
 } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
-import { Badge, Card, Loaded, Notice, PageHeader, Tile, Unavailable, statusTone } from "../admin-ui";
+import { Badge, Card, Loaded, Notice, PageHeader, Tile, statusTone } from "../admin-ui";
 
 const DISPUTE_PATTERN = /DISPUT|CHALLENG/i;
 
@@ -32,15 +32,15 @@ export function ResolutionView({ view }: { view: string }) {
 const COPY = {
   pending: {
     title: "Pending resolutions",
-    subtitle: "Outcome proposals recorded by the finalized indexer, newest first.",
+    subtitle: "Proposed outcomes, newest first.",
   },
   disputes: {
     title: "Disputes",
-    subtitle: "Proposals whose indexed status shows a dispute or challenge.",
+    subtitle: "Proposals that were challenged.",
   },
   evidence: {
     title: "Evidence",
-    subtitle: "Evidence and source hashes committed with each proposal.",
+    subtitle: "Evidence and source hashes for each proposal.",
   },
 } as const;
 
@@ -60,8 +60,8 @@ function ResolutionTable({ mode }: { mode: keyof typeof COPY }) {
                 <div className="adm-card-body">
                   <p className="adm-muted" style={{ margin: 0 }}>
                     {mode === "disputes"
-                      ? "No disputed proposals are indexed."
-                      : "No resolution proposals have been indexed yet."}
+                      ? "No disputes."
+                      : "No proposals yet."}
                   </p>
                 </div>
               ) : (
@@ -119,10 +119,9 @@ function ResolutionTable({ mode }: { mode: keyof typeof COPY }) {
         }}
       </Loaded>
       {mode === "evidence" ? (
-        <Notice>
-          Only hashes are stored. The evidence document itself is held by the resolver; this panel
-          does not display or host evidence files.
-        </Notice>
+        <p className="adm-muted" style={{ margin: 0 }}>
+          Only hashes are stored here, not the evidence files.
+        </p>
       ) : null}
     </div>
   );
@@ -134,11 +133,10 @@ function ResolveView() {
     <div className="adm-stack">
       <PageHeader
         title="Resolve"
-        subtitle="Propose, dispute, finalize and void through the Oracle contract with an authorized wallet."
+        subtitle="Propose, dispute and finalize outcomes with your wallet."
       />
       <Notice tone="warn">
-        Every action here is a real Base transaction signed by your wallet and permitted only to
-        on-chain role holders. Signing in as an administrator does not grant contract authority.
+        These are real Base transactions. Only wallets holding the on-chain role can do them.
       </Notice>
       <div className="adm-grid-tiles">
         <Loaded query={chain} label="oracle settings">
@@ -147,7 +145,7 @@ function ResolveView() {
               <Tile
                 label="Oracle bond"
                 value={live.oracleBondAtomic ? `${atomicToDecimal(live.oracleBondAtomic) ?? "Unavailable"} USDC` : "Unavailable"}
-                hint="Read live from the Oracle contract"
+                hint="Live from Base"
               />
               <Tile
                 label="Challenge period"
@@ -156,7 +154,7 @@ function ResolveView() {
                     ? (formatDuration(live.challengePeriodSeconds) ?? "Unavailable")
                     : "Unavailable"
                 }
-                hint="Read live from the Oracle contract"
+                hint="Live from Base"
               />
             </>
           )}
@@ -165,13 +163,6 @@ function ResolveView() {
       <Card title="Operator console">
         <NativeOperatorConsole prepared={null} outcomeCount={2} />
       </Card>
-      <Unavailable
-        title="Guided multi-step resolution is not enabled"
-        needs="A reviewed workflow that checks evidence and challenge state before enabling each action."
-      >
-        The console above exposes the contract actions directly. Review the Pending, Disputes and
-        Evidence pages first.
-      </Unavailable>
     </div>
   );
 }

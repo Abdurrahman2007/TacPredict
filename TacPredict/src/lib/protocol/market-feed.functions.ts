@@ -10,6 +10,7 @@ import {
   type ProtocolDeployment,
 } from "./types";
 import type { Market } from "@/domain/markets/types";
+import { usdcShort } from "./display.mjs";
 export type NativeFeed = {
   markets: Market[];
   cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana", Market>>;
@@ -37,11 +38,7 @@ export function toMarket(m: NativeMarket): Market {
     startsAt: m.openAt,
     endsAt: m.closeAt,
     closesAt: new Date(m.closeAt).toISOString().slice(0, 16).replace("T", " ") + " UTC",
-    volume: price(m.volumeAtomic).toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 2,
-    }),
+    volume: usdcShort(m.volumeAtomic),
     volume24h: price(m.volume24hAtomic),
     participants: m.traders,
     ...(m.liquidityAtomic === null ? {} : { liquidity: price(m.liquidityAtomic) }),

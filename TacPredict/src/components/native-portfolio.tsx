@@ -11,10 +11,10 @@ import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useLoginDialog } from "@/components/login-dialog";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
-import { atomicDecimal } from "@/lib/protocol/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { claimPosition } from "@/lib/protocol/execution";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
+import { usdcShort, sharesShort } from "@/lib/protocol/display.mjs";
 export function NativePortfolio({
   tab,
   search = "",
@@ -166,10 +166,10 @@ export function NativePortfolio({
                 </Link>
                 <div className="mt-3 flex justify-between gap-3 text-xs text-muted-foreground">
                   <span>
-                    {o.side} · Outcome {o.outcomeIndex + 1} · {atomicDecimal(o.remainingAtomic)}{" "}
+                    {o.side} · Outcome {o.outcomeIndex + 1} · {sharesShort(o.remainingAtomic)}{" "}
                     shares
                   </span>
-                  <span>Limit {atomicDecimal(o.priceAtomic)} USDC</span>
+                  <span>Limit {usdcShort(o.priceAtomic)}</span>
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   {o.status === "PARTIAL" ? "Partially filled" : "Unfilled"} · Expires{" "}
@@ -225,7 +225,7 @@ export function NativePortfolio({
                     {a.title}
                   </Link>
                 </div>
-                <p className="text-sm tabular-nums">{atomicDecimal(a.amountAtomic)} USDC</p>
+                <p className="text-sm tabular-nums">{usdcShort(a.amountAtomic)}</p>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] text-muted-foreground">
@@ -268,22 +268,22 @@ export function NativePortfolio({
               <div>
                 <p className="text-muted-foreground">Outcome · Shares</p>
                 <p className="mt-1">
-                  {p.outcome} · {atomicDecimal(p.sharesAtomic)}
+                  {p.outcome} · {sharesShort(p.sharesAtomic)}
                 </p>
               </div>
               <div>
                 <p className="text-muted-foreground">Last-trade value</p>
                 <p className="mt-1 tabular-nums">
-                  {p.valueAtomic === null ? "—" : `${atomicDecimal(p.valueAtomic)} USDC`}
+                  {usdcShort(p.valueAtomic)}
                 </p>
               </div>
               <div>
                 <p className="text-muted-foreground">Claimable</p>
-                <p className="mt-1 tabular-nums">{atomicDecimal(p.claimableAtomic)} USDC</p>
+                <p className="mt-1 tabular-nums">{usdcShort(p.claimableAtomic)}</p>
               </div>
             </div>
             <p className="mt-4 text-[11px] text-muted-foreground">
-              P&amp;L — · Cost basis not yet indexed
+              Cost basis not yet indexed
             </p>
             {BigInt(p.claimableAtomic) > 0n && (
               <div className="mt-4">

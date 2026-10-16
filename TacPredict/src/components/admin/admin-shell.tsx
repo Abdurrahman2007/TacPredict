@@ -5,8 +5,7 @@ import { Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WalletConnectButton } from "@/components/wallet-connect-button";
 import {
-  adminNavGroups,
-  capabilityLabel,
+  adminNavItems,
   defaultViews,
   isAdminRouteSection,
   type AdminNavItem,
@@ -29,12 +28,12 @@ function useActiveNav() {
   const section = segments[2] ?? "";
   const view = typeof search["view"] === "string" ? (search["view"] as string) : undefined;
   const isActive = (item: AdminNavItem) => {
+    if (item.kind === "overview") return pathname === "/admin";
     if (item.kind === "importer") return pathname.startsWith("/admin/market-importer");
-    return (
-      isAdminRouteSection(section) &&
-      section === item.section &&
-      (view ?? defaultViews[item.section]) === item.view
-    );
+    if (!isAdminRouteSection(section) || section !== item.section) return false;
+    // "Create market" is its own entry; every other Markets tab belongs to "Markets".
+    const current = view ?? defaultViews[item.section];
+    return item.id === "create" ? current === "create" : item.id === "markets" ? current !== "create" : true;
   };
   return { pathname, isActive };
 }
@@ -44,8 +43,8 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
   const navigate = useNavigate();
   const { pathname, isActive } = useActiveNav();
   const close = () => setOpen(false);
-  const activeItem = adminNavGroups.flatMap((g) => g.items).find((item) => isActive(item));
-  const title = pathname === "/admin" ? "Dashboard" : (activeItem?.label ?? "Administration");
+  const activeItem = adminNavItems.find((item) => isActive(item));
+  const title = activeItem?.label ?? "Administration";
   const email = user.email ?? "Administrator";
 
   async function leave(scope: "local" | "global") {
@@ -67,60 +66,42 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
             </div>
           </div>
 
-          <Link
-            to="/admin"
-            className="adm-nav-item"
-            data-active={pathname === "/admin"}
-            onClick={close}
-          >
-            Dashboard
-            <span className="adm-dot" data-kind="live" title={capabilityLabel("live")} />
-          </Link>
-
-          {adminNavGroups.map((group) => (
-            <nav key={group.title} aria-label={group.title}>
-              <div className="adm-group-title">{group.title}</div>
-              {group.items.map((item) =>
-                item.kind === "importer" ? (
+          <nav aria-label="Pages">
+            {adminNavItems.map((item) => {
+              const active = isActive(item);
+              if (item.kind === "overview")
+                return (
+                  <Link key={item.id} to="/admin" className="adm-nav-item" data-active={active} onClick={close}>
+                    {item.label}
+                  </Link>
+                );
+              if (item.kind === "importer")
+                return (
                   <Link
                     key={item.id}
                     to="/admin/market-importer"
                     className="adm-nav-item"
-                    data-active={isActive(item)}
+                    data-active={active}
                     onClick={close}
                   >
                     {item.label}
-                    <span className="adm-dot" data-kind={item.capability} title={capabilityLabel(item.capability)} />
                   </Link>
-                ) : (
-                  <Link
-                    key={item.id}
-                    to="/admin/$section"
-                    params={{ section: item.section }}
-                    search={{ view: item.view }}
-                    className="adm-nav-item"
-                    data-active={isActive(item)}
-                    onClick={close}
-                  >
-                    {item.label}
-                    <span className="adm-dot" data-kind={item.capability} title={capabilityLabel(item.capability)} />
-                  </Link>
-                ),
-              )}
-            </nav>
-          ))}
-
-          <div className="adm-legend" aria-label="Page status legend">
-            <span>
-              <i className="adm-dot" data-kind="live" /> Live data
-            </span>
-            <span>
-              <i className="adm-dot" data-kind="wallet" /> Wallet-signed actions
-            </span>
-            <span>
-              <i className="adm-dot" /> Not enabled yet
-            </span>
-          </div>
+                );
+              return (
+                <Link
+                  key={item.id}
+                  to="/admin/$section"
+                  params={{ section: item.section }}
+                  search={{ view: item.view }}
+                  className="adm-nav-item"
+                  data-active={active}
+                  onClick={close}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </aside>
         <div className="adm-scrim" data-open={open} onClick={close} aria-hidden="true" />
 
