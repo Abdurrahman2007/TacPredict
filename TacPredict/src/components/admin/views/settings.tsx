@@ -1,13 +1,11 @@
 import { formatTimestamp } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
-import { Badge, Card, Loaded, Notice, PageHeader, Unavailable } from "../admin-ui";
+import { Badge, Card, Loaded, PageHeader } from "../admin-ui";
 
 const CATEGORIES = ["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"];
 
 export function SettingsView({ view }: { view: string }) {
   switch (view) {
-    case "admins":
-      return <AdminsView />;
     case "categories":
       return <CategoriesView />;
     case "providers":
@@ -19,33 +17,10 @@ export function SettingsView({ view }: { view: string }) {
   }
 }
 
-function AdminsView() {
-  const query = useAdminSnapshot("Settings");
-  return (
-    <div className="adm-stack">
-      <PageHeader title="Admins & roles" subtitle="Who can open this workspace and what they may do." />
-      <Loaded query={query} label="permission boundary">
-        {(snapshot) => {
-          const row = snapshot.rows.find((r) => r.id === "security");
-          return row ? <Notice>{row.detail}</Notice> : null;
-        }}
-      </Loaded>
-      <Unavailable
-        title="Role management is not enabled"
-        needs="Separate role definitions (owner, operator, resolver, support), an audited grant workflow and per-page enforcement."
-      >
-        Today access needs an assigned database admin role plus a verified authenticator code.
-        Roles are granted directly in Supabase by an owner. Every administrator has the same
-        read access here; contract actions still require on-chain role holders.
-      </Unavailable>
-    </div>
-  );
-}
-
 function CategoriesView() {
   return (
     <div className="adm-stack">
-      <PageHeader title="Categories" subtitle="Categories accepted when preparing market terms." />
+      <PageHeader title="Categories" subtitle="Categories you can pick when creating a market." />
       <Card title="Current categories">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {CATEGORIES.map((c) => (
@@ -55,10 +30,7 @@ function CategoriesView() {
           ))}
         </div>
       </Card>
-      <Notice>
-        This list is fixed in the application and the database check. Editing categories needs a
-        code and migration change, so it is read-only here.
-      </Notice>
+      <p className="adm-muted" style={{ margin: 0 }}>This list is fixed in the app.</p>
     </div>
   );
 }
@@ -66,7 +38,7 @@ function CategoriesView() {
 function ProvidersView() {
   return (
     <div className="adm-stack">
-      <PageHeader title="Providers" subtitle="External services the application depends on." />
+      <PageHeader title="Providers" subtitle="Outside services the app uses." />
       <Card flush>
         <div className="adm-table-wrap">
           <table className="adm-table">
@@ -102,10 +74,7 @@ function ProvidersView() {
           </table>
         </div>
       </Card>
-      <Notice>
-        Provider keys are never shown or editable in the browser. They live only in server
-        configuration.
-      </Notice>
+      <p className="adm-muted" style={{ margin: 0 }}>API keys are never shown here. They live in server settings.</p>
     </div>
   );
 }
@@ -117,7 +86,7 @@ function SystemView() {
     <div className="adm-stack">
       <PageHeader
         title="System"
-        subtitle="Live status of the chain connection and the indexer."
+        subtitle="Chain connection and indexer status."
         actions={
           <button
             type="button"
@@ -148,7 +117,7 @@ function SystemView() {
                 )}
               </dd>
               <dt>RPC source</dt>
-              <dd>{data.rpcSource === "protocol" ? "Configured provider" : "Public endpoint (rate-limited)"}</dd>
+              <dd>{data.rpcSource === "protocol" ? "Configured provider" : "Public endpoint (limited)"}</dd>
               <dt>Observed</dt>
               <dd>{formatTimestamp(data.observedAt) ?? data.observedAt}</dd>
             </dl>
@@ -174,18 +143,24 @@ function SystemView() {
   );
 }
 
+/** MARKET_METADATA_PREPARED -> "Market metadata prepared". */
+function readableAction(code: string): string {
+  const text = code.replace(/_/g, " ").toLowerCase().trim();
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : code;
+}
+
 function AuditView() {
   const query = useAdminSnapshot("Audit");
   return (
     <div className="adm-stack">
-      <PageHeader title="Audit logs" subtitle="Most recent 50 recorded administrator actions." />
+      <PageHeader title="Audit log" subtitle="Latest 50 admin actions." />
       <Loaded query={query} label="audit log">
         {(snapshot) => (
           <Card flush>
             {snapshot.rows.length === 0 ? (
               <div className="adm-card-body">
                 <p className="adm-muted" style={{ margin: 0 }}>
-                  No audit entries have been recorded.
+                  Nothing recorded yet.
                 </p>
               </div>
             ) : (
@@ -202,7 +177,7 @@ function AuditView() {
                     {snapshot.rows.map((r) => (
                       <tr key={r.id}>
                         <td>{formatTimestamp(r.observedAt) ?? "Unavailable"}</td>
-                        <td style={{ fontWeight: 650 }}>{r.label}</td>
+                        <td style={{ fontWeight: 650 }}>{readableAction(r.label)}</td>
                         <td className="adm-mono" style={{ overflowWrap: "anywhere" }}>
                           {r.detail}
                         </td>

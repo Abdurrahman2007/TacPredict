@@ -1,12 +1,8 @@
 /**
  * Navigation for the separate administrator workspace (/admin).
- * `capability` is honest about what each page can do today:
- *  - "live":    shows real indexed / on-chain data
- *  - "wallet":  real data plus wallet-signed on-chain actions
- *  - "off":     no backend read/write exists yet; the page explains what is missing
+ * Kept deliberately short: one sidebar entry per job, with sub-pages as tabs inside the page.
+ * Only pages that show real data or do real work are listed.
  */
-export type AdminCapability = "live" | "wallet" | "off";
-
 export const adminRouteSections = [
   "markets",
   "trading",
@@ -25,95 +21,20 @@ export function isAdminRouteSection(value: string): value is AdminRouteSection {
 }
 
 export type AdminNavItem =
-  | { kind: "page"; id: string; label: string; section: AdminRouteSection; view: string; capability: AdminCapability }
-  | { kind: "importer"; id: string; label: string; capability: AdminCapability };
+  | { kind: "overview"; id: string; label: string }
+  | { kind: "page"; id: string; label: string; section: AdminRouteSection; view: string }
+  | { kind: "importer"; id: string; label: string };
 
-export type AdminNavGroup = {
-  title: string;
-  items: AdminNavItem[];
-};
-
-const page = (
-  section: AdminRouteSection,
-  view: string,
-  label: string,
-  capability: AdminCapability,
-): AdminNavItem => ({ kind: "page", id: `${section}:${view}`, label, section, view, capability });
-
-export const adminNavGroups: AdminNavGroup[] = [
-  {
-    title: "Markets",
-    items: [
-      page("markets", "all", "All markets", "live"),
-      page("markets", "create", "Create market", "wallet"),
-      page("markets", "live", "Live", "live"),
-      page("markets", "upcoming", "Upcoming", "live"),
-      page("markets", "closed", "Closed", "live"),
-      page("markets", "resolving", "Resolving", "live"),
-      page("markets", "resolved", "Resolved", "live"),
-      { kind: "importer", id: "importer", label: "AI market importer", capability: "live" },
-    ],
-  },
-  {
-    title: "Trading",
-    items: [
-      page("trading", "orders", "Orders", "off"),
-      page("trading", "trades", "Trades", "live"),
-      page("trading", "positions", "Positions", "off"),
-      page("trading", "liquidity", "Liquidity", "off"),
-    ],
-  },
-  {
-    title: "Resolution",
-    items: [
-      page("resolution", "pending", "Pending", "live"),
-      page("resolution", "resolve", "Resolve", "wallet"),
-      page("resolution", "disputes", "Disputes", "live"),
-      page("resolution", "evidence", "Evidence", "live"),
-    ],
-  },
-  {
-    title: "Users",
-    items: [
-      page("users", "users", "Users", "live"),
-      page("users", "wallets", "Wallets", "live"),
-      page("users", "risk", "Risk", "off"),
-    ],
-  },
-  {
-    title: "Blockchain",
-    items: [
-      page("blockchain", "transactions", "Transactions", "off"),
-      page("blockchain", "contracts", "Contracts", "live"),
-      page("blockchain", "oracle", "Oracle", "live"),
-      page("blockchain", "indexer", "Indexer", "live"),
-    ],
-  },
-  {
-    title: "Treasury",
-    items: [
-      page("treasury", "usdc", "USDC", "off"),
-      page("treasury", "fees", "Fees", "off"),
-      page("treasury", "withdrawals", "Withdrawals", "off"),
-    ],
-  },
-  {
-    title: "Insights",
-    items: [
-      page("analytics", "overview", "Analytics", "live"),
-      page("notifications", "overview", "Notifications", "off"),
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      page("settings", "admins", "Admins & roles", "off"),
-      page("settings", "categories", "Categories", "live"),
-      page("settings", "providers", "Providers", "live"),
-      page("settings", "system", "System", "live"),
-      page("settings", "audit", "Audit logs", "live"),
-    ],
-  },
+export const adminNavItems: AdminNavItem[] = [
+  { kind: "overview", id: "overview", label: "Overview" },
+  { kind: "page", id: "markets", label: "Markets", section: "markets", view: "all" },
+  { kind: "page", id: "create", label: "Create market", section: "markets", view: "create" },
+  { kind: "importer", id: "importer", label: "AI importer" },
+  { kind: "page", id: "resolution", label: "Resolution", section: "resolution", view: "pending" },
+  { kind: "page", id: "trades", label: "Trades", section: "trading", view: "trades" },
+  { kind: "page", id: "users", label: "Users", section: "users", view: "users" },
+  { kind: "page", id: "blockchain", label: "Blockchain", section: "blockchain", view: "contracts" },
+  { kind: "page", id: "settings", label: "Settings", section: "settings", view: "system" },
 ];
 
 /** First view of every section; used when the URL has no `view`. */
@@ -129,6 +50,38 @@ export const defaultViews: Record<AdminRouteSection, string> = {
   settings: "system",
 };
 
-export function capabilityLabel(c: AdminCapability): string {
-  return c === "live" ? "Live data" : c === "wallet" ? "Wallet-signed actions" : "Not enabled yet";
+/** Tabs shown at the top of a section page. Sections without tabs are single pages. */
+export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; label: string }[]>> = {
+  markets: [
+    { view: "all", label: "All" },
+    { view: "live", label: "Live" },
+    { view: "upcoming", label: "Upcoming" },
+    { view: "closed", label: "Closed" },
+    { view: "resolving", label: "Resolving" },
+    { view: "resolved", label: "Resolved" },
+  ],
+  resolution: [
+    { view: "pending", label: "Pending" },
+    { view: "disputes", label: "Disputes" },
+    { view: "evidence", label: "Evidence" },
+    { view: "resolve", label: "Resolve" },
+  ],
+  blockchain: [
+    { view: "contracts", label: "Contracts" },
+    { view: "oracle", label: "Oracle" },
+    { view: "indexer", label: "Indexer" },
+  ],
+  settings: [
+    { view: "system", label: "System" },
+    { view: "audit", label: "Audit log" },
+    { view: "categories", label: "Categories" },
+    { view: "providers", label: "Providers" },
+  ],
+};
+
+/** Old links to pages that were merged or removed land somewhere useful instead of an empty page. */
+export function adminRedirectFor(section: AdminRouteSection, view: string): "overview" | "users" | null {
+  if (section === "treasury" || section === "analytics" || section === "notifications") return "overview";
+  if (section === "settings" && view === "admins") return "users";
+  return null;
 }

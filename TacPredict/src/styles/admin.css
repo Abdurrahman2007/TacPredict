@@ -471,7 +471,8 @@ html:has(.adm-root) {
   color: var(--adm-ink-2);
   cursor: pointer;
 }
-.adm-tab[aria-pressed="true"] {
+.adm-tab[aria-pressed="true"],
+.adm-tab[aria-current="page"] {
   background: var(--adm-ink);
   border-color: var(--adm-ink);
   color: #fff;
@@ -675,4 +676,13 @@ html:has(.adm-root) {
   .adm-side {
     transition: none;
   }
+}
+
+/* Section tabs are links; keep them looking like the pill buttons. */
+a.adm-tab {
+  display: inline-block;
+  text-decoration: none;
+}
+.adm-stack > .adm-tabs {
+  margin-bottom: 0;
 }

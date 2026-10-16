@@ -16,7 +16,6 @@ import {
   Notice,
   PageHeader,
   Tile,
-  Unavailable,
 } from "../admin-ui";
 
 function RefreshButton({ onClick, busy }: { onClick: () => void; busy: boolean }) {
@@ -29,19 +28,6 @@ function RefreshButton({ onClick, busy }: { onClick: () => void; busy: boolean }
 
 export function BlockchainView({ view }: { view: string }) {
   switch (view) {
-    case "transactions":
-      return (
-        <div className="adm-stack">
-          <PageHeader title="Transactions" subtitle="Protocol transaction history." />
-          <Unavailable
-            title="Transaction history is not enabled"
-            needs="An admin read function over protocol_transactions and protocol_chain_events."
-          >
-            Individual finalized trades are listed under Trading. A complete transaction feed is not
-            shown because no admin read exists for it yet.
-          </Unavailable>
-        </div>
-      );
     case "oracle":
       return <OracleView />;
     case "indexer":
@@ -58,7 +44,7 @@ function ContractsView() {
     <div className="adm-stack">
       <PageHeader
         title="Contracts"
-        subtitle="Verified TacPredict deployment on Base Mainnet."
+        subtitle="TacPredict contracts on Base."
         actions={<RefreshButton onClick={() => void live.refetch()} busy={live.isFetching} />}
       />
       <Loaded query={snapshot} label="deployment">
@@ -66,10 +52,7 @@ function ContractsView() {
           const { deployment } = parseBlockchainRows(data.rows);
           if (!deployment)
             return (
-              <Notice tone="warn">
-                No verified Base deployment is recorded in the database, so no contract addresses
-                are shown.
-              </Notice>
+              <Notice tone="warn">No verified deployment is recorded yet.</Notice>
             );
           return (
             <>
@@ -88,10 +71,10 @@ function ContractsView() {
                       <Badge tone="ok">Not paused</Badge>
                     )
                   }
-                  hint="Read from the Registry contract"
+                  hint="Live from Base"
                 />
                 <Tile
-                  label="Database trading flag"
+                  label="Trading flag (database)"
                   value={
                     deployment.databaseTradingEnabled === null
                       ? "Unavailable"
@@ -99,12 +82,12 @@ function ContractsView() {
                         ? "Enabled"
                         : "Disabled"
                   }
-                  hint="Config record, not a chain read"
+                  hint="Saved setting"
                 />
                 <Tile
                   label="Markets created (live)"
                   value={live.data?.nextMarketId ?? (live.isPending ? "Reading…" : "Unavailable")}
-                  hint="Registry next market ID"
+                  hint="Live from Base"
                 />
               </div>
               <Card flush>
@@ -140,13 +123,6 @@ function ContractsView() {
                   </table>
                 </div>
               </Card>
-              <Notice>
-                Addresses come from the verified deployment record. Pause state and market count are
-                read live from Base when this page loads or you press Refresh.
-                {deployment.recordedAt
-                  ? ` Deployment recorded ${formatTimestamp(deployment.recordedAt) ?? deployment.recordedAt}.`
-                  : ""}
-              </Notice>
             </>
           );
         }}
@@ -162,7 +138,7 @@ function OracleView() {
     <div className="adm-stack">
       <PageHeader
         title="Oracle"
-        subtitle="Resolution settings read directly from the Oracle contract."
+        subtitle="Resolution settings, read from the contract."
         actions={<RefreshButton onClick={() => void live.refetch()} busy={live.isFetching} />}
       />
       <Loaded query={live} label="oracle settings">
@@ -176,12 +152,12 @@ function OracleView() {
               <Tile
                 label="Bond per proposal"
                 value={bond === null ? "Unavailable" : `${bond} USDC`}
-                hint="Oracle bond()"
+                hint="Per proposal"
               />
               <Tile
                 label="Challenge period"
                 value={challenge ?? "Unavailable"}
-                hint="Oracle challengePeriod()"
+                hint="Time to dispute"
               />
               <Tile label="Observed" value={formatTimestamp(data.observedAt) ?? "Unavailable"} />
             </div>
@@ -200,10 +176,6 @@ function OracleView() {
           ) : null;
         }}
       </Loaded>
-      <Notice>
-        Bond and challenge period are protocol settings. This panel can only read them; changing
-        them requires an authorized on-chain transaction.
-      </Notice>
     </div>
   );
 }
@@ -216,7 +188,7 @@ function IndexerView() {
     <div className="adm-stack">
       <PageHeader
         title="Indexer"
-        subtitle="How far the finalized-event indexer has read compared with the Base chain head."
+        subtitle="How far the indexer has read compared with Base."
         actions={<RefreshButton onClick={() => void live.refetch()} busy={live.isFetching} />}
       />
       <Loaded query={snapshot} label="indexer checkpoint">
@@ -234,7 +206,7 @@ function IndexerView() {
                   hint={
                     checkpoint?.updatedAt
                       ? `Updated ${formatTimestamp(checkpoint.updatedAt) ?? checkpoint.updatedAt}`
-                      : "No checkpoint recorded"
+                      : "No checkpoint yet"
                   }
                 />
                 <Tile
@@ -244,7 +216,7 @@ function IndexerView() {
                 <Tile
                   label="Blocks behind"
                   value={lag === null ? "Unavailable" : lag.toString()}
-                  hint="Finalized indexing intentionally trails the head"
+                  hint="A small lag is normal"
                 />
                 <Tile
                   label="Latest indexer job"

@@ -50,13 +50,13 @@ export function AdminGate({ children }: { children: (user: User) => ReactNode })
   switch (gate.state) {
     case "checking":
     case "signed-out":
-      return <AdminSplash text="Checking administrator session…" />;
+      return <AdminSplash text="Checking your session…" />;
     case "error":
       return (
         <AdminCenter>
           <div className="adm-login-card">
             <h1>Could not verify access</h1>
-            <p className="adm-sub">The administrator check failed. Nothing was opened.</p>
+            <p className="adm-sub">Something went wrong while checking your access.</p>
             <button type="button" className="adm-btn adm-btn-primary" onClick={gate.retry}>
               Try again
             </button>

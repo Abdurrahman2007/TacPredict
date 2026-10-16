@@ -40,11 +40,8 @@ export function AdminLoginForm() {
           </div>
         </div>
         <div>
-          <h1>Administrator sign in</h1>
-          <p className="adm-sub">
-            Use the email and password of your assigned administrator account. You will then confirm
-            a code from your authenticator app.
-          </p>
+          <h1>Admin sign in</h1>
+          <p className="adm-sub">Enter your email and password. Next, confirm your authenticator code.</p>
         </div>
         <form
           style={{ display: "grid", gap: 14 }}
@@ -89,10 +86,6 @@ export function AdminLoginForm() {
             </div>
           ) : null}
         </form>
-        <p className="adm-muted" style={{ margin: 0, fontSize: 12 }}>
-          Restricted area. Access needs the database administrator role and a verified authenticator
-          code; signing in alone does not open the workspace.
-        </p>
       </div>
     </AdminCenter>
   );
@@ -105,9 +98,8 @@ export function AdminNoRole({ email, onSignOut }: { email: string; onSignOut: ()
       <div className="adm-login-card">
         <h1>No administrator access</h1>
         <p className="adm-sub">
-          Signed in as <b style={{ overflowWrap: "anywhere" }}>{email}</b>, but this account does not
-          hold the database <code>admin</code> role. An owner must add it in Supabase, then sign in
-          again.
+          <b style={{ overflowWrap: "anywhere" }}>{email}</b> is not an admin account. Ask an
+          existing admin to give you access, then sign in again.
         </p>
         <button type="button" className="adm-btn" onClick={onSignOut}>
           Sign out and use another account
