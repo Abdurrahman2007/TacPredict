@@ -16,7 +16,7 @@ export function MarketCountdown({
   const end = Date.parse(market.endsAt ?? ""),
     start = Date.parse(market.startsAt ?? "");
   if (!Number.isFinite(end) || !Number.isFinite(start))
-    return <span className="text-xs text-muted-foreground">Source odds</span>;
+    return <span className="text-xs text-muted-foreground">Window unavailable</span>;
   const upcoming = start > now,
     closed = end <= now;
   const seconds = Math.max(0, Math.floor(((upcoming ? start : end) - now) / 1000));

@@ -16,13 +16,20 @@ test("Preview cards and detail have no invented financial observations", () => {
   assert(s.includes('volume: "$0"'));
   assert(!s.includes("native:"));
   const detail = read("components/preview-market-detail.tsx");
-  assert(detail.includes("No on-chain market ID yet"));
-  assert(detail.includes("No funds move."));
+  assert(detail.includes("PredictionDetail"));
+  const shared = read("components/prediction-detail.tsx");
+  assert(shared.includes("!market.native"));
+  assert(shared.includes("Not a live TacPredict contract"));
+  assert(shared.includes("Displayed zeros mean no native trading data"));
+  assert(shared.includes("MobileOutcomeDock"));
+  const trade = read("components/prediction-amount-card.tsx");
+  assert(trade.includes("market.native?.status === \"OPEN\""));
+  assert(trade.includes("deployment?.tradingEnabled"));
+  assert(trade.includes("!market.native"));
+  assert(trade.includes("!canTrade"));
+  assert(trade.includes("never a free executable quote"));
   assert(!detail.includes("placeLimitBuy"));
-  assert(!detail.includes("fillOffer"));
   assert(!detail.includes("sendTransaction"));
-  assert(detail.includes("disabled"));
-  assert(detail.includes("MobileOutcomeDock"));
 });
 test("Unknown outcome probability never draws a fake progress bar and never shows a dash", () => {
   const row = read("components/outcome-row.tsx");

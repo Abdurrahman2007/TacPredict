@@ -1,3 +1,4 @@
+import { fiveMinuteTemplate, type FiveMinuteTimes } from "@/lib/protocol/five-minute-market.mjs";
 import { useMemo, useState } from "react";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
 import { prepareNativeMarket, uploadMarketImage } from "@/lib/protocol/admin.functions";
@@ -5,7 +6,15 @@ import { prepareMarketImage } from "@/lib/protocol/market-image-client";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { Card, Notice, PageHeader } from "../admin-ui";
 
-const CATEGORIES = ["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"] as const;
+const CATEGORIES = [
+  "Crypto",
+  "Sports",
+  "News",
+  "Technology",
+  "Business",
+  "Culture",
+  "Other",
+] as const;
 
 type FormKey = "title" | "description" | "outcomes" | "rules" | "source" | "sourceUrl";
 
@@ -35,6 +44,13 @@ export function CreateMarket() {
     image: "",
   });
   const [uploading, setUploading] = useState(false);
+  const [templateTimes, setTemplateTimes] = useState<FiveMinuteTimes | null>(null);
+  function chooseFiveMinute(asset: "bitcoin" | "ethereum") {
+    const { times, ...terms } = fiveMinuteTemplate(asset);
+    setTemplateTimes(times);
+    setMarketType("multi");
+    edit(terms);
+  }
 
   const outcomeList = useMemo(
     () =>
@@ -66,6 +82,7 @@ export function CreateMarket() {
   }
 
   function submit() {
+    if (busy || uploading) return;
     setBusy(true);
     setPrepared(null);
     setNotice(null);
@@ -96,6 +113,50 @@ export function CreateMarket() {
         subtitle="Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
       />
 
+      <Card title="Real BTC / ETH five-minute templates">
+        <p className="adm-muted">
+          Fixed UTC window, Up / Down outcomes and exact Coinbase 60-second candle rules. No
+          invented opening price. Review the source and oracle coverage before publishing; a
+          template is not a live market.
+        </p>
+        <div className="adm-tabs">
+          <button
+            className="adm-btn"
+            type="button"
+            disabled={busy}
+            onClick={() => chooseFiveMinute("bitcoin")}
+          >
+            Bitcoin · 5 min
+          </button>
+          <button
+            className="adm-btn"
+            type="button"
+            disabled={busy}
+            onClick={() => chooseFiveMinute("ethereum")}
+          >
+            Ethereum · 5 min
+          </button>
+          {templateTimes && (
+            <button
+              className="adm-btn"
+              type="button"
+              onClick={() => {
+                setTemplateTimes(null);
+                setPrepared(null);
+              }}
+            >
+              Use custom times
+            </button>
+          )}
+        </div>
+        {templateTimes && (
+          <p className="adm-muted">
+            UTC: {templateTimes.openAt.replace("T", " ")} to{" "}
+            {templateTimes.closeAt.replace("T", " ")}. Times are locked to these rules. Choose a
+            fresh template if the window is too close.
+          </p>
+        )}
+      </Card>
       <Card title="Step 1 · Market details">
         <form
           style={{ display: "grid", gap: 14 }}
@@ -126,7 +187,9 @@ export function CreateMarket() {
                 setMarketType("multi");
                 edit({
                   outcomes:
-                    form.outcomes.includes(",") && form.outcomes !== "Yes,No" ? form.outcomes : "A,B,C",
+                    form.outcomes.includes(",") && form.outcomes !== "Yes,No"
+                      ? form.outcomes
+                      : "A,B,C",
                 });
               }}
             >
@@ -157,7 +220,11 @@ export function CreateMarket() {
                   alt="Market picture preview"
                   width={64}
                   height={64}
-                  style={{ borderRadius: 12, objectFit: "cover", border: "1px solid var(--adm-line)" }}
+                  style={{
+                    borderRadius: 12,
+                    objectFit: "cover",
+                    border: "1px solid var(--adm-line)",
+                  }}
                 />
               ) : null}
               <label className="adm-btn" style={{ cursor: uploading ? "wait" : "pointer" }}>
@@ -205,8 +272,8 @@ export function CreateMarket() {
           </label>
 
           <p className="adm-muted" style={{ margin: 0, fontSize: 12.5 }}>
-            Outcomes: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8, all different).
-            Open and close times are set in step 2.
+            Outcomes: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8, all
+            different). Open and close times are set in step 2.
           </p>
 
           <div>
@@ -235,7 +302,12 @@ export function CreateMarket() {
       </Card>
 
       <Card title="Step 2 · Publish on Base">
-        <NativeOperatorConsole prepared={prepared} outcomeCount={outcomeList.length || 2} />
+        <NativeOperatorConsole
+          key={templateTimes?.openAt ?? "custom"}
+          initialTimes={templateTimes ?? undefined}
+          prepared={prepared}
+          outcomeCount={outcomeList.length || 2}
+        />
       </Card>
     </div>
   );

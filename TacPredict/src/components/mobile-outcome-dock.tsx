@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Market } from "@/domain/markets/types";
-import { pct } from "@/lib/protocol/display.mjs";
+import { cents } from "@/lib/protocol/display.mjs";
 export function MobileOutcomeDock({
   market,
   selected,
@@ -29,7 +29,7 @@ export function MobileOutcomeDock({
   if (!ready || !market.outcomes.length) return null;
   return createPortal(
     <div
-      className="fixed inset-x-0 z-40 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden"
+      className="pd-dock fixed inset-x-0 z-40 flex gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden"
       aria-label="Quick outcome selection"
       style={{ bottom: navHeight }}
     >
@@ -41,17 +41,16 @@ export function MobileOutcomeDock({
           onClick={() => onSelect(item.id)}
           className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold ${selected === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
           style={{
-            background:
-              market.category === "Sports"
-                ? index === 0
-                  ? "#9a4558"
-                  : "#526680"
+            background: /^(yes|up)$/i.test(item.label)
+              ? "#197c53"
+              : /^(no|down)$/i.test(item.label)
+                ? "#a24353"
                 : index === 0
-                  ? "#197c53"
-                  : "#a24353",
+                  ? "#526680"
+                  : "#49555f",
           }}
         >
-          {item.label} {pct(item)}
+          {item.label} {cents(item)}
         </button>
       ))}
     </div>,

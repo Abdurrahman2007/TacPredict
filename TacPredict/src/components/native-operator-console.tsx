@@ -11,9 +11,13 @@ import {
 export function NativeOperatorConsole({
   prepared,
   outcomeCount,
+  initialTimes,
 }: {
   prepared: PreparedTerms | null;
   outcomeCount: number;
+  initialTimes?:
+    | { openAt: string; closeAt: string; resolveAfter: string; resolutionDeadline: string }
+    | undefined;
 }) {
   const wallet = useBaseWallet(),
     q = useQuery({
@@ -25,12 +29,14 @@ export function NativeOperatorConsole({
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(""),
     [ack, setAck] = useState(false);
-  const [times, setTimes] = useState({
-      openAt: "",
-      closeAt: "",
-      resolveAfter: "",
-      resolutionDeadline: "",
-    }),
+  const [times, setTimes] = useState(
+      initialTimes ?? {
+        openAt: "",
+        closeAt: "",
+        resolveAfter: "",
+        resolutionDeadline: "",
+      },
+    ),
     [action, setAction] = useState<ResolverAction>("checkpointClose"),
     [input, setInput] = useState({
       marketId: "",
@@ -112,6 +118,7 @@ export function NativeOperatorConsole({
               {k} (UTC)
               <input
                 type="datetime-local"
+                readOnly={Boolean(initialTimes)}
                 value={times[k as keyof typeof times]}
                 onChange={(e) => setTimes({ ...times, [k]: e.target.value })}
                 className="mt-2 min-h-11 w-full min-w-0 rounded-xl border border-border bg-background p-3"
