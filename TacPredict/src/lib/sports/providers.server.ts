@@ -8,7 +8,7 @@ import {
   parseFootballFixtures,
 } from "./fixtures.mjs";
 import { canonicalJson, observedAtField } from "./evidence.mjs";
-import type { EvidencePackage } from "./types";
+import { noEvidence, type EvidencePackage } from "./types";
 import { ASSETS, DURATIONS, windowResult, type UpDownAsset } from "@/lib/updown/window.mjs";
 
 /**
@@ -124,38 +124,36 @@ export async function loadCricketFixtures(): Promise<{ fixtures: Fixture[]; erro
   return { fixtures: unique, error: null };
 }
 
-const hashOf = (evidence: unknown) => keccak256(stringToHex(canonicalJson(evidence)));
+const hashOf = (text: string) => keccak256(stringToHex(text));
 
 export async function loadSportsResult(
   sport: "football" | "cricket",
   matchId: string,
   closeMs: number,
 ): Promise<EvidencePackage> {
-  const key = process.env[sport === "football" ? FOOTBALL_KEY : CRICKET_KEY];
-  if (!key)
-    return {
-      result: null,
-      evidence: null,
-      evidenceHash: null,
-      observedAt: null,
-      error: `Not connected. Add ${sport === "football" ? FOOTBALL_KEY : CRICKET_KEY} as a Worker secret.`,
-    };
+  const secret = sport === "football" ? FOOTBALL_KEY : CRICKET_KEY;
+  const key = process.env[secret];
+  if (!key) return noEvidence(`Not connected. Add ${secret} as a Worker secret.`);
   try {
     const json =
       sport === "football"
         ? await getJson(`${FOOTBALL_BASE}/matches/${encodeURIComponent(matchId)}`, { "x-auth-token": key }, 20000)
         : await getJson(`${CRICKET_BASE}/match_info?apikey=${encodeURIComponent(key)}&id=${encodeURIComponent(matchId)}`, {}, 20000);
     const result = sport === "football" ? footballResult(json) : cricketResult(json);
-    const evidence = { ...result.evidence, fetchedAt: new Date().toISOString(), suggestion: result.state };
-    return { result, evidence, evidenceHash: hashOf(evidence), observedAt: observedAtField(closeMs, Date.now()), error: null };
-  } catch (error) {
+    const text = canonicalJson({ ...result.evidence, fetchedAt: new Date().toISOString(), suggestion: result.state });
     return {
-      result: null,
-      evidence: null,
-      evidenceHash: null,
-      observedAt: null,
-      error: error instanceof Error ? error.message : "The provider could not be reached.",
+      state: result.state,
+      winner: result.winner ?? null,
+      winnerName: result.winnerName ?? null,
+      outcome: null,
+      note: result.note,
+      evidenceText: text,
+      evidenceHash: hashOf(text),
+      observedAt: observedAtField(closeMs, Date.now()),
+      error: null,
     };
+  } catch (error) {
+    return noEvidence(error instanceof Error ? error.message : "The provider could not be reached.");
   }
 }
 
@@ -175,10 +173,8 @@ export async function loadCryptoEvidence(asset: UpDownAsset, startMs: number, mi
   const info = ASSETS[asset];
   const size = minutes * 60000;
   const endMs = startMs + size;
-  if (!DURATIONS.includes(minutes) || startMs % size !== 0)
-    return { result: null, evidence: null, evidenceHash: null, observedAt: null, error: "That is not a valid window." };
-  if (Date.now() < endMs + 60000)
-    return { result: null, evidence: null, evidenceHash: null, observedAt: null, error: "The window has not finished yet." };
+  if (!DURATIONS.includes(minutes) || startMs % size !== 0) return noEvidence("That is not a valid window.");
+  if (Date.now() < endMs + 60000) return noEvidence("The window has not finished yet.");
   try {
     const [first, last] = await Promise.all([
       candlesBetween(info.product, startMs, startMs + 60000),
@@ -192,8 +188,10 @@ export async function loadCryptoEvidence(asset: UpDownAsset, startMs: number, mi
       { start: startMs, end: endMs, minutes },
     );
     if (!open || !close || !result)
-      return { result: null, evidence: null, evidenceHash: null, observedAt: null, error: "Coinbase has no candle for the start or the last minute. Do not propose a result; review it under the timeout-void rules." };
-    const evidence = {
+      return noEvidence(
+        "Coinbase has no candle for the start or the last minute. Do not propose a result; review it under the timeout-void rules.",
+      );
+    const text = canonicalJson({
       provider: "Coinbase Exchange",
       product: info.product,
       window: { start: new Date(startMs).toISOString(), end: new Date(endMs).toISOString() },
@@ -202,15 +200,19 @@ export async function loadCryptoEvidence(asset: UpDownAsset, startMs: number, mi
       rule: "UP if close of the last 60-second candle >= open of the first 60-second candle",
       outcome: result.outcome,
       fetchedAt: new Date().toISOString(),
-    };
+    });
     return {
-      result: { state: "final", winner: result.outcome === "Up" ? "home" : "away", note: `Open ${result.open}, close ${result.close}: ${result.outcome}.`, evidence },
-      evidence,
-      evidenceHash: hashOf(evidence),
+      state: "final",
+      winner: null,
+      winnerName: null,
+      outcome: result.outcome,
+      note: `Open ${result.open}, close ${result.close}: ${result.outcome}.`,
+      evidenceText: text,
+      evidenceHash: hashOf(text),
       observedAt: observedAtField(endMs, Date.now()),
       error: null,
     };
   } catch (error) {
-    return { result: null, evidence: null, evidenceHash: null, observedAt: null, error: error instanceof Error ? error.message : "Coinbase could not be reached." };
+    return noEvidence(error instanceof Error ? error.message : "Coinbase could not be reached.");
   }
 }

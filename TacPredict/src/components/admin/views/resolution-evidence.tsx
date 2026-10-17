@@ -6,8 +6,7 @@ import { NativeOperatorConsole, type ResolverPrefill } from "@/components/native
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { getCryptoEvidence, getSportsEvidence } from "@/lib/sports/sports.functions";
 import { proposalFor } from "@/lib/sports/fixtures.mjs";
-import { canonicalJson } from "@/lib/sports/evidence.mjs";
-import type { EvidencePackage } from "@/lib/sports/types";
+import { noEvidence, type EvidencePackage } from "@/lib/sports/types";
 import { ASSETS, ASSET_KEYS, DURATIONS, type UpDownAsset } from "@/lib/updown/window.mjs";
 import { Badge, Card, Loaded, Notice, PageHeader } from "../admin-ui";
 
@@ -71,19 +70,27 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
       if (kind === "crypto") {
         const w = cryptoWindow(market);
         if (!w) return;
-        pack = (await getCryptoEvidence({ data: w })) as Pack;
-        const outcome = String(pack.evidence?.["outcome"] ?? "");
+        pack = await getCryptoEvidence({ data: w });
+        const outcome = pack.outcome ?? "";
         const index = market.outcomes.findIndex((o) => o.label.toLowerCase() === outcome.toLowerCase());
         proposal = index >= 0 ? { outcome: index, voided: false } : null;
       } else {
         const match = sportsMatch(market);
         if (!match) return;
-        pack = (await getSportsEvidence({
+        pack = await getSportsEvidence({
           data: { ...match, closeMs: Date.parse(market.native.closeAt) },
-        })) as Pack;
+        });
         proposal = proposalFor(
           match.sport,
-          pack.result,
+          pack.state
+            ? {
+                state: pack.state,
+                ...(pack.winner ? { winner: pack.winner } : {}),
+                ...(pack.winnerName ? { winnerName: pack.winnerName } : {}),
+                note: pack.note ?? "",
+                evidence: {},
+              }
+            : null,
           market.outcomes.map((o) => o.label),
         );
       }
@@ -91,13 +98,7 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
     } catch (error) {
       setChecked({
         market,
-        pack: {
-          result: null,
-          evidence: null,
-          evidenceHash: null,
-          observedAt: null,
-          error: error instanceof Error ? error.message : "The check failed.",
-        },
+        pack: noEvidence(error instanceof Error ? error.message : "The check failed."),
         proposal: null,
       });
     } finally {
@@ -162,10 +163,10 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
       {checked ? (
         <Card title={checked.market.title}>
           {checked.pack.error ? <Notice tone="warn">{checked.pack.error}</Notice> : null}
-          {checked.pack.result ? (
+          {checked.pack.state ? (
             <p style={{ margin: "0 0 10px" }}>
-              <b>{checked.pack.result.state === "final" ? "Result found. " : checked.pack.result.state === "void" ? "Suggests VOID. " : checked.pack.result.state === "pending" ? "Not final yet. " : "Needs a person. "}</b>
-              {checked.pack.result.note}
+              <b>{checked.pack.state === "final" ? "Result found. " : checked.pack.state === "void" ? "Suggests VOID. " : checked.pack.state === "pending" ? "Not final yet. " : "Needs a person. "}</b>
+              {checked.pack.note}
             </p>
           ) : null}
           {checked.proposal ? (
@@ -174,18 +175,18 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
               <b>{checked.proposal.voided ? "VOID" : (checked.market.outcomes[checked.proposal.outcome]?.label ?? "")}</b>.
               Nothing is sent until you sign it with your wallet.
             </p>
-          ) : checked.pack.result ? (
+          ) : checked.pack.state ? (
             <p className="adm-muted" style={{ margin: "0 0 10px" }}>
               No automatic suggestion. Check the official source and decide.
             </p>
           ) : null}
-          {checked.pack.evidence ? (
+          {checked.pack.evidenceText ? (
             <>
               <p className="adm-muted" style={{ margin: "0 0 6px" }}>
                 Evidence text (the hash is calculated from exactly this text; keep it so others can check it):
               </p>
               <pre className="adm-mono" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0 }}>
-                {canonicalJson(checked.pack.evidence)}
+                {checked.pack.evidenceText}
               </pre>
               <dl className="adm-kv" style={{ marginTop: 10 }}>
                 <dt>Evidence hash</dt>
@@ -197,7 +198,7 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
                 <button
                   type="button"
                   className="adm-btn"
-                  onClick={() => void navigator.clipboard?.writeText(canonicalJson(checked.pack.evidence))}
+                  onClick={() => void navigator.clipboard?.writeText(checked.pack.evidenceText ?? "")}
                 >
                   Copy evidence text
                 </button>
