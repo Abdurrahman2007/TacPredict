@@ -41,10 +41,11 @@ export function MobileOutcomeDock({
           onClick={() => onSelect(item.id)}
           className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold ${selected === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
           style={{
+            color: /^(yes|up)$/i.test(item.label) ? "#10191e" : "#f4f7fa",
             background: /^(yes|up)$/i.test(item.label)
-              ? "#197c53"
+              ? "#bfceda"
               : /^(no|down)$/i.test(item.label)
-                ? "#a24353"
+                ? "#1d2529"
                 : index === 0
                   ? "#526680"
                   : "#49555f",

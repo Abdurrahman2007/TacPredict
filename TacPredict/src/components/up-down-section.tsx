@@ -57,14 +57,24 @@ function AssetCard({
   const gran = (spot.data?.granularity ?? 60) * 1000;
   const beat = priceToBeat(candles, start, gran);
   const current =
-    live.price ?? trades?.[trades.length - 1]?.price ?? candles?.[candles.length - 1]?.close ?? null;
+    live.price ??
+    trades?.[trades.length - 1]?.price ??
+    candles?.[candles.length - 1]?.close ??
+    null;
   const delta = deltaInfo(current, beat);
   const nowSec = Math.floor(nowMs / 1000);
   const series = useMemo(
     () =>
       large
         ? thin(
-            seriesForWindow({ candles, trades, ticks: live.ticks, w: { start, end: start + minutes * 60000, minutes }, nowMs: nowSec * 1000, gran }),
+            seriesForWindow({
+              candles,
+              trades,
+              ticks: live.ticks,
+              w: { start, end: start + minutes * 60000, minutes },
+              nowMs: nowSec * 1000,
+              gran,
+            }),
             200,
           )
         : [],
@@ -79,11 +89,15 @@ function AssetCard({
 
   return (
     <article
-      className="overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6"
+      className="ud-home-card overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6"
       aria-label={`${info.name} Up or Down`}
     >
       <div className="flex items-center gap-3">
-        <img src={`/brand/crypto/${info.logo}.svg`} alt={`${info.name} logo`} className="size-10 shrink-0 rounded-full" />
+        <img
+          src={`/brand/crypto/${info.logo}.svg`}
+          alt={`${info.name} logo`}
+          className="size-10 shrink-0 rounded-full"
+        />
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold">
             <Link to="/up-down/$asset" params={{ asset: slugOf(asset) }} search={search}>
@@ -100,12 +114,6 @@ function AssetCard({
         </span>
       </div>
 
-      {large && (
-        <Link to="/up-down/$asset" params={{ asset: slugOf(asset) }} search={search} className="mt-3 block">
-          <UpDownChart w={w} series={series} beat={beat} asset={asset} live={live.status === "live"} />
-        </Link>
-      )}
-
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
           <dt className="text-xs text-muted-foreground">Price to beat</dt>
@@ -116,15 +124,39 @@ function AssetCard({
         <div>
           <dt className="text-xs text-muted-foreground">Current price</dt>
           <dd className="mt-1 font-semibold tabular-nums">
-            {current !== null ? formatUsd(current, asset) : live.status === "connecting" || spot.isPending ? "Loading…" : "Unavailable"}
+            {current !== null
+              ? formatUsd(current, asset)
+              : live.status === "connecting" || spot.isPending
+                ? "Loading…"
+                : "Unavailable"}
             {delta && (
-              <span className={`ml-2 text-xs ${delta.direction === "up" ? "ud-up" : delta.direction === "down" ? "ud-down" : ""}`}>
-                {delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : ""} {formatUsd(Math.abs(delta.abs), asset)}
+              <span
+                className={`ml-2 text-xs ${delta.direction === "up" ? "ud-up" : delta.direction === "down" ? "ud-down" : ""}`}
+              >
+                {delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : ""}{" "}
+                {formatUsd(Math.abs(delta.abs), asset)}
               </span>
             )}
           </dd>
         </div>
       </dl>
+
+      {large && (
+        <Link
+          to="/up-down/$asset"
+          params={{ asset: slugOf(asset) }}
+          search={search}
+          className="mt-3 block"
+        >
+          <UpDownChart
+            w={w}
+            series={series}
+            beat={beat}
+            asset={asset}
+            live={live.status === "live"}
+          />
+        </Link>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {(
@@ -137,8 +169,8 @@ function AssetCard({
             key={label}
             to="/up-down/$asset"
             params={{ asset: slugOf(asset) }}
-            search={search}
-            className={`ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ${label === "Up" ? "bg-[#1f9d62]" : "bg-[#d4515c]"}`}
+            search={{ ...search, side: label.toLowerCase() as "up" | "down" }}
+            className={`ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ${label === "Up" ? "ud-outcome-up" : "ud-outcome-down"}`}
           >
             {label} {cents(outcome)}
           </Link>
@@ -163,10 +195,23 @@ export function UpDownSection({
 }) {
   const [minutes, setMinutes] = useState(5);
   const nowMs = useNow(Date.parse(snapshotTime) || 0);
+  if (!nowMs)
+    return (
+      <section className="ud-loading" role="status" aria-label="Loading Up/Down windows">
+        <div className="ud-skeleton ud-skeleton-title" />
+        <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
+          {CARDS.map(({ asset }) => (
+            <div key={asset} className="ud-skeleton ud-skeleton-chart" />
+          ))}
+        </div>
+      </section>
+    );
   return (
     <section className={detailed ? "" : "mt-5"}>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">Up &amp; Down</h2>
+        <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
+          Trending Up &amp; Down
+        </h2>
         <Link
           to="/up-down"
           className="flex min-h-11 shrink-0 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground"
@@ -175,22 +220,33 @@ export function UpDownSection({
           <ChevronRight className="size-4" />
         </Link>
       </div>
-      <div className="mb-4 inline-flex gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label="Window length">
+      <div
+        className="ud-home-durations mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+        role="group"
+        aria-label="Window length"
+      >
         {DURATIONS.map((d) => (
           <button
             key={d}
             type="button"
             aria-pressed={minutes === d}
             onClick={() => setMinutes(d)}
-            className={`min-h-9 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
+            className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
           >
             {durationLabel(d)}
           </button>
         ))}
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
         {CARDS.map(({ asset, large }) => (
-          <AssetCard key={asset} asset={asset} minutes={minutes} nowMs={nowMs} markets={markets} large={large} />
+          <AssetCard
+            key={asset}
+            asset={asset}
+            minutes={minutes}
+            nowMs={nowMs}
+            markets={markets}
+            large={large}
+          />
         ))}
       </div>
     </section>

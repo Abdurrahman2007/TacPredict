@@ -28,8 +28,12 @@ function MyPositions({ market }: { market: Market }) {
   const { user } = useProtocolUser();
   const portfolio = useNativePortfolio();
   const zone = useTimeZone();
-  const positions = (portfolio.data?.positions ?? []).filter((p) => p.marketId === market.id);
-  const history = (portfolio.data?.activity ?? []).filter((a) => a.marketId === market.id);
+  const positions = (portfolio.data?.positions ?? []).filter(
+    (p) => p.marketId === market.native?.id && p.chainId === market.native?.chainId,
+  );
+  const history = (portfolio.data?.activity ?? []).filter(
+    (a) => a.marketId === market.native?.id && a.chainId === market.native?.chainId,
+  );
   const total = positions.reduce((sum, p) => sum + BigInt(p.valueAtomic ?? "0"), 0n);
   return (
     <section className="ud-card" aria-label="Your positions">
@@ -107,10 +111,10 @@ export function StatsCard({ market }: { market: Market | null }) {
     ["Open interest", usdcShort(market?.native?.openInterestAtomic)],
     ["Total volume", volumeText(market?.volume)],
     ["Traders", String(market?.participants ?? 0)],
-    ["Settlement", "$1 per share if correct"],
+    ["Settlement", market?.native ? "$1 per share if correct" : "Price tracking only"],
   ];
   return (
-    <section className="ud-card" aria-label="Statistics">
+    <section className="ud-card ud-statistics" aria-label="Statistics">
       <h2>Statistics</h2>
       {rows.map(([label, value]) => (
         <div className="ud-row" key={label}>
@@ -134,14 +138,14 @@ export function RulesCard({
 }) {
   const name = ASSETS[asset].name;
   return (
-    <section className="ud-card" aria-label="Rules summary">
+    <section className="ud-card ud-rules" aria-label="Rules summary">
       <h2>Rules Summary</h2>
       <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
         Each {durationLabel(minutes)} window runs on the UTC clock. The price to beat is the open of
-        the first Coinbase {ASSETS[asset].product} 60-second candle in the window. The final price is
-        the close of its last 60-second candle. Up wins if the final price is the same as or higher
-        than the price to beat; Down wins if it is lower. {name} prices, the chart and the price to
-        beat on this page all come from the same Coinbase feed.
+        the first Coinbase {ASSETS[asset].product} 60-second candle in the window. The final price
+        is the close of its last 60-second candle. Up wins if the final price is the same as or
+        higher than the price to beat; Down wins if it is lower. {name} prices, the chart and the
+        price to beat on this page all come from the same Coinbase feed.
       </p>
       {market ? (
         <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
@@ -201,7 +205,11 @@ function MiniCard({
       <small>
         {formatUsd(live.price, asset)}{" "}
         {delta && (
-          <span className={delta.direction === "up" ? "ud-up" : delta.direction === "down" ? "ud-down" : ""}>
+          <span
+            className={
+              delta.direction === "up" ? "ud-up" : delta.direction === "down" ? "ud-down" : ""
+            }
+          >
             {delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : ""}{" "}
             {formatUsd(Math.abs(delta.abs), asset)}
           </span>

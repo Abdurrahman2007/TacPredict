@@ -2,14 +2,17 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { UpDownDetail } from "@/components/updown/updown-detail";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
-import { ASSETS, assetFromSlug, parseDuration } from "@/lib/updown/window.mjs";
+import { ASSETS, DURATIONS, assetFromSlug, parseDuration } from "@/lib/updown/window.mjs";
 import updownCss from "@/styles/updown.css?url";
 
 export const Route = createFileRoute("/up-down_/$asset")({
-  validateSearch: (search: Record<string, unknown>): { d?: number; w?: number } => {
-    const out: { d?: number; w?: number } = {};
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { d?: number; w?: number; side?: "up" | "down" } => {
+    const out: { d?: number; w?: number; side?: "up" | "down" } = {};
+    if (search["side"] === "up" || search["side"] === "down") out.side = search["side"];
     const d = Number(search["d"]);
-    if (Number.isFinite(d) && [5, 15, 60].includes(d)) out.d = d;
+    if (Number.isFinite(d) && DURATIONS.includes(d)) out.d = d;
     const w = Number(search["w"]);
     if (search["w"] !== undefined && Number.isFinite(w) && w > 0) out.w = w;
     return out;
@@ -47,6 +50,7 @@ function UpDownAssetPage() {
       minutes={parseDuration(search.d)}
       windowParam={search.w}
       loadedAt={loadedAt}
+      initialSide={search.side}
     />
   );
 }

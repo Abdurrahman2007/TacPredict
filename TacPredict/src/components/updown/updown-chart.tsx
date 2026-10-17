@@ -57,23 +57,27 @@ export function UpDownChart({
     return { low, high, x, y };
   }, [series, beat, w]);
 
-  if (!geometry)
-    return <div className="ud-chart ud-chart-empty">Waiting for price data…</div>;
+  if (!geometry) return <div className="ud-chart ud-chart-empty">Waiting for price data…</div>;
 
   const { low, high, x, y } = geometry;
   const last = series[series.length - 1]!;
-  const up = beat === null ? null : last.price >= beat;
-  const color = up === null ? "#8fa8d6" : up ? "#2fbf71" : "#f0616d";
+  const color = "#315dff";
   const points = series.map((p) => `${x(p.time).toFixed(1)},${y(p.price).toFixed(1)}`);
   const line = `M${points.join(" L")}`;
   const area = `${line} L${x(last.time).toFixed(1)},${H - B} L${x(series[0]!.time).toFixed(1)},${H - B} Z`;
   const ticks = [0.15, 0.5, 0.85].map((f) => high - (high - low) * f);
 
   function inspect(clientX: number, bounds: DOMRect) {
-    const fraction = Math.max(0, Math.min(1, (((clientX - bounds.left) / bounds.width) * W - L) / (W - L - R)));
+    const fraction = Math.max(
+      0,
+      Math.min(1, (((clientX - bounds.left) / bounds.width) * W - L) / (W - L - R)),
+    );
     const target = w.start + fraction * (w.end - w.start);
     setProbe(
-      series.reduce((best, p) => (Math.abs(p.time - target) < Math.abs(best.time - target) ? p : best), series[0]!),
+      series.reduce(
+        (best, p) => (Math.abs(p.time - target) < Math.abs(best.time - target) ? p : best),
+        series[0]!,
+      ),
     );
   }
 
@@ -94,7 +98,15 @@ export function UpDownChart({
         </defs>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={L} x2={W - R} y1={y(t)} y2={y(t)} stroke="#2f3a41" strokeWidth="1" strokeDasharray="2 5" />
+            <line
+              x1={L}
+              x2={W - R}
+              y1={y(t)}
+              y2={y(t)}
+              stroke="#2f3a41"
+              strokeWidth="1"
+              strokeDasharray="2 5"
+            />
             <text x={W - R + 8} y={y(t) + 4} fontSize="10.5" fill="#8d9aa6">
               {tick(t)}
             </text>
@@ -102,7 +114,15 @@ export function UpDownChart({
         ))}
         {beat !== null && (
           <g>
-            <line x1={L} x2={W - R} y1={y(beat)} y2={y(beat)} stroke="#b8c4d9" strokeWidth="1.4" strokeDasharray="6 5" />
+            <line
+              x1={L}
+              x2={W - R}
+              y1={y(beat)}
+              y2={y(beat)}
+              stroke="#b8c4d9"
+              strokeWidth="1.4"
+              strokeDasharray="6 5"
+            />
             <text x={L + 2} y={y(beat) - 6} fontSize="10.5" fill="#b8c4d9">
               Price to beat
             </text>
@@ -113,12 +133,35 @@ export function UpDownChart({
           </g>
         )}
         <path d={area} fill={`url(#${gradient})`} />
-        <path d={line} fill="none" stroke={color} strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
-        {live && <circle className="ud-pulse" cx={x(last.time)} cy={y(last.price)} r="4" fill={color} />}
-        <circle cx={x(last.time)} cy={y(last.price)} r="4.2" fill={color} stroke="#0f161a" strokeWidth="2" />
+        <path
+          d={line}
+          fill="none"
+          stroke={color}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {live && (
+          <circle className="ud-pulse" cx={x(last.time)} cy={y(last.price)} r="4" fill={color} />
+        )}
+        <circle
+          cx={x(last.time)}
+          cy={y(last.price)}
+          r="4.2"
+          fill={color}
+          stroke="#0f161a"
+          strokeWidth="2"
+        />
         {probe && (
           <g>
-            <line x1={x(probe.time)} x2={x(probe.time)} y1={T} y2={H - B} stroke="#8d9aa6" strokeWidth="1" />
+            <line
+              x1={x(probe.time)}
+              x2={x(probe.time)}
+              y1={T}
+              y2={H - B}
+              stroke="#8d9aa6"
+              strokeWidth="1"
+            />
             <circle cx={x(probe.time)} cy={y(probe.price)} r="4" fill="#fff" />
             <text x={L + 2} y={11} fontSize="11" fill="#e8edf3">
               {formatUsd(probe.price, asset)} · {clock(probe.time, zone, true)}
