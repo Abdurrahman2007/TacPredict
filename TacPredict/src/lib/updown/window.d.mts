@@ -1,5 +1,5 @@
 import type { Market } from "@/domain/markets/types";
-export type UpDownAsset = "bitcoin" | "ethereum" | "solana";
+export type UpDownAsset = "bitcoin" | "ethereum" | "solana" | "bnb";
 export const ASSETS: Record<UpDownAsset, { product: string; name: string; short: string; logo: string }>;
 export const ASSET_KEYS: readonly UpDownAsset[];
 export const DURATIONS: readonly number[];
@@ -15,10 +15,14 @@ export function makeWindow(startMs: number, minutes: number): Win;
 export function windowState(w: Win, nowMs: number): "upcoming" | "live" | "past";
 export function resolveWindow(param: unknown, nowMs: number, minutes: number): Win;
 export function windowsAround(nowMs: number, minutes: number, past?: number, future?: number): Win[];
-export function priceToBeat(candles: Candle[] | undefined, startMs: number): number | null;
+export const MAX_CANDLES: number;
+export function granularityFor(minutes: number): number;
+export function pastCountFor(minutes: number): number;
+export function priceToBeat(candles: Candle[] | undefined, startMs: number, gran?: number): number | null;
 export function windowResult(
   candles: Candle[] | undefined,
   w: Win,
+  gran?: number,
 ): { open: number; close: number; outcome: "Up" | "Down" } | null;
 export function deltaInfo(
   current: number | null | undefined,
@@ -32,6 +36,7 @@ export function seriesForWindow(input: {
   ticks: PricePoint[] | undefined;
   w: Win;
   nowMs: number;
+  gran?: number;
 }): PricePoint[];
 export function thin<T>(points: T[], max?: number): T[];
 export function formatUsd(price: number | null | undefined, asset?: UpDownAsset): string;

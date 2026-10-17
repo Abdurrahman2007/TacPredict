@@ -1,4 +1,4 @@
-import { ASSETS, type Candle, type PricePoint, type UpDownAsset } from "./window.mjs";
+import { ASSETS, granularityFor, type Candle, type PricePoint, type UpDownAsset } from "./window.mjs";
 
 const BASE = "https://api.exchange.coinbase.com";
 const SOURCE = "Coinbase";
@@ -34,12 +34,16 @@ const num = (value: unknown) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-/** One-minute candles, oldest first. [time(s), low, high, open, close, volume] from Coinbase. */
-async function loadCandles(asset: UpDownAsset, minutes: number): Promise<Candle[]> {
+/**
+ * Real candles, oldest first. [time(s), low, high, open, close, volume] from Coinbase. Short
+ * look-backs use one-minute candles; longer ones use the smallest Coinbase candle size that
+ * still fits the 300-candle limit.
+ */
+async function loadCandles(asset: UpDownAsset, minutes: number, granularity: number): Promise<Candle[]> {
   const end = new Date();
   const start = new Date(end.getTime() - minutes * 60000);
   const rows = await get(
-    `/products/${ASSETS[asset].product}/candles?granularity=60&start=${start.toISOString()}&end=${end.toISOString()}`,
+    `/products/${ASSETS[asset].product}/candles?granularity=${granularity}&start=${start.toISOString()}&end=${end.toISOString()}`,
   );
   if (!Array.isArray(rows)) throw new Error("Unexpected candle response");
   return rows
@@ -71,11 +75,14 @@ async function loadTrades(asset: UpDownAsset): Promise<PricePoint[]> {
 }
 
 export async function spotWindowData(asset: UpDownAsset, minutes: number) {
+  const granularity = granularityFor(minutes);
   const [candles, trades] = await Promise.all([
-    cached(`candles:${asset}:${minutes}`, 4000, () => loadCandles(asset, minutes)),
+    cached(`candles:${asset}:${minutes}`, granularity > 60 ? 15000 : 4000, () =>
+      loadCandles(asset, minutes, granularity),
+    ),
     cached(`trades:${asset}`, 2000, () => loadTrades(asset)).catch(() => [] as PricePoint[]),
   ]);
-  return { asset, candles, trades, fetchedAt: Date.now(), source: SOURCE };
+  return { asset, candles, trades, granularity, fetchedAt: Date.now(), source: SOURCE };
 }
 
 export async function spotTickers() {

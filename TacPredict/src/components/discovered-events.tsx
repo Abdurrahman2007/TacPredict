@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { eventDraftsQueryOptions, type EventDraft } from "@/lib/agent/events.functions";
 import type { Market } from "@/domain/markets/types";
 import { MarketCard } from "./market-card";
+import { sectionOf } from "@/domain/markets/sections.mjs";
 export function eventMarket(p: EventDraft): Market {
   return {
     id: p.id,
@@ -40,7 +41,7 @@ export function DiscoveredEvents({
   const rows = sortListings(
     (q.data ?? []).filter(
       (p) =>
-        (category === "All" || p.category === category) &&
+        (category === "All" ? sectionOf(p) !== null : sectionOf(p) === category) &&
         p.title.toLowerCase().includes(query.trim().toLowerCase()),
     ),
     sort,

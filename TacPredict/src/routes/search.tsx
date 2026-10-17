@@ -9,6 +9,7 @@ import { previewMarket } from "@/components/prelaunch-markets";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { MarketIcon } from "@/components/market-icon";
 import { searchListings } from "@/lib/markets/search-list.mjs";
+import { marketSection, sectionOf } from "@/domain/markets/sections.mjs";
 import searchStyles from "@/styles/search-discovery.css?url";
 
 export const Route = createFileRoute("/search")({
@@ -23,9 +24,9 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.trim());
   const rows = searchListings([
-    ...feed.markets,
+    ...feed.markets.filter((m) => marketSection(m) !== null),
     ...Object.values(feed.cryptoUpDown).filter((m): m is NonNullable<typeof m> => Boolean(m)),
-    ...(events.data ?? []).map(eventMarket),
+    ...(events.data ?? []).filter((p) => sectionOf(p) !== null).map(eventMarket),
     ...(previews.data ?? []).map(previewMarket),
   ], q);
   const loading = events.isPending || previews.isPending;

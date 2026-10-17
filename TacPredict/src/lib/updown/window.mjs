@@ -1,5 +1,5 @@
 /**
- * Pure helpers for Up/Down windows (5 min, 15 min, 1 hour). Windows are aligned to the UTC clock,
+ * Pure helpers for Up/Down windows (5 min, 15 min, 30 min, 1 hour, 12 hours, 24 hours). Windows are aligned to the UTC clock,
  * so "9:15 -> 9:20" is the same window for everybody. Every number comes from real Coinbase data
  * passed in by the caller; nothing here invents a price.
  */
@@ -7,10 +7,24 @@ export const ASSETS = {
   bitcoin: { product: "BTC-USD", name: "Bitcoin", short: "BTC", logo: "btc" },
   ethereum: { product: "ETH-USD", name: "Ethereum", short: "ETH", logo: "eth" },
   solana: { product: "SOL-USD", name: "Solana", short: "SOL", logo: "sol" },
+  bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
-export const ASSET_KEYS = ["bitcoin", "ethereum", "solana"];
-export const DURATIONS = [5, 15, 60];
-const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana" };
+export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
+export const DURATIONS = [5, 15, 30, 60, 720, 1440];
+const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
+
+/** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
+const GRANULARITIES = [60, 300, 900, 3600, 21600, 86400];
+export const MAX_CANDLES = 300;
+/** Smallest real candle size that covers `minutes` of history in one request. */
+export function granularityFor(minutes) {
+  const need = Math.max(1, Math.ceil(minutes));
+  return GRANULARITIES.find((g) => (need * 60) / g <= MAX_CANDLES) ?? 86400;
+}
+/** How many past windows the "Past" list offers for each length. */
+export function pastCountFor(minutes) {
+  return minutes <= 30 ? 12 : minutes === 60 ? 6 : 3;
+}
 
 export function assetFromSlug(slug) {
   return SLUGS[String(slug).toLowerCase()] ?? null;
@@ -19,7 +33,11 @@ export function slugOf(asset) {
   return ASSETS[asset]?.short.toLowerCase() ?? "btc";
 }
 export function durationLabel(minutes) {
-  return minutes >= 60 && minutes % 60 === 0 ? `${minutes / 60} hour` : `${minutes} min`;
+  if (minutes >= 60 && minutes % 60 === 0) {
+    const h = minutes / 60;
+    return h === 1 ? "1 hour" : `${h} hours`;
+  }
+  return `${minutes} min`;
 }
 export function parseDuration(value) {
   const n = Number(value);
@@ -45,7 +63,7 @@ export function resolveWindow(param, nowMs, minutes) {
   if (
     !Number.isFinite(n) ||
     n % size !== 0 ||
-    n < current - 24 * 3600000 ||
+    n < current - Math.max(24 * 3600000, 3 * size) ||
     n > current + 6 * size
   )
     return makeWindow(current, minutes);
@@ -61,20 +79,27 @@ export function windowsAround(nowMs, minutes, past = 12, future = 3) {
   return out;
 }
 
-const minuteOf = (ms) => Math.floor(ms / 60000) * 60000;
-
-/** Open of the one-minute candle that starts exactly at the window start. Null if we do not have it. */
-export function priceToBeat(candles, startMs) {
-  const hit = (candles ?? []).find((c) => c.time === minuteOf(startMs));
+/**
+ * Open of the candle that starts exactly at the window start. `gran` is the candle size in ms
+ * (60000 by default). A candle that does not start on the boundary is never used, so a coarse
+ * candle can not stand in for a shorter window. Null if we do not have it.
+ */
+export function priceToBeat(candles, startMs, gran = 60000) {
+  if (startMs % gran !== 0) return null;
+  const hit = (candles ?? []).find((c) => c.time === startMs);
   return hit && hit.open > 0 ? hit.open : null;
 }
 
-/** Final result of a finished window from real candles; null while data is missing. */
-export function windowResult(candles, w) {
-  const open = priceToBeat(candles, w.start);
+/**
+ * Final result of a finished window from real candles; null while data is missing. The close of
+ * the candle that contains the last minute of the window is the last trade before the end.
+ */
+export function windowResult(candles, w, gran = 60000) {
+  const open = priceToBeat(candles, w.start, gran);
+  if (open === null || (w.end % gran !== 0 && gran > 60000)) return null;
   const lastMinute = w.end - 60000;
-  const last = (candles ?? []).find((c) => c.time === lastMinute);
-  if (open === null || !last || !(last.close > 0)) return null;
+  const last = (candles ?? []).find((c) => c.time <= lastMinute && lastMinute < c.time + gran);
+  if (!last || !(last.close > 0)) return null;
   return { open, close: last.close, outcome: last.close >= open ? "Up" : "Down" };
 }
 
@@ -118,14 +143,14 @@ export function matchNativeMarket(markets, asset, w) {
  * live ticks. All real; later sources only replace earlier ones where they overlap.
  * Output: [{time (ms), price}] sorted by time and clipped to [start, min(now, end)].
  */
-export function seriesForWindow({ candles, trades, ticks, w, nowMs }) {
+export function seriesForWindow({ candles, trades, ticks, w, nowMs, gran = 60000 }) {
   const stop = Math.min(nowMs, w.end);
   const out = [];
   const firstTrade = trades?.length ? trades[0].time : Infinity;
   for (const c of candles ?? []) {
-    if (c.time + 60000 > firstTrade) continue;
+    if (c.time + gran > firstTrade) continue;
     if (c.time >= w.start && c.time <= stop) out.push({ time: c.time, price: c.open });
-    const closeAt = c.time + 59000;
+    const closeAt = c.time + gran - 1000;
     if (closeAt >= w.start && closeAt <= stop && closeAt < firstTrade)
       out.push({ time: closeAt, price: c.close });
   }

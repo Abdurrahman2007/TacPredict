@@ -39,7 +39,11 @@
   color: var(--ud-mute);
 }
 .ud-durations {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   gap: 4px;
   margin-top: 14px;
   padding: 3px;
@@ -48,6 +52,8 @@
   border: 1px solid var(--ud-line);
 }
 .ud-durations a {
+  flex: none;
+  white-space: nowrap;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 13px;

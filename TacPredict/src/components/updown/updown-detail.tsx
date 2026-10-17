@@ -14,6 +14,7 @@ import {
   formatCountdown,
   formatUsd,
   matchNativeMarket,
+  pastCountFor,
   priceToBeat,
   resolveWindow,
   seriesForWindow,
@@ -29,8 +30,10 @@ import { UpDownIsland } from "./island";
 import { UpDownTradeBar } from "./trade-bar";
 import { ActivityCard, AlsoTrading, PositionsCard, RulesCard, StatsCard } from "./sections";
 
-function pastCountFor(minutes: number) {
-  return minutes >= 60 ? 3 : 12;
+/** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
+function lookbackFor(needed: number) {
+  const step = needed > 300 ? 60 : 30;
+  return Math.min(18000, Math.max(30, Math.ceil(needed / step) * step));
 }
 
 export function UpDownDetail({
@@ -50,17 +53,20 @@ export function UpDownDetail({
   const w = resolveWindow(windowParam, nowMs, minutes);
   const state = windowState(w, nowMs);
 
-  // One request covers the selected window, the "Past" list and the chart; quantized so the
-  // query key stays stable as the clock moves.
-  const needed = Math.max(minutes * pastCountFor(minutes) + 10, Math.ceil((nowMs - w.start) / 60000) + 10);
-  const lookback = Math.min(240, Math.ceil(needed / 30) * 30);
-  const spot = useQuery(spotWindowQueryOptions(asset, lookback));
+  // Short windows use one request for the chart and the "Past" list. Long windows (1h and up)
+  // use a second, coarser request for the list so the chart keeps fine candles.
+  const chartNeeded = Math.ceil((nowMs - w.start) / 60000) + 10;
+  const pastNeeded = minutes * (pastCountFor(minutes) + 1) + 10;
+  const split = minutes >= 60;
+  const spot = useQuery(spotWindowQueryOptions(asset, lookbackFor(split ? chartNeeded : Math.max(chartNeeded, pastNeeded))));
+  const history = useQuery({ ...spotWindowQueryOptions(asset, lookbackFor(pastNeeded), 30000), enabled: split });
   const live = useLivePrice(asset);
   const feed = useQuery(nativeMarketFeedQueryOptions);
 
   const candles = spot.data?.candles;
-  const beat = priceToBeat(candles, w.start);
-  const result = state === "past" ? windowResult(candles, w) : null;
+  const gran = (spot.data?.granularity ?? 60) * 1000;
+  const beat = priceToBeat(candles, w.start, gran);
+  const result = state === "past" ? windowResult(candles, w, gran) : null;
   const lastTrade = spot.data?.trades[spot.data.trades.length - 1]?.price ?? null;
   const lastCandle = candles?.[candles.length - 1]?.close ?? null;
   const current = state === "past" ? (result?.close ?? null) : (live.price ?? lastTrade ?? lastCandle);
@@ -76,10 +82,11 @@ export function UpDownDetail({
           ticks: live.ticks,
           w: { start: w.start, end: w.end, minutes },
           nowMs: nowSec * 1000,
+          gran,
         }),
         260,
       ),
-    [candles, trades, live.ticks, w.start, w.end, minutes, nowSec],
+    [candles, trades, live.ticks, w.start, w.end, minutes, nowSec, gran],
   );
   const market = matchNativeMarket(feed.data?.markets, asset, w);
 
@@ -184,7 +191,8 @@ export function UpDownDetail({
         minutes={minutes}
         nowMs={nowMs}
         selected={w}
-        candles={candles}
+        candles={split ? history.data?.candles : candles}
+        gran={((split ? history.data?.granularity : spot.data?.granularity) ?? 60) * 1000}
         pastCount={pastCountFor(minutes)}
       />
 

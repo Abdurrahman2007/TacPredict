@@ -9,7 +9,8 @@ import { homeFeedListings } from "@/lib/markets/home-feed.mjs";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { sortListings } from "@/lib/markets/listing-sort.mjs";
-import type { Market, MarketCategory } from "@/domain/markets/types";
+import type { Market } from "@/domain/markets/types";
+import { SECTIONS, marketSection, sectionOf, type Section } from "@/domain/markets/sections.mjs";
 import homeCss from "@/styles/home-reference.css?url";
 import updownCss from "@/styles/updown.css?url";
 
@@ -71,15 +72,17 @@ function HomePage() {
   });
   const native = useMemo(
     () =>
-      homeFeedListings(nativeFeed.markets, feed, Date.parse(nativeFeed.updatedAt)).filter(
-        (m) => !m.endsAt || Date.parse(m.endsAt) > Date.parse(nativeFeed.updatedAt),
-      ),
+      homeFeedListings(
+        nativeFeed.markets.filter((m) => marketSection(m) !== null),
+        feed,
+        Date.parse(nativeFeed.updatedAt),
+      ).filter((m) => !m.endsAt || Date.parse(m.endsAt) > Date.parse(nativeFeed.updatedAt)),
     [feed, nativeFeed],
   );
   const listings = useMemo(() => {
     const imported =
       feed === "Trending" || feed === "New"
-        ? sortListings(events.data ?? [], feed).map(eventMarket)
+        ? sortListings((events.data ?? []).filter((p) => sectionOf(p) !== null), feed).map(eventMarket)
         : [];
     const nativeQuestions = new Set(
       native.map((m) => m.title.toLowerCase().replace(/[^a-z0-9]/g, "")),
@@ -93,8 +96,8 @@ function HomePage() {
   }, [events.data, feed, native]);
   const featured = useMemo(() => {
     const ordered: Market[] = [];
-    for (const category of ["Sports", "News", "Technology", "Business", "Crypto", "Culture"]) {
-      const m = listings.find((m) => m.category === category);
+    for (const section of SECTIONS) {
+      const m = listings.find((m) => (marketSection(m) ?? sectionOf(m)) === section);
       if (m) ordered.push(m);
     }
     return ordered;
@@ -134,36 +137,9 @@ function HomePage() {
           <UpDownSection markets={nativeFeed.markets} snapshotTime={nativeFeed.updatedAt} />
         </div>
       )}
-      <HomeSection
-        title="Crypto Markets"
-        category="Crypto"
-        markets={listings.filter((m) => m.category === "Crypto")}
-      />
-      <HomeSection
-        title="Top Sports Markets"
-        category="Sports"
-        markets={listings.filter((m) => m.category === "Sports")}
-      />
-      <HomeSection
-        title="News & Politics"
-        category="News"
-        markets={listings.filter((m) => m.category === "News")}
-      />
-      <HomeSection
-        title="Technology & AI"
-        category="Technology"
-        markets={listings.filter((m) => m.category === "Technology")}
-      />
-      <HomeSection
-        title="Business & Economy"
-        category="Business"
-        markets={listings.filter((m) => m.category === "Business")}
-      />
-      <HomeSection
-        title="Culture & Entertainment"
-        category="Culture"
-        markets={listings.filter((m) => m.category === "Culture")}
-      />
+      <HomeSection title="Crypto Markets" section="Crypto" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Crypto")} />
+      <HomeSection title="Football" section="Football" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Football")} />
+      <HomeSection title="Cricket" section="Cricket" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Cricket")} />
       {(feed === "Trending" || feed === "New") && events.isError && (
         <p role="status" className="home-feed-notice">
           Event discovery is temporarily unavailable.
@@ -197,11 +173,11 @@ function HomePage() {
 }
 function HomeSection({
   title,
-  category,
+  section,
   markets,
 }: {
   title: string;
-  category: MarketCategory;
+  section: Section;
   markets: Market[];
 }) {
   if (!markets.length) return null;
@@ -211,7 +187,7 @@ function HomeSection({
         <h2>{title}</h2>
         <Link
           to="/markets"
-          search={{ category, sort: "Trending", q: "" }}
+          search={{ category: section, sort: "Trending", q: "" }}
           className="home-view-all ios-press"
         >
           View all <ChevronRight size={16} />
@@ -225,6 +201,7 @@ function HomeSection({
     </section>
   );
 }
+const label = (m: Market | undefined) => (m ? (marketSection(m) ?? sectionOf(m) ?? m.category) : "");
 function FeaturedCarousel({ markets }: { markets: Market[] }) {
   const rail = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
@@ -266,13 +243,13 @@ function FeaturedCarousel({ markets }: { markets: Market[] }) {
       <div className="home-carousel-controls">
         <button aria-label="Previous featured prediction" onClick={() => move(safe - 1)}>
           <ChevronLeft size={16} />
-          {markets[safe]?.category}
+          {label(markets[safe])}
         </button>
         <div className="home-carousel-dots">
           {markets.map((m, i) => (
             <button
               key={m.id}
-              aria-label={`Show featured ${m.category} prediction`}
+              aria-label={`Show featured ${label(m)} prediction`}
               aria-pressed={safe === i}
               className={safe === i ? "active" : ""}
               onClick={() => move(i)}

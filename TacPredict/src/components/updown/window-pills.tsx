@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, LineChart } from "lucide-react";
-import { clock, useTimeZone } from "@/lib/updown/use-clock";
+import { clock, dayLabel, useTimeZone } from "@/lib/updown/use-clock";
 import {
   slugOf,
   windowResult,
@@ -18,6 +18,7 @@ export function WindowPills({
   nowMs,
   selected,
   candles,
+  gran,
   pastCount,
 }: {
   asset: UpDownAsset;
@@ -25,6 +26,7 @@ export function WindowPills({
   nowMs: number;
   selected: Win;
   candles: Candle[] | undefined;
+  gran: number;
   pastCount: number;
 }) {
   const zone = useTimeZone();
@@ -32,6 +34,12 @@ export function WindowPills({
   const all = windowsAround(nowMs, minutes, pastCount, 3);
   const past = all.filter((w) => w.start < current).reverse();
   const ahead = all.filter((w) => w.start >= current);
+  const label = (w: Win) =>
+    minutes >= 1440
+      ? dayLabel(w.start, zone)
+      : minutes >= 720
+        ? `${dayLabel(w.start, zone)} ${clock(w.start, zone)}`
+        : clock(w.start, zone);
   const link = (w: Win) => ({
     to: "/up-down/$asset" as const,
     params: { asset: slugOf(asset) },
@@ -54,14 +62,14 @@ export function WindowPills({
             </p>
           ) : (
             past.map((w) => {
-              const result = windowResult(candles, w);
+              const result = windowResult(candles, w, gran);
               return (
                 <Link
                   key={w.start}
                   {...link(w)}
                   aria-current={w.start === selected.start ? "page" : undefined}
                 >
-                  <span>{clock(w.start, zone)}</span>
+                  <span>{label(w)}</span>
                   {result ? (
                     <span className={result.outcome === "Up" ? "ud-up" : "ud-down"}>
                       {result.outcome === "Up" ? "↑ Up" : "↓ Down"}
@@ -83,7 +91,7 @@ export function WindowPills({
           aria-current={w.start === selected.start ? "page" : undefined}
         >
           {w.start === current && <span className="ud-dot" aria-hidden="true" />}
-          {clock(w.start, zone)}
+          {label(w)}
         </Link>
       ))}
     </div>

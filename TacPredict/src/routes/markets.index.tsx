@@ -7,7 +7,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { sortListings } from "@/lib/markets/listing-sort.mjs";
 import marketsCss from "@/styles/markets-compact.css?url";
 import { MarketCard } from "@/components/market-card";
-import { categories } from "@/domain/markets/demo-markets";
+import { SECTION_FILTERS, marketSection, sectionOf } from "@/domain/markets/sections.mjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useMemo } from "react";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/markets/")({
     search: Record<string, unknown>,
   ): { category?: string; sort?: SortOption; q?: string } => ({
     ...(typeof search["category"] === "string" &&
-    categories.includes(search["category"] as (typeof categories)[number])
+    (SECTION_FILTERS as readonly string[]).includes(search["category"])
       ? { category: search["category"] }
       : {}),
     ...(sortOptions.includes(search["sort"] as SortOption)
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/markets/")({
       {
         name: "description",
         content:
-          "Explore active prediction markets across crypto, sports, technology, business, and culture.",
+          "Explore Crypto Up/Down, Football and Cricket prediction markets on Base with USDC.",
       },
       { property: "og:title", content: "Markets — TacPredict" },
       {
@@ -68,14 +68,16 @@ function MarketsPage() {
   const previews = useQuery(marketPreviewsQueryOptions);
   const otherMatches = [...(events.data ?? []), ...(previews.data ?? [])].some(
     (p) =>
-      (category === "All" || p.category === category) &&
+      (category === "All" ? sectionOf(p) !== null : sectionOf(p) === category) &&
       p.title.toLowerCase().includes(query.toLowerCase()),
   );
   const { data: liveFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const filtered = useMemo(
     () =>
       sortListings(
-        liveFeed.markets.filter((market) => category === "All" || market.category === category),
+        liveFeed.markets.filter((market) =>
+          category === "All" ? marketSection(market) !== null : marketSection(market) === category,
+        ),
         sort,
       ),
     [category, liveFeed.markets, sort],
@@ -97,7 +99,7 @@ function MarketsPage() {
         role="navigation"
         aria-label="Market categories"
       >
-        {categories.map((category) => (
+        {SECTION_FILTERS.map((category) => (
           <Link
             key={category}
             to="/markets"

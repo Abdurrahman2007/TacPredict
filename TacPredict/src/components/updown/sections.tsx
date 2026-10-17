@@ -11,6 +11,7 @@ import { useLivePrice } from "@/lib/updown/live-prices";
 import { clock, useTimeZone } from "@/lib/updown/use-clock";
 import {
   ASSETS,
+  DURATIONS,
   ASSET_KEYS,
   deltaInfo,
   durationLabel,
@@ -136,10 +137,11 @@ export function RulesCard({
     <section className="ud-card" aria-label="Rules summary">
       <h2>Rules Summary</h2>
       <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
-        Each {durationLabel(minutes)} window compares the {name} price at the end of the window with
-        its price at the start, the price to beat. Up wins if the end price is the same or higher.
-        Down wins if it is lower. The chart and price to beat on this page use Coinbase{" "}
-        {ASSETS[asset].product} prices.
+        Each {durationLabel(minutes)} window runs on the UTC clock. The price to beat is the open of
+        the first Coinbase {ASSETS[asset].product} 60-second candle in the window. The final price is
+        the close of its last 60-second candle. Up wins if the final price is the same as or higher
+        than the price to beat; Down wins if it is lower. {name} prices, the chart and the price to
+        beat on this page all come from the same Coinbase feed.
       </p>
       {market ? (
         <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
@@ -184,7 +186,7 @@ function MiniCard({
   const lookback = Math.ceil((minutes + 10) / 30) * 30;
   const spot = useQuery(spotWindowQueryOptions(asset, lookback, 30000));
   const live = useLivePrice(asset);
-  const beat = priceToBeat(spot.data?.candles, start);
+  const beat = priceToBeat(spot.data?.candles, start, (spot.data?.granularity ?? 60) * 1000);
   const delta = deltaInfo(live.price, beat);
   const left = formatCountdown(start + minutes * 60000 - nowMs);
   return (
@@ -221,7 +223,7 @@ export function AlsoTrading({
   nowMs: number;
 }) {
   const others = ASSET_KEYS.filter((a) => a !== asset);
-  const nextLength = minutes === 5 ? 15 : minutes === 15 ? 60 : 5;
+  const nextLength = DURATIONS[(DURATIONS.indexOf(minutes) + 1) % DURATIONS.length] ?? 5;
   return (
     <section className="mt-7" aria-label="People are also trading">
       <h2 style={{ fontSize: 17, fontWeight: 650 }}>People are also trading</h2>

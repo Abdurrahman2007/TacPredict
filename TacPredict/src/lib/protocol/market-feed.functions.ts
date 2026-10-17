@@ -13,7 +13,7 @@ import type { Market } from "@/domain/markets/types";
 import { usdcShort } from "./display.mjs";
 export type NativeFeed = {
   markets: Market[];
-  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana", Market>>;
+  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana" | "bnb", Market>>;
   source: "TacPredict";
   updatedAt: string;
   deployments: ProtocolDeployment[];
@@ -67,6 +67,7 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         ["bitcoin", /\b(bitcoin|btc)\b/i],
         ["ethereum", /\b(ethereum|eth)\b/i],
         ["solana", /\b(solana|sol)\b/i],
+        ["bnb", /\bbnb\b/i],
       ] as const) {
         const m = markets.find(
           (m) =>

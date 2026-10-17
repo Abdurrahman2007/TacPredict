@@ -25,6 +25,7 @@ const state: Record<UpDownAsset, LiveAsset> = {
   bitcoin: EMPTY,
   ethereum: EMPTY,
   solana: EMPTY,
+  bnb: EMPTY,
 };
 const listeners = new Set<() => void>();
 let socket: WebSocket | null = null;

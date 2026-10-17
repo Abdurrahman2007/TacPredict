@@ -120,3 +120,55 @@ test("thin keeps ends; formatting; slugs", () => {
   assert.equal(durationLabel(60), "1 hour");
   assert.equal(durationLabel(5), "5 min");
 });
+
+import {
+  ASSET_KEYS,
+  DURATIONS,
+  granularityFor,
+  pastCountFor,
+  priceToBeat as beat,
+  windowResult as result,
+} from "../../src/lib/updown/window.mjs";
+
+test("four assets and six window lengths", () => {
+  assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "bnb"]);
+  assert.equal(assetFromSlug("BNB"), "bnb");
+  assert.deepEqual([...DURATIONS], [5, 15, 30, 60, 720, 1440]);
+  assert.deepEqual(DURATIONS.map(durationLabel), ["5 min", "15 min", "30 min", "1 hour", "12 hours", "24 hours"]);
+});
+
+test("candle size grows with the look-back and never exceeds 300 candles", () => {
+  assert.equal(granularityFor(70), 60);
+  assert.equal(granularityFor(300), 60);
+  assert.equal(granularityFor(301), 300);
+  assert.equal(granularityFor(1500), 300);
+  assert.equal(granularityFor(1501), 900);
+  assert.equal(granularityFor(18000), 3600);
+  for (const m of [5, 60, 400, 1470, 4000, 18000]) assert.ok((m * 60) / granularityFor(m) <= 300);
+  assert.ok(pastCountFor(5) > pastCountFor(1440));
+});
+
+test("coarse candles give the same price to beat and result as minute candles", () => {
+  const H = 3600000;
+  const start = Date.UTC(2026, 9, 17, 0);
+  const w = { start, end: start + 12 * H, minutes: 720 };
+  const hourly = Array.from({ length: 12 }, (_, i) => ({
+    time: start + i * H,
+    open: 100 + i,
+    high: 200,
+    low: 50,
+    close: 101 + i,
+  }));
+  assert.equal(beat(hourly, start, H), 100);
+  assert.deepEqual(result(hourly, w, H), { open: 100, close: 112, outcome: "Up" });
+  // The last hourly candle holds the last minute of the window, so dropping it removes the result.
+  assert.equal(result(hourly.slice(0, 11), w, H), null);
+});
+
+test("a coarse candle never stands in for a shorter window", () => {
+  const H = 3600000;
+  const hourly = [{ time: Date.UTC(2026, 9, 17, 9), open: 100, high: 101, low: 99, close: 100 }];
+  assert.equal(beat(hourly, Date.UTC(2026, 9, 17, 9, 15), H), null);
+  const five = { start: Date.UTC(2026, 9, 17, 9, 15), end: Date.UTC(2026, 9, 17, 9, 20), minutes: 5 };
+  assert.equal(result(hourly, five, H), null);
+});

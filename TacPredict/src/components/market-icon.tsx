@@ -11,7 +11,9 @@ export function MarketIcon({ market, className }: { market: Market; className?: 
       ? "eth"
       : /\b(solana|sol)\b/i.test(market.title)
         ? "sol"
-        : null;
+        : /\bbnb\b/i.test(market.title)
+          ? "bnb"
+          : null;
   if (market.category === "Crypto" && cryptoAsset)
     return (
       <span className={cn("market-icon overflow-hidden", className)}>

@@ -27,8 +27,9 @@ import {
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
-  { asset: "ethereum", large: false },
-  { asset: "solana", large: false },
+  { asset: "ethereum", large: true },
+  { asset: "solana", large: true },
+  { asset: "bnb", large: true },
 ];
 
 function AssetCard({
@@ -49,11 +50,12 @@ function AssetCard({
   const start = windowStartFor(nowMs, minutes);
   const w = makeWindow(start, minutes);
   const lookback = Math.ceil((minutes + 10) / 30) * 30;
-  const spot = useQuery(spotWindowQueryOptions(asset, lookback, large ? 5000 : 30000));
+  const spot = useQuery(spotWindowQueryOptions(asset, lookback, 10000));
   const live = useLivePrice(asset);
   const candles = spot.data?.candles;
   const trades = spot.data?.trades;
-  const beat = priceToBeat(candles, start);
+  const gran = (spot.data?.granularity ?? 60) * 1000;
+  const beat = priceToBeat(candles, start, gran);
   const current =
     live.price ?? trades?.[trades.length - 1]?.price ?? candles?.[candles.length - 1]?.close ?? null;
   const delta = deltaInfo(current, beat);
@@ -62,11 +64,11 @@ function AssetCard({
     () =>
       large
         ? thin(
-            seriesForWindow({ candles, trades, ticks: live.ticks, w: { start, end: start + minutes * 60000, minutes }, nowMs: nowSec * 1000 }),
+            seriesForWindow({ candles, trades, ticks: live.ticks, w: { start, end: start + minutes * 60000, minutes }, nowMs: nowSec * 1000, gran }),
             200,
           )
         : [],
-    [large, candles, trades, live.ticks, start, minutes, nowSec],
+    [large, candles, trades, live.ticks, start, minutes, nowSec, gran],
   );
   const market = matchNativeMarket(markets, asset, w);
   const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
@@ -77,7 +79,7 @@ function AssetCard({
 
   return (
     <article
-      className={`overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6 ${large ? "sm:col-span-2" : ""}`}
+      className="overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6"
       aria-label={`${info.name} Up or Down`}
     >
       <div className="flex items-center gap-3">
