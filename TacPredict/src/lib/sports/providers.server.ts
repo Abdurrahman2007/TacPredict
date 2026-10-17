@@ -6,9 +6,9 @@ import {
   footballResult,
   parseCricketFixtures,
   parseFootballFixtures,
-  type SportsResult,
 } from "./fixtures.mjs";
 import { canonicalJson, observedAtField } from "./evidence.mjs";
+import type { EvidencePackage } from "./types";
 import { ASSETS, DURATIONS, windowResult, type UpDownAsset } from "@/lib/updown/window.mjs";
 
 /**
@@ -123,14 +123,6 @@ export async function loadCricketFixtures(): Promise<{ fixtures: Fixture[]; erro
   unique.sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
   return { fixtures: unique, error: null };
 }
-
-export type EvidencePackage = {
-  result: SportsResult | null;
-  evidence: Record<string, unknown> | null;
-  evidenceHash: string | null;
-  observedAt: string | null;
-  error: string | null;
-};
 
 const hashOf = (evidence: unknown) => keccak256(stringToHex(canonicalJson(evidence)));
 

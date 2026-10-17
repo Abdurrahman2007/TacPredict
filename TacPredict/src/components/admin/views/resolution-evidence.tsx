@@ -7,11 +7,12 @@ import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functio
 import { getCryptoEvidence, getSportsEvidence } from "@/lib/sports/sports.functions";
 import { proposalFor } from "@/lib/sports/fixtures.mjs";
 import { canonicalJson } from "@/lib/sports/evidence.mjs";
+import type { EvidencePackage } from "@/lib/sports/types";
 import { ASSETS, ASSET_KEYS, DURATIONS, type UpDownAsset } from "@/lib/updown/window.mjs";
 import { Badge, Card, Loaded, Notice, PageHeader } from "../admin-ui";
 
 type Kind = "crypto" | "sports";
-type Pack = Awaited<ReturnType<typeof getSportsEvidence>>;
+type Pack = EvidencePackage;
 type Checked = { market: Market; pack: Pack; proposal: { outcome: number; voided: boolean } | null };
 
 const utc = (iso: string) =>
@@ -70,16 +71,16 @@ export function ResolutionEvidence({ kind }: { kind: Kind }) {
       if (kind === "crypto") {
         const w = cryptoWindow(market);
         if (!w) return;
-        pack = await getCryptoEvidence({ data: w });
+        pack = (await getCryptoEvidence({ data: w })) as Pack;
         const outcome = String(pack.evidence?.["outcome"] ?? "");
         const index = market.outcomes.findIndex((o) => o.label.toLowerCase() === outcome.toLowerCase());
         proposal = index >= 0 ? { outcome: index, voided: false } : null;
       } else {
         const match = sportsMatch(market);
         if (!match) return;
-        pack = await getSportsEvidence({
+        pack = (await getSportsEvidence({
           data: { ...match, closeMs: Date.parse(market.native.closeAt) },
-        });
+        })) as Pack;
         proposal = proposalFor(
           match.sport,
           pack.result,
