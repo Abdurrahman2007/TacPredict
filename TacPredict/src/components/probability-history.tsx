@@ -3,7 +3,13 @@ import { useMemo, useState } from "react";
 import { probabilityHistoryOptions } from "@/lib/probability-history.functions";
 import type { Market } from "@/domain/markets/types";
 import { pct } from "@/lib/protocol/display.mjs";
-const colors = ["#e0b627", "#2fc790", "#799aef"];
+const palette = ["#799aef", "#a0afb8", "#b8a8e3"];
+const outcomeColor = (label: string, index: number) =>
+  /^(yes|up)$/i.test(label)
+    ? "#55c875"
+    : /^(no|down)$/i.test(label)
+      ? "#c36c7f"
+      : palette[index % palette.length];
 export function ProbabilityHistoryChart({ market }: { market: Market }) {
   const [interval, setInterval] = useState<"1h" | "1d" | "1w" | "1m">("1d"),
     [selected, setSelected] = useState<number | null>(null);
@@ -29,11 +35,12 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
       <div className="mb-5 flex flex-wrap gap-x-5 gap-y-2">
         {market.outcomes.slice(0, 3).map((o, i) => (
           <span key={o.id} className="flex items-center gap-2 text-sm">
-            <span className="size-2 rounded-full" style={{ background: colors[i] }} />
+            <span
+              className="size-2 rounded-full"
+              style={{ background: outcomeColor(market.outcomes[i]?.label ?? "", i) }}
+            />
             {o.label}
-            <span className="text-muted-foreground">
-              {pct(o)}
-            </span>
+            <span className="text-muted-foreground">{pct(o)}</span>
           </span>
         ))}
       </div>
@@ -109,7 +116,7 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
                   key={s.label}
                   points={s.points.map((p) => `${x(p.time)},${y(p.probability)}`).join(" ")}
                   fill="none"
-                  stroke={colors[i]}
+                  stroke={outcomeColor(market.outcomes[i]?.label ?? "", i)}
                   strokeWidth="2"
                   vectorEffect="non-scaling-stroke"
                   strokeLinejoin="round"
@@ -128,7 +135,7 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
                   left: `${(x(p.time) / 360) * 100}%`,
                   top: `${(y(p.probability) / 200) * 100}%`,
                   transform: "translate(-50%, -50%)",
-                  background: colors[i],
+                  background: outcomeColor(market.outcomes[i]?.label ?? "", i),
                 }}
               />
             );
@@ -167,7 +174,10 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
                       s.points[0]!,
                     );
                     return (
-                      <p key={s.label} style={{ color: colors[i] }}>
+                      <p
+                        key={s.label}
+                        style={{ color: outcomeColor(market.outcomes[i]?.label ?? "", i) }}
+                      >
                         {s.label} {p.probability.toFixed(1)}% ·{" "}
                         {new Date(p.time).toISOString().slice(11, 16)}
                       </p>
@@ -188,12 +198,12 @@ export function ProbabilityHistoryChart({ market }: { market: Market }) {
       {observed.length > 0 && (
         <div className="mt-2 flex justify-between text-xs text-muted-foreground">
           <span>{new Date(first).toISOString().slice(5, 16).replace("T", " ")} UTC</span>
-          <span>Polymarket</span>
+          <span>TacPredict</span>
           <span>{new Date(last).toISOString().slice(5, 16).replace("T", " ")} UTC</span>
         </div>
       )}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <span className="text-xs text-muted-foreground">{market.volume} source vol</span>
+        <span className="text-xs text-muted-foreground">{market.volume} traded volume</span>
         <div className="flex gap-1">
           {(["1h", "1d", "1w", "1m"] as const).map((v) => (
             <button

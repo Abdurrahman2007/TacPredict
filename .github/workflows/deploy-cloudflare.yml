@@ -12,7 +12,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: cloudflare-production-deploy-${{ github.ref }}
+  group: tacpredict-cloudflare-production
   cancel-in-progress: false
 jobs:
   build-and-deploy:
@@ -24,6 +24,7 @@ jobs:
     env:
       VITE_SUPABASE_URL: https://lmqaiqvwcytmgwgwyfwx.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_WALLETCONNECT_PROJECT_ID: ${{ vars.VITE_WALLETCONNECT_PROJECT_ID || 'ba72570e2db904ab92fdd696564a9cda' }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
@@ -34,18 +35,23 @@ jobs:
           cache: npm
           cache-dependency-path: TacPredict/package-lock.json
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
+      - run: npm ci --prefix protocol
+      - run: npm run compile --prefix protocol
+      - run: node scripts/package-cloudflare.cjs
+      - run: node scripts/prepare-workers-deploy.cjs
       - name: Locate the generated Worker config
         id: config
         run: |
           echo "--- .output"
           find .output -maxdepth 2 -not -path '*/node_modules/*' | sort | head -40
-          if [ -f .output/server/wrangler.json ]; then
-            echo "path=.output/server/wrangler.json" >> "$GITHUB_OUTPUT"
+          if [ -f .output/cloudflare/wrangler.json ]; then
+            echo "path=.output/cloudflare/wrangler.json" >> "$GITHUB_OUTPUT"
             echo "--- generated wrangler.json"
-            cat .output/server/wrangler.json
+            cat .output/cloudflare/wrangler.json
           else
-            echo "The build did not generate .output/server/wrangler.json" >&2
+            echo "The build did not generate .output/cloudflare/wrangler.json" >&2
             exit 1
           fi
       - name: Validate the Worker bundle (no credentials, no upload)

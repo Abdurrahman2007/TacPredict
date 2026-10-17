@@ -1,0 +1,529 @@
+.pd-page {
+  padding-bottom: 96px;
+  min-width: 0;
+}
+.pd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.pd-grid {
+  display: grid;
+  gap: 28px;
+}
+.pd-heading {
+  padding-bottom: 8px;
+}
+.pd-category {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.pd-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pd-title-row > div {
+  min-width: 0;
+  flex: 1;
+}
+.pd-title-row h1 {
+  font-size: clamp(21px, 3vw, 30px);
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.035em;
+}
+.pd-title-row p {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  margin-top: 6px;
+}
+.pd-data-note {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+  margin-top: 14px;
+}
+.pd-position-card {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 26px;
+  padding: 16px;
+  margin-top: 28px;
+}
+.pd-segments {
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--secondary);
+}
+.pd-segments button {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 999px;
+  color: #c9d3d8;
+  font-size: 14px;
+}
+.pd-segments button[aria-pressed="true"] {
+  background: #bfceda;
+  color: #10191e;
+}
+.pd-position-card > p {
+  color: var(--muted-foreground);
+  padding: 23px 0;
+  min-height: 80px;
+  font-size: 14px;
+}
+.pd-position-footer,
+.pd-position-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  padding-top: 14px;
+}
+.pd-position-footer a,
+.pd-rules a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--muted-foreground);
+}
+.pd-statistics,
+.pd-rules {
+  margin-top: 30px;
+}
+.pd-page h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.pd-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 13px 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.pd-stat i {
+  flex: 1;
+  border-bottom: 1px dashed var(--border);
+}
+.pd-stat strong {
+  font-weight: 500;
+  color: var(--foreground);
+}
+.pd-rules p {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.9;
+  margin: 16px 0;
+}
+.pd-rules summary {
+  min-height: 44px;
+  color: #55adf5;
+  cursor: pointer;
+  font-size: 14px;
+}
+.pd-back-top {
+  display: block;
+  margin: 28px auto 0;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--secondary);
+  font-size: 12px;
+}
+.pd-desktop-trade {
+  display: none;
+}
+.pd-extra-outcomes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.pd-extra-outcomes button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 12px 20px;
+}
+.pd-island {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 76px;
+  border-radius: 23px;
+  background: linear-gradient(110deg, #2c3943, #233039 68%, #35434c);
+  padding: 13px 15px;
+  box-shadow: 0 12px 30px #0002;
+}
+.pd-island-copy {
+  flex: 1;
+  min-width: 0;
+}
+.pd-island-copy > strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 550;
+}
+.pd-island-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #a9b8c3;
+}
+.pd-island-price {
+  color: #edf6fa;
+  font-variant-numeric: tabular-nums;
+}
+.pd-side-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #ffffff13;
+  font-size: 11px;
+}
+.pd-floating-island {
+  position: fixed;
+  top: 80px;
+  left: 16px;
+  right: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  z-index: 39;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
+  pointer-events: none;
+  transition:
+    opacity 0.25s,
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pd-floating-island.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.pd-order-controls,
+.pd-amount-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 16px;
+}
+.pd-mode {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 21px;
+}
+.pd-mode button {
+  min-height: 42px;
+  padding: 0 21px;
+  border-radius: 999px;
+  font-size: 16px;
+  background: #252e34;
+  color: #f1f5f7;
+}
+.pd-mode button[aria-pressed="true"] {
+  background: #bfceda;
+  color: #10191e;
+}
+.pd-order-outcomes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pd-order-outcomes button {
+  flex: 1;
+  min-width: 100px;
+  border-radius: 999px;
+  min-height: 47px;
+  background: #283136;
+  font-size: 15px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+}
+.pd-order-outcomes button[data-tone="positive"][aria-pressed="true"] {
+  background: #55c875;
+  color: #091c10;
+}
+.pd-order-outcomes button[data-tone="negative"][aria-pressed="true"] {
+  background: #b5596e;
+  color: #fff;
+}
+.pd-order-outcomes button[data-tone="neutral"][aria-pressed="true"] {
+  background: #bfceda;
+  color: #10191e;
+}
+.pd-amount-panel {
+  margin-top: 12px;
+  padding: 17px;
+}
+.pd-balance {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pd-balance > span {
+  font-size: 15px;
+}
+.pd-balance small {
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+.pd-amount-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-size: 76px;
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  min-height: 160px;
+  color: #b2bec5;
+  font-variant-numeric: tabular-nums;
+}
+.pd-amount-input input {
+  min-width: 1ch;
+  max-width: 100%;
+  text-align: center;
+  outline: none;
+  background: transparent;
+  letter-spacing: -0.06em;
+  color: inherit;
+}
+.pd-amount-input input:focus {
+  outline: none;
+}
+.pd-presets {
+  display: flex;
+  gap: 7px;
+}
+.pd-presets button {
+  flex: 1;
+  min-height: 36px;
+  background: #293238;
+  border-radius: 999px;
+  font-size: 15px;
+}
+.pd-contracts {
+  text-align: center;
+  color: #b2bec5;
+  font-size: 17px;
+  margin-top: -25px;
+  margin-bottom: 30px;
+}
+.pd-submit {
+  width: 100%;
+  border-radius: 999px;
+  min-height: 48px;
+  background: #f3f6f8;
+  color: #11191e;
+  font-size: 16px;
+  margin-top: 14px;
+}
+.pd-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.pd-order-note,
+.pd-order-notice {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+  text-align: center;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.pd-order-details {
+  margin-top: 13px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  padding: 0 4px;
+}
+.pd-order-details summary {
+  cursor: pointer;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+.pd-order-details label {
+  display: block;
+  margin: 10px 0;
+}
+.pd-order-details input[type="text"] {
+  width: 100%;
+  margin-top: 8px;
+  min-height: 44px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 12px;
+  color: var(--foreground);
+}
+.pd-order-details p {
+  line-height: 1.8;
+  margin: 10px 0;
+}
+.pd-share-consent input {
+  margin-right: 8px;
+}
+.pd-order-details > button {
+  display: block;
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 12px;
+  width: 100%;
+  margin: 8px 0;
+}
+.pd-trade-screen {
+  --background: #10191e;
+  --card: #1d2529;
+  --secondary: #283136;
+  --border: #394146;
+  --foreground: #f4f7fa;
+  --muted-foreground: #acb8be;
+  position: fixed !important;
+  inset: 0 !important;
+  translate: 0 0 !important;
+  transform: none;
+  max-width: none !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  display: block !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: var(--background) !important;
+  color: var(--foreground);
+  animation: pd-screen-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  z-index: 100 !important;
+}
+.pd-trade-screen > button {
+  display: none;
+}
+.pd-trade-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 10px 16px 12px;
+  background: #10191ef5;
+  backdrop-filter: blur(20px);
+}
+.pd-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: #425059;
+  margin: 0 auto 12px;
+}
+.pd-trade-top .pd-island {
+  padding-right: 42px;
+  animation: pd-island-in 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pd-close {
+  position: absolute;
+  top: 45px;
+  right: 24px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #ffffff0c;
+  color: #d8e3e9;
+}
+.pd-trade-content {
+  padding: 0 16px max(24px, env(safe-area-inset-bottom));
+  max-width: 580px;
+  margin: auto;
+}
+.pd-trade-top > .pd-island {
+  max-width: 548px;
+  margin: auto;
+}
+.pd-dock {
+  background: #252831 !important;
+}
+.pd-dock button {
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.pd-dock button:active {
+  transform: scale(0.98);
+}
+@keyframes pd-screen-in {
+  from {
+    opacity: 0.4;
+    transform: translateY(34px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pd-island-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (min-width: 1024px) {
+  .pd-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+    align-items: start;
+  }
+  .pd-desktop-trade {
+    display: block;
+    position: sticky;
+    top: 96px;
+  }
+  .pd-floating-island {
+    right: auto;
+    left: max(24px, calc((100vw - 1104px) / 2));
+    width: calc(min(65vw, 650px));
+  }
+  .pd-trade-screen {
+    inset: 5vh auto auto 50% !important;
+    translate: -50% 0 !important;
+    width: 580px !important;
+    height: auto !important;
+    max-height: 90dvh !important;
+    border-radius: 28px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-trade-screen,
+  .pd-trade-top .pd-island {
+    animation: none !important;
+  }
+  .pd-floating-island,
+  .pd-dock button {
+    transition: none;
+  }
+}

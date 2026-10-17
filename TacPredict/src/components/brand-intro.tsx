@@ -1,48 +1,54 @@
 import { useEffect, useState } from "react";
-
+import { BrandMark } from "./brand-mark";
+import "@/styles/prediction-intro.css";
 export function BrandIntro() {
-  // Render the overlay on the server too, so Home never flashes before hydration.
   const [visible, setVisible] = useState(true);
   useEffect(() => {
-    // Root shell stays mounted during navigation; a full reload starts a new intro.
-    // No storage gate: every page load gets the same opening treatment.
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(() => setVisible(false), reducedMotion ? 900 : 2100);
-    return () => window.clearTimeout(timer);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const before = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    const timer = window.setTimeout(
+      () => {
+        document.documentElement.style.overflow = before;
+        setVisible(false);
+      },
+      reduced ? 500 : 1850,
+    );
+    return () => {
+      window.clearTimeout(timer);
+      document.documentElement.style.overflow = before;
+    };
   }, []);
   if (!visible) return null;
   return (
-    <div
-      className="brand-intro-3d fixed inset-0 z-[110] grid place-items-center overflow-hidden bg-background"
-      aria-label="Tac Predict opening animation"
-      style={{ animationDuration: "2100ms" }}
-    >
-      <div className="intro-stage" aria-hidden="true">
-        <div className="pixel-logo" aria-hidden="true">
-          {Array.from({ length: 64 }, (_, i) => {
-            const x = i % 8,
-              y = Math.floor(i / 8);
-            return (
-              <span
-                key={i}
-                className="pixel-logo-tile"
-                style={
-                  {
-                    left: `${x * 12.5}%`,
-                    top: `${y * 12.5}%`,
-                    backgroundPosition: `${(x * 100) / 7}% ${(y * 100) / 7}%`,
-                    "--px": `${(x - 3.5) * 24}px`,
-                    "--py": `${(y - 3.5) * 24}px`,
-                    "--turn": `${(i % 2 ? 1 : -1) * 60}deg`,
-                    "--delay": `${(x + y) * 24}ms`,
-                  } as import("react").CSSProperties
-                }
-              />
-            );
-          })}
+    <div className="prediction-intro" role="status" aria-label="Opening TacPredict">
+      <div className="prediction-intro-stage" aria-hidden="true">
+        <svg className="prediction-intro-orbits" viewBox="0 0 280 280" fill="none">
+          <circle cx="140" cy="140" r="105" stroke="currentColor" strokeWidth=".7" />
+          <circle
+            cx="140"
+            cy="140"
+            r="128"
+            stroke="currentColor"
+            strokeWidth=".5"
+            strokeDasharray="2 12"
+          />
+          <path
+            className="intro-signal"
+            d="M18 166 H67 L98 135 L120 151 L159 112 L185 127 L222 91 H262"
+            stroke="#aac1d8"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle className="intro-orbit-point" cx="140" cy="35" r="3" fill="#62cf8a" />
+        </svg>
+        <div className="prediction-intro-logo">
+          <BrandMark className="size-24" />
         </div>
-        <div className="intro-wordmark">
-          Tac Predict
+        <strong>TacPredict</strong>
+        <div className="prediction-intro-track">
+          <span />
         </div>
       </div>
     </div>
