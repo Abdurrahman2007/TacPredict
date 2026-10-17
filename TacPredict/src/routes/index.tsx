@@ -6,12 +6,12 @@ import { useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Flame, Sparkles, ArrowUp } from "lucide-react";
 import { UpDownSection } from "@/components/up-down-section";
 import { homeFeedListings } from "@/lib/markets/home-feed.mjs";
-import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { sortListings } from "@/lib/markets/listing-sort.mjs";
 import type { Market, MarketCategory } from "@/domain/markets/types";
 import homeCss from "@/styles/home-reference.css?url";
+import updownCss from "@/styles/updown.css?url";
 
 const feeds = ["Trending", "Live", "Upcoming", "New"] as const;
 type Feed = (typeof feeds)[number];
@@ -20,7 +20,10 @@ export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { feed?: Feed } =>
     feeds.includes(search["feed"] as Feed) ? { feed: search["feed"] as Feed } : {},
   head: () => ({
-    links: [{ rel: "stylesheet", href: homeCss }],
+    links: [
+      { rel: "stylesheet", href: homeCss },
+      { rel: "stylesheet", href: updownCss },
+    ],
     meta: [
       { title: "TacPredict — Prediction Markets" },
       {
@@ -58,8 +61,6 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { feed = "Trending" } = Route.useSearch();
-  const { data: crypto } = useQuery(cryptoMarketQueryOptions);
-  const { data: btcHistory } = useQuery(cryptoHistoryQueryOptions("bitcoin"));
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const snapshot = Route.useLoaderData();
   const events = useQuery({
@@ -130,19 +131,7 @@ function HomePage() {
       {(feed === "Trending" || feed === "New") && <FeaturedCarousel markets={featured} />}
       {feed === "Trending" && (
         <div className="home-crypto-chart">
-          <UpDownSection
-            crypto={crypto}
-            histories={
-              crypto
-                ? {
-                    ...crypto.histories,
-                    bitcoin: [...(btcHistory ?? []), ...crypto.histories.bitcoin],
-                  }
-                : undefined
-            }
-            liveMarkets={nativeFeed.cryptoUpDown}
-            snapshotTime={nativeFeed.updatedAt}
-          />
+          <UpDownSection markets={nativeFeed.markets} snapshotTime={nativeFeed.updatedAt} />
         </div>
       )}
       <HomeSection

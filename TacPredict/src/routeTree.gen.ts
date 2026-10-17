@@ -18,6 +18,7 @@ import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as UpDownRouteImport } from './routes/up-down'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
+import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AdminSectionRouteImport } from './routes/admin.$section'
 import { Route as AdminMarketImporterRouteImport } from './routes/admin.market-importer'
@@ -64,6 +65,11 @@ const SearchRoute = SearchRouteImport.update({
 const UpDownRoute = UpDownRouteImport.update({
   id: '/up-down',
   path: '/up-down',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpDownAssetRoute = UpDownAssetRouteImport.update({
+  id: '/up-down_/$asset',
+  path: '/up-down/$asset',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/admin/login': typeof AdminLoginRoute
+  '/up-down/$asset': typeof UpDownAssetRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/admin/login': typeof AdminLoginRoute
+  '/up-down/$asset': typeof UpDownAssetRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
   '/admin_/login': typeof AdminLoginRoute
+  '/up-down_/$asset': typeof UpDownAssetRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/up-down'
     | '/admin/login'
+    | '/up-down/$asset'
     | '/auth/callback'
     | '/admin/$section'
     | '/admin/market-importer'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/up-down'
     | '/admin/login'
+    | '/up-down/$asset'
     | '/auth/callback'
     | '/admin/$section'
     | '/admin/market-importer'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/up-down'
     | '/admin_/login'
+    | '/up-down_/$asset'
     | '/auth_/callback'
     | '/admin/$section'
     | '/admin/market-importer'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   UpDownRoute: typeof UpDownRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  UpDownAssetRoute: typeof UpDownAssetRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
 }
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/up-down'
       fullPath: '/up-down'
       preLoaderRoute: typeof UpDownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/up-down_/$asset': {
+      id: '/up-down_/$asset'
+      path: '/up-down/$asset'
+      fullPath: '/up-down/$asset'
+      preLoaderRoute: typeof UpDownAssetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin_/login': {
@@ -383,6 +403,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   UpDownRoute: UpDownRoute,
   AdminLoginRoute: AdminLoginRoute,
+  UpDownAssetRoute: UpDownAssetRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
 }
