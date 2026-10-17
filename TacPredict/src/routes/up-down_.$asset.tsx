@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { UpDownDetail } from "@/components/updown/updown-detail";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { ASSETS, assetFromSlug, parseDuration } from "@/lib/updown/window.mjs";
@@ -25,7 +26,6 @@ export const Route = createFileRoute("/up-down_/$asset")({
   },
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions).catch(() => null);
-    return { loadedAt: Date.now() };
   },
   notFoundComponent: () => <div className="py-16 text-center">Market not found.</div>,
   component: UpDownAssetPage,
@@ -34,7 +34,10 @@ export const Route = createFileRoute("/up-down_/$asset")({
 function UpDownAssetPage() {
   const { asset: slug } = Route.useParams();
   const search = Route.useSearch();
-  const { loadedAt } = Route.useLoaderData();
+  // The feed snapshot time is dehydrated with the query, so server and browser start from the
+  // same clock value and the countdown does not mismatch on hydration.
+  const feed = useQuery(nativeMarketFeedQueryOptions);
+  const loadedAt = Date.parse(feed.data?.updatedAt ?? "") || 0;
   const asset = assetFromSlug(slug);
   if (!asset) return null;
   return (
