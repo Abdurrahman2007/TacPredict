@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { adminSectionSchema, adminSnapshotSchema } from "./admin-view";
+import { missingSportsClauses } from "./market-templates.mjs";
 import { createPublicClient, http, keccak256, parseAbi, stringToHex, type Address } from "viem";
 import { base } from "viem/chains";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -20,7 +21,9 @@ const documentSchema = z
   .object({
     title: z.string().min(5).max(200),
     description: z.string().min(20).max(12000),
-    category: z.enum(["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"]),
+    // The product has three sections. Football and Cricket are stored as Sports + subcategory.
+    category: z.enum(["Crypto", "Sports"]),
+    subcategory: z.enum(["Football", "Cricket"]).optional(),
     outcomes: z
       .array(z.string().min(1).max(80))
       .min(2)
@@ -38,7 +41,17 @@ const documentSchema = z
       .refine(isManagedImageUrl, "Image must be uploaded through the admin image upload")
       .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((doc, ctx) => {
+    if ((doc.category === "Sports") !== Boolean(doc.subcategory))
+      ctx.addIssue({ code: "custom", message: "Choose Crypto, Football or Cricket." });
+    // Sports rules must state what happens on postponed, abandoned, tied and no-result matches
+    // before the market exists; the engine drafts do, and hand-written rules must too.
+    if (doc.subcategory) {
+      const missing = missingSportsClauses(doc.rules, doc.subcategory === "Football" ? "football" : "cricket");
+      if (missing.length) ctx.addIssue({ code: "custom", message: `Rules must state ${missing.join("; ")}.` });
+    }
+  });
 function canonical(v: unknown): string {
   if (Array.isArray(v)) return "[" + v.map(canonical).join(",") + "]";
   if (v && typeof v === "object")

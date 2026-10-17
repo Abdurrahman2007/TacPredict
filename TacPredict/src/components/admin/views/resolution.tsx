@@ -8,6 +8,7 @@ import {
   type ParsedResolution,
 } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
+import { ResolutionEvidence } from "./resolution-evidence";
 import { Badge, Card, Loaded, Notice, PageHeader, Tile, statusTone } from "../admin-ui";
 
 const DISPUTE_PATTERN = /DISPUT|CHALLENG/i;
@@ -22,8 +23,10 @@ export function ResolutionView({ view }: { view: string }) {
       return <ResolveView />;
     case "disputes":
       return <ResolutionTable mode="disputes" />;
-    case "evidence":
-      return <ResolutionTable mode="evidence" />;
+    case "crypto":
+      return <ResolutionEvidence kind="crypto" />;
+    case "sports":
+      return <ResolutionEvidence kind="sports" />;
     default:
       return <ResolutionTable mode="pending" />;
   }

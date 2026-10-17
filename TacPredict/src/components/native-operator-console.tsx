@@ -8,16 +8,27 @@ import {
   type PreparedTerms,
   type ResolverAction,
 } from "@/lib/protocol/operator-actions";
+export type ResolverPrefill = {
+  marketId: string;
+  outcome: number;
+  voided: boolean;
+  evidenceHash: string;
+  observedAt: string;
+};
+
 export function NativeOperatorConsole({
   prepared,
   outcomeCount,
   initialTimes,
+  resolverPrefill,
 }: {
   prepared: PreparedTerms | null;
   outcomeCount: number;
   initialTimes?:
     | { openAt: string; closeAt: string; resolveAfter: string; resolutionDeadline: string }
     | undefined;
+  /** Fills the propose form from reviewed evidence. It only fills fields; a wallet still signs. */
+  resolverPrefill?: ResolverPrefill | undefined;
 }) {
   const wallet = useBaseWallet(),
     q = useQuery({
@@ -37,14 +48,16 @@ export function NativeOperatorConsole({
         resolutionDeadline: "",
       },
     ),
-    [action, setAction] = useState<ResolverAction>("checkpointClose"),
-    [input, setInput] = useState({
-      marketId: "",
-      outcome: 0,
-      voided: false,
-      evidenceHash: "",
-      observedAt: "",
-    });
+    [action, setAction] = useState<ResolverAction>(resolverPrefill ? "propose" : "checkpointClose"),
+    [input, setInput] = useState(
+      resolverPrefill ?? {
+        marketId: "",
+        outcome: 0,
+        voided: false,
+        evidenceHash: "",
+        observedAt: "",
+      },
+    );
   const deployment = q.data?.find((d) => d.chainId === chain);
   const ready = Boolean(
     deployment && wallet.provider && wallet.address && wallet.chainId === chain && ack,
@@ -136,7 +149,7 @@ export function NativeOperatorConsole({
           Simulate &amp; sign Factory transaction
         </button>
       </details>
-      <details className="border-t border-border pt-4">
+      <details className="border-t border-border pt-4" open={Boolean(resolverPrefill)}>
         <summary className="min-h-11 cursor-pointer text-sm font-semibold">
           Resolution, dispute and guardian actions
         </summary>

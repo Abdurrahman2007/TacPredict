@@ -1,20 +1,13 @@
-import { fiveMinuteTemplate, type FiveMinuteTimes } from "@/lib/protocol/five-minute-market.mjs";
-import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { SECTIONS, termsForSection, type Section } from "@/domain/markets/sections.mjs";
+import { validateDraft, type Draft, type DraftTimes } from "@/lib/protocol/market-templates.mjs";
+import { takeDraft } from "../draft-handoff";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
 import { prepareNativeMarket, uploadMarketImage } from "@/lib/protocol/admin.functions";
 import { prepareMarketImage } from "@/lib/protocol/market-image-client";
 import type { PreparedTerms } from "@/lib/protocol/operator-actions";
 import { Card, Notice, PageHeader } from "../admin-ui";
-
-const CATEGORIES = [
-  "Crypto",
-  "Sports",
-  "News",
-  "Technology",
-  "Business",
-  "Culture",
-  "Other",
-] as const;
 
 type FormKey = "title" | "description" | "outcomes" | "rules" | "source" | "sourceUrl";
 
@@ -36,7 +29,7 @@ export function CreateMarket() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "Crypto" as (typeof CATEGORIES)[number],
+    section: "Crypto" as Section,
     outcomes: "Yes,No",
     rules: "",
     source: "",
@@ -44,13 +37,32 @@ export function CreateMarket() {
     image: "",
   });
   const [uploading, setUploading] = useState(false);
-  const [templateTimes, setTemplateTimes] = useState<FiveMinuteTimes | null>(null);
-  function chooseFiveMinute(asset: "bitcoin" | "ethereum") {
-    const { times, ...terms } = fiveMinuteTemplate(asset);
-    setTemplateTimes(times);
+  const [templateTimes, setTemplateTimes] = useState<DraftTimes | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [fromEngine, setFromEngine] = useState(false);
+
+  // A draft prepared on the Market engine page arrives here once, as plain form values.
+  useEffect(() => {
+    const draft: Draft | null = takeDraft();
+    if (!draft) return;
+    const section: Section =
+      draft.subcategory === "Football" ? "Football" : draft.subcategory === "Cricket" ? "Cricket" : "Crypto";
+    setTemplateTimes(draft.times);
+    setTags(draft.tags);
+    setFromEngine(true);
     setMarketType("multi");
-    edit(terms);
-  }
+    setPrepared(null);
+    setForm((f) => ({
+      ...f,
+      section,
+      title: draft.title,
+      description: draft.description,
+      outcomes: draft.outcomes,
+      rules: draft.rules,
+      source: draft.source,
+      sourceUrl: draft.sourceUrl,
+    }));
+  }, []);
 
   const outcomeList = useMemo(
     () =>
@@ -59,6 +71,28 @@ export function CreateMarket() {
         .map((x) => x.trim())
         .filter(Boolean),
     [form.outcomes],
+  );
+
+  const terms = termsForSection(form.section);
+  const problems = useMemo(
+    () =>
+      form.title || form.rules
+        ? validateDraft(
+            {
+              title: form.title,
+              outcomes: form.outcomes,
+              rules: form.rules,
+              sourceUrl: form.sourceUrl,
+              category: terms.category,
+              ...(terms.subcategory ? { subcategory: terms.subcategory } : {}),
+              ...(templateTimes ? { times: templateTimes } : {}),
+            },
+            Date.now(),
+            { times: Boolean(templateTimes) },
+          )
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form.title, form.outcomes, form.rules, form.sourceUrl, form.section, templateTimes],
   );
 
   function edit(next: Partial<typeof form>) {
@@ -86,9 +120,9 @@ export function CreateMarket() {
     setBusy(true);
     setPrepared(null);
     setNotice(null);
-    const { image, ...terms } = form;
+    const { image, section, ...fields } = form;
     void prepareNativeMarket({
-      data: { ...terms, outcomes: outcomeList, tags: [], ...(image ? { image } : {}) },
+      data: { ...fields, ...termsForSection(section), outcomes: outcomeList, tags, ...(image ? { image } : {}) },
     })
       .then((r) => {
         setPrepared(r);
@@ -113,35 +147,25 @@ export function CreateMarket() {
         subtitle="Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
       />
 
-      <Card title="Real BTC / ETH five-minute templates">
+      <Card title="Start from a draft">
         <p className="adm-muted">
-          Fixed UTC window, Up / Down outcomes and exact Coinbase 60-second candle rules. No
-          invented opening price. Review the source and oracle coverage before publishing; a
-          template is not a live market.
+          Crypto Up/Down windows and Football / Cricket matches are prepared on the Market engine page with their rules
+          already written. Pick one there and it opens here.
         </p>
         <div className="adm-tabs">
-          <button
-            className="adm-btn"
-            type="button"
-            disabled={busy}
-            onClick={() => chooseFiveMinute("bitcoin")}
-          >
-            Bitcoin · 5 min
-          </button>
-          <button
-            className="adm-btn"
-            type="button"
-            disabled={busy}
-            onClick={() => chooseFiveMinute("ethereum")}
-          >
-            Ethereum · 5 min
-          </button>
+          <Link to="/admin/$section" params={{ section: "engine" }} search={{ view: "fixtures" }} className="adm-btn">
+            Football &amp; Cricket matches
+          </Link>
+          <Link to="/admin/$section" params={{ section: "engine" }} search={{ view: "crypto" }} className="adm-btn">
+            Crypto windows
+          </Link>
           {templateTimes && (
             <button
               className="adm-btn"
               type="button"
               onClick={() => {
                 setTemplateTimes(null);
+                setFromEngine(false);
                 setPrepared(null);
               }}
             >
@@ -151,9 +175,9 @@ export function CreateMarket() {
         </div>
         {templateTimes && (
           <p className="adm-muted">
-            UTC: {templateTimes.openAt.replace("T", " ")} to{" "}
-            {templateTimes.closeAt.replace("T", " ")}. Times are locked to these rules. Choose a
-            fresh template if the window is too close.
+            {fromEngine ? "Draft from the Market engine. " : ""}UTC: {templateTimes.openAt.replace("T", " ")} to{" "}
+            {templateTimes.closeAt.replace("T", " ")}. Times are locked to these rules. Prepare a fresh draft if the
+            window is too close.
           </p>
         )}
       </Card>
@@ -257,30 +281,45 @@ export function CreateMarket() {
             </span>
           </div>
 
-          <label className="adm-field">
-            Category
-            <select
-              className="adm-select"
-              disabled={busy}
-              value={form.category}
-              onChange={(e) => edit({ category: e.target.value as (typeof CATEGORIES)[number] })}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
+          <div className="adm-field">
+            Section
+            <div className="adm-tabs" role="group" aria-label="Section" style={{ margin: 0 }}>
+              {SECTIONS.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  className="adm-tab"
+                  aria-pressed={form.section === name}
+                  disabled={busy}
+                  onClick={() => edit({ section: name })}
+                >
+                  {name}
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </div>
 
           <p className="adm-muted" style={{ margin: 0, fontSize: 12.5 }}>
             Outcomes: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8, all
             different). Open and close times are set in step 2.
           </p>
 
+          {problems.length > 0 ? (
+            <Notice tone="warn">
+              <b>Fix before saving</b>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
+                {problems.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </Notice>
+          ) : null}
+
           <div>
             <button
               type="submit"
               className="adm-btn adm-btn-primary"
-              disabled={busy || uploading || outcomeList.length < 2}
+              disabled={busy || uploading || outcomeList.length < 2 || problems.length > 0}
             >
               {busy ? "Saving…" : "Save market terms"}
             </button>

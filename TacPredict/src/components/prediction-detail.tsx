@@ -247,7 +247,7 @@ export function PredictionDetail({
             <p>{market.description}</p>
             <details>
               <summary>Show resolution rules</summary>
-              <p>{market.resolutionCriteria}</p>
+              <p style={{ whiteSpace: "pre-line" }}>{market.resolutionCriteria}</p>
               <a href={market.sourceUrl} target="_blank" rel="noopener noreferrer">
                 View source <ArrowUpRight size={15} />
               </a>

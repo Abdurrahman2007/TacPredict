@@ -5,6 +5,7 @@
  */
 export const adminRouteSections = [
   "markets",
+  "engine",
   "trading",
   "resolution",
   "users",
@@ -29,7 +30,7 @@ export const adminNavItems: AdminNavItem[] = [
   { kind: "overview", id: "overview", label: "Overview" },
   { kind: "page", id: "markets", label: "Markets", section: "markets", view: "all" },
   { kind: "page", id: "create", label: "Create market", section: "markets", view: "create" },
-  { kind: "importer", id: "importer", label: "AI importer" },
+  { kind: "page", id: "engine", label: "Market engine", section: "engine", view: "fixtures" },
   { kind: "page", id: "resolution", label: "Resolution", section: "resolution", view: "pending" },
   { kind: "page", id: "trades", label: "Trades", section: "trading", view: "trades" },
   { kind: "page", id: "users", label: "Users", section: "users", view: "users" },
@@ -40,6 +41,7 @@ export const adminNavItems: AdminNavItem[] = [
 /** First view of every section; used when the URL has no `view`. */
 export const defaultViews: Record<AdminRouteSection, string> = {
   markets: "all",
+  engine: "fixtures",
   trading: "trades",
   resolution: "pending",
   users: "users",
@@ -60,10 +62,16 @@ export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; labe
     { view: "resolving", label: "Resolving" },
     { view: "resolved", label: "Resolved" },
   ],
+  engine: [
+    { view: "fixtures", label: "Football & Cricket" },
+    { view: "crypto", label: "Crypto windows" },
+    { view: "providers", label: "Providers" },
+  ],
   resolution: [
     { view: "pending", label: "Pending" },
+    { view: "crypto", label: "Crypto oracle" },
+    { view: "sports", label: "Sports results" },
     { view: "disputes", label: "Disputes" },
-    { view: "evidence", label: "Evidence" },
     { view: "resolve", label: "Resolve" },
   ],
   blockchain: [
@@ -74,14 +82,14 @@ export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; labe
   settings: [
     { view: "system", label: "System" },
     { view: "audit", label: "Audit log" },
-    { view: "categories", label: "Categories" },
-    { view: "providers", label: "Providers" },
   ],
 };
 
 /** Old links to pages that were merged or removed land somewhere useful instead of an empty page. */
-export function adminRedirectFor(section: AdminRouteSection, view: string): "overview" | "users" | null {
+export function adminRedirectFor(section: AdminRouteSection, view: string): "overview" | "users" | "engine" | null {
   if (section === "treasury" || section === "analytics" || section === "notifications") return "overview";
   if (section === "settings" && view === "admins") return "users";
+  if (section === "settings" && (view === "categories" || view === "providers")) return "engine";
+  if (section === "resolution" && view === "evidence") return "overview";
   return null;
 }

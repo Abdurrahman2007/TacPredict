@@ -1,6 +1,7 @@
 import { Link, Navigate } from "@tanstack/react-router";
 import { adminRedirectFor, sectionTabs, type AdminRouteSection } from "@/lib/protocol/admin-nav";
 import { BlockchainView } from "./views/blockchain";
+import { EngineView } from "./views/engine";
 import { MarketsView } from "./views/markets";
 import { ResolutionView } from "./views/resolution";
 import { SettingsView } from "./views/settings";
@@ -32,6 +33,8 @@ function SectionBody({ section, view }: { section: AdminRouteSection; view: stri
   switch (section) {
     case "markets":
       return <MarketsView view={view} />;
+    case "engine":
+      return <EngineView view={view} />;
     case "resolution":
       return <ResolutionView view={view} />;
     case "blockchain":
@@ -49,6 +52,8 @@ function SectionBody({ section, view }: { section: AdminRouteSection; view: stri
 export function AdminSectionView({ section, view }: { section: AdminRouteSection; view: string }) {
   const redirect = adminRedirectFor(section, view);
   if (redirect === "overview") return <Navigate to="/admin" replace />;
+  if (redirect === "engine")
+    return <Navigate to="/admin/$section" params={{ section: "engine" }} search={{ view: "providers" }} replace />;
   if (redirect === "users")
     return <Navigate to="/admin/$section" params={{ section: "users" }} search={{ view: "users" }} replace />;
   return (

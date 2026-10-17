@@ -1,19 +1,3 @@
-export type FiveMinuteTimes = {
-  openAt: string;
-  closeAt: string;
-  resolveAfter: string;
-  resolutionDeadline: string;
-};
-export function fiveMinuteTemplate(
-  asset: "bitcoin" | "ethereum",
-  now?: number,
-): {
-  title: string;
-  description: string;
-  category: "Crypto";
-  outcomes: string;
-  rules: string;
-  source: string;
-  sourceUrl: string;
-  times: FiveMinuteTimes;
-};
+import type { Draft, DraftTimes } from "./market-templates.mjs";
+export type FiveMinuteTimes = DraftTimes;
+export function fiveMinuteTemplate(asset: "bitcoin" | "ethereum", now?: number): Draft;

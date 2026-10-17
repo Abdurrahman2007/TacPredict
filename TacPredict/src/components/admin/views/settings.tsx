@@ -2,81 +2,13 @@ import { formatTimestamp } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
 import { Badge, Card, Loaded, PageHeader } from "../admin-ui";
 
-const CATEGORIES = ["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"];
-
 export function SettingsView({ view }: { view: string }) {
   switch (view) {
-    case "categories":
-      return <CategoriesView />;
-    case "providers":
-      return <ProvidersView />;
     case "audit":
       return <AuditView />;
     default:
       return <SystemView />;
   }
-}
-
-function CategoriesView() {
-  return (
-    <div className="adm-stack">
-      <PageHeader title="Categories" subtitle="Categories you can pick when creating a market." />
-      <Card title="Current categories">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {CATEGORIES.map((c) => (
-            <Badge key={c} tone="brand">
-              {c}
-            </Badge>
-          ))}
-        </div>
-      </Card>
-      <p className="adm-muted" style={{ margin: 0 }}>This list is fixed in the app.</p>
-    </div>
-  );
-}
-
-function ProvidersView() {
-  return (
-    <div className="adm-stack">
-      <PageHeader title="Providers" subtitle="Outside services the app uses." />
-      <Card flush>
-        <div className="adm-table-wrap">
-          <table className="adm-table">
-            <thead>
-              <tr>
-                <th>Provider</th>
-                <th>Used for</th>
-                <th>Control</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ fontWeight: 650 }}>Base RPC</td>
-                <td>Live chain reads, indexing and wallet transactions</td>
-                <td>Server environment variable</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 650 }}>Supabase</td>
-                <td>Authentication, roles and indexed protocol data</td>
-                <td>Supabase project settings</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 650 }}>CoinGecko</td>
-                <td>Crypto price context on market cards</td>
-                <td>Server environment variable</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 650 }}>Polymarket</td>
-                <td>Discovery of candidate markets and reference odds</td>
-                <td>AI market importer</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </Card>
-      <p className="adm-muted" style={{ margin: 0 }}>API keys are never shown here. They live in server settings.</p>
-    </div>
-  );
 }
 
 function SystemView() {
