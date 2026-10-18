@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/protocol.test.mjs test/ui-order-math.test.mjs test/reward-view.test.mjs test/deployment-verifier.test.mjs test/job-fencing.test.mjs test/indexer-config.test.mjs test/base-account-proof.test.mjs test/oracle-observer.test.mjs test/request-budget.test.mjs test/admin-workspace.test.mjs test/admin-rows.test.mjs",
+    "test": "node --test test/protocol.test.mjs test/ui-order-math.test.mjs test/reward-view.test.mjs test/deployment-verifier.test.mjs test/job-fencing.test.mjs test/indexer-config.test.mjs test/base-account-proof.test.mjs test/oracle-observer.test.mjs test/request-budget.test.mjs test/admin-workspace.test.mjs test/admin-rows.test.mjs test/updown-pool.test.mjs test/updown-window.test.mjs test/sections.test.mjs test/market-templates.test.mjs test/sports-fixtures.test.mjs test/brand-assets.test.mjs",
     "compile": "node scripts/compile.mjs",
     "verify:deployment": "node scripts/verify-deployment.mjs",
     "prepare:oracle:evidence": "node scripts/prepare-oracle-evidence.mjs",

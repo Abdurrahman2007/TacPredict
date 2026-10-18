@@ -119,3 +119,6 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+
+---
+bnb.svg and xrp.svg are the unmodified files from https://github.com/spothq/cryptocurrency-icons (svg/color), which publishes them under CC0 1.0. They are real token logos, not redrawn.
