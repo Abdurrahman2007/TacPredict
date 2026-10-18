@@ -62,6 +62,7 @@ export function CoinGeckoChart({
         <UpDownChart
           w={series.length > 1 ? { ...selected, start: first!.time, end: last!.time } : selected}
           series={series}
+          compact={summary}
           beat={null}
           asset={asset}
           live={false}
@@ -76,12 +77,6 @@ export function CoinGeckoChart({
           </span>
         </div>
       )}
-      <span
-        className="cg-attribution"
-        title={`Sampled CoinGecko prices${snapshot.data?.stale ? " · delayed" : ""}. Display only; settlement follows the locked oracle rules.`}
-      >
-        CoinGecko{snapshot.data?.stale ? " · delayed" : ""}
-      </span>
     </section>
   );
 }

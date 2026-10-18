@@ -3,8 +3,8 @@
   min-width: 0;
   background: #1d2529;
   border: 1px solid #384145;
-  border-radius: 24px;
-  padding: 20px;
+  border-radius: 21px;
+  padding: 16px;
 }
 .tp-market-card {
   display: flex;
@@ -18,7 +18,7 @@
   color: #acb8be;
   font-size: 12px;
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .tp-card-meta > span {
   color: #f1f4f5;
@@ -32,24 +32,24 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  min-height: 44px;
+  min-height: 40px;
 }
 .tp-card-title h3 {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.45;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .tp-card-outcomes {
   display: grid;
-  gap: 16px;
-  margin: 26px 0 24px;
+  gap: 10px;
+  margin: 18px 0;
 }
 .tp-card-outcome {
   display: flex;
   gap: 12px;
   align-items: center;
-  min-height: 48px;
+  min-height: 44px;
   border-radius: 12px;
 }
 .tp-card-outcome > div {
@@ -57,9 +57,9 @@
 }
 .tp-card-outcome > span:last-child {
   min-width: 64px;
-  min-height: 42px;
+  min-height: 38px;
   background: #293137;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
 }
 .tp-card-footer {
@@ -82,13 +82,13 @@
   outline-offset: 4px;
 }
 .tp-card.home-featured-card {
-  flex: 0 0 90%;
-  max-width: 420px;
+  flex: 0 0 88%;
+  max-width: 380px;
   scroll-snap-align: start;
 }
 @media (min-width: 640px) {
   .tp-card {
-    padding: 24px;
-    border-radius: 26px;
+    padding: 18px;
+    border-radius: 23px;
   }
 }

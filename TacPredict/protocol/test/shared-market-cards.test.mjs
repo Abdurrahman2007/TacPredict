@@ -55,3 +55,25 @@ test("multi-outcome trade dock does not hide football Away", () => {
   assert.ok(c.includes("market.outcomes.length > 2"));
   assert.ok(c.includes("Trade ·"));
 });
+
+test("compact cards have no repeated visible provider caption", () => {
+  const c = src("components/updown/coingecko-chart.tsx");
+  assert.ok(!c.includes('className="cg-attribution"'));
+  assert.ok(c.includes("compact={summary}"));
+  assert.ok(src("components/updown/sections.tsx").includes("CoinGecko chart is display-only"));
+});
+test("chart is an interactive data-rendered SVG rather than a screenshot", () => {
+  const c = src("components/updown/updown-chart.tsx");
+  assert.ok(c.includes("compact ? 176 : 232"));
+  for (const feature of [
+    "onPointerDown",
+    "onKeyDown",
+    "ArrowLeft",
+    "aria-valuetext",
+    "ud-chart-probe",
+  ])
+    assert.ok(c.includes(feature));
+  assert.ok(c.includes('const line = `M${points.join(" L")}`'));
+  assert.ok(!c.includes("<img"));
+  assert.ok(!c.includes("Math.random"));
+});

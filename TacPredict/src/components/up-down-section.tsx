@@ -51,32 +51,32 @@ function AssetCard({
 
   return (
     <article className="ud-home-card tp-card" aria-label={`${info.name} Up or Down`}>
-      <div className="tp-crypto-meta">
+      <div className="tp-crypto-heading">
         <img
           src={`/brand/crypto/${info.logo}.svg`}
           alt={`${info.name} logo`}
-          className="size-9 shrink-0 rounded-full"
+          className="size-8 shrink-0 rounded-full"
         />
-        <span className="ud-live text-xs font-medium tabular-nums">
-          LIVE {formatCountdown(w.end - nowMs)}
-        </span>
+        <div className="tp-crypto-copy">
+          <Link
+            to="/up-down/$asset"
+            params={{ asset: slugOf(asset) }}
+            search={search}
+            className="tp-crypto-title"
+          >
+            <h3>{title}</h3>
+          </Link>
+          <p className="tp-crypto-time">
+            {dayLabel(w.start, zone)}, {clock(w.start, zone)} –{" "}
+            {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
+            {clock(w.end, zone)}
+          </p>
+        </div>
+        <span className="ud-live tp-crypto-live">LIVE {formatCountdown(w.end - nowMs)}</span>
       </div>
-      <Link
-        to="/up-down/$asset"
-        params={{ asset: slugOf(asset) }}
-        search={search}
-        className="tp-crypto-title"
-      >
-        <h3>{title}</h3>
-      </Link>
-      <p className="tp-crypto-time">
-        {dayLabel(w.start, zone)}, {clock(w.start, zone)} –{" "}
-        {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
-        {clock(w.end, zone)}
-      </p>
       {large && <CoinGeckoChart asset={asset} window={w} summary />}
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="tp-crypto-actions">
         {(
           [
             ["Up", up],
@@ -94,7 +94,7 @@ function AssetCard({
           </Link>
         ))}
       </div>
-      <div className="mt-4 flex justify-between border-t border-border/50 pt-3 text-xs text-muted-foreground">
+      <div className="tp-crypto-footer">
         <span>{usdcShort(market?.native?.openInterestAtomic)} OI</span>
         <span>{volumeText(market?.volume)} Vol</span>
       </div>

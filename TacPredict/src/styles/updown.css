@@ -631,100 +631,145 @@
   }
 }
 
+/* Compact cards share a single interactive, sampled-price chart. */
 .cg-chart {
   min-width: 0;
-  margin-top: 18px;
+  position: relative;
+  margin-top: 12px;
 }
-.cg-chart-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  color: #acb8be;
-  font-size: 12px;
-}
-.cg-chart-heading strong {
-  color: #299eff;
-  font-size: 18px;
-  font-variant-numeric: tabular-nums;
-}
-.cg-chart-note {
-  font-size: 11px;
-  color: #acb8be;
-  line-height: 1.7;
-  margin: 8px 0;
-}
-
-/* Clean sampled-price cards: a single summary, chart and pair of actions. */
 .ud-home-card.tp-card {
+  padding: 16px;
+  border-radius: 22px;
   background: #1d2529;
   border-color: #384145;
 }
-.tp-crypto-meta {
+.tp-crypto-heading {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  align-items: flex-start;
+  gap: 9px;
+}
+.tp-crypto-heading > img {
+  margin-top: 2px;
+}
+.tp-crypto-copy {
+  min-width: 0;
+  flex: 1;
 }
 .tp-crypto-title h3 {
-  font-size: 16px;
-  font-weight: 650;
-  line-height: 1.45;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 .tp-crypto-time {
-  color: #acb8be;
-  font-size: 13px;
+  color: #a3afb5;
+  font-size: 11px;
   line-height: 1.5;
-  margin-top: 5px;
+  margin-top: 3px;
+}
+.tp-crypto-live {
+  flex-shrink: 0;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 .tp-price-summary {
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr);
-  gap: 16px;
-  margin: 24px 0 12px;
+  gap: 14px;
+  margin: 16px 0 8px;
 }
 .tp-price-summary dt {
-  color: #acb8be;
-  font-size: 13px;
+  color: #a3afb5;
+  font-size: 12px;
 }
 .tp-price-summary dd {
-  font-size: 17px;
-  margin-top: 6px;
+  font-size: 16px;
+  margin-top: 5px;
   font-variant-numeric: tabular-nums;
 }
 .tp-price-summary dd span {
   display: inline-block;
-  margin-left: 7px;
-  font-size: 12px;
+  margin-left: 6px;
+  font-size: 11px;
 }
 .tp-price-summary .tp-current {
-  color: #315dff;
+  color: #3476f6;
 }
-.cg-chart {
-  position: relative;
-}
-.cg-chart .cg-attribution {
-  display: block;
-  text-align: right;
-  color: #8e9ba2;
-  font-size: 9px;
-  margin-top: -5px;
-  margin-bottom: 8px;
+.tp-crypto-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
 }
 .ud-home-card .ud-outcome-up,
 .ud-home-card .ud-outcome-down {
+  min-height: 44px;
   color: #f3f5f6;
   background: #293137;
   font-weight: 500;
 }
+.tp-crypto-footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #303a3f;
+  padding-top: 10px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #97a5ac;
+  font-variant-numeric: tabular-nums;
+}
 .ud-home-card .ud-chart {
-  min-height: 190px;
+  min-height: 0;
+  margin-top: 8px;
 }
 .ud-home-card .ud-chart svg {
   width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 360/176;
 }
 .ud-home-card .ud-chart-empty {
+  min-height: 156px;
   color: #8e9ba2;
   font-size: 12px;
+}
+.ud-chart-interactive {
+  position: relative;
+  outline: none;
+}
+.ud-chart-interactive:focus-visible {
+  border-radius: 12px;
+  outline: 2px solid #9db6d6;
+  outline-offset: 3px;
+}
+.ud-chart-interactive svg {
+  cursor: crosshair;
+}
+.ud-chart-probe {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  top: 0;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  padding: 6px 9px;
+  border: 1px solid #414d54;
+  border-radius: 10px;
+  background: #202b31;
+  box-shadow: 0 4px 14px #0002;
+  font-size: 11px;
+  color: #eff3f5;
+  font-variant-numeric: tabular-nums;
+}
+.ud-chart-probe time {
+  color: #9cabb3;
+  font-size: 10px;
+}
+@media (min-width: 640px) {
+  .ud-home-card.tp-card {
+    padding: 18px;
+    border-radius: 23px;
+  }
 }
