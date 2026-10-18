@@ -171,7 +171,7 @@ export function UpDownDetail({
 
         <dl className="ud-prices">
           <div>
-            <dt>Oracle price to beat · Coinbase</dt>
+            <dt>Price to beat · Coinbase</dt>
             <dd>
               {beat !== null
                 ? formatUsd(beat, asset)
@@ -183,7 +183,7 @@ export function UpDownDetail({
             </dd>
           </div>
           <div>
-            <dt>{state === "past" ? "Oracle final · Coinbase" : "Oracle reference · Coinbase"}</dt>
+            <dt>{state === "past" ? "Final · Coinbase" : "Oracle · Coinbase"}</dt>
             <dd>
               {current !== null
                 ? formatUsd(current, asset)
@@ -202,11 +202,6 @@ export function UpDownDetail({
       </div>
 
       <CoinGeckoChart asset={asset} window={w} />
-      <p className="cg-chart-note">
-        Chart: CoinGecko. Oracle/reference values above: Coinbase {info.product}. Providers may
-        differ; the chart never finalizes a result.
-      </p>
-
       <nav className="ud-durations" aria-label="Window length">
         {DURATIONS.map((d) => (
           <Link

@@ -96,13 +96,13 @@ function AssetCard({
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className="text-xs text-muted-foreground">Oracle price to beat · Coinbase</dt>
+          <dt className="text-xs text-muted-foreground">Price to beat · Coinbase</dt>
           <dd className="mt-1 font-semibold tabular-nums">
             {beat !== null ? formatUsd(beat, asset) : spot.isPending ? "Loading…" : "Unavailable"}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Oracle reference · Coinbase</dt>
+          <dt className="text-xs text-muted-foreground">Oracle · Coinbase</dt>
           <dd className="mt-1 font-semibold tabular-nums">
             {current !== null
               ? formatUsd(current, asset)

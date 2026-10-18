@@ -46,21 +46,25 @@ export function CoinGeckoChart({ asset, window: selected }: { asset: UpDownAsset
           {unavailable ? "CoinGecko data unavailable" : "Loading CoinGecko history…"}
         </div>
       )}
-      <p className="cg-chart-note">
-        {!exactWindow && points.length > 0
-          ? "Too few samples in this window; showing recent provider history. "
-          : ""}
-        Sampled prices, not tick-by-tick. {snapshot.data?.stale ? "Delayed provider data. " : ""}
-        Settlement follows the market’s locked oracle rules.
-      </p>
-      {last && (
-        <p className="cg-chart-note">
-          Last sample:{" "}
-          <time dateTime={new Date(last.time).toISOString()}>
-            {new Date(last.time).toISOString().slice(11, 19)} UTC
-          </time>
-        </p>
+      {!exactWindow && points.length > 0 && (
+        <p className="cg-chart-note">Recent history shown: too few samples in this window.</p>
       )}
+      <details className="cg-chart-note">
+        <summary>CoinGecko samples · Source details</summary>
+        <p>
+          Sampled prices, not tick-by-tick. {snapshot.data?.stale ? "Delayed provider data. " : ""}
+          Settlement follows the market’s locked oracle rules, never this chart. Coinbase oracle and
+          CoinGecko prices can differ.
+        </p>
+        {last && (
+          <p>
+            Last sample:{" "}
+            <time dateTime={new Date(last.time).toISOString()}>
+              {new Date(last.time).toISOString().slice(11, 19)} UTC
+            </time>
+          </p>
+        )}
+      </details>
       {unavailable && (
         <button
           type="button"
