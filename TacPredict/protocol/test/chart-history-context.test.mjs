@@ -59,3 +59,11 @@ test("full historical cache is separate from spot-only snapshot history", () => 
   assert.ok(s.includes("public,max-age=600"));
   assert.ok(!s.includes("histories.set(asset, { points: shared.histories[asset]"));
 });
+
+test("a lone recent observation keeps its real timestamp even for a future window", () => {
+  const point = { time: now - 1000, price: 81000 };
+  const view = chartView([point], { start: now + 300000, end: now + 600000, minutes: 5 }, now);
+  assert.deepEqual(view.series, [point]);
+  assert.equal(view.range.end, point.time);
+  assert.ok(view.range.start < point.time);
+});

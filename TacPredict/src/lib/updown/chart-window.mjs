@@ -34,6 +34,8 @@ export function chartView(points, selected, now) {
             end: last.time,
             minutes: Math.max(1, Math.ceil((last.time - first.time) / 60000)),
           }
-        : selected,
+        : first
+          ? { start: first.time - 60000, end: first.time, minutes: 1 }
+          : selected,
   };
 }
