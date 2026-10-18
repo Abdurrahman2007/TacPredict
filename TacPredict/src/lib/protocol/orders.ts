@@ -38,6 +38,7 @@ export const exchangeAbi = parseAbi([
   "function cancelOrder((uint256 marketId,uint8 outcome,address maker,bool isBuy,uint256 price,uint256 shares,uint256 nonce,uint64 expiration,address taker))",
 ]);
 export const positionAbi = parseAbi([
+  "function tokenId(uint256,uint8) view returns(uint256)",
   "function balanceOf(address,uint256) view returns(uint256)",
   "function isApprovedForAll(address,address) view returns(bool)",
   "function setApprovalForAll(address,bool)",

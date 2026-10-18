@@ -11,6 +11,7 @@ import {
   type SignedOrder,
 } from "./orders";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertMarketIdentity } from "./market-identity.mjs";
 const db = supabaseAdmin as unknown as SupabaseClient;
 export async function saveVerifiedOrder(
   input: { chainId: 8453 | 84532; marketUuid: string; order: SignedOrder; signature: string },
@@ -44,7 +45,7 @@ export async function saveVerifiedOrder(
   }
   const { data: m, error: me } = await db
     .from("protocol_markets")
-    .select("onchain_id::text,chain_id,close_at,open_at,published,outcome_count")
+    .select("onchain_id::text,api_market_id,chain_id,close_at,open_at,published,outcome_count")
     .eq("id", input.marketUuid)
     .maybeSingle();
   const o = orderMessage(input.order);
@@ -62,6 +63,10 @@ export async function saveVerifiedOrder(
     Number(o.expiration) * 1000 <= Date.now()
   )
     throw Error("Invalid market/order terms");
+  assertMarketIdentity(
+    { chainId: m.chain_id, onchainId: String(m.onchain_id), marketId: m.api_market_id },
+    input.chainId,
+  );
   const domain = {
     name: "TacPredictExchange",
     version: "1",
@@ -136,6 +141,14 @@ export async function saveVerifiedOrder(
       .eq("outcome_index", o.outcome)
       .single();
     if (!outcome?.token_id) throw Error("Unindexed outcome");
+    const chainToken = await client.readContract({
+      address: d.positions as Address,
+      abi: positionAbi,
+      functionName: "tokenId",
+      args: [o.marketId, o.outcome],
+    });
+    if (chainToken.toString() !== String(outcome.token_id))
+      throw Error("Indexed outcome token mismatch");
     const [balance, approved] = await Promise.all([
       client.readContract({
         address: d.positions as Address,

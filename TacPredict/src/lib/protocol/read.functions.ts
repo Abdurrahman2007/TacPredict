@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { signedOrderSchema } from "./orders";
-const marketId = z.string().regex(/^TACP-\d+-\d+$/);
+import { validPublicMarketId } from "./market-identity.mjs";
+const marketId = z.string().refine(validPublicMarketId, "Invalid chain-aware market ID");
 export const getNativeActivity = createServerFn({ method: "GET" })
   .inputValidator((v: unknown) => z.object({ marketId }).parse(v))
   .handler(async ({ data }) => {

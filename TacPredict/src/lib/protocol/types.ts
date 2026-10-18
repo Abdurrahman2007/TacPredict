@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validMarketIdentity } from "./market-identity.mjs";
 const atomic = z.string().regex(/^\d+$/);
 const hex = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 export const deploymentSchema = z.object({
@@ -20,55 +21,57 @@ export const deploymentSchema = z.object({
     ),
   ),
 });
-export const nativeMarketSchema = z.object({
-  id: z.string().uuid(),
-  marketId: z.string().regex(/^TACP-\d+-\d+$/),
-  onchainId: atomic,
-  chainId: z.union([z.literal(8453), z.literal(84532)]),
-  questionId: z.string(),
-  conditionId: z.string(),
-  metadataHash: z.string(),
-  title: z.string(),
-  description: z.string(),
-  category: z.enum(["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"]),
-  subcategory: z.string().nullable(),
-  image: z.string().nullable(),
-  tags: z.array(z.string()),
-  source: z.string(),
-  sourceUrl: z.string(),
-  rules: z.string(),
-  oracle: hex,
-  status: z.enum([
-    "DRAFT",
-    "UPCOMING",
-    "OPEN",
-    "CLOSED",
-    "RESOLVING",
-    "RESOLVED",
-    "SETTLED",
-    "VOID",
-    "CANCELLED",
-  ]),
-  createdAt: z.string(),
-  openAt: z.string(),
-  closeAt: z.string(),
-  resolveAfter: z.string(),
-  resolutionDeadline: z.string(),
-  openInterestAtomic: atomic,
-  liquidityAtomic: atomic.nullable(),
-  volumeAtomic: atomic,
-  volume24hAtomic: atomic,
-  traders: z.number(),
-  outcomes: z.array(
-    z.object({
-      index: z.number().int(),
-      label: z.string(),
-      tokenId: atomic.nullable(),
-      priceAtomic: atomic.nullable(),
-      payoutWeight: atomic.nullable(),
-    }),
-  ),
-});
+export const nativeMarketSchema = z
+  .object({
+    id: z.string().uuid(),
+    marketId: z.string().regex(/^TACP-\d+-\d+$/),
+    onchainId: atomic,
+    chainId: z.union([z.literal(8453), z.literal(84532)]),
+    questionId: z.string(),
+    conditionId: z.string(),
+    metadataHash: z.string(),
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(["Crypto", "Sports", "News", "Technology", "Business", "Culture", "Other"]),
+    subcategory: z.string().nullable(),
+    image: z.string().nullable(),
+    tags: z.array(z.string()),
+    source: z.string(),
+    sourceUrl: z.string(),
+    rules: z.string(),
+    oracle: hex,
+    status: z.enum([
+      "DRAFT",
+      "UPCOMING",
+      "OPEN",
+      "CLOSED",
+      "RESOLVING",
+      "RESOLVED",
+      "SETTLED",
+      "VOID",
+      "CANCELLED",
+    ]),
+    createdAt: z.string(),
+    openAt: z.string(),
+    closeAt: z.string(),
+    resolveAfter: z.string(),
+    resolutionDeadline: z.string(),
+    openInterestAtomic: atomic,
+    liquidityAtomic: atomic.nullable(),
+    volumeAtomic: atomic,
+    volume24hAtomic: atomic,
+    traders: z.number(),
+    outcomes: z.array(
+      z.object({
+        index: z.number().int(),
+        label: z.string(),
+        tokenId: atomic.nullable(),
+        priceAtomic: atomic.nullable(),
+        payoutWeight: atomic.nullable(),
+      }),
+    ),
+  })
+  .refine(validMarketIdentity, "Market DB/on-chain identity mismatch");
 export type NativeMarket = z.infer<typeof nativeMarketSchema>;
 export type ProtocolDeployment = z.infer<typeof deploymentSchema>;
 export function atomicDecimal(v: string, decimals = 6) {

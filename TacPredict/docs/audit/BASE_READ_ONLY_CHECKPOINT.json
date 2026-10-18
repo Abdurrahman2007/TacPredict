@@ -1,0 +1,227 @@
+{
+  "stateChecks": {
+    "chainId": 8453,
+    "blockNumber": "52764461",
+    "readOnly": true,
+    "checks": [
+      {
+        "contract": "factory",
+        "function": "registry",
+        "args": [],
+        "value": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "passed": true
+      },
+      {
+        "contract": "positions",
+        "function": "registry",
+        "args": [],
+        "value": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "passed": true
+      },
+      {
+        "contract": "exchange",
+        "function": "registry",
+        "args": [],
+        "value": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "registry",
+        "args": [],
+        "value": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "passed": true
+      },
+      {
+        "contract": "settlement",
+        "function": "registry",
+        "args": [],
+        "value": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+        "passed": true
+      },
+      {
+        "contract": "exchange",
+        "function": "positions",
+        "args": [],
+        "value": "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7",
+        "passed": true
+      },
+      {
+        "contract": "settlement",
+        "function": "positions",
+        "args": [],
+        "value": "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7",
+        "passed": true
+      },
+      {
+        "contract": "factory",
+        "function": "oracle",
+        "args": [],
+        "value": "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f",
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "collateralToken",
+        "args": [],
+        "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "passed": true
+      },
+      {
+        "contract": "positions",
+        "function": "usdc",
+        "args": [],
+        "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "passed": true
+      },
+      {
+        "contract": "exchange",
+        "function": "usdc",
+        "args": [],
+        "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "usdc",
+        "args": [],
+        "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "hasRole",
+        "args": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "factory",
+        "function": "hasRole",
+        "args": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "hasRole",
+        "args": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "hasRole",
+        "args": [
+          "0xdfbefbf47cfe66b701d8cfdbce1de81c821590819cb07e71cb01b6602fb0ee27",
+          "0xe01c23aac6f152a2eA437A7E6Eb0a664A1908568"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "hasRole",
+        "args": [
+          "0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1",
+          "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "hasRole",
+        "args": [
+          "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "factory",
+        "function": "hasRole",
+        "args": [
+          "0xd3065a24ad9e7725d223007135762d2902038999e3e5829146654498a58d9795",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "hasRole",
+        "args": [
+          "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "hasRole",
+        "args": [
+          "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+          "0x57828f1aa32fd6be3988f240068df53ed94b7aef"
+        ],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "tradingPaused",
+        "args": [],
+        "value": true,
+        "passed": true
+      },
+      {
+        "contract": "registry",
+        "function": "nextMarketId",
+        "args": [],
+        "value": "2",
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "bond",
+        "args": [],
+        "value": "5000000",
+        "passed": true
+      },
+      {
+        "contract": "oracle",
+        "function": "challengePeriod",
+        "args": [],
+        "value": "86400",
+        "passed": true
+      }
+    ]
+  },
+  "innerDeploymentProof": {
+    "chainId": 8453,
+    "transactionHash": "0x2b707200f70fb3d9c7598605f3d7cf57a05bded84842742b362004e82b4a0966",
+    "deploymentBlock": "52453630",
+    "deploymentBlockHash": "0xa707015c57e48289cb877bd09fa78eb324d20d299eb020b551274fa5621c1796",
+    "compiledCreationCallsMatch": true,
+    "innerAdminUserOperationSuccess": true,
+    "callCount": 9,
+    "compiler": "0.8.30+commit.73712a01",
+    "audited": false,
+    "note": "Verified compiled constructors/CREATE2 addresses and expected account calls plus inner UserOperationEvent, not merely outer status. Current roles/pointers/canonical block reread remain separate."
+  },
+  "independentAudit": false,
+  "liveDatabaseVerified": false,
+  "mainnetWritesPerformed": false,
+  "fullHTTPVerifierCompleted": false
+}
