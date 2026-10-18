@@ -23,8 +23,12 @@ const FOOTBALL_KEY = "FOOTBALL_DATA_API_KEY";
 const CRICKET_KEY = "CRICKET_DATA_API_KEY";
 
 export type ProviderInfo = {
-  id: "coinbase" | "football-data" | "cricketdata";
-  role: "Crypto price oracle" | "Football fixtures and results" | "Cricket fixtures and results";
+  id: "coingecko" | "coinbase" | "football-data" | "cricketdata";
+  role:
+    | "Crypto charts"
+    | "Crypto price oracle"
+    | "Football fixtures and results"
+    | "Cricket fixtures and results";
   name: string;
   configured: boolean;
   secret: string | null;
@@ -33,6 +37,14 @@ export type ProviderInfo = {
 
 export function providerInfo(): ProviderInfo[] {
   return [
+    {
+      id: "coingecko",
+      role: "Crypto charts",
+      name: "CoinGecko",
+      configured: Boolean(process.env["COINGECKO_DEMO_API_KEY"]),
+      secret: "COINGECKO_DEMO_API_KEY",
+      note: "BTC, ETH, SOL and BNB charts. Sampled display data only; not the locked Coinbase settlement oracle.",
+    },
     {
       id: "coinbase",
       role: "Crypto price oracle",
@@ -61,16 +73,25 @@ export function providerInfo(): ProviderInfo[] {
 }
 
 const saved = new Map<string, { expires: number; value: unknown }>();
-async function getJson(url: string, headers: Record<string, string>, ttl: number): Promise<unknown> {
+async function getJson(
+  url: string,
+  headers: Record<string, string>,
+  ttl: number,
+): Promise<unknown> {
   const hit = saved.get(url);
   if (hit && hit.expires > Date.now()) return hit.value;
   const response = await fetch(url, {
-    headers: { accept: "application/json", "user-agent": "TacPredict/1.0 (https://tacpredict.fun)", ...headers },
+    headers: {
+      accept: "application/json",
+      "user-agent": "TacPredict/1.0 (https://tacpredict.fun)",
+      ...headers,
+    },
     signal: AbortSignal.timeout(9000),
   });
   if (response.status === 401 || response.status === 403)
     throw Error("The provider refused the API key. Check the Worker secret.");
-  if (response.status === 429) throw Error("The provider rate limit was reached. Try again in a minute.");
+  if (response.status === 429)
+    throw Error("The provider rate limit was reached. Try again in a minute.");
   if (!response.ok) throw Error(`The provider returned ${response.status}.`);
   const value = await response.json();
   saved.set(url, { expires: Date.now() + ttl, value });
@@ -79,9 +100,12 @@ async function getJson(url: string, headers: Record<string, string>, ttl: number
 
 const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-export async function loadFootballFixtures(days: number): Promise<{ fixtures: Fixture[]; error: string | null }> {
+export async function loadFootballFixtures(
+  days: number,
+): Promise<{ fixtures: Fixture[]; error: string | null }> {
   const key = process.env[FOOTBALL_KEY];
-  if (!key) return { fixtures: [], error: `Not connected. Add ${FOOTBALL_KEY} as a Worker secret.` };
+  if (!key)
+    return { fixtures: [], error: `Not connected. Add ${FOOTBALL_KEY} as a Worker secret.` };
   const from = Date.now();
   const to = from + Math.min(10, Math.max(1, days)) * 86400000;
   const fixtures: Fixture[] = [];
@@ -102,17 +126,25 @@ export async function loadFootballFixtures(days: number): Promise<{ fixtures: Fi
   return { fixtures, error: errors.length ? errors.join(" ") : null };
 }
 
-export async function loadCricketFixtures(): Promise<{ fixtures: Fixture[]; error: string | null }> {
+export async function loadCricketFixtures(): Promise<{
+  fixtures: Fixture[];
+  error: string | null;
+}> {
   const key = process.env[CRICKET_KEY];
   if (!key) return { fixtures: [], error: `Not connected. Add ${CRICKET_KEY} as a Worker secret.` };
   const fixtures: Fixture[] = [];
   try {
     for (const offset of [0, 25]) {
-      const json = (await getJson(`${CRICKET_BASE}/matches?apikey=${encodeURIComponent(key)}&offset=${offset}`, {}, 600000)) as {
+      const json = (await getJson(
+        `${CRICKET_BASE}/matches?apikey=${encodeURIComponent(key)}&offset=${offset}`,
+        {},
+        600000,
+      )) as {
         status?: string;
         reason?: string;
       };
-      if (json?.status === "failure") throw Error(json.reason || "The provider returned a failure.");
+      if (json?.status === "failure")
+        throw Error(json.reason || "The provider returned a failure.");
       fixtures.push(...parseCricketFixtures(json));
     }
   } catch (error) {
@@ -137,10 +169,22 @@ export async function loadSportsResult(
   try {
     const json =
       sport === "football"
-        ? await getJson(`${FOOTBALL_BASE}/matches/${encodeURIComponent(matchId)}`, { "x-auth-token": key }, 20000)
-        : await getJson(`${CRICKET_BASE}/match_info?apikey=${encodeURIComponent(key)}&id=${encodeURIComponent(matchId)}`, {}, 20000);
+        ? await getJson(
+            `${FOOTBALL_BASE}/matches/${encodeURIComponent(matchId)}`,
+            { "x-auth-token": key },
+            20000,
+          )
+        : await getJson(
+            `${CRICKET_BASE}/match_info?apikey=${encodeURIComponent(key)}&id=${encodeURIComponent(matchId)}`,
+            {},
+            20000,
+          );
     const result = sport === "football" ? footballResult(json) : cricketResult(json);
-    const text = canonicalJson({ ...result.evidence, fetchedAt: new Date().toISOString(), suggestion: result.state });
+    const text = canonicalJson({
+      ...result.evidence,
+      fetchedAt: new Date().toISOString(),
+      suggestion: result.state,
+    });
     return {
       state: result.state,
       winner: result.winner ?? null,
@@ -153,7 +197,9 @@ export async function loadSportsResult(
       error: null,
     };
   } catch (error) {
-    return noEvidence(error instanceof Error ? error.message : "The provider could not be reached.");
+    return noEvidence(
+      error instanceof Error ? error.message : "The provider could not be reached.",
+    );
   }
 }
 
@@ -165,15 +211,22 @@ async function candlesBetween(product: string, fromMs: number, toMs: number): Pr
     5000,
   );
   if (!Array.isArray(rows)) throw Error("Unexpected candle response.");
-  return rows.filter((r): r is Row => Array.isArray(r) && r.length >= 5 && r.every((x) => typeof x === "number"));
+  return rows.filter(
+    (r): r is Row => Array.isArray(r) && r.length >= 5 && r.every((x) => typeof x === "number"),
+  );
 }
 
 /** Crypto oracle evidence: the two exact Coinbase candles the locked rules name. */
-export async function loadCryptoEvidence(asset: UpDownAsset, startMs: number, minutes: number): Promise<EvidencePackage> {
+export async function loadCryptoEvidence(
+  asset: UpDownAsset,
+  startMs: number,
+  minutes: number,
+): Promise<EvidencePackage> {
   const info = ASSETS[asset];
   const size = minutes * 60000;
   const endMs = startMs + size;
-  if (!DURATIONS.includes(minutes) || startMs % size !== 0) return noEvidence("That is not a valid window.");
+  if (!DURATIONS.includes(minutes) || startMs % size !== 0)
+    return noEvidence("That is not a valid window.");
   if (Date.now() < endMs + 60000) return noEvidence("The window has not finished yet.");
   try {
     const [first, last] = await Promise.all([
@@ -182,9 +235,17 @@ export async function loadCryptoEvidence(asset: UpDownAsset, startMs: number, mi
     ]);
     const open = first.find((r) => r[0] * 1000 === startMs);
     const close = last.find((r) => r[0] * 1000 === endMs - 60000);
-    const candle = (r: Row) => ({ time: new Date(r[0] * 1000).toISOString(), low: r[1], high: r[2], open: r[3], close: r[4] });
+    const candle = (r: Row) => ({
+      time: new Date(r[0] * 1000).toISOString(),
+      low: r[1],
+      high: r[2],
+      open: r[3],
+      close: r[4],
+    });
     const result = windowResult(
-      [open, close].flatMap((r) => (r ? [{ time: r[0] * 1000, open: r[3], high: r[2], low: r[1], close: r[4] }] : [])),
+      [open, close].flatMap((r) =>
+        r ? [{ time: r[0] * 1000, open: r[3], high: r[2], low: r[1], close: r[4] }] : [],
+      ),
       { start: startMs, end: endMs, minutes },
     );
     if (!open || !close || !result)

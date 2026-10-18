@@ -630,3 +630,27 @@
     animation: none;
   }
 }
+
+.cg-chart {
+  min-width: 0;
+  margin-top: 18px;
+}
+.cg-chart-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #acb8be;
+  font-size: 12px;
+}
+.cg-chart-heading strong {
+  color: #299eff;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.cg-chart-note {
+  font-size: 11px;
+  color: #acb8be;
+  line-height: 1.7;
+  margin: 8px 0;
+}

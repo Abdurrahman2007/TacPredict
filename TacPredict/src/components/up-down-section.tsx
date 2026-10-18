@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
-import { UpDownChart } from "@/components/updown/updown-chart";
+import { CoinGeckoChart } from "@/components/updown/coingecko-chart";
 import { cents, usdcShort, volumeText } from "@/lib/protocol/display.mjs";
 import { useLivePrice } from "@/lib/updown/live-prices";
 import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
@@ -18,9 +18,7 @@ import {
   makeWindow,
   matchNativeMarket,
   priceToBeat,
-  seriesForWindow,
   slugOf,
-  thin,
   windowStartFor,
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
@@ -62,24 +60,6 @@ function AssetCard({
     candles?.[candles.length - 1]?.close ??
     null;
   const delta = deltaInfo(current, beat);
-  const nowSec = Math.floor(nowMs / 1000);
-  const series = useMemo(
-    () =>
-      large
-        ? thin(
-            seriesForWindow({
-              candles,
-              trades,
-              ticks: live.ticks,
-              w: { start, end: start + minutes * 60000, minutes },
-              nowMs: nowSec * 1000,
-              gran,
-            }),
-            200,
-          )
-        : [],
-    [large, candles, trades, live.ticks, start, minutes, nowSec, gran],
-  );
   const market = matchNativeMarket(markets, asset, w);
   const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
   const down = market?.outcomes.find((o) => /^down$/i.test(o.label)) ?? market?.outcomes[1];
@@ -116,13 +96,13 @@ function AssetCard({
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className="text-xs text-muted-foreground">Price to beat</dt>
+          <dt className="text-xs text-muted-foreground">Oracle price to beat · Coinbase</dt>
           <dd className="mt-1 font-semibold tabular-nums">
             {beat !== null ? formatUsd(beat, asset) : spot.isPending ? "Loading…" : "Unavailable"}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Current price</dt>
+          <dt className="text-xs text-muted-foreground">Oracle reference · Coinbase</dt>
           <dd className="mt-1 font-semibold tabular-nums">
             {current !== null
               ? formatUsd(current, asset)
@@ -142,20 +122,9 @@ function AssetCard({
       </dl>
 
       {large && (
-        <Link
-          to="/up-down/$asset"
-          params={{ asset: slugOf(asset) }}
-          search={search}
-          className="mt-3 block"
-        >
-          <UpDownChart
-            w={w}
-            series={series}
-            beat={beat}
-            asset={asset}
-            live={live.status === "live"}
-          />
-        </Link>
+        <div className="mt-3 block">
+          <CoinGeckoChart asset={asset} window={w} />
+        </div>
       )}
 
       <div className="mt-4 grid grid-cols-2 gap-3">

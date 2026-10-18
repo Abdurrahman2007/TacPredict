@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { Market } from "@/domain/markets/types";
@@ -18,14 +18,12 @@ import {
   pastCountFor,
   priceToBeat,
   resolveWindow,
-  seriesForWindow,
   slugOf,
-  thin,
   windowResult,
   windowState,
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
-import { UpDownChart } from "./updown-chart";
+import { CoinGeckoChart } from "./coingecko-chart";
 import { WindowPills } from "./window-pills";
 import { UpDownIsland } from "./island";
 import { UpDownTradeBar } from "./trade-bar";
@@ -83,23 +81,6 @@ export function UpDownDetail({
   const current =
     state === "past" ? (result?.close ?? null) : (live.price ?? lastTrade ?? lastCandle);
   const delta = deltaInfo(current, beat);
-  const nowSec = Math.floor(nowMs / 1000);
-  const trades = spot.data?.trades;
-  const series = useMemo(
-    () =>
-      thin(
-        seriesForWindow({
-          candles,
-          trades,
-          ticks: live.ticks,
-          w: { start: w.start, end: w.end, minutes },
-          nowMs: nowSec * 1000,
-          gran,
-        }),
-        260,
-      ),
-    [candles, trades, live.ticks, w.start, w.end, minutes, nowSec, gran],
-  );
   const market = matchNativeMarket(feed.data?.markets, asset, w);
 
   const remaining = state === "live" ? w.end - nowMs : state === "upcoming" ? w.start - nowMs : 0;
@@ -132,7 +113,6 @@ export function UpDownDetail({
         : result
           ? result.outcome
           : "ENDED";
-  const error = spot.isError && !spot.data;
 
   const island = {
     asset,
@@ -191,7 +171,7 @@ export function UpDownDetail({
 
         <dl className="ud-prices">
           <div>
-            <dt>Price to beat</dt>
+            <dt>Oracle price to beat · Coinbase</dt>
             <dd>
               {beat !== null
                 ? formatUsd(beat, asset)
@@ -203,7 +183,7 @@ export function UpDownDetail({
             </dd>
           </div>
           <div>
-            <dt>{state === "past" ? "Final price" : "Current price"}</dt>
+            <dt>{state === "past" ? "Oracle final · Coinbase" : "Oracle reference · Coinbase"}</dt>
             <dd>
               {current !== null
                 ? formatUsd(current, asset)
@@ -221,32 +201,10 @@ export function UpDownDetail({
         </dl>
       </div>
 
-      {error ? (
-        <div className="ud-chart ud-chart-empty">
-          <div style={{ textAlign: "center" }}>
-            Live price is unavailable right now.
-            <br />
-            <button type="button" className="ud-up" onClick={() => void spot.refetch()}>
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : (
-        <UpDownChart
-          w={w}
-          series={series}
-          beat={beat}
-          asset={asset}
-          live={state === "live" && live.status === "live"}
-        />
-      )}
-      <p className="ud-muted" style={{ marginTop: 6, fontSize: 12 }}>
-        Prices from Coinbase {info.product}
-        {live.status === "live"
-          ? " · live"
-          : live.status === "offline"
-            ? " · refreshing every few seconds"
-            : ""}
+      <CoinGeckoChart asset={asset} window={w} />
+      <p className="cg-chart-note">
+        Chart: CoinGecko. Oracle/reference values above: Coinbase {info.product}. Providers may
+        differ; the chart never finalizes a result.
       </p>
 
       <nav className="ud-durations" aria-label="Window length">

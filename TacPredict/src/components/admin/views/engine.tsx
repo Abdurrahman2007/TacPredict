@@ -36,7 +36,11 @@ function useOpenCreate() {
   const navigate = useNavigate();
   return (draft: Draft) => {
     handOffDraft(draft);
-    void navigate({ to: "/admin/$section", params: { section: "markets" }, search: { view: "create" } });
+    void navigate({
+      to: "/admin/$section",
+      params: { section: "markets" },
+      search: { view: "create" },
+    });
   };
 }
 
@@ -58,7 +62,8 @@ function Fixtures() {
         subtitle="Real upcoming matches from the data providers. Each one becomes a draft with the rules already written."
       />
       <Notice tone="info">
-        A draft is only terms. You save it, then publish it on Base with your wallet. Trading closes at kick-off.
+        A draft is only terms. You save it, then publish it on Base with your wallet. Trading closes
+        at kick-off.
       </Notice>
       <SportCard sport="football" title="Football · La Liga and Champions League" />
       <SportCard sport="cricket" title="Cricket · T20 and Bangladesh matches" />
@@ -80,7 +85,12 @@ function SportCard({ sport, title }: { sport: "football" | "cricket"; title: str
     <Card
       title={title}
       actions={
-        <button type="button" className="adm-btn" disabled={query.isFetching} onClick={() => void query.refetch()}>
+        <button
+          type="button"
+          className="adm-btn"
+          disabled={query.isFetching}
+          onClick={() => void query.refetch()}
+        >
           {query.isFetching ? "Loading…" : "Reload"}
         </button>
       }
@@ -168,7 +178,11 @@ function FixtureRow({
         {exists ? (
           <Badge tone="ok">Market exists</Badge>
         ) : draft && !problem ? (
-          <button type="button" className="adm-btn adm-btn-primary" onClick={() => onPrepare(draft)}>
+          <button
+            type="button"
+            className="adm-btn adm-btn-primary"
+            onClick={() => onPrepare(draft)}
+          >
             Prepare market
           </button>
         ) : (
@@ -205,7 +219,12 @@ function CryptoWindows() {
                   <td style={{ fontWeight: 650 }}>{ASSETS[asset].name}</td>
                   {DURATIONS.map((minutes) => (
                     <td key={minutes}>
-                      <WindowCell asset={asset} minutes={minutes} markets={feed.data?.markets} onPrepare={open} />
+                      <WindowCell
+                        asset={asset}
+                        minutes={minutes}
+                        markets={feed.data?.markets}
+                        onPrepare={open}
+                      />
                     </td>
                   ))}
                 </tr>
@@ -215,8 +234,8 @@ function CryptoWindows() {
         </div>
       </Card>
       <p className="adm-muted" style={{ margin: 0 }}>
-        Each button prepares the next window that is at least two minutes away. Windows are published one at a time with
-        your wallet.
+        Each button prepares the next window that is at least two minutes away. Windows are
+        published one at a time with your wallet.
       </p>
     </div>
   );
@@ -235,7 +254,11 @@ function WindowCell({
 }) {
   const draft = cryptoWindowTemplate(asset, minutes);
   const start = Date.parse(`${draft.times.openAt}:00Z`);
-  const exists = matchNativeMarket(markets, asset, { start, end: start + minutes * 60000, minutes });
+  const exists = matchNativeMarket(markets, asset, {
+    start,
+    end: start + minutes * 60000,
+    minutes,
+  });
   const label = new Intl.DateTimeFormat("en-GB", {
     ...(minutes >= 720 ? { day: "2-digit" as const, month: "short" as const } : {}),
     hour: "2-digit",
@@ -246,7 +269,12 @@ function WindowCell({
   return exists ? (
     <Badge tone="ok">{label} live</Badge>
   ) : (
-    <button type="button" className="adm-btn" onClick={() => onPrepare(draft)} title={`Window starts ${label} UTC`}>
+    <button
+      type="button"
+      className="adm-btn"
+      onClick={() => onPrepare(draft)}
+      title={`Window starts ${label} UTC`}
+    >
       {label}
     </button>
   );
@@ -276,14 +304,19 @@ function Providers() {
                       <td style={{ fontWeight: 650 }}>{p.role}</td>
                       <td>{p.name}</td>
                       <td>
-                        {p.configured ? <Badge tone="ok">Connected</Badge> : <Badge tone="warn">Not connected</Badge>}
+                        {p.configured ? (
+                          <Badge tone="ok">Configured</Badge>
+                        ) : (
+                          <Badge tone="warn">Not connected</Badge>
+                        )}
                       </td>
                       <td>
                         {p.note}
                         {!p.configured && p.secret ? (
                           <>
                             {" "}
-                            Add <span className="adm-mono">{p.secret}</span> as a secret on the Cloudflare Worker.
+                            Add <span className="adm-mono">{p.secret}</span> as a secret on the
+                            Cloudflare Worker.
                           </>
                         ) : null}
                       </td>
@@ -301,18 +334,24 @@ function Providers() {
           <dd>Read provider data, build market drafts and check their times and rules.</dd>
           <dt>Can not</dt>
           <dd>
-            Publish a market, change a balance or a position, finalize a result, or withdraw treasury funds. Those need a
-            wallet that holds the matching role on the Base contracts.
+            Publish a market, change a balance or a position, finalize a result, or withdraw
+            treasury funds. Those need a wallet that holds the matching role on the Base contracts.
+          </dd>
+          <dt>Execution</dt>
+          <dd>
+            The current Base Exchange is an order book, not an AMM. Quotes require real orders and
+            collateral; no liquidity, fills or balances are fabricated.
           </dd>
           <dt>Results</dt>
           <dd>
-            Crypto prices and sports results are handled on separate pages. A suggestion is evidence only: a person
-            proposes the result with a wallet, and anyone can dispute it during the challenge period.
+            Crypto prices and sports results are handled on separate pages. A suggestion is evidence
+            only: a person proposes the result with a wallet, and anyone can dispute it during the
+            challenge period.
           </dd>
           <dt>VOID</dt>
           <dd>
-            A voided market pays every outcome share 1/N USDC (N outcomes). It is not a refund of the price paid, and the
-            rules of every market say so.
+            A voided market pays every outcome share 1/N USDC (N outcomes). It is not a refund of
+            the price paid, and the rules of every market say so.
           </dd>
         </dl>
       </Card>

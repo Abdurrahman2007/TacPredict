@@ -144,8 +144,9 @@ export function RulesCard({
         Each {durationLabel(minutes)} window runs on the UTC clock. The price to beat is the open of
         the first Coinbase {ASSETS[asset].product} 60-second candle in the window. The final price
         is the close of its last 60-second candle. Up wins if the final price is the same as or
-        higher than the price to beat; Down wins if it is lower. {name} prices, the chart and the
-        price to beat on this page all come from the same Coinbase feed.
+        higher than the price to beat; Down wins if it is lower. {name} oracle values use Coinbase.
+        The separate CoinGecko chart is display-only and is never substituted for locked settlement
+        evidence.
       </p>
       {market ? (
         <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
