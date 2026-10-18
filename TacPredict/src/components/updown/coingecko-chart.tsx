@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cryptoHistoryQueryOptions, cryptoMarketQueryOptions } from "@/lib/market-data.functions";
-import { chartWindow } from "@/lib/updown/chart-window.mjs";
+import { chartView } from "@/lib/updown/chart-window.mjs";
 import { ASSETS, deltaInfo, formatUsd, type UpDownAsset, type Win } from "@/lib/updown/window.mjs";
+import { clock, useTimeZone } from "@/lib/updown/use-clock";
 import { UpDownChart } from "./updown-chart";
 
 /** Sampled prices, not tick-by-tick. Chart data never changes locked settlement evidence. */
@@ -17,15 +18,17 @@ export function CoinGeckoChart({
 }) {
   const snapshot = useQuery(cryptoMarketQueryOptions);
   const history = useQuery(cryptoHistoryQueryOptions(asset));
-  const series = useMemo(
+  const zone = useTimeZone();
+  const view = useMemo(
     () =>
-      chartWindow(
+      chartView(
         [...(history.data ?? []), ...(snapshot.data?.histories[asset] ?? [])],
-        selected.start,
-        Math.min(selected.end, Date.now()),
+        selected,
+        Date.now(),
       ),
     [history.data, snapshot.data, asset, selected.start, selected.end],
   );
+  const { series, range, mode } = view;
   const first = series[0];
   const last = series.at(-1);
   const delta = deltaInfo(last?.price, first?.price);
@@ -34,13 +37,13 @@ export function CoinGeckoChart({
       {summary && (
         <dl className="tp-price-summary">
           <div>
-            <dt title="First CoinGecko observation in this window; not the locked settlement price">
-              Reference
+            <dt title="First displayed CoinGecko observation; not the locked settlement price">
+              {mode === "recent" ? "History start" : "Reference"}
             </dt>
             <dd>{first ? formatUsd(first.price, asset) : "$0"}</dd>
           </div>
           <div>
-            <dt className="tp-current">Now</dt>
+            <dt className="tp-current">{mode === "recent" ? "Latest" : "Now"}</dt>
             <dd className="tp-current">
               {last ? formatUsd(last.price, asset) : "$0"}
               {delta && series.length > 1 && (
@@ -58,9 +61,17 @@ export function CoinGeckoChart({
           </div>
         </dl>
       )}
+      {mode === "recent" && series.length > 1 && (
+        <div className="cg-chart-context" aria-label="Displayed chart time range">
+          <span>Recent price history</span>
+          <span>
+            {clock(range.start, zone)} – {clock(range.end, zone)}
+          </span>
+        </div>
+      )}
       {series.length ? (
         <UpDownChart
-          w={series.length > 1 ? { ...selected, start: first!.time, end: last!.time } : selected}
+          w={range}
           series={series}
           compact={summary}
           beat={null}
@@ -73,9 +84,21 @@ export function CoinGeckoChart({
           <span>
             {history.isPending || snapshot.isPending
               ? "Loading chart…"
-              : "No samples in this window"}
+              : "Price history temporarily unavailable"}
           </span>
         </div>
+      )}
+      {series.length < 2 && !history.isPending && (
+        <button
+          type="button"
+          className="cg-chart-retry"
+          onClick={() => {
+            void history.refetch();
+            void snapshot.refetch();
+          }}
+        >
+          Reload chart
+        </button>
       )}
       {snapshot.data?.stale && (
         <span className="block text-right text-[10px] text-amber-300" role="status">

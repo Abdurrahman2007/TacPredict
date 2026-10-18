@@ -19,6 +19,20 @@ async function history(asset: string): Promise<PricePoint[]> {
   const saved = histories.get(asset);
   if (saved && saved.expires > Date.now()) return saved.points;
   try {
+    const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
+    const cacheKey = `https://tacpredict.fun/__cache/coingecko/history-v4/${asset}`;
+    const hit = await edge?.match(cacheKey).catch(() => undefined);
+    if (hit) {
+      const points = (await hit.json()) as PricePoint[];
+      if (
+        Array.isArray(points) &&
+        points.length > 1 &&
+        points.every((p) => Number.isFinite(p.time) && Number.isFinite(p.price) && p.price > 0)
+      ) {
+        histories.set(asset, { points, expires: Date.now() + 600_000 });
+        return points;
+      }
+    }
     const raw = await request(
       `/coins/${asset === "bnb" ? "binancecoin" : asset}/market_chart?vs_currency=usd&days=1`,
     );
@@ -36,6 +50,16 @@ async function history(asset: string): Promise<PricePoint[]> {
       : [];
     if (!points.length) throw new Error("No price history");
     histories.set(asset, { points, expires: Date.now() + 600_000 });
+    if (edge) {
+      await edge
+        .put(
+          cacheKey,
+          new Response(JSON.stringify(points), {
+            headers: { "Content-Type": "application/json", "Cache-Control": "public,max-age=600" },
+          }),
+        )
+        .catch(() => undefined);
+    }
     return points;
   } catch {
     return saved?.points ?? [];
@@ -129,9 +153,6 @@ export async function coingeckoSnapshot(): Promise<CryptoMarketSnapshot> {
     const shared = await edgeSnapshot();
     if (shared) {
       cached = { value: shared, expires: Date.now() + ttl };
-      for (const asset of assets)
-        if (!histories.has(asset) && shared.histories[asset].length > 1)
-          histories.set(asset, { points: shared.histories[asset], expires: Date.now() + 600_000 });
       return shared;
     }
     const value = await snapshot();

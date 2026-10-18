@@ -13,7 +13,7 @@ test("Home and detail use CoinGecko charts without changing locked oracle eviden
   for (const f of ["components/up-down-section.tsx", "components/updown/updown-detail.tsx"])
     assert.ok(src(f).includes("<CoinGeckoChart"));
   const c = src("components/updown/coingecko-chart.tsx");
-  assert.ok(c.includes("chartWindow("));
+  assert.ok(c.includes("chartView("));
   assert.ok(!c.includes("Recent history"));
   assert.ok(c.includes("beat={null}"));
   assert.ok(c.includes("Sampled prices, not tick-by-tick"));

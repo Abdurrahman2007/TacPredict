@@ -9,7 +9,6 @@ import { useLivePrice } from "@/lib/updown/live-prices";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
   ASSETS,
-  DURATIONS,
   deltaInfo,
   durationLabel,
   formatCountdown,
@@ -165,6 +164,7 @@ export function UpDownDetail({
             <p className="ud-sub">{windowText}</p>
           </div>
           <div className="ud-countdown" data-state={state} aria-live="off">
+            {state === "upcoming" && <span className="ud-countdown-label">Starts in</span>}
             {state === "past" ? (result ? result.outcome : "Ended") : countdown}
           </div>
         </div>
@@ -202,20 +202,6 @@ export function UpDownDetail({
       </div>
 
       <CoinGeckoChart asset={asset} window={w} />
-      <nav className="ud-durations" aria-label="Window length">
-        {DURATIONS.map((d) => (
-          <Link
-            key={d}
-            to="/up-down/$asset"
-            params={{ asset: slugOf(asset) }}
-            search={{ d }}
-            aria-current={d === minutes ? "page" : undefined}
-          >
-            {durationLabel(d)}
-          </Link>
-        ))}
-      </nav>
-
       <WindowPills
         asset={asset}
         minutes={minutes}

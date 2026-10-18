@@ -117,7 +117,7 @@ export function UpDownChart({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`${asset} ${source} price this window. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
+        aria-label={`${asset} ${source} price history. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
         onPointerDown={(e) => inspect(e.clientX, e.currentTarget.getBoundingClientRect())}
         onPointerMove={(e) => {
           if (e.pointerType === "mouse" || e.buttons === 1)
