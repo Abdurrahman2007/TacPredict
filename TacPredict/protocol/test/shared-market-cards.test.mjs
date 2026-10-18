@@ -77,3 +77,9 @@ test("chart is an interactive data-rendered SVG rather than a screenshot", () =>
   assert.ok(!c.includes("<img"));
   assert.ok(!c.includes("Math.random"));
 });
+
+test("removing repeated provider captions does not hide stale-data warnings", () => {
+  const c = src("components/updown/coingecko-chart.tsx");
+  assert.ok(c.includes("snapshot.data?.stale"));
+  assert.ok(c.includes("Delayed prices"));
+});

@@ -77,6 +77,11 @@ export function CoinGeckoChart({
           </span>
         </div>
       )}
+      {snapshot.data?.stale && (
+        <span className="block text-right text-[10px] text-amber-300" role="status">
+          Delayed prices
+        </span>
+      )}
     </section>
   );
 }
