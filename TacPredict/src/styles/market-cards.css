@@ -1,0 +1,94 @@
+/* Shared chrome: creation source never selects a different card design. */
+.tp-card {
+  min-width: 0;
+  background: #1d2529;
+  border: 1px solid #384145;
+  border-radius: 24px;
+  padding: 20px;
+}
+.tp-market-card {
+  display: flex;
+  flex-direction: column;
+}
+.tp-card-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #acb8be;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.tp-card-meta > span {
+  color: #f1f4f5;
+  font-weight: 600;
+}
+.tp-card-meta time {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.tp-card-title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+}
+.tp-card-title h3 {
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.tp-card-outcomes {
+  display: grid;
+  gap: 16px;
+  margin: 26px 0 24px;
+}
+.tp-card-outcome {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  border-radius: 12px;
+}
+.tp-card-outcome > div {
+  min-width: 0;
+}
+.tp-card-outcome > span:last-child {
+  min-width: 64px;
+  min-height: 42px;
+  background: #293137;
+  font-size: 17px;
+  font-weight: 500;
+}
+.tp-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  color: #acb8be;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.tp-card-more {
+  margin-top: 16px;
+  color: #acb8be;
+  font-size: 12px;
+}
+.tp-card :is(a, button):focus-visible {
+  outline: 2px solid #bfcfda;
+  outline-offset: 4px;
+}
+.tp-card.home-featured-card {
+  flex: 0 0 90%;
+  max-width: 420px;
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .tp-card {
+    padding: 24px;
+    border-radius: 26px;
+  }
+}

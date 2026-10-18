@@ -146,7 +146,8 @@ export function RulesCard({
         is the close of its last 60-second candle. Up wins if the final price is the same as or
         higher than the price to beat; Down wins if it is lower. {name} oracle values use Coinbase.
         The separate CoinGecko chart is display-only and is never substituted for locked settlement
-        evidence.
+        evidence. Home chart reference and Now values are CoinGecko observations, not settlement
+        prices. Sampled prices are not tick-by-tick; a short window may have only one observation.
       </p>
       {market ? (
         <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>

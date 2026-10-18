@@ -3,13 +3,7 @@ import { useMemo, useState } from "react";
 import { probabilityHistoryOptions } from "@/lib/probability-history.functions";
 import type { Market } from "@/domain/markets/types";
 import { pct } from "@/lib/protocol/display.mjs";
-const palette = ["#799aef", "#a0afb8", "#b8a8e3"];
-const outcomeColor = (label: string, index: number) =>
-  /^(yes|up)$/i.test(label)
-    ? "#55c875"
-    : /^(no|down)$/i.test(label)
-      ? "#c36c7f"
-      : palette[index % palette.length];
+import { outcomeColor } from "@/lib/outcome-color";
 export function ProbabilityHistoryChart({ market }: { market: Market }) {
   const [interval, setInterval] = useState<"1h" | "1d" | "1w" | "1m">("1d"),
     [selected, setSelected] = useState<number | null>(null);

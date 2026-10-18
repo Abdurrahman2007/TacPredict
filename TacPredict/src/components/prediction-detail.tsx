@@ -17,7 +17,7 @@ import { PredictionAmountCard } from "./prediction-amount-card";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from "./ui/dialog";
 import "@/styles/prediction-detail.css";
 
-type Asset = "bitcoin" | "ethereum" | "solana";
+type Asset = "bitcoin" | "ethereum" | "solana" | "bnb";
 export function assetForMarket(m: Market): Asset | undefined {
   if (m.category !== "Crypto") return undefined;
   return /\b(bitcoin|btc)\b/i.test(m.title)
@@ -26,7 +26,9 @@ export function assetForMarket(m: Market): Asset | undefined {
       ? "ethereum"
       : /\b(solana|sol)\b/i.test(m.title)
         ? "solana"
-        : undefined;
+        : /\bbnb\b/i.test(m.title)
+          ? "bnb"
+          : undefined;
 }
 export function MarketIsland({
   market,
@@ -152,18 +154,26 @@ export function PredictionDetail({
             </div>
           </div>
           {asset ? (
-            <CryptoDetailChart asset={asset} initialMinutes={durationMinutes(market) ?? 15} />
+            <CryptoDetailChart
+              asset={asset}
+              initialMinutes={durationMinutes(market) ?? 15}
+              startsAt={market.startsAt}
+              endsAt={market.endsAt}
+            />
           ) : market.native ? (
             <ProbabilityHistoryChart market={market} />
           ) : null}
           {!market.native && (
-            <p className="pd-data-note">
-              Not a live TacPredict contract. Displayed zeros mean no native trading data, not free
-              shares.{" "}
-              {asset
-                ? "Spot prices are references, not prediction odds or settlement evidence."
-                : ""}
-            </p>
+            <details className="pd-data-note">
+              <summary>Price tracking only · Trading unavailable</summary>
+              <p>
+                Not a live TacPredict contract. Displayed zeros mean no native trading data, not
+                free shares.{" "}
+                {asset
+                  ? "Spot prices are references, not prediction odds or settlement evidence."
+                  : ""}
+              </p>
+            </details>
           )}
           {market.outcomes.length > 2 && (
             <div className="pd-extra-outcomes">

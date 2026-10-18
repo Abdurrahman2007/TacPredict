@@ -33,27 +33,37 @@ export function MobileOutcomeDock({
       aria-label="Quick outcome selection"
       style={{ bottom: navHeight }}
     >
-      {market.outcomes.slice(0, 2).map((item, index) => (
+      {market.outcomes.length > 2 ? (
         <button
-          key={item.id}
           type="button"
-          aria-pressed={selected === item.id}
-          onClick={() => onSelect(item.id)}
-          className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold ${selected === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
-          style={{
-            color: /^(yes|up)$/i.test(item.label) ? "#10191e" : "#f4f7fa",
-            background: /^(yes|up)$/i.test(item.label)
-              ? "#bfceda"
-              : /^(no|down)$/i.test(item.label)
-                ? "#1d2529"
-                : index === 0
-                  ? "#526680"
-                  : "#49555f",
-          }}
+          className="ios-press min-h-12 flex-1 rounded-full bg-[#bfceda] text-[#10191e] text-base font-medium"
+          onClick={() => onSelect(selected ?? market.outcomes[0]!.id)}
         >
-          {item.label} {cents(item)}
+          Trade · {market.outcomes.length} outcomes
         </button>
-      ))}
+      ) : (
+        market.outcomes.slice(0, 2).map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={selected === item.id}
+            onClick={() => onSelect(item.id)}
+            className={`ios-press min-h-12 min-w-0 flex-1 rounded-full border px-3 text-sm font-semibold ${selected === item.id ? "border-white/25 text-white shadow-lg" : "border-white/10 text-white/85"}`}
+            style={{
+              color: /^(yes|up)$/i.test(item.label) ? "#10191e" : "#f4f7fa",
+              background: /^(yes|up)$/i.test(item.label)
+                ? "#bfceda"
+                : /^(no|down)$/i.test(item.label)
+                  ? "#1d2529"
+                  : index === 0
+                    ? "#526680"
+                    : "#49555f",
+            }}
+          >
+            {item.label} {cents(item)}
+          </button>
+        ))
+      )}
     </div>,
     document.body,
   );

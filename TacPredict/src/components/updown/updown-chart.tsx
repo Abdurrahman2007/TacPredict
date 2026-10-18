@@ -17,7 +17,7 @@ function tick(price: number) {
 
 /**
  * Price chart for one window. The x axis is the whole window, so the line grows from left to
- * right; the dashed line is the price to beat. Every point is a real Coinbase price.
+ * right; the dashed line is the price to beat. Every point is a real observation from the specified source.
  */
 export function UpDownChart({
   w,
@@ -25,12 +25,14 @@ export function UpDownChart({
   beat,
   asset,
   live,
+  source = "Coinbase",
 }: {
   w: Win;
   series: PricePoint[];
   beat: number | null;
   asset: UpDownAsset;
   live: boolean;
+  source?: string;
 }) {
   const gradient = useId().replace(/:/g, "");
   const zone = useTimeZone();
@@ -86,7 +88,7 @@ export function UpDownChart({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`${asset} price this window. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
+        aria-label={`${asset} ${source} price this window. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
         onPointerMove={(e) => inspect(e.clientX, e.currentTarget.getBoundingClientRect())}
         onPointerLeave={() => setProbe(null)}
       >
@@ -152,6 +154,12 @@ export function UpDownChart({
           stroke="#0f161a"
           strokeWidth="2"
         />
+        <g aria-label={`Latest observed price ${formatUsd(last.price, asset)}`}>
+          <rect x={W - 81} y={y(last.price) - 11} width="80" height="22" rx="11" fill="#315dff" />
+          <text x={W - 41} y={y(last.price) + 4} textAnchor="middle" fontSize="10.5" fill="#fff">
+            {formatUsd(last.price, asset)}
+          </text>
+        </g>
         {probe && (
           <g>
             <line
@@ -169,10 +177,10 @@ export function UpDownChart({
           </g>
         )}
         <text x={L} y={H - 6} fontSize="10.5" fill="#8d9aa6">
-          {clock(w.start, zone)}
+          {clock(w.start, zone, w.minutes <= 30)}
         </text>
         <text x={W - R} y={H - 6} fontSize="10.5" fill="#8d9aa6" textAnchor="end">
-          {clock(w.end, zone)}
+          {clock(w.end, zone, w.minutes <= 30)}
         </text>
       </svg>
     </div>

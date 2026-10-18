@@ -1,33 +1,35 @@
 import { useQuery } from "@tanstack/react-query";
 import { cryptoMarketQueryOptions, cryptoHistoryQueryOptions } from "@/lib/market-data.functions";
-import { sourcePriceWindow } from "@/lib/price-window";
+import { chartWindow } from "@/lib/updown/chart-window.mjs";
 import { MarketSparkline } from "@/components/market-sparkline";
+import type { UpDownAsset } from "@/lib/updown/window.mjs";
 export function CryptoDetailChart({
   asset,
   initialMinutes = 15,
+  startsAt,
+  endsAt,
 }: {
-  asset: "bitcoin" | "ethereum" | "solana";
+  asset: UpDownAsset;
   initialMinutes?: number;
+  startsAt?: string | undefined;
+  endsAt?: string | undefined;
 }) {
   const { data } = useQuery(cryptoMarketQueryOptions);
   const { data: history } = useQuery(cryptoHistoryQueryOptions(asset));
-  const minutes = Math.min(Math.max(initialMinutes, 1), 60);
-  const observations = [...(history ?? []), ...(data?.histories[asset] ?? [])].sort(
-      (a, b) => a.time - b.time,
-    ),
-    last = observations.at(-1)?.time ?? 0;
+  const observations = [...(history ?? []), ...(data?.histories[asset] ?? [])];
+  const last = Math.max(0, ...observations.map((p) => p.time));
+  const start = Date.parse(startsAt ?? "");
+  const end = Date.parse(endsAt ?? "");
+  const since = Number.isFinite(start) ? start : last - initialMinutes * 60000;
+  const until = Number.isFinite(end) ? end : last;
   return (
     <section className="mt-6" aria-label="Market spot chart">
       <MarketSparkline
-        points={sourcePriceWindow(observations, last - minutes * 60000)}
+        points={chartWindow(observations, since, until)}
         assetLabel={asset}
         sourceLabel="CoinGecko"
       />
-      {data?.stale && (
-        <p className="mt-3 text-[11px] text-muted-foreground">
-          Price refresh delayed · showing last available data
-        </p>
-      )}
+      {data?.stale && <p className="mt-3 text-[11px] text-muted-foreground">Delayed data</p>}
     </section>
   );
 }

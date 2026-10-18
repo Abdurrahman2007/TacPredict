@@ -1,3 +1,4 @@
+import { outcomeColor } from "@/lib/outcome-color";
 import type { MarketOutcome } from "@/domain/markets/types";
 import { pct } from "@/lib/protocol/display.mjs";
 export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: number }) {
@@ -12,8 +13,9 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
         </span>
         <div className="mt-2 h-[3px] w-full rounded-full bg-border/40">
           <div
-            className={`h-full rounded-full ${index === 0 ? "bg-positive" : "bg-destructive"}`}
+            className="h-full rounded-full"
             style={{
+              background: outcomeColor(outcome.label, index),
               width: `${outcome.probabilityKnown === false ? 0 : Math.max(0, Math.min(100, outcome.probability))}%`,
             }}
           />
@@ -25,7 +27,7 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
       >
         {outcome.probabilityKnown !== false && outcome.probability > 0
           ? `${(100 / outcome.probability).toFixed(2)}x`
-          : "0x"}
+          : "0"}
       </span>
       <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-base font-semibold tabular-nums">
         {pct(outcome)}

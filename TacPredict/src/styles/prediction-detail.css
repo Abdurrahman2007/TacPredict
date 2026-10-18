@@ -527,3 +527,38 @@
     transition: none;
   }
 }
+
+/* Same quiet charcoal surfaces as list cards; no source-specific visual variants. */
+.pd-position-card {
+  background: #1d2529;
+  border-color: #384145;
+  padding: 18px;
+}
+.pd-position-card > p {
+  padding: 26px 0;
+  min-height: 88px;
+  color: #acb8be;
+}
+.pd-title-row {
+  align-items: flex-start;
+}
+.pd-title-row > .market-icon {
+  margin-top: 3px;
+}
+.pd-title-row h1 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.pd-data-note summary {
+  cursor: pointer;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+.pd-data-note p {
+  padding: 8px 0;
+}
+.pd-extra-outcomes button[aria-pressed="true"] {
+  background: #bfceda;
+  color: #10191e;
+}

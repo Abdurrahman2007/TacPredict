@@ -1,23 +1,18 @@
 import { useState } from "react";
+import "@/styles/market-cards.css";
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
 import { CoinGeckoChart } from "@/components/updown/coingecko-chart";
 import { cents, usdcShort, volumeText } from "@/lib/protocol/display.mjs";
-import { useLivePrice } from "@/lib/updown/live-prices";
-import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
   ASSETS,
   DURATIONS,
-  deltaInfo,
   durationLabel,
   formatCountdown,
-  formatUsd,
   makeWindow,
   matchNativeMarket,
-  priceToBeat,
   slugOf,
   windowStartFor,
   type UpDownAsset,
@@ -47,85 +42,39 @@ function AssetCard({
   const zone = useTimeZone();
   const start = windowStartFor(nowMs, minutes);
   const w = makeWindow(start, minutes);
-  const lookback = Math.ceil((minutes + 10) / 30) * 30;
-  const spot = useQuery(spotWindowQueryOptions(asset, lookback, 10000));
-  const live = useLivePrice(asset);
-  const candles = spot.data?.candles;
-  const trades = spot.data?.trades;
-  const gran = (spot.data?.granularity ?? 60) * 1000;
-  const beat = priceToBeat(candles, start, gran);
-  const current =
-    live.price ??
-    trades?.[trades.length - 1]?.price ??
-    candles?.[candles.length - 1]?.close ??
-    null;
-  const delta = deltaInfo(current, beat);
   const market = matchNativeMarket(markets, asset, w);
   const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
   const down = market?.outcomes.find((o) => /^down$/i.test(o.label)) ?? market?.outcomes[1];
-  const title = `${info.name} - ${durationLabel(minutes)}`;
+  const title = `${info.name} Up or Down - ${durationLabel(minutes)}`;
   const search = { d: minutes };
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
 
   return (
-    <article
-      className="ud-home-card overflow-hidden rounded-[26px] border border-border bg-card p-5 sm:p-6"
-      aria-label={`${info.name} Up or Down`}
-    >
-      <div className="flex items-center gap-3">
+    <article className="ud-home-card tp-card" aria-label={`${info.name} Up or Down`}>
+      <div className="tp-crypto-meta">
         <img
           src={`/brand/crypto/${info.logo}.svg`}
           alt={`${info.name} logo`}
-          className="size-10 shrink-0 rounded-full"
+          className="size-9 shrink-0 rounded-full"
         />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold">
-            <Link to="/up-down/$asset" params={{ asset: slugOf(asset) }} search={search}>
-              {title}
-            </Link>
-          </h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {clock(w.start, zone)} – {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
-            {clock(w.end, zone)}
-          </p>
-        </div>
-        <span className="ud-live shrink-0 text-xs font-semibold tabular-nums">
+        <span className="ud-live text-xs font-medium tabular-nums">
           LIVE {formatCountdown(w.end - nowMs)}
         </span>
       </div>
-
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-xs text-muted-foreground">Price to beat · Coinbase</dt>
-          <dd className="mt-1 font-semibold tabular-nums">
-            {beat !== null ? formatUsd(beat, asset) : spot.isPending ? "Loading…" : "Unavailable"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted-foreground">Oracle · Coinbase</dt>
-          <dd className="mt-1 font-semibold tabular-nums">
-            {current !== null
-              ? formatUsd(current, asset)
-              : live.status === "connecting" || spot.isPending
-                ? "Loading…"
-                : "Unavailable"}
-            {delta && (
-              <span
-                className={`ml-2 text-xs ${delta.direction === "up" ? "ud-up" : delta.direction === "down" ? "ud-down" : ""}`}
-              >
-                {delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : ""}{" "}
-                {formatUsd(Math.abs(delta.abs), asset)}
-              </span>
-            )}
-          </dd>
-        </div>
-      </dl>
-
-      {large && (
-        <div className="mt-3 block">
-          <CoinGeckoChart asset={asset} window={w} />
-        </div>
-      )}
+      <Link
+        to="/up-down/$asset"
+        params={{ asset: slugOf(asset) }}
+        search={search}
+        className="tp-crypto-title"
+      >
+        <h3>{title}</h3>
+      </Link>
+      <p className="tp-crypto-time">
+        {dayLabel(w.start, zone)}, {clock(w.start, zone)} –{" "}
+        {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
+        {clock(w.end, zone)}
+      </p>
+      {large && <CoinGeckoChart asset={asset} window={w} summary />}
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {(
@@ -189,23 +138,25 @@ export function UpDownSection({
           <ChevronRight className="size-4" />
         </Link>
       </div>
-      <div
-        className="ud-home-durations mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
-        role="group"
-        aria-label="Window length"
-      >
-        {DURATIONS.map((d) => (
-          <button
-            key={d}
-            type="button"
-            aria-pressed={minutes === d}
-            onClick={() => setMinutes(d)}
-            className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
-          >
-            {durationLabel(d)}
-          </button>
-        ))}
-      </div>
+      {detailed && (
+        <div
+          className="ud-home-durations mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+          role="group"
+          aria-label="Window length"
+        >
+          {DURATIONS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              aria-pressed={minutes === d}
+              onClick={() => setMinutes(d)}
+              className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
+            >
+              {durationLabel(d)}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
         {CARDS.map(({ asset, large }) => (
           <AssetCard
