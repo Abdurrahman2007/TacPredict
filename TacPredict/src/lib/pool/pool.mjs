@@ -162,6 +162,12 @@ const ERROR_TEXT = [
   [/Readings can still arrive/i, "The price reading can still arrive. Try again in a few minutes."],
   [/exceeds balance|insufficient (funds|balance)|transfer amount/i, "Not enough USDC or gas in your wallet."],
   [/allowance/i, "USDC approval is missing."],
+  [/Fee too high/i, "That fee is above the 10% cap."],
+  [/Bad limits/i, "Limits must satisfy minimum <= per-user limit <= round pool limit."],
+  [/Unsupported duration|Unknown asset/i, "The contract does not support that asset or duration."],
+  [/Payouts already open/i, "Payouts are already open for that round, so it can no longer be voided."],
+  [/Nothing to withdraw/i, "There are no fees to withdraw."],
+  [/Empty round|Nothing to refund/i, "That round has no bets."],
 ];
 export function poolErrorMessage(error) {
   const parts = [error?.shortMessage, error?.details, error?.cause?.reason, error?.cause?.shortMessage, error?.message]

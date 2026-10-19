@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi, type Address } from "viem";
+import { createPublicClient, http, keccak256, parseAbi, stringToHex, type Address } from "viem";
 import { base } from "viem/chains";
 import { ERC20_ABI_TEXT, POOL_ABI_TEXT } from "./abi";
 import { configuredPoolAddress } from "./deployment";
@@ -181,4 +181,19 @@ export async function poolRecentPositions(user: Address, nowMs: number): Promise
     refund: previews[i]![1],
     ready: previews[i]![2],
   }));
+}
+
+export type PoolRoleStatus = { isReporter: boolean; isAdmin: boolean; isGuardian: boolean; ethBalance: string };
+const role = (name: string) => keccak256(stringToHex(name));
+export async function poolRoleStatus(who: Address): Promise<PoolRoleStatus | null> {
+  const address = configuredPoolAddress();
+  if (!address) return null;
+  const pub = client();
+  const [isReporter, isAdmin, isGuardian, balance] = await Promise.all([
+    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [role("REPORTER_ROLE"), who] }),
+    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [`0x${"00".repeat(32)}`, who] }),
+    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [role("GUARDIAN_ROLE"), who] }),
+    pub.getBalance({ address: who }),
+  ]);
+  return { isReporter, isAdmin, isGuardian, ethBalance: String(balance) };
 }
