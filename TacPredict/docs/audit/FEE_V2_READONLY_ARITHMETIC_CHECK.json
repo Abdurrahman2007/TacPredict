@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "3affa5c955238d834de36cff8748b47956f08319",
+  "test": "deterministic BigInt quote partition/accounting checks",
+  "checkedFills": 5000,
+  "scopes": 1000,
+  "passed": true,
+  "networkCalls": 0,
+  "transactions": 0,
+  "limitation": "Pure arithmetic helper only; not contract, live-chain, RLS or indexer E2E proof."
+}

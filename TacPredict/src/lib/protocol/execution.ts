@@ -22,6 +22,7 @@ import {
   positionAbi,
   usdcAtomic,
 } from "./orders";
+import { assertMarketIdentity, onchainMarketId } from "./market-identity.mjs";
 import type { BookOrder } from "./read.functions";
 import { submitProtocolOrder } from "./orders.functions";
 export async function protocolClients(w: WalletState, d: ProtocolDeployment, newRisk = true) {
@@ -70,6 +71,7 @@ export async function placeLimitBuy(
   amount: string,
   price: string,
 ) {
+  assertMarketIdentity(m, d.chainId);
   const { pub, wallet, account, chain } = await protocolClients(w, d);
   const q = limitQuote(amount, price);
   if (
@@ -213,12 +215,13 @@ export async function claimPosition(
   marketId: string,
   voided: boolean,
 ) {
+  const id = onchainMarketId(marketId);
   const { pub, wallet, account } = await protocolClients(w, d, false);
   const amount = await pub.readContract({
     address: d.positions as Address,
     abi: positionAbi,
     functionName: "claimable",
-    args: [BigInt(marketId), account],
+    args: [id, account],
   });
   if (amount <= 0n) throw Error("No redeemable shares.");
   const { request } = await pub.simulateContract({
@@ -226,7 +229,7 @@ export async function claimPosition(
     address: d.settlement as Address,
     abi: settlementAbi,
     functionName: voided ? "refund" : "claim",
-    args: [BigInt(marketId)],
+    args: [id],
   });
   const hash = await wallet.writeContract(request);
   if ((await pub.waitForTransactionReceipt({ hash })).status !== "success")
@@ -241,6 +244,7 @@ export async function fundCompleteSet(
   amount: string,
   merge = false,
 ) {
+  assertMarketIdentity(m, d.chainId);
   const { pub, wallet, account } = await protocolClients(w, d, !merge);
   const quantity = usdcAtomic(amount);
   if (m.chainId !== d.chainId) throw Error("Market network mismatch");
@@ -291,12 +295,20 @@ export async function placeLimitSell(
   shares: string,
   price: string,
 ) {
+  assertMarketIdentity(m, d.chainId);
   const { pub, wallet, account, chain } = await protocolClients(w, d);
   const quantity = usdcAtomic(shares),
     p = usdcAtomic(price);
   if (p >= 1000000n) throw Error("Price must be below 1 USDC");
   const token = m.outcomes.find((o) => o.index === outcome)?.tokenId;
   if (!token) throw Error("Outcome token not indexed");
+  const chainToken = await pub.readContract({
+    address: d.positions as Address,
+    abi: positionAbi,
+    functionName: "tokenId",
+    args: [onchainMarketId(m.onchainId), outcome],
+  });
+  if (chainToken.toString() !== token) throw Error("Indexed outcome token mismatch");
   const balance = await pub.readContract({
     address: d.positions as Address,
     abi: positionAbi,

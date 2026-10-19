@@ -1,0 +1,329 @@
+{
+  "sourceCommit": "3affa5c955238d834de36cff8748b47956f08319",
+  "interpretation": "Repository expectations only, NOT applied-history or live-policy proof. prosrc MD5 checks exact body bytes, not semantic safety or grant/owner/search_path. Source file SHA256 is not a Supabase statement-array checksum.",
+  "migrations": [
+    {
+      "version": "202610070000",
+      "filename": "202610070000_account_baseline.sql",
+      "sha256": "1ec1f17c4d4168761de8a5eae0af59931bc75baeac09f4192e9e1a35b11bcc4f"
+    },
+    {
+      "version": "202610070001",
+      "filename": "202610070001_rolling_24h_rewards.sql",
+      "sha256": "0ecbe454db5e01a19cdce3f947deea9c89ad614eb0fc00b102eb05f1f8a104cf"
+    },
+    {
+      "version": "202610070002",
+      "filename": "202610070002_tac_promo_codes.sql",
+      "sha256": "af893173c0191b5e0250e6459cec8927a217d93c339fda875f9aeaacfcd76340"
+    },
+    {
+      "version": "202610080003",
+      "filename": "202610080003_locked_usdc_rewards.sql",
+      "sha256": "9273c36434647b59e96fae4059c7b37f076e30a02085b556ecd1eaaaff6f5320"
+    },
+    {
+      "version": "202610080004",
+      "filename": "202610080004_native_usdc_protocol.sql",
+      "sha256": "2ee3f467251e0e35d10c5c17d4a35dcb594a8ee4d011b1d563765a1cdfad3884"
+    },
+    {
+      "version": "202610080005",
+      "filename": "202610080005_native_protocol_read_api.sql",
+      "sha256": "a9d2fc00452f11969ed1accecd31a6d1cd39a014393afcdbafba9602a2136647"
+    },
+    {
+      "version": "202610080006",
+      "filename": "202610080006_native_protocol_hardening.sql",
+      "sha256": "d9e4b756eb1c5ef494fec1bc3a5a6b9b2713b90b85bc3ef3c0561b0efeb8ac42"
+    },
+    {
+      "version": "202610080007",
+      "filename": "202610080007_native_orderbook_api.sql",
+      "sha256": "00a90c8e9eb8b1a51bfaa4e5160c8453fabb4926eab917e84d3318ae3fb90355"
+    },
+    {
+      "version": "202610080008",
+      "filename": "202610080008_native_metadata_api.sql",
+      "sha256": "2a5c4b151c90718c76ac139f41dac79f5e5294bf3cb523d8a9771b6e59ebcb0d"
+    },
+    {
+      "version": "202610080009",
+      "filename": "202610080009_chain_aware_native_ids.sql",
+      "sha256": "f344b1681a212a6973ed310dd08a31e740dcefdb3e9de428f3ebcaf39435a427"
+    },
+    {
+      "version": "202610080010",
+      "filename": "202610080010_verified_wallet_links.sql",
+      "sha256": "d7b5ebc47eebf8f8bcb8d2e7ca6b5da9c64e202c5c0a55883a1edc07ce40dce4"
+    },
+    {
+      "version": "202610080011",
+      "filename": "202610080011_indexer_scope_and_evidence.sql",
+      "sha256": "d7549f06432f951c5c0859343a0428435460c89619eb2dea018461f83cd3f8fe"
+    },
+    {
+      "version": "202610080012",
+      "filename": "202610080012_exact_indexed_void_claims.sql",
+      "sha256": "390261c3c29e14bc98371e596e4e25f870208a81d13b86519d5c14e6bcad2760"
+    },
+    {
+      "version": "202610080013",
+      "filename": "202610080013_native_reward_journey.sql",
+      "sha256": "463ad6e0ca32988b1a7e35d8634dec94a668539145cabbc76c0ce0bcb12d694f"
+    },
+    {
+      "version": "202610080014",
+      "filename": "202610080014_protocol_job_fencing.sql",
+      "sha256": "32e9ea24c8b67dc9931801d0b7d0e5fee5ddb2a1f0cfb1c252113c9a6bb8a60a"
+    },
+    {
+      "version": "202610080015",
+      "filename": "202610080015_verified_execution_feed.sql",
+      "sha256": "632465abadcbd619a9256437e6e09181b64ac22fe1bf6eaeb6e0e49c1cc99a5b"
+    },
+    {
+      "version": "202610080016",
+      "filename": "202610080016_admin_read_workspace.sql",
+      "sha256": "e59ada17870ffe80db32706dd8b9d3a40572a9981bbcef8f0b3d86a9dfa30d38"
+    },
+    {
+      "version": "202610110017",
+      "filename": "202610110017_market_import_agent.sql",
+      "sha256": "d5d0e35f1eef160424907f5a5edfe8c1b4cec0e78973fa656c4e0c8741e98928"
+    },
+    {
+      "version": "202610110018",
+      "filename": "202610110018_discovery_scheduler.sql",
+      "sha256": "7dfc8845ec64ba69dd7cd17f49eaf4956c29f73a739b74f42dae3021e9aedae5"
+    },
+    {
+      "version": "202610120019",
+      "filename": "202610120019_market_import_admin_stats.sql",
+      "sha256": "5dce51c59470ea90b84e3aabe968b3142b77b01b83e9275934ff8bfa452fd943"
+    },
+    {
+      "version": "202610120020",
+      "filename": "202610120020_web3_wallets_users.sql",
+      "sha256": "f75632beffa2420f79412c459d4c454fd8e70947d1a352810a429c665de1c505"
+    }
+  ],
+  "expectedFinalPublicFunctions": [
+    {
+      "name": "handle_new_tac_account",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610070000_account_baseline.sql",
+      "prosrcMd5": "d21c953fb143b27f8b7ed9bb2798eafc"
+    },
+    {
+      "name": "has_role",
+      "argumentsSource": "_role public.app_role,_user_id uuid",
+      "lastDefinitionMigration": "202610070000_account_baseline.sql",
+      "prosrcMd5": "3842cac1406447161acfc19050647283"
+    },
+    {
+      "name": "get_reward_status",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610070001_rolling_24h_rewards.sql",
+      "prosrcMd5": "bdd977ff9c9ed710f0b6d301bb7354dc"
+    },
+    {
+      "name": "claim_daily_reward",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610070001_rolling_24h_rewards.sql",
+      "prosrcMd5": "588bc2fa7b7dda866773b8207ddbce43"
+    },
+    {
+      "name": "get_tac_promo_status",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610070002_tac_promo_codes.sql",
+      "prosrcMd5": "fe87cd7d317b69589137f1139f0e9a63"
+    },
+    {
+      "name": "redeem_tac_promo",
+      "argumentsSource": "_code text",
+      "lastDefinitionMigration": "202610070002_tac_promo_codes.sql",
+      "prosrcMd5": "d640a21af743def0bf83b05d1f83f1c2"
+    },
+    {
+      "name": "get_user_reward_tasks",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610080003_locked_usdc_rewards.sql",
+      "prosrcMd5": "713ebf292d84798ebcbd3636f3beb78a"
+    },
+    {
+      "name": "register_my_protocol_wallet",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610080010_verified_wallet_links.sql",
+      "prosrcMd5": "31226c544f74a050fe983eac1c2828a6"
+    },
+    {
+      "name": "prepare_protocol_market",
+      "argumentsSource": "_hash text,_rules_hash text,_source_hash text,_document jsonb",
+      "lastDefinitionMigration": "202610080016_admin_read_workspace.sql",
+      "prosrcMd5": "905886510625bcf421f700bd3cedd38a"
+    },
+    {
+      "name": "apply_protocol_event",
+      "argumentsSource": "_chain bigint,_block numeric,_block_hash text,_tx text,_log integer,_contract text,_event text,_payload jsonb,_timestamp timestamptz",
+      "lastDefinitionMigration": "202610080011_indexer_scope_and_evidence.sql",
+      "prosrcMd5": "75b26365764b8eb9edeb60182e7053ab"
+    },
+    {
+      "name": "get_protocol_market_feed",
+      "argumentsSource": "_limit integer DEFAULT 150",
+      "lastDefinitionMigration": "202610080015_verified_execution_feed.sql",
+      "prosrcMd5": "b56b57dab48eb042f2c9ddde38be1587"
+    },
+    {
+      "name": "get_protocol_probability_history",
+      "argumentsSource": "_market_id text,_since timestamptz",
+      "lastDefinitionMigration": "202610080009_chain_aware_native_ids.sql",
+      "prosrcMd5": "a249224e69d599da3c73720e6efcbb35"
+    },
+    {
+      "name": "get_my_protocol_portfolio",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610080012_exact_indexed_void_claims.sql",
+      "prosrcMd5": "621bfe0d0ce12b28ae3409e0082e554a"
+    },
+    {
+      "name": "get_protocol_market_activity",
+      "argumentsSource": "_market_id text",
+      "lastDefinitionMigration": "202610080009_chain_aware_native_ids.sql",
+      "prosrcMd5": "646e76b03c95118d3826022507f238b6"
+    },
+    {
+      "name": "get_protocol_signed_orderbook",
+      "argumentsSource": "_market_id text,_outcome integer",
+      "lastDefinitionMigration": "202610080009_chain_aware_native_ids.sql",
+      "prosrcMd5": "7e0c90f8088b13497e750458581925e3"
+    },
+    {
+      "name": "get_protocol_metadata",
+      "argumentsSource": "_hash text",
+      "lastDefinitionMigration": "202610080008_native_metadata_api.sql",
+      "prosrcMd5": "5492fe22126da7716ddec37b511fcda2"
+    },
+    {
+      "name": "consume_protocol_wallet_link",
+      "argumentsSource": "_challenge uuid,_user uuid",
+      "lastDefinitionMigration": "202610080010_verified_wallet_links.sql",
+      "prosrcMd5": "ae6d7162c509243ab8c614bfe9f8ab22"
+    },
+    {
+      "name": "get_my_native_reward_tasks",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610080013_native_reward_journey.sql",
+      "prosrcMd5": "88a81fb0a674a32390e697110b210a05"
+    },
+    {
+      "name": "get_my_protocol_activity",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610080013_native_reward_journey.sql",
+      "prosrcMd5": "f05380cadc92030f80fbb9b7385d7dea"
+    },
+    {
+      "name": "acquire_protocol_job_lease",
+      "argumentsSource": "_chain bigint,_job text,_owner uuid,_seconds integer DEFAULT 180",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "9f4bd4032b88554b5548b4380cbae6da"
+    },
+    {
+      "name": "renew_protocol_job_lease",
+      "argumentsSource": "_chain bigint,_job text,_owner uuid,_seconds integer DEFAULT 180",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "6f45be8e576f0ab0633eb560ef6e9cc7"
+    },
+    {
+      "name": "release_protocol_job_lease",
+      "argumentsSource": "_chain bigint,_job text,_owner uuid",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "7087d1718962af0a134cc1d5d2350465"
+    },
+    {
+      "name": "assert_protocol_job_lease",
+      "argumentsSource": "_chain bigint,_job text,_owner uuid",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "3a9b86520429a42fffe10ea105b7adfe"
+    },
+    {
+      "name": "apply_leased_protocol_event",
+      "argumentsSource": "_owner uuid,_chain bigint,_block numeric,_block_hash text,_tx text,_log integer,_contract text,_event text,_payload jsonb,_timestamp timestamptz",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "784cc19e9ea4b346874cb3fce9e3d9bc"
+    },
+    {
+      "name": "advance_protocol_checkpoint",
+      "argumentsSource": "_owner uuid,_chain bigint,_expected_block numeric,_block numeric,_hash text",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "1409df19a0c1836e3dd1e7bf280131fd"
+    },
+    {
+      "name": "finish_protocol_job_run",
+      "argumentsSource": "_id uuid,_status text",
+      "lastDefinitionMigration": "202610080014_protocol_job_fencing.sql",
+      "prosrcMd5": "6e5d485842dcb7c9dc9ba2008fa743ca"
+    },
+    {
+      "name": "get_protocol_admin_snapshot",
+      "argumentsSource": "_section text",
+      "lastDefinitionMigration": "202610080016_admin_read_workspace.sql",
+      "prosrcMd5": "842c4e0e0611fa0f470b46e7a6683c43"
+    },
+    {
+      "name": "claim_market_import_run",
+      "argumentsSource": "_id uuid",
+      "lastDefinitionMigration": "202610110017_market_import_agent.sql",
+      "prosrcMd5": "fe6166503925bd1a760da372ab8456fb"
+    },
+    {
+      "name": "finish_market_import_run",
+      "argumentsSource": "_id uuid,_status text,_discovered integer,_rejected integer,_ai boolean,_error text,_offset integer",
+      "lastDefinitionMigration": "202610110017_market_import_agent.sql",
+      "prosrcMd5": "477b8c2e720e8dd99386031dcf472480"
+    },
+    {
+      "name": "persist_market_candidates",
+      "argumentsSource": "_items jsonb",
+      "lastDefinitionMigration": "202610110018_discovery_scheduler.sql",
+      "prosrcMd5": "7c6e1086a72adbf2e4a91ec794c43553"
+    },
+    {
+      "name": "get_market_previews",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610110017_market_import_agent.sql",
+      "prosrcMd5": "1ea8e4a741654f7062a93cbcc10e2c7e"
+    },
+    {
+      "name": "get_market_import_admin",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610120019_market_import_admin_stats.sql",
+      "prosrcMd5": "46553fe23b46fa4fc21667fbb24275ab"
+    },
+    {
+      "name": "set_market_import_enabled",
+      "argumentsSource": "_enabled boolean",
+      "lastDefinitionMigration": "202610110017_market_import_agent.sql",
+      "prosrcMd5": "22403cc85bcbc0c654b185e6a28ec051"
+    },
+    {
+      "name": "review_market_candidate",
+      "argumentsSource": "_id uuid,_reject boolean",
+      "lastDefinitionMigration": "202610110017_market_import_agent.sql",
+      "prosrcMd5": "dd09546dd99b2162232c51247a887ae8"
+    },
+    {
+      "name": "get_market_event_drafts",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610110018_discovery_scheduler.sql",
+      "prosrcMd5": "55271a3b46eb9f3de5375a379f2df6a0"
+    },
+    {
+      "name": "request_market_discovery",
+      "argumentsSource": "",
+      "lastDefinitionMigration": "202610110018_discovery_scheduler.sql",
+      "prosrcMd5": "13dd64bacb9273a2f13317176993fc52"
+    }
+  ]
+}

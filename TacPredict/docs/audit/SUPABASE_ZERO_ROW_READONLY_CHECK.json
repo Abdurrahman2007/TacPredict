@@ -1,0 +1,196 @@
+{
+  "projectRef": "lmqaiqvwcytmgwgwyfwx",
+  "checkedAtUtc": "2026-10-19T07:40:09.385731+00:00",
+  "method": "GET only; select=*&limit=0; no user rows or mutation probes",
+  "checks": [
+    {
+      "table": "protocol_deployments",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_markets",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_market_outcomes",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_market_sources",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_market_rules",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_trades",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_market_prices",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_resolutions",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_resolution_evidence",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_disputes",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_market_metadata",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_wallets",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_wallet_link_challenges",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_positions",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_orders",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_transactions",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_chain_events",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_claims",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_refunds",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_notifications",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_audit_logs",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_indexer_checkpoints",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_job_leases",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_job_runs",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_reward_credits",
+      "httpStatus": 401
+    },
+    {
+      "table": "users",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "wallets",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "user_roles",
+      "httpStatus": 401
+    },
+    {
+      "table": "profiles",
+      "httpStatus": 401
+    },
+    {
+      "table": "locked_usdc_rewards",
+      "httpStatus": 404
+    },
+    {
+      "table": "points_transactions",
+      "httpStatus": 401
+    },
+    {
+      "table": "predictions",
+      "httpStatus": 401
+    },
+    {
+      "table": "tac_promo_codes",
+      "httpStatus": 401
+    },
+    {
+      "table": "tac_promo_redemptions",
+      "httpStatus": 401
+    },
+    {
+      "table": "tac_promo_attempts",
+      "httpStatus": 401
+    },
+    {
+      "table": "verified_usdc_events",
+      "httpStatus": 404
+    },
+    {
+      "table": "locked_reward_credits",
+      "httpStatus": 404
+    },
+    {
+      "table": "protocol_market_metrics",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "protocol_orderbook",
+      "httpStatus": 200,
+      "zeroRows": true
+    },
+    {
+      "table": "market_import_policy",
+      "httpStatus": 401
+    },
+    {
+      "table": "market_candidates",
+      "httpStatus": 401
+    },
+    {
+      "table": "market_agent_runs",
+      "httpStatus": 401
+    }
+  ],
+  "openApi": {
+    "httpStatus": 401
+  },
+  "appliedMigrationsVerified": false,
+  "liveRlsPoliciesVerified": false,
+  "authenticatedOwnershipIsolationVerified": false,
+  "writesTested": false
+}

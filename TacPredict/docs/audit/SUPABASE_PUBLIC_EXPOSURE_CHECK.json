@@ -1,0 +1,54 @@
+{
+  "projectRef": "lmqaiqvwcytmgwgwyfwx",
+  "credentialCapability": "existing public app key only",
+  "method": "GET, limit=0; no DDL, DML, grants, migrations or user rows",
+  "checks": [
+    {
+      "table": "protocol_deployments",
+      "httpStatus": 200,
+      "zeroRowResponse": true
+    },
+    {
+      "table": "protocol_markets",
+      "httpStatus": 200,
+      "zeroRowResponse": true
+    },
+    {
+      "table": "protocol_orders",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_trades",
+      "httpStatus": 200,
+      "zeroRowResponse": true
+    },
+    {
+      "table": "protocol_positions",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_claims",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_refunds",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_audit_logs",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_job_leases",
+      "httpStatus": 401
+    },
+    {
+      "table": "protocol_indexer_checkpoints",
+      "httpStatus": 401
+    }
+  ],
+  "migrationHistoryVerified": false,
+  "livePoliciesVerified": false,
+  "userIsolationVerified": false,
+  "blocker": "Authorized management/database read-only access unavailable; public REST checks cannot prove RLS or schema migration state."
+}
