@@ -6,6 +6,10 @@
     "test": "node --test ../supabase-security-sql.test.mjs"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.3.14"
+    "@electric-sql/pglite": "0.3.14",
+    "pg": "8.23.1"
+  },
+  "optionalDependencies": {
+    "@embedded-postgres/linux-x64": "17.9.0-beta.17"
   }
 }

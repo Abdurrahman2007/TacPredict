@@ -1,3 +1,5 @@
+> **Newer continuation:** [Stage 2 launch-gate implementation and fresh read-only observations](REMAINING_LAUNCH_GATES_STAGE2.md). Historical limitations below must be read with that report; production changes remain unapplied.
+
 # Authenticated live Supabase verification and review-only fixes
 
 **Verdict: release remains BLOCKED. Live catalog verification completed; code fixes and SQL proposals are not deployed/applied. Draft PR #3 remains open/draft/unmerged.**

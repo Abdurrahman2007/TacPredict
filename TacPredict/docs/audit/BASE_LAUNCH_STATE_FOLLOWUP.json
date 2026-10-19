@@ -1,0 +1,23 @@
+{
+  "chainId": 8453,
+  "blockNumber": "52812843",
+  "blockHash": "0x2c023ecfd19dfe432c3a238a6b49f15f67334e38b927b772cbfcf588d341b015",
+  "method": "eth_call at finalized block via Base MCP, all twelve inner read calls individually checked",
+  "observedAtUtc": "2026-10-19T13:20:04.252Z",
+  "values": {
+    "chainId": "8453",
+    "tradingPaused": true,
+    "nextMarketId": "2",
+    "collateralToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "bondAtomic": "5000000",
+    "challengeSeconds": "86400",
+    "usdcBalance_registry": "0",
+    "usdcBalance_factory": "0",
+    "usdcBalance_positions": "0",
+    "usdcBalance_exchange": "0",
+    "usdcBalance_oracle": "0",
+    "usdcBalance_settlement": "0"
+  },
+  "scope": "Limited launch-state getters only. No fresh bytecode/hash, market liabilities, maker balances, approvals, roles or independent security audit claim.",
+  "mutations": false
+}

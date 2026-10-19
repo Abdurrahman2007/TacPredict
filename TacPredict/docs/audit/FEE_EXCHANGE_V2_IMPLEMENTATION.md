@@ -1,3 +1,5 @@
+> **Newer continuation:** [Stage 2 launch-gate implementation and fresh read-only observations](REMAINING_LAUNCH_GATES_STAGE2.md). Historical limitations below must be read with that report; production changes remain unapplied.
+
 # FeeExchangeV2 — review-only implementation and integration requirements
 
 **Not deployed, activated, independently audited or production-integrated. No transaction or schema change is authorized by this document.** Supersedes the provisional fee-payer/VOID policy in TREASURY_INTEGRATION_REVIEW.md; that file's first checkpoint is historical.

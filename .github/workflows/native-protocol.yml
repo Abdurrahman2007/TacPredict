@@ -26,4 +26,5 @@ jobs:
       - run: npm --prefix protocol run compile
       - run: npm --prefix protocol test
       - run: npm --prefix protocol run test:security-sql
+      - run: npm --prefix protocol run test:security-postgres
 # No secrets, wallet funding, deployment or mainnet activation in CI.

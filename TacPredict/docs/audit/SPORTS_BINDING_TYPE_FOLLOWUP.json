@@ -1,0 +1,21 @@
+{
+  "worker": "tacpredict-app",
+  "checkedAt": "2026-10-19T13:18:57.589Z",
+  "secretListStatus": 200,
+  "settingsStatus": 200,
+  "expected": [
+    {
+      "name": "FOOTBALL_DATA_API_KEY",
+      "secretPresent": false,
+      "bindingTypes": ["plain_text"]
+    },
+    {
+      "name": "CRICKET_DATA_API_KEY",
+      "secretPresent": false,
+      "bindingTypes": ["plain_text"]
+    }
+  ],
+  "compatibilityDate": "2026-10-16",
+  "compatibilityFlags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+  "scope": "Names and types only; no binding values requested in output, no changes or provider validity tests."
+}
