@@ -2,6 +2,8 @@
 
 Status: engineering review and approval-gated implementation plan; NOT an independent security audit, deployment approval, or public-launch clearance.
 
+> **Policy update:** Owner approved additional buyer-only 1% and full execution-fee refund on VOID. The old provisional fee policy below is historical and superseded by [FEE_EXCHANGE_V2_IMPLEMENTATION.md](FEE_EXCHANGE_V2_IMPLEMENTATION.md). Fees now require escrow until terminal resolution; none are immediately earned.
+
 ## Scope and preservation
 
 - Requested branch `development/base-usdc`: reviewed HEAD `dd2e39d78ac4f16ef63e227334999259ba93bfa4`.
