@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ASSETS, formatUsd, type UpDownAsset } from "@/lib/updown/window.mjs";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 export type IslandContext = {
   asset: UpDownAsset;
@@ -22,7 +23,7 @@ export function UpDownIslandContent({
 }: IslandContext) {
   return (
     <>
-      <img src={`/brand/crypto/${ASSETS[asset].logo}.svg`} alt="" />
+      <img src={cryptoLogoUrl(ASSETS[asset].logo)} alt="" />
       <span className="ud-island-copy">
         <b>{label}</b>
         <span className="ud-island-values">

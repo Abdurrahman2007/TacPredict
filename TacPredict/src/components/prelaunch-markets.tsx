@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { marketPreviewsQueryOptions, type MarketPreview } from "@/lib/agent/discovery.functions";
 import type { Market } from "@/domain/markets/types";
 import { OutcomeRow } from "./outcome-row";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 export function previewMarket(p: MarketPreview): Market {
   return {
@@ -29,7 +30,7 @@ export function previewMarket(p: MarketPreview): Market {
     source: "TacPredict preview",
     sourceUrl: p.sourceUrl,
     resolutionCriteria: p.rules,
-    image: `/brand/crypto/${p.asset === "bitcoin" ? "btc" : p.asset === "ethereum" ? "eth" : "sol"}.svg`,
+    image: cryptoLogoUrl(p.asset === "bitcoin" ? "btc" : p.asset === "ethereum" ? "eth" : "sol"),
   };
 }
 export function PrelaunchMarkets({

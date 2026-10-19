@@ -22,6 +22,7 @@ import {
   windowStartFor,
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 function MyPositions({ market }: { market: Market }) {
   const [tab, setTab] = useState<"positions" | "history">("positions");
@@ -204,7 +205,7 @@ function MiniCard({
       search={{ d: minutes }}
       className="ud-mini"
     >
-      <img src={`/brand/crypto/${ASSETS[asset].logo}.svg`} alt="" />
+      <img src={cryptoLogoUrl(ASSETS[asset].logo)} alt="" />
       <p>{label ?? `${ASSETS[asset].name} - ${durationLabel(minutes)}`}</p>
       <small>
         {formatUsd(live.price, asset)}{" "}

@@ -17,6 +17,7 @@ import {
   windowStartFor,
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
@@ -53,7 +54,7 @@ function AssetCard({
     <article className="ud-home-card tp-card" aria-label={`${info.name} Up or Down`}>
       <div className="tp-crypto-heading">
         <img
-          src={`/brand/crypto/${info.logo}.svg`}
+          src={cryptoLogoUrl(info.logo)}
           alt={`${info.name} logo`}
           className="size-8 shrink-0 rounded-full"
         />

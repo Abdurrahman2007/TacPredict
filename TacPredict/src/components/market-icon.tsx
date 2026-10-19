@@ -2,6 +2,7 @@ import { Bot, Clapperboard, Landmark, Newspaper, Shapes, Trophy } from "lucide-r
 import type { Market } from "@/domain/markets/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 export function MarketIcon({ market, className }: { market: Market; className?: string }) {
   const [failed, setFailed] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export function MarketIcon({ market, className }: { market: Market; className?: 
     return (
       <span className={cn("market-icon overflow-hidden", className)}>
         <img
-          src={`/brand/crypto/${cryptoAsset}.svg`}
+          src={cryptoLogoUrl(cryptoAsset)}
           alt={`${cryptoAsset.toUpperCase()} logo`}
           className="size-full object-contain"
           width={48}

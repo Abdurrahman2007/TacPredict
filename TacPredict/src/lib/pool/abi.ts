@@ -1,0 +1,40 @@
+/** Human-readable ABI of UpDownPool. The compiled artifact is checked against this list in the tests. */
+export const POOL_ABI_TEXT = [
+  "function getWindow(uint8 asset,uint32 duration,uint64 start) view returns ((uint128 upPool,uint128 downPool,uint128 startPrice,uint128 endPrice,uint128 fee,uint128 distributable,uint128 claimedWin,uint128 paidBonus,uint64 startObservedAt,uint64 endObservedAt,uint64 claimOpensAt,uint16 feeBps,uint8 state,uint8 result,bool feeBooked))",
+  "function getPosition(uint8 asset,uint32 duration,uint64 start,address user) view returns ((uint128 up,uint128 down,bool claimed))",
+  "function previewClaim(uint8 asset,uint32 duration,uint64 start,address user) view returns (uint256 amount,bool refund,bool ready)",
+  "function bet(uint8 asset,uint32 duration,uint64 start,bool up,uint256 amount)",
+  "function claim(uint8 asset,uint32 duration,uint64 start) returns (uint256 amount)",
+  "function voidUnreported(uint8 asset,uint32 duration,uint64 start)",
+  "function voidWindow(uint8 asset,uint32 duration,uint64 start,bytes32 reasonHash)",
+  "function finalizeWindow(uint8 asset,uint32 duration,uint64 start)",
+  "function reportStarts((uint8 asset,uint32 duration,uint64 start,uint128 price,uint64 observedAt)[] items)",
+  "function reportEnds((uint8 asset,uint32 duration,uint64 start,uint128 price,uint64 observedAt)[] items)",
+  "function withdrawOwnerBalance() returns (uint256 amount)",
+  "function setSeries(uint8 asset,uint32 duration,bool enabled)",
+  "function setFee(uint256 newFeeBps)",
+  "function setLimits(uint256 newMinBet,uint256 newMaxPerUser,uint256 newMaxPool)",
+  "function setTreasury(address newTreasury)",
+  "function setBettingPaused(bool paused)",
+  "function grantRole(bytes32 role,address account)",
+  "function revokeRole(bytes32 role,address account)",
+  "function hasRole(bytes32 role,address account) view returns (bool)",
+  "function seriesEnabled(uint8,uint32) view returns (bool)",
+  "function feeBps() view returns (uint256)",
+  "function minBet() view returns (uint256)",
+  "function maxPerUser() view returns (uint256)",
+  "function maxPoolPerWindow() view returns (uint256)",
+  "function ownerBalance() view returns (uint256)",
+  "function bettingPaused() view returns (bool)",
+  "function treasury() view returns (address)",
+  "function collateralToken() view returns (address)",
+  "event Bet(bytes32 indexed key,address indexed user,uint8 asset,uint32 duration,uint64 start,bool up,uint256 amount)",
+  "event Claimed(bytes32 indexed key,address indexed user,uint256 amount,bool refund)",
+] as const;
+export const ERC20_ABI_TEXT = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)",
+] as const;
+export const REPORT_ROLE_NAME = "REPORTER_ROLE";
+export const GUARDIAN_ROLE_NAME = "GUARDIAN_ROLE";

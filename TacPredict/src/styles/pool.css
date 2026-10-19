@@ -1,0 +1,109 @@
+/* Pool rounds: cards and bet panel. Built on the Up/Down tokens in updown.css. */
+.pool-bar-closed {
+  grid-template-columns: 1fr;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+  padding: 10px 12px;
+  color: var(--ud-mute, #acb8be);
+  font-size: 13px;
+}
+.pool-bar-next {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 999px;
+  background: #e8edf3;
+  color: #0f161a;
+  font-weight: 650;
+  font-size: 14px;
+}
+.pool-card .pool-split {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  margin: 12px 0 8px;
+  background: #2c373e;
+}
+.pool-split-up {
+  background: var(--ud-up, #55c878);
+  transition: width 400ms ease;
+}
+.pool-split-down {
+  background: var(--ud-down, #ff454f);
+  transition: width 400ms ease;
+}
+.pool-action {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+.pool-action p {
+  margin: 0;
+  line-height: 1.5;
+}
+.pool-btn {
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: #e8edf3;
+  color: #0f161a;
+  font-weight: 650;
+}
+.pool-btn:disabled {
+  opacity: 0.5;
+}
+.pool-notice {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #c9d4dc;
+}
+.pool-notice a {
+  text-decoration: underline;
+}
+.pool-problem {
+  margin: 6px 0 0;
+  color: var(--ud-down, #ff454f);
+  font-size: 13px;
+}
+.pool-preview {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+}
+.pool-preview > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pool-preview dt {
+  color: #acb8be;
+}
+.pool-preview dd {
+  margin: 0;
+  font-weight: 650;
+  text-align: right;
+}
+.pool-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #8f9da6;
+}
+.pool-done {
+  margin-top: 10px;
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid #384145;
+}
+.pool-rules {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.65;
+  color: #acb8be;
+}

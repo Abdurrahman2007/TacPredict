@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrandMark } from "./brand-mark";
 import "@/styles/prediction-intro.css";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 /** Real token logos already shipped in /public/brand/crypto. */
 const TOKENS = [
@@ -92,7 +93,7 @@ export function BrandIntro() {
         <ul className="pi-tokens">
           {TOKENS.map((token, index) => (
             <li key={token.key} style={{ animationDelay: `${1550 + index * 130}ms` }}>
-              <img src={`/brand/crypto/${token.key}.svg`} width={30} height={30} alt="" decoding="async" />
+              <img src={cryptoLogoUrl(token.key)} width={30} height={30} alt="" decoding="async" />
             </li>
           ))}
         </ul>

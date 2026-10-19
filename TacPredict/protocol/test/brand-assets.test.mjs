@@ -20,7 +20,8 @@ test("token logos are the real upstream icons, never hand-drawn text badges", ()
 test("opening animation uses only real shipped logos, carries no price figures and stays reload-based", () => {
   const ui = read("src/components/brand-intro.tsx");
   for (const name of ["btc", "eth", "sol", "bnb"]) assert.ok(ui.includes(`key: "${name}"`));
-  assert.ok(ui.includes("/brand/crypto/"));
+  assert.ok(ui.includes("cryptoLogoUrl"));
+  assert.ok(read("src/lib/crypto-logo.ts").includes("/brand/crypto/"));
   assert.ok(!/\$\s?\d|\d{2,}[.,]\d{2}/.test(ui), "no price-like figures in the opening scene");
   assert.ok(ui.includes("prefers-reduced-motion"));
   assert.ok(ui.includes("useState(true)"));
@@ -28,4 +29,22 @@ test("opening animation uses only real shipped logos, carries no price figures a
   const css = read("src/styles/prediction-intro.css");
   assert.ok(css.includes("prefers-reduced-motion: reduce"));
   assert.ok(css.includes("visibility: hidden"), "the scene removes itself even before scripts run");
+});
+
+test("every logo is requested through the versioned helper so a replaced logo is never served from an old cache", () => {
+  const files = [
+    "src/components/brand-intro.tsx",
+    "src/components/market-icon.tsx",
+    "src/components/up-down-section.tsx",
+    "src/components/updown/island.tsx",
+    "src/components/updown/sections.tsx",
+    "src/components/updown/updown-detail.tsx",
+    "src/components/prelaunch-markets.tsx",
+  ];
+  for (const file of files) {
+    const text = read(file);
+    assert.ok(text.includes("cryptoLogoUrl"), `${file} uses the versioned logo helper`);
+    assert.ok(!/`\/brand\/crypto\//.test(text), `${file} has no hard-coded logo path`);
+  }
+  assert.match(read("src/lib/crypto-logo.ts"), /\?v=\$\{LOGO_VERSION\}/);
 });

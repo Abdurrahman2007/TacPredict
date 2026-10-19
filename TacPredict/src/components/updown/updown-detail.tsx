@@ -5,6 +5,9 @@ import type { Market } from "@/domain/markets/types";
 import { ArrowLeft } from "lucide-react";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
+import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
+import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
+import { fromScaled } from "@/lib/pool/pool.mjs";
 import { useLivePrice } from "@/lib/updown/live-prices";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
@@ -26,7 +29,9 @@ import { CoinGeckoChart } from "./coingecko-chart";
 import { WindowPills } from "./window-pills";
 import { UpDownIsland } from "./island";
 import { UpDownTradeBar } from "./trade-bar";
+import { PoolOffBar, PoolRoundCard, PoolRulesCard, PoolTradeBar } from "./pool-trade";
 import { ActivityCard, AlsoTrading, PositionsCard, RulesCard, StatsCard } from "./sections";
+import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
 function lookbackFor(needed: number) {
@@ -79,7 +84,20 @@ export function UpDownDetail({
   const lastCandle = candles?.[candles.length - 1]?.close ?? null;
   const current =
     state === "past" ? (result?.close ?? null) : (live.price ?? lastTrade ?? lastCandle);
-  const delta = deltaInfo(current, beat);
+  // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
+  const poolConfig = useQuery(poolConfigQueryOptions);
+  const poolOn = Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const poolRound = useQuery(poolRoundQueryOptions(asset, minutes, w.start, poolOn));
+  const gecko = useQuery({ ...cryptoMarketQueryOptions, enabled: poolOn });
+  const poolBeat =
+    poolRound.data && BigInt(poolRound.data.startPrice) > 0n ? fromScaled(poolRound.data.startPrice) : null;
+  const poolEnd =
+    poolRound.data && BigInt(poolRound.data.endPrice) > 0n ? fromScaled(poolRound.data.endPrice) : null;
+  const geckoNow = gecko.data?.[asset]?.price ?? null;
+
+  const shownBeat = poolOn ? poolBeat : beat;
+  const shownCurrent = poolOn ? (state === "past" ? poolEnd : geckoNow) : current;
+  const delta = deltaInfo(shownCurrent, shownBeat);
   const market = matchNativeMarket(feed.data?.markets, asset, w);
 
   const remaining = state === "live" ? w.end - nowMs : state === "upcoming" ? w.start - nowMs : 0;
@@ -118,7 +136,7 @@ export function UpDownDetail({
     label: title,
     stateText,
     live: state === "live",
-    price: current,
+    price: shownCurrent,
     deltaText,
     direction: delta?.direction ?? null,
   };
@@ -158,7 +176,7 @@ export function UpDownDetail({
 
       <div ref={hero}>
         <div className="ud-title-row">
-          <img src={`/brand/crypto/${info.logo}.svg`} alt={`${info.name} logo`} />
+          <img src={cryptoLogoUrl(info.logo)} alt={`${info.name} logo`} />
           <div>
             <h1 className="ud-title">{title}</h1>
             <p className="ud-sub">{windowText}</p>
@@ -171,22 +189,32 @@ export function UpDownDetail({
 
         <dl className="ud-prices">
           <div>
-            <dt>Price to beat · Coinbase</dt>
+            <dt>Price to beat · {poolOn ? "CoinGecko" : "Coinbase"}</dt>
             <dd>
-              {beat !== null
-                ? formatUsd(beat, asset)
+              {shownBeat !== null
+                ? formatUsd(shownBeat, asset)
                 : state === "upcoming"
                   ? "Set at start"
-                  : spot.isPending
-                    ? "Loading…"
-                    : "Unavailable"}
+                  : poolOn
+                    ? "Waiting for the reading"
+                    : spot.isPending
+                      ? "Loading…"
+                      : "Unavailable"}
             </dd>
           </div>
           <div>
-            <dt>{state === "past" ? "Final · Coinbase" : "Oracle · Coinbase"}</dt>
+            <dt>
+              {poolOn
+                ? state === "past"
+                  ? "Final · CoinGecko"
+                  : "Now · CoinGecko"
+                : state === "past"
+                  ? "Final · Coinbase"
+                  : "Oracle · Coinbase"}
+            </dt>
             <dd>
-              {current !== null
-                ? formatUsd(current, asset)
+              {shownCurrent !== null
+                ? formatUsd(shownCurrent, asset)
                 : live.status === "connecting" || spot.isPending
                   ? "Loading…"
                   : "Unavailable"}
@@ -212,11 +240,28 @@ export function UpDownDetail({
         pastCount={pastCountFor(minutes)}
       />
 
-      <PositionsCard market={market} />
-      <StatsCard market={market} />
-      <RulesCard asset={asset} minutes={minutes} market={market} />
-      <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
-      <ActivityCard market={market} />
+      {poolOn && poolConfig.data ? (
+        <>
+          <PoolRoundCard
+            asset={asset}
+            minutes={minutes}
+            startMs={w.start}
+            nowMs={nowMs}
+            config={poolConfig.data}
+            round={poolRound.data ?? null}
+          />
+          <PoolRulesCard asset={asset} minutes={minutes} feeBps={poolRound.data?.feeBps || poolConfig.data.feeBps} />
+          <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
+        </>
+      ) : (
+        <>
+          <PositionsCard market={market} />
+          <StatsCard market={market} />
+          <RulesCard asset={asset} minutes={minutes} market={market} />
+          <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
+          <ActivityCard market={market} />
+        </>
+      )}
 
       <UpDownIsland
         show={islandOn}
@@ -224,16 +269,36 @@ export function UpDownDetail({
         label={title}
         stateText={stateText}
         live={state === "live"}
-        price={current}
+        price={shownCurrent}
         deltaText={deltaText}
         direction={delta?.direction ?? null}
       />
-      <UpDownTradeBar
-        market={market}
-        reference={reference}
-        context={island}
-        initialSide={initialSide}
-      />
+      {poolOn && poolConfig.data ? (
+        <PoolTradeBar
+          asset={asset}
+          minutes={minutes}
+          startMs={w.start}
+          nowMs={nowMs}
+          config={poolConfig.data}
+          round={poolRound.data ?? null}
+          context={island}
+        />
+      ) : market ? (
+        <UpDownTradeBar
+          market={market}
+          reference={reference}
+          context={island}
+          initialSide={initialSide}
+        />
+      ) : (
+        <PoolOffBar
+          message={
+            poolConfig.data?.address
+              ? "Betting for this round is not turned on yet."
+              : "Live betting opens soon. No bets can be placed yet."
+          }
+        />
+      )}
     </div>
   );
 }
