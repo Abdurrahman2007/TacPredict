@@ -24,7 +24,9 @@ export function createDatabaseClient(env, fetcher = fetch) {
 export async function withProtocolLease(db, chain, job, work) {
   const owner = randomUUID();
   const args = { _chain: chain, _job: job, _owner: owner };
-  if (!(await db("rpc/acquire_protocol_job_lease", { ...args, _seconds: 180 }))) {
+  const acquired = await db("rpc/acquire_protocol_job_lease", { ...args, _seconds: 180 });
+  if (acquired !== true && acquired !== false) throw Error("Invalid job lease acknowledgement");
+  if (acquired === false) {
     console.log(
       JSON.stringify({ chain, job, status: "skipped", reason: "Another writer owns the lease" }),
     );
@@ -37,7 +39,7 @@ export async function withProtocolLease(db, chain, job, work) {
     pending = true;
     void db("rpc/renew_protocol_job_lease", { ...args, _seconds: 180 })
       .then((ok) => {
-        if (!ok) lost = true;
+        if (ok !== true) lost = true;
       })
       .catch(() => {
         lost = true;
@@ -48,7 +50,7 @@ export async function withProtocolLease(db, chain, job, work) {
   }, 45000);
   heartbeat.unref?.();
   const assert = async () => {
-    if (lost || !(await db("rpc/renew_protocol_job_lease", { ...args, _seconds: 180 }))) {
+    if (lost || (await db("rpc/renew_protocol_job_lease", { ...args, _seconds: 180 })) !== true) {
       lost = true;
       throw Error("Job fencing lease lost; halt");
     }

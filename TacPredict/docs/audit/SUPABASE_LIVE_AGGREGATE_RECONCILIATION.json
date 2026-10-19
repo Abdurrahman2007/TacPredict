@@ -1,0 +1,82 @@
+{
+  "projectRef": "lmqaiqvwcytmgwgwyfwx",
+  "method": "Authenticated existing-project SQL editor; BEGIN TRANSACTION READ ONLY, 30-second statement timeout; aggregate counts and checkpoint metadata only",
+  "approvalScope": "User approved preceding read-only aggregate reconciliation request; not production changes",
+  "observedAtUtc": "2026-10-19T13:48:03.229449+00:00",
+  "finalizedAnchor": {
+    "number": "52813606",
+    "source": "Base MCP eth_call Multicall3 getBlockNumber at finalized",
+    "selector": "0x42cbb15c"
+  },
+  "aggregate": {
+    "mode": "READ_ONLY_AGGREGATE_COUNTS_NOT_CHAIN_PROOF",
+    "checkpoint": {
+      "chainId": 8453,
+      "blockHash": "0x2b274e57d8c42772fee61db6daf34a3d642c0d9f6a25a3736683d3be6322d58a",
+      "updatedAt": "2026-10-19T13:43:50.248685+00:00",
+      "blockNumber": "52756118",
+      "withinReviewedFinalizedAnchor": true
+    },
+    "launchAuthorized": false,
+    "scopedRawEventCount": "2",
+    "missingMarketParents": "0",
+    "orphanTradeProjections": "0",
+    "missingTradeProjections": "0",
+    "mismatchedTradeProjections": "0",
+    "boundWalletsWithoutVerifiedAt": "0",
+    "missingPrincipalClaimOrRefundProjections": "0",
+    "mismatchedPrincipalClaimOrRefundProjections": "0"
+  },
+  "coverage": {
+    "mode": "READ_ONLY_COVERAGE_COUNTS_NOT_CHAIN_PROOF",
+    "observedAt": "2026-10-19T13:48:03.229449+00:00",
+    "tradeCount": "0",
+    "marketCount": "1",
+    "rawEventCounts": [
+      {
+        "count": "1",
+        "eventName": "MarketCreated"
+      },
+      {
+        "count": "1",
+        "eventName": "MetadataPublished"
+      }
+    ],
+    "launchAuthorized": false,
+    "principalClaimCount": "0",
+    "transactionReadOnly": "on",
+    "principalRefundCount": "0",
+    "migrationLedgerPresent": false,
+    "indexerRunCountsLast24Hours": [
+      {
+        "count": "1",
+        "status": "FAILED"
+      },
+      {
+        "count": "1439",
+        "status": "SUCCESS"
+      }
+    ]
+  },
+  "checkpointCanonicalHashRead": {
+    "number": "52756118",
+    "hash": "0x2b274e57d8c42772fee61db6daf34a3d642c0d9f6a25a3736683d3be6322d58a",
+    "matchesDatabaseCheckpoint": true,
+    "source": "Base MCP eth_getBlockByNumber exact block 0x324fe96, false"
+  },
+  "lagBlocksAtAnchor": "57488",
+  "querySha256": {
+    "production-reconciliation-counts.executed.sql": "9d21ed0d1eb78cc9c421b9861da71c4aa5433eee47a7a444b7803adc223f38ee",
+    "production-reconciliation-coverage.executed.sql": "16b80e67c3d4e9b5addac1ac7e3e11523b4e8ceb7315ae9893d2c74f02b1f3ae"
+  },
+  "limits": [
+    "Zero discrepancy counts cover the indexed prefix only, not missing canonical chain events.",
+    "Trade/claim/refund counts are zero; their mismatch checks are vacuous for actual financial activity.",
+    "One market and two raw events (MarketCreated, MetadataPublished) do not establish historical completeness.",
+    "1439 SUCCESS job records do not mean caught-up indexing or live-trading readiness.",
+    "Migration history still cannot be verified because the standard ledger is absent.",
+    "No individual user/address/payload rows returned or exported; no production data/policies/secrets changed, signer activated, or transaction submitted.",
+    "Finalized-anchor getter and checkpoint-hash read are separate RPC observations, not independent proof of all logs."
+  ],
+  "launchAuthorized": false
+}

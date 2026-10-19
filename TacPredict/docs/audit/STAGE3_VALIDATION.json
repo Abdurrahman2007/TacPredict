@@ -1,0 +1,53 @@
+{
+  "scope": "Local only; no independent audit, production deployment, production-shape staging or live V2 integration",
+  "results": {
+    "fullProtocolRunner": {
+      "tests": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "a8c4ee61ae31bd6f6465d9bc87f2144cd25368afbc3083249331e8f1ca8111fe"
+    },
+    "focusedGuardsAndOrderBoundary": {
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "d88a6a681a967a9ccdc8a183dea95f1d773a5d1a6f911b2e81f1c60cf5fe1f94"
+    },
+    "pgliteSecuritySql": {
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "b40beb8ec8bdbf4b0b770d802ecef39dd10ca3ffb4261746306c9bc798cdef0c"
+    },
+    "realPostgresSecuritySqlAndConcurrency": {
+      "tests": 21,
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "cd3e9f1b00761c470cef0fa18bcf8564512d409d536a7563dd0e9d1daf9a5a80"
+    },
+    "feeV2LocalEvmIncludingTypedDataHashParity": {
+      "tests": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "114453533852490823c31d29951b33accf43cb891f54b92adfafd9d604bc0679"
+    }
+  },
+  "typescriptNoEmitExitCode": 0,
+  "nodeSyntaxChecks": [
+    "protocol/scripts/indexer-core.mjs",
+    "scripts/package-cloudflare.cjs"
+  ],
+  "remoteCiSuccessClaimed": false,
+  "productionBuildRerun": false,
+  "launchAuthorized": false,
+  "overlapNotes": [
+    "32 focused cases are included in the 74 runner result.",
+    "13 PGlite/common tests overlap the 21 real PostgreSQL run.",
+    "Do not add these counts as unique security properties."
+  ]
+}

@@ -16,6 +16,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { compile } from "../scripts/compile.mjs";
+import { feeV2TypedData } from "../../src/lib/protocol/fee-v2-orders.mjs";
 import { feeV2OrderTypes, feeV2Quote } from "../../src/lib/protocol/fee-v2.mjs";
 
 const provider = ganache.provider({
@@ -237,6 +238,27 @@ try {
   await test("fee consent, domain/chain, recipient, taker cap and buyer signed all-in cap fail closed", async () => {
     const o = order(a);
     const digest = await read("FeeExchangeV2", "orderId", [o]);
+    const liveMarket = await read("MarketRegistry", "getMarket", [o.marketId]);
+    const parsed = feeV2TypedData(
+      Object.fromEntries(
+        Object.entries(o).map(([k, v]) => [
+          k,
+          typeof v === "bigint" || typeof v === "number" ? v.toString() : v,
+        ]),
+      ),
+      {
+        chainId: 84532,
+        exchange: addresses.FeeExchangeV2,
+        treasury: await read("FeeExchangeV2", "treasury"),
+        marketId: o.marketId.toString(),
+        outcomeCount: liveMarket.outcomeCount.toString(),
+        nowSeconds: (await pub.getBlock()).timestamp.toString(),
+        closeAtSeconds: liveMarket.closeAt.toString(),
+      },
+    );
+    assert.equal(parsed.orderId, digest);
+    assert.equal(parsed.executionAuthorized, false);
+
     const balance = await cash(2),
       escrow = await feeRead();
     await assert.rejects(

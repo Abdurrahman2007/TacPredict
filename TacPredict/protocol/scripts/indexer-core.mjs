@@ -4,6 +4,7 @@ import { base, baseSepolia } from "viem/chains";
 import { createDatabaseClient, withProtocolLease } from "./job-client.mjs";
 import { createRequestBudget } from "./request-budget.mjs";
 import { applyProjectedEvent } from "./indexer-projection-guard.mjs";
+import { assertCanonicalBlock, assertFinalizedEventReceipt } from "./finalized-receipt-guard.mjs";
 
 export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
   if (!Number.isInteger(maxChunks) || maxChunks < 1 || maxChunks > 100)
@@ -97,6 +98,9 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
         ? BigInt(checkpoint.block_number) + 1n
         : BigInt(deployment.deployment_block);
       const finalized = await client.getBlock({ blockTag: "finalized" });
+      assertCanonicalBlock(finalized, finalized.number, finalized.number);
+      if (checkpoint && BigInt(checkpoint.block_number) > finalized.number)
+        throw Error("Checkpoint is beyond finalized head; halt");
       // Alchemy Free permits at most ten blocks per eth_getLogs request.
       const chunk = 10n;
       let applied = 0;
@@ -135,19 +139,9 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
             client.getTransactionReceipt({ hash: log.transactionHash }),
             client.getBlock({ blockNumber: log.blockNumber }),
           ]);
-          if (
-            receipt.status !== "success" ||
-            receipt.blockHash !== block.hash ||
-            log.blockHash !== block.hash ||
-            log.removed ||
-            !receipt.logs.some(
-              (l) =>
-                l.logIndex === log.logIndex &&
-                l.address.toLowerCase() === log.address.toLowerCase() &&
-                l.data === log.data,
-            )
-          )
-            throw Error("Invalid finalized receipt");
+          if (log.blockNumber < from || log.blockNumber > to)
+            throw Error("Log outside requested finalized chunk");
+          assertFinalizedEventReceipt(log, receipt, block, finalized.number);
           let payload = stringify(decoded.args);
           if (decoded.eventName === "MarketCreated") {
             const m = await client.readContract({
@@ -187,6 +181,7 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
           if (ok) applied++;
         }
         const end = await client.getBlock({ blockNumber: to });
+        assertCanonicalBlock(end, to, finalized.number);
         await db("rpc/advance_protocol_checkpoint", {
           _owner: lease.owner,
           _chain: chainId,
@@ -204,6 +199,7 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
           applied,
           through: previous,
           done: previous === finalized.number.toString(),
+          lagBlocks: previous === null ? null : (finalized.number - BigInt(previous)).toString(),
         }),
       );
       return {
@@ -212,6 +208,7 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
         applied,
         through: previous,
         done: previous === finalized.number.toString(),
+        lagBlocks: previous === null ? null : (finalized.number - BigInt(previous)).toString(),
       };
     } finally {
       budget?.releaseReserve();

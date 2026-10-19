@@ -1,3 +1,5 @@
+> **Newer continuation:** [Stage 3 live aggregate reconciliation and integration fixes](LIVE_RECONCILIATION_AND_INTEGRATION_STAGE3.md). The aggregate-only query was subsequently approved and executed read-only; historical blockers below must be read with the new evidence.
+
 # Remaining launch gates — second implementation checkpoint
 
 **Release verdict: BLOCKED. Review branch only. This is concrete local implementation/test progress, not production activation or an independent audit.**

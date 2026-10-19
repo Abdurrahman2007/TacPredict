@@ -289,7 +289,17 @@ async function runMock(mode) {
             result = [eventLog];
             break;
           case "eth_getTransactionReceipt":
-            result = receipt;
+            result =
+              mode === "receiptTopics"
+                ? {
+                    ...receipt,
+                    logs: [{ ...eventLog, topics: [...eventLog.topics.slice(0, -1), hash(99)] }],
+                  }
+                : mode === "receiptTx"
+                  ? { ...receipt, transactionHash: hash(99) }
+                  : mode === "receiptBlock"
+                    ? { ...receipt, blockNumber: "0x2" }
+                    : receipt;
             break;
           default:
             throw Error("Unexpected mock RPC " + r.method);
@@ -397,4 +407,25 @@ test("guard is wired into the actual indexer before checkpoint advancement", () 
   assert(
     core.indexOf("await applyProjectedEvent(db,") < core.indexOf("rpc/advance_protocol_checkpoint"),
   );
+});
+
+test("actual indexer rejects substituted indexed topics, receipt transaction and block before ANY projection/checkpoint", async () => {
+  for (const mode of ["receiptTopics", "receiptTx", "receiptBlock"]) {
+    const r = await runMock(mode);
+    assert(r.error);
+    assert.match(r.error.message, /Receipt event|receipt envelope/);
+    assert(!r.calls.some((c) => c.resource === "rpc/apply_leased_protocol_event"));
+    assert(!r.calls.some((c) => c.resource === "rpc/advance_protocol_checkpoint"));
+    assert(
+      r.calls.some(
+        (c) => c.resource === "rpc/finish_protocol_job_run" && c.body._status === "FAILED",
+      ),
+    );
+    assert.equal(r.calls.at(-1).resource, "rpc/release_protocol_job_lease");
+  }
+});
+test("source Worker reports incomplete bounded batches as CATCHING_UP, not caught-up launch readiness", () => {
+  const s = readFileSync(new URL("../../scripts/package-cloudflare.cjs", import.meta.url), "utf8");
+  assert(s.includes('result.done===true?"CAUGHT_UP":"CATCHING_UP"'));
+  assert(!s.includes('status:result?"SUCCESS":"SKIPPED"'));
 });

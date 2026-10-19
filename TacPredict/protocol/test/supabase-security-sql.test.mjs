@@ -233,6 +233,13 @@ test("isolated SQL: privileges, wallet isolation and atomic projection lifecycle
     );
     const result = await db.exec(sql);
     assert.ok(result);
+    for (const name of [
+      "production-reconciliation-counts.executed.sql",
+      "production-reconciliation-coverage.executed.sql",
+    ]) {
+      const executed = await readFile(new URL("docs/audit/sql/" + name, root), "utf8");
+      assert.ok(await db.exec(executed));
+    }
   });
   await t.test("expired lease prevents event and checkpoint changes", async () => {
     const owner = "30000000-0000-0000-0000-000000000003";

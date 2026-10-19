@@ -1,3 +1,5 @@
+> **Stage 3 update:** [Authorized aggregate results and isolated V2 order/disclosure boundary](LIVE_RECONCILIATION_AND_INTEGRATION_STAGE3.md). Historical claims below about missing SQL access are superseded; full V2 integration/activation is still incomplete.
+
 > **Newer continuation:** [Stage 2 launch-gate implementation and fresh read-only observations](REMAINING_LAUNCH_GATES_STAGE2.md). Historical limitations below must be read with that report; production changes remain unapplied.
 
 # FeeExchangeV2 — review-only implementation and integration requirements

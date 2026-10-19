@@ -24,6 +24,7 @@ jobs:
       - run: npm run build
       - run: npx tsc --noEmit
       - run: npm --prefix protocol run compile
+      - run: npm --prefix protocol run test:fee-v2
       - run: npm --prefix protocol test
       - run: npm --prefix protocol run test:security-sql
       - run: npm --prefix protocol run test:security-postgres
