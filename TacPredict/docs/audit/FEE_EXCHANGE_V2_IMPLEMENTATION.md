@@ -129,3 +129,7 @@ At inspection: main `4c16eb7e14dd1d187c9bef3055d215caae075d05`, development `47f
 - Reproduce the isolated suite: `cd protocol && npm run test:fee-v2`; full regression from application root: `node --test protocol/test/*.test.mjs`. Test deployments/keys/tokens are local Ganache fixtures only, not real-chain assets.
 - Ganache emitted a Node 24 native µWS compatibility warning and used its JavaScript fallback; this was not a test failure.
 - Not performed: live V2 deployment/transactions, live migrations, full live RLS/user-isolation verification, production fee indexing, staging wallet E2E, independent audit or external freeze/fuzz campaigns. These remain release gates.
+
+## Read-only security follow-up
+
+See [Supabase security follow-up](SUPABASE_SECURITY_FOLLOWUP.md) for fresh zero-row endpoint checks, all-public-table metadata diagnostics, repository migration/function expectations, ownership/indexer source findings and sports binding-name evidence. **Live migration history/RLS verification remains blocked** because no authorized project metadata session/results were obtained. Newly identified source issues include permissive alternate `users`/`wallets` policies, missing explicit `verified_at` in raw ownership reads, a broader legacy orderbook view, and missing-market financial-event acknowledgement. None was fixed or mutation-tested in production. Trading must not be activated on the strength of prior local fee tests.
