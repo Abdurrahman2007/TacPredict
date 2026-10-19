@@ -119,7 +119,7 @@ export function roundStatus(round, nowSec) {
 /** Can the missing-reading refund be triggered for this round yet? Mirrors voidUnreported. */
 export function unreportedRefundDue(round, startSec, minutes, nowSec) {
   if (Number(round.state) !== 0) return false;
-  if (BigInt(round.upPool) + BigInt(round.downPool) === 0n) return false;
+  if (BigInt(round.up) + BigInt(round.down) === 0n) return false;
   const end = startSec + minutes * 60;
   return BigInt(round.startPrice) === 0n
     ? nowSec > startSec + REPORT_GRACE_S

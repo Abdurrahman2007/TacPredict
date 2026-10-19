@@ -47,7 +47,7 @@ export async function poolConfig(): Promise<PoolConfig> {
   return cached(`config:${address}`, 4000, async () => {
     const pub = client();
     const pairs = POOL_ASSET_KEYS.flatMap((asset) => POOL_DURATIONS.map((minutes) => ({ asset, minutes })));
-    const [feeBps, minBet, maxPerUser, maxPool, paused, ownerBalance, treasury, ...enabled] = await pub.multicall({
+    const [feeBps, minBet, maxPerUser, maxPool, paused, ownerBalance, treasury] = await pub.multicall({
       allowFailure: false,
       contracts: [
         { address, abi: poolAbi, functionName: "feeBps" },
@@ -57,13 +57,16 @@ export async function poolConfig(): Promise<PoolConfig> {
         { address, abi: poolAbi, functionName: "bettingPaused" },
         { address, abi: poolAbi, functionName: "ownerBalance" },
         { address, abi: poolAbi, functionName: "treasury" },
-        ...pairs.map(({ asset, minutes }) => ({
-          address,
-          abi: poolAbi,
-          functionName: "seriesEnabled" as const,
-          args: [poolAssetId(asset) ?? 0, durationSeconds(minutes)] as const,
-        })),
       ],
+    });
+    const enabled = await pub.multicall({
+      allowFailure: false,
+      contracts: pairs.map(({ asset, minutes }) => ({
+        address,
+        abi: poolAbi,
+        functionName: "seriesEnabled" as const,
+        args: [poolAssetId(asset) ?? 0, durationSeconds(minutes)] as const,
+      })),
     });
     return {
       address,

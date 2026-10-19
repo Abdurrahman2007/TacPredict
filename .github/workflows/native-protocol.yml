@@ -24,5 +24,7 @@ jobs:
       - run: npm run build
       - run: npx tsc --noEmit
       - run: npm --prefix protocol run compile
+      - run: node protocol/scripts/emit-pool-bytecode.mjs
+        continue-on-error: true
       - run: npm --prefix protocol test
 # No secrets, wallet funding, deployment or mainnet activation in CI.

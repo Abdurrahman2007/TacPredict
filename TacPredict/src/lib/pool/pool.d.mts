@@ -37,8 +37,8 @@ export type RoundLike = {
   state: number | string;
   result: number | string;
   claimOpensAt: number | string | bigint;
-  upPool: bigint | string;
-  downPool: bigint | string;
+  up: bigint | string;
+  down: bigint | string;
   startPrice: bigint | string;
 };
 export function roundStatus(
