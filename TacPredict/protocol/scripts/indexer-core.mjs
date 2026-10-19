@@ -3,6 +3,7 @@ import { createPublicClient, http, decodeEventLog, keccak256, encodeAbiParameter
 import { base, baseSepolia } from "viem/chains";
 import { createDatabaseClient, withProtocolLease } from "./job-client.mjs";
 import { createRequestBudget } from "./request-budget.mjs";
+import { applyProjectedEvent } from "./indexer-projection-guard.mjs";
 
 export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
   if (!Number.isInteger(maxChunks) || maxChunks < 1 || maxChunks > 100)
@@ -171,7 +172,7 @@ export async function runFinalizedIndexer(env, arts, maxChunks = 10) {
               ),
             };
           }
-          const ok = await db("rpc/apply_leased_protocol_event", {
+          const ok = await applyProjectedEvent(db, {
             _owner: lease.owner,
             _chain: chainId,
             _block: log.blockNumber.toString(),

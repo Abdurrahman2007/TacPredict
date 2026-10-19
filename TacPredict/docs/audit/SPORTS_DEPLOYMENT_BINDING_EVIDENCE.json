@@ -1,0 +1,31 @@
+{
+  "checkedAtUtc": "2026-10-19T07:54:01.239Z",
+  "worker": "tacpredict-app",
+  "routes": [
+    "www.tacpredict.fun/*",
+    "tacpredict.fun/*"
+  ],
+  "secretsStatus": 200,
+  "settingsStatus": 200,
+  "expected": [
+    {
+      "name": "FOOTBALL_DATA_API_KEY",
+      "inSecretNames": false,
+      "bindingTypes": []
+    },
+    {
+      "name": "CRICKET_DATA_API_KEY",
+      "inSecretNames": false,
+      "bindingTypes": []
+    }
+  ],
+  "compatibilityDate": "2026-10-16",
+  "compatibilityFlags": [
+    "nodejs_compat",
+    "nodejs_compat_populate_process_env"
+  ],
+  "secretValuesRead": false,
+  "method": "Cloudflare GET metadata only; return expected names/presence/type and compatibility configuration, no values",
+  "githubSecretStorage": "Owner-reported; values and GitHub secret scope not independently inspected",
+  "workflowMapping": "Source-only: no references or secret-sync steps for either name in inspected deployment workflow"
+}

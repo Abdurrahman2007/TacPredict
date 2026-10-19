@@ -1,0 +1,43 @@
+{
+  "checkedAtUtc": "2026-10-19T08:04:54.600457+00:00",
+  "baseReviewCommit": "0b47cabb1f40c500a8d91aa631b3e5f0caf12353",
+  "sourceSha256": {
+    "protocol/scripts/indexer-core.mjs": "c2331ea1c83d59cae39ff8bbb31e277cebc2d42241bc866ca3210f2ef27778ae",
+    "protocol/scripts/indexer-projection-guard.mjs": "95ef3917e13965825f933fa62ef2f9f19944c1729ca334aff61126124fdb76b4",
+    "protocol/test/indexer-projection-guard.test.mjs": "44113a4ee8230e09c45aae5ad80cdbfaa198e0d33b78cbd170e7c7d779956968",
+    "protocol/package.json": "973a166ceb541524ef02a43cec6268f2fe36d21729d298c943c843536e43caed"
+  },
+  "newGuardSuite": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "network": "total mock; no live DB/RPC forwarding"
+  },
+  "transactionFreeRegression": {
+    "files": 31,
+    "tests": 125,
+    "passed": 125,
+    "failed": 0,
+    "includesGuardSuite": true,
+    "excluded": [
+      "protocol.test.mjs",
+      "fee-exchange-v2.test.mjs"
+    ]
+  },
+  "typecheck": true,
+  "localBuild": true,
+  "targetedEslint": true,
+  "workerIndexerBrowserBundle": true,
+  "databaseWrites": false,
+  "migrationsRun": false,
+  "contractsDeployed": false,
+  "mainnetTransactions": false,
+  "productionChanges": false,
+  "limitations": [
+    "No live SQL/RLS/ownership verification",
+    "No real database atomic rollback test",
+    "No provider key validity/quota test",
+    "No production subrequest/backlog/load proof",
+    "No historical projection repair or checkpoint change"
+  ]
+}

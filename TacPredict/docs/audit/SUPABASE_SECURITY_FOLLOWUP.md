@@ -171,3 +171,7 @@ The user's request to start testing is recorded, but these blockers prevent a re
 6. Confirm where the football/cricket secrets were added and the exact worker/environment binding names; then separately approve binding corrections/provider health tests if required. No key values in reports.
 7. Complete reviewed FeeV2 schema/indexer/order/backend/UI integration plan and local/staging reconciliation/failed-transfer/reorg tests. Keep V1 and separate UpDownPool economics distinct; preserve newer UI changes. Resolve fee-escrow treasury custody and all residual risks before approval.
 8. Only after those gates, an independent contract review and testnet lifecycle, request narrowly scoped human approval for any deployment or mainnet step. **No activation/deployment approval is requested in this report.**
+
+## Subsequent deployment/indexer follow-up
+
+[Deployment bindings and fail-closed indexer follow-up](DEPLOYMENT_BINDINGS_AND_INDEXER_FOLLOWUP.md) classifies each finding as production-verified, source-only or unverified, records the absent GitHub→Worker secret mapping and exact approval-gated manual setup steps, and adds a review-only projection preflight with mocked checkpoint regressions. It does NOT replace the unsafe live/unverified SQL or complete live RLS verification. All production changes remain blocked; Draft PR #3 stays open.
