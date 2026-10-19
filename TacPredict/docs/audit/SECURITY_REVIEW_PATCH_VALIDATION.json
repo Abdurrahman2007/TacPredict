@@ -1,0 +1,32 @@
+{
+  "scope": "Review branch only; production catalog reads and local isolated fixes/tests",
+  "reviewBase": "d8c6f967e21be5464244d756a1580bd5b1e3b39a",
+  "validatedAtUtc": "2026-10-19T10:55:41.814914+00:00",
+  "tests": {
+    "combined": 33,
+    "passed": 33,
+    "failed": 0,
+    "isolatedSqlAndClientIncludingParent": 12,
+    "existingMockedConfigFencing": 21,
+    "command": "node --test protocol/test/supabase-security-sql.test.mjs protocol/test/indexer-projection-guard.test.mjs protocol/test/job-fencing.test.mjs protocol/test/indexer-config.test.mjs protocol/test/base-account-proof.test.mjs"
+  },
+  "checks": {
+    "typescript": "passed",
+    "targetedWalletLint": "passed",
+    "gitDiffCheck": "passed",
+    "remoteCI": "not yet observed"
+  },
+  "productionChanges": false,
+  "databaseMutations": false,
+  "mainnetTransactions": false,
+  "contractDeployments": false,
+  "tradingActivated": false,
+  "remaining": [
+    "Live migration-history ledger absent",
+    "Seven source routine hash mismatches and one missing routine require review",
+    "Production data-level binding invariants and user A/B runtime tests not executed",
+    "SQL proposals need separately approved staging and production application",
+    "Historical projection reconciliation and deployed writer/checkpoint proof pending",
+    "FeeV2 full E2E, independent review and testnet pending"
+  ]
+}

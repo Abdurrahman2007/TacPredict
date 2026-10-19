@@ -1,3 +1,5 @@
+> **Newer authenticated live findings and review-only patches:** [LIVE_SUPABASE_FINDINGS_AND_REVIEW_FIXES.md](LIVE_SUPABASE_FINDINGS_AND_REVIEW_FIXES.md). Earlier statements below about missing login/catalog evidence are historical; production fixes are still NOT applied.
+
 # Deployment bindings and fail-closed indexer follow-up
 
 **No production change authorized or performed. Draft PR #3 stays open/draft.**

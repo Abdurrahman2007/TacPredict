@@ -3,7 +3,7 @@ on:
   push:
     branches: [development/base-usdc]
   pull_request:
-    paths: ['TacPredict/protocol/**', 'TacPredict/src/lib/protocol/**', 'TacPredict/supabase/migrations/**']
+    paths: ['TacPredict/protocol/**', 'TacPredict/src/lib/protocol/**', 'TacPredict/supabase/migrations/**', 'TacPredict/docs/audit/proposals/**']
 permissions:
   contents: read
 jobs:
@@ -25,4 +25,5 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm --prefix protocol run compile
       - run: npm --prefix protocol test
+      - run: npm --prefix protocol run test:security-sql
 # No secrets, wallet funding, deployment or mainnet activation in CI.

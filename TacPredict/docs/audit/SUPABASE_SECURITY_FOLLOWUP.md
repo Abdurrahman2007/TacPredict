@@ -1,3 +1,5 @@
+> **Newer authenticated live findings and review-only patches:** [LIVE_SUPABASE_FINDINGS_AND_REVIEW_FIXES.md](LIVE_SUPABASE_FINDINGS_AND_REVIEW_FIXES.md). Earlier statements below about missing login/catalog evidence are historical; production fixes are still NOT applied.
+
 # Read-only Supabase / FeeExchangeV2 security follow-up
 
 **Release verdict: BLOCKED. Draft PR must remain open; no trading activation is recommended.**

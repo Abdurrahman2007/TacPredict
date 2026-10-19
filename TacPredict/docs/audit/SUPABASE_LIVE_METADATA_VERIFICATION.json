@@ -1,0 +1,2914 @@
+{
+  "projectRef": "lmqaiqvwcytmgwgwyfwx",
+  "observedAtUtc": "2026-10-19T10:51:24.223688+00:00",
+  "method": "Authorized browser SQL editor; explicit BEGIN TRANSACTION READ ONLY; metadata catalogs only; no application RPC or user/event rows",
+  "sourceReviewCommit": "d8c6f967e21be5464244d756a1580bd5b1e3b39a",
+  "rawMetadataResponseSha256": "902198bc91e8bb3b8cb8257b832bce95224cfdf2c9fd4930aa9fb746094d7fb3",
+  "scopeNotes": [
+    "Views do not have ordinary table RLS; assess owner, invoker options and exposed predicates.",
+    "Table grants alone do not prove execution of writes; no live mutation probes were made.",
+    "TRUNCATE ACL is dangerous and bypasses RLS if a SQL-capable API role can use it; no claim that REST exposes a truncate route.",
+    "No production wallet/user binding row invariants or dynamic A/B tests executed.",
+    "A body hash match proves exact body bytes only, not migration application history or safety."
+  ],
+  "catalog": {
+    "connection": [
+      {
+        "connection_metadata": {
+          "database": "postgres",
+          "serverVersion": "17.11",
+          "inspectionRole": "postgres",
+          "transactionReadOnly": "on"
+        }
+      }
+    ],
+    "migrationHistory": [
+      {
+        "migration_history_status": "unavailable: supabase_migrations.schema_migrations absent"
+      }
+    ],
+    "relations": [
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "market_agent_runs",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "market_candidates",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "market_import_policy",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "points_transactions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "predictions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "profiles",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_audit_logs",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_chain_events",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_claims",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_deployments",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_disputes",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_indexer_checkpoints",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_job_leases",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_job_runs",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_market_metadata",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "v",
+        "relation": "protocol_market_metrics",
+        "reloptions": [
+          "security_invoker=true"
+        ],
+        "rls_forced": false,
+        "rls_enabled": false,
+        "view_definition_md5": "92dc086cbb1c9625fca54019f5d3154f"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_market_outcomes",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_market_prices",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_market_rules",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_market_sources",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_markets",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_notifications",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "v",
+        "relation": "protocol_orderbook",
+        "reloptions": [
+          "security_barrier=true"
+        ],
+        "rls_forced": false,
+        "rls_enabled": false,
+        "view_definition_md5": "122a378066e60e8eaafbd41dd06698ef"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_orders",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_positions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_refunds",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_resolution_evidence",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_resolutions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_reward_credits",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_trades",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_transactions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_wallet_link_challenges",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "protocol_wallets",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "tac_promo_attempts",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "tac_promo_codes",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "tac_promo_redemptions",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "user_roles",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "users",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "owner": "postgres",
+        "relkind": "r",
+        "relation": "wallets",
+        "reloptions": null,
+        "rls_forced": false,
+        "rls_enabled": true,
+        "view_definition_md5": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    ],
+    "policies": [
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "points_transactions",
+        "permissive": "PERMISSIVE",
+        "policyname": "Account reads own points",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "predictions",
+        "permissive": "PERMISSIVE",
+        "policyname": "Account reads own predictions",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "profiles",
+        "permissive": "PERMISSIVE",
+        "policyname": "Account reads own profile",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = 'admin'::app_role))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_audit_logs",
+        "permissive": "PERMISSIVE",
+        "policyname": "Admin audit",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_wallets w\n  WHERE ((w.id = protocol_claims.wallet_id) AND (w.user_id = ( SELECT auth.uid() AS uid)))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_claims",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own claims",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "verified",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_deployments",
+        "permissive": "PERMISSIVE",
+        "policyname": "Verified deployments only",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_disputes.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_disputes",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = ( SELECT auth.uid() AS uid)) AND (user_roles.role = 'admin'::app_role))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_market_metadata",
+        "permissive": "PERMISSIVE",
+        "policyname": "Admin metadata",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_market_outcomes.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_market_outcomes",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_market_prices.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_market_prices",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_market_rules.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_market_rules",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_market_sources.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_market_sources",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "published",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_markets",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published native markets",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_notifications",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own notifications",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_orders",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own signed orders",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_wallets w\n  WHERE ((w.id = protocol_positions.wallet_id) AND (w.user_id = ( SELECT auth.uid() AS uid)))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_positions",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own verified positions",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_wallets w\n  WHERE ((w.id = protocol_refunds.wallet_id) AND (w.user_id = ( SELECT auth.uid() AS uid)))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_refunds",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own refunds",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_resolution_evidence.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_resolution_evidence",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_resolutions.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_resolutions",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_reward_credits",
+        "permissive": "PERMISSIVE",
+        "policyname": "own_native_reward_credit",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(EXISTS ( SELECT 1\n   FROM protocol_markets m\n  WHERE ((m.id = protocol_trades.market_uuid) AND m.published)))",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "protocol_trades",
+        "permissive": "PERMISSIVE",
+        "policyname": "Published market rows",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "protocol_wallets",
+        "permissive": "PERMISSIVE",
+        "policyname": "Own verified wallets",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "user_roles",
+        "permissive": "PERMISSIVE",
+        "policyname": "Account reads own role",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "users",
+        "permissive": "PERMISSIVE",
+        "policyname": "users_insert_anon",
+        "schemaname": "public",
+        "with_check": "(wallet_address = lower(wallet_address))"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "true",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "users",
+        "permissive": "PERMISSIVE",
+        "policyname": "users_select_anon",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "true",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "users",
+        "permissive": "PERMISSIVE",
+        "policyname": "users_update_anon",
+        "schemaname": "public",
+        "with_check": "(wallet_address = lower(wallet_address))"
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "wallets",
+        "permissive": "PERMISSIVE",
+        "policyname": "wallets_insert_anon",
+        "schemaname": "public",
+        "with_check": "(address = lower(address))"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "true",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "wallets",
+        "permissive": "PERMISSIVE",
+        "policyname": "wallets_select_anon",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "true",
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "tablename": "wallets",
+        "permissive": "PERMISSIVE",
+        "policyname": "wallets_update_anon",
+        "schemaname": "public",
+        "with_check": "(address = lower(address))"
+      }
+    ],
+    "effectiveApiTablePrivileges": [
+      {
+        "api_role": "anon",
+        "relation": "market_agent_runs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "market_agent_runs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "market_agent_runs",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "market_candidates",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "market_candidates",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "market_candidates",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "market_import_policy",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "market_import_policy",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "market_import_policy",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "points_transactions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "points_transactions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "points_transactions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "predictions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "predictions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "predictions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "profiles",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "profiles",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "profiles",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_audit_logs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_audit_logs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_audit_logs",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_chain_events",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_chain_events",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_chain_events",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_claims",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_claims",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_claims",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_deployments",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_deployments",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_deployments",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_disputes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_disputes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_disputes",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_indexer_checkpoints",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_indexer_checkpoints",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_indexer_checkpoints",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_job_leases",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_job_leases",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_job_leases",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_job_runs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_job_runs",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_job_runs",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_metadata",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_metadata",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_metadata",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_metrics",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_metrics",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_metrics",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_outcomes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_outcomes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_outcomes",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_prices",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_prices",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_prices",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_rules",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_rules",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_rules",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_market_sources",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_market_sources",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_market_sources",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_markets",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_markets",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_markets",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_notifications",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_notifications",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_notifications",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_orderbook",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_orderbook",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_orderbook",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_orders",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_orders",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_orders",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_positions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_positions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_positions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_refunds",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_refunds",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_refunds",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_resolution_evidence",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_resolution_evidence",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_resolution_evidence",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_resolutions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_resolutions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_resolutions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_reward_credits",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_reward_credits",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_reward_credits",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_trades",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_trades",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_trades",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_transactions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_transactions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_transactions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_wallet_link_challenges",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_wallet_link_challenges",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_wallet_link_challenges",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "protocol_wallets",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "protocol_wallets",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "protocol_wallets",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "tac_promo_attempts",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "tac_promo_attempts",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "tac_promo_attempts",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "tac_promo_codes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "tac_promo_codes",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "tac_promo_codes",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "tac_promo_redemptions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "tac_promo_redemptions",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "tac_promo_redemptions",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "user_roles",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": false,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "user_roles",
+        "can_delete": false,
+        "can_insert": false,
+        "can_select": true,
+        "can_update": false,
+        "can_truncate": false
+      },
+      {
+        "api_role": "service_role",
+        "relation": "user_roles",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "users",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "users",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "service_role",
+        "relation": "users",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "anon",
+        "relation": "wallets",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "authenticated",
+        "relation": "wallets",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      },
+      {
+        "api_role": "service_role",
+        "relation": "wallets",
+        "can_delete": true,
+        "can_insert": true,
+        "can_select": true,
+        "can_update": true,
+        "can_truncate": true
+      }
+    ],
+    "routines": [
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "acquire_protocol_job_lease(bigint,text,uuid,integer)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "9f4bd4032b88554b5548b4380cbae6da",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "advance_protocol_checkpoint(uuid,bigint,numeric,numeric,text)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "1409df19a0c1836e3dd1e7bf280131fd",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "apply_leased_protocol_event(uuid,bigint,numeric,text,text,integer,text,text,jsonb,timestamp with time zone)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "784cc19e9ea4b346874cb3fce9e3d9bc",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "apply_protocol_event(bigint,numeric,text,text,integer,text,text,jsonb,timestamp with time zone)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "75b26365764b8eb9edeb60182e7053ab",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "assert_protocol_job_lease(bigint,text,uuid)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "3a9b86520429a42fffe10ea105b7adfe",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "claim_daily_reward()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "1e253c0b8c7351312e008901bf389a2b",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "claim_market_import_run(uuid)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "fe6166503925bd1a760da372ab8456fb",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "consume_protocol_wallet_link(uuid,uuid)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "ae6d7162c509243ab8c614bfe9f8ab22",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "finish_market_import_run(uuid,text,integer,integer,boolean,text,integer)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "477b8c2e720e8dd99386031dcf472480",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "finish_protocol_job_run(uuid,text)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "6e5d485842dcb7c9dc9ba2008fa743ca",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_market_event_drafts()",
+        "language": "sql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "55271a3b46eb9f3de5375a379f2df6a0",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_market_import_admin()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "c9b7497a703a03c5fb64dfe5afb2f478",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_market_previews()",
+        "language": "sql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "1ea8e4a741654f7062a93cbcc10e2c7e",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_my_native_reward_tasks()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "88a81fb0a674a32390e697110b210a05",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_my_protocol_activity()",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "f05380cadc92030f80fbb9b7385d7dea",
+        "provolatile": "s",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_my_protocol_portfolio()",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "621bfe0d0ce12b28ae3409e0082e554a",
+        "provolatile": "s",
+        "anon_execute": false,
+        "security_definer": false,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_admin_snapshot(text)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "842c4e0e0611fa0f470b46e7a6683c43",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_market_activity(text)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "646e76b03c95118d3826022507f238b6",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": false,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_market_feed(integer)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "b56b57dab48eb042f2c9ddde38be1587",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": false,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_metadata(text)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "5492fe22126da7716ddec37b511fcda2",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_probability_history(text,timestamp with time zone)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "a249224e69d599da3c73720e6efcbb35",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": false,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_protocol_signed_orderbook(text,integer)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "7e0c90f8088b13497e750458581925e3",
+        "provolatile": "s",
+        "anon_execute": true,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_reward_status()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "0f6335d4bbc0fd3d8ce3569c6a23d122",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "get_tac_promo_status()",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "ba9b725eee5f5fff327e9fd9c75c5b73",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "handle_new_tac_account()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "b6348d212de244f2d07d0fe47aa191c3",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "has_role(app_role,uuid)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "f81b069c0941fcecc3344875c951e2da",
+        "provolatile": "s",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "persist_market_candidates(jsonb)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "7c6e1086a72adbf2e4a91ec794c43553",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "prepare_protocol_market(text,text,text,jsonb)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "905886510625bcf421f700bd3cedd38a",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "redeem_tac_promo(text)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "3e695afe9ca7c59d45b3e357b4ab0dee",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "register_my_protocol_wallet()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "31226c544f74a050fe983eac1c2828a6",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "release_protocol_job_lease(bigint,text,uuid)",
+        "language": "sql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "7087d1718962af0a134cc1d5d2350465",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "renew_protocol_job_lease(bigint,text,uuid,integer)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=public, pg_temp"
+        ],
+        "prosrc_md5": "6f45be8e576f0ab0633eb560ef6e9cc7",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "request_market_discovery()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "13dd64bacb9273a2f13317176993fc52",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": false
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "review_market_candidate(uuid,boolean)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "dd09546dd99b2162232c51247a887ae8",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "=X/postgres",
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "rls_auto_enable()",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=pg_catalog"
+        ],
+        "prosrc_md5": "99be20677b456ea8d3be47bdd44fb369",
+        "provolatile": "v",
+        "anon_execute": true,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      },
+      {
+        "acl": [
+          "postgres=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "owner": "postgres",
+        "routine": "set_market_import_enabled(boolean)",
+        "language": "plpgsql",
+        "settings": [
+          "search_path=\"\""
+        ],
+        "prosrc_md5": "22403cc85bcbc0c654b185e6a28ec051",
+        "provolatile": "v",
+        "anon_execute": false,
+        "security_definer": true,
+        "service_role_execute": true,
+        "authenticated_execute": true
+      }
+    ],
+    "schemas": [
+      {
+        "owner": "supabase_admin",
+        "nspacl": [
+          "supabase_admin=UC/supabase_admin",
+          "anon=U/supabase_admin",
+          "authenticated=U/supabase_admin",
+          "service_role=U/supabase_admin",
+          "supabase_auth_admin=UC/supabase_admin",
+          "dashboard_user=UC/supabase_admin",
+          "postgres=U/supabase_admin"
+        ],
+        "schema": "auth",
+        "anon_create": false,
+        "authenticated_create": false
+      },
+      {
+        "owner": "pg_database_owner",
+        "nspacl": [
+          "pg_database_owner=UC/pg_database_owner",
+          "=U/pg_database_owner",
+          "postgres=U/pg_database_owner",
+          "anon=U/pg_database_owner",
+          "authenticated=U/pg_database_owner",
+          "service_role=U/pg_database_owner"
+        ],
+        "schema": "public",
+        "anon_create": false,
+        "authenticated_create": false
+      }
+    ],
+    "roles": [
+      {
+        "rolname": "postgres",
+        "rolsuper": false,
+        "rolinherit": true,
+        "rolbypassrls": true
+      },
+      {
+        "rolname": "authenticated",
+        "rolsuper": false,
+        "rolinherit": true,
+        "rolbypassrls": false
+      },
+      {
+        "rolname": "anon",
+        "rolsuper": false,
+        "rolinherit": true,
+        "rolbypassrls": false
+      },
+      {
+        "rolname": "service_role",
+        "rolsuper": false,
+        "rolinherit": true,
+        "rolbypassrls": true
+      },
+      {
+        "rolname": "authenticator",
+        "rolsuper": false,
+        "rolinherit": false,
+        "rolbypassrls": false
+      }
+    ],
+    "roleMembership": [
+      {
+        "member": "authenticator",
+        "admin_option": false,
+        "inherited_role": "authenticated"
+      },
+      {
+        "member": "authenticator",
+        "admin_option": false,
+        "inherited_role": "anon"
+      },
+      {
+        "member": "authenticator",
+        "admin_option": false,
+        "inherited_role": "service_role"
+      }
+    ],
+    "defaultPrivileges": [
+      {
+        "owner": "postgres",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=arwdDxtm/postgres",
+          "anon=arwdDxtm/postgres",
+          "authenticated=arwdDxtm/postgres",
+          "service_role=arwdDxtm/postgres"
+        ],
+        "defaclobjtype": "r"
+      },
+      {
+        "owner": "postgres",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres",
+          "service_role=X/postgres"
+        ],
+        "defaclobjtype": "f"
+      },
+      {
+        "owner": "postgres",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=rwU/postgres",
+          "anon=rwU/postgres",
+          "authenticated=rwU/postgres",
+          "service_role=rwU/postgres"
+        ],
+        "defaclobjtype": "S"
+      },
+      {
+        "owner": "supabase_admin",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=rwU/supabase_admin",
+          "anon=rwU/supabase_admin",
+          "authenticated=rwU/supabase_admin",
+          "service_role=rwU/supabase_admin"
+        ],
+        "defaclobjtype": "S"
+      },
+      {
+        "owner": "supabase_admin",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=arwdDxtm/supabase_admin",
+          "anon=arwdDxtm/supabase_admin",
+          "authenticated=arwdDxtm/supabase_admin",
+          "service_role=arwdDxtm/supabase_admin"
+        ],
+        "defaclobjtype": "r"
+      },
+      {
+        "owner": "supabase_admin",
+        "schema": "public",
+        "defaclacl": [
+          "postgres=X/supabase_admin",
+          "anon=X/supabase_admin",
+          "authenticated=X/supabase_admin",
+          "service_role=X/supabase_admin"
+        ],
+        "defaclobjtype": "f"
+      }
+    ],
+    "triggers": [],
+    "publicationMembership": [
+      {
+        "pubname": "supabase_realtime",
+        "tablename": "protocol_reward_credits",
+        "schemaname": "public"
+      }
+    ]
+  },
+  "livePredicateFlags": {
+    "orderbook": {
+      "hasZeroTakerPredicate": false,
+      "mentionsTradingEnabled": false,
+      "mentionsVerifiedDeployment": false
+    },
+    "portfolio": {
+      "mentionsVerifiedAt": false
+    },
+    "eventIndexer": {
+      "containsMissingParentSuccess": true
+    }
+  },
+  "sourceFunctionComparison": [
+    {
+      "name": "handle_new_tac_account",
+      "sourceMigration": "202610070000_account_baseline.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "d21c953fb143b27f8b7ed9bb2798eafc",
+      "liveMd5": "b6348d212de244f2d07d0fe47aa191c3"
+    },
+    {
+      "name": "has_role",
+      "sourceMigration": "202610070000_account_baseline.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "3842cac1406447161acfc19050647283",
+      "liveMd5": "f81b069c0941fcecc3344875c951e2da"
+    },
+    {
+      "name": "get_reward_status",
+      "sourceMigration": "202610070001_rolling_24h_rewards.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "bdd977ff9c9ed710f0b6d301bb7354dc",
+      "liveMd5": "0f6335d4bbc0fd3d8ce3569c6a23d122"
+    },
+    {
+      "name": "claim_daily_reward",
+      "sourceMigration": "202610070001_rolling_24h_rewards.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "588bc2fa7b7dda866773b8207ddbce43",
+      "liveMd5": "1e253c0b8c7351312e008901bf389a2b"
+    },
+    {
+      "name": "get_tac_promo_status",
+      "sourceMigration": "202610070002_tac_promo_codes.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "fe87cd7d317b69589137f1139f0e9a63",
+      "liveMd5": "ba9b725eee5f5fff327e9fd9c75c5b73"
+    },
+    {
+      "name": "redeem_tac_promo",
+      "sourceMigration": "202610070002_tac_promo_codes.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "d640a21af743def0bf83b05d1f83f1c2",
+      "liveMd5": "3e695afe9ca7c59d45b3e357b4ab0dee"
+    },
+    {
+      "name": "get_user_reward_tasks",
+      "sourceMigration": "202610080003_locked_usdc_rewards.sql",
+      "status": "missing",
+      "sourceMd5": "713ebf292d84798ebcbd3636f3beb78a",
+      "liveMd5": null
+    },
+    {
+      "name": "register_my_protocol_wallet",
+      "sourceMigration": "202610080010_verified_wallet_links.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "31226c544f74a050fe983eac1c2828a6",
+      "liveMd5": "31226c544f74a050fe983eac1c2828a6"
+    },
+    {
+      "name": "prepare_protocol_market",
+      "sourceMigration": "202610080016_admin_read_workspace.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "905886510625bcf421f700bd3cedd38a",
+      "liveMd5": "905886510625bcf421f700bd3cedd38a"
+    },
+    {
+      "name": "apply_protocol_event",
+      "sourceMigration": "202610080011_indexer_scope_and_evidence.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "75b26365764b8eb9edeb60182e7053ab",
+      "liveMd5": "75b26365764b8eb9edeb60182e7053ab"
+    },
+    {
+      "name": "get_protocol_market_feed",
+      "sourceMigration": "202610080015_verified_execution_feed.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "b56b57dab48eb042f2c9ddde38be1587",
+      "liveMd5": "b56b57dab48eb042f2c9ddde38be1587"
+    },
+    {
+      "name": "get_protocol_probability_history",
+      "sourceMigration": "202610080009_chain_aware_native_ids.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "a249224e69d599da3c73720e6efcbb35",
+      "liveMd5": "a249224e69d599da3c73720e6efcbb35"
+    },
+    {
+      "name": "get_my_protocol_portfolio",
+      "sourceMigration": "202610080012_exact_indexed_void_claims.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "621bfe0d0ce12b28ae3409e0082e554a",
+      "liveMd5": "621bfe0d0ce12b28ae3409e0082e554a"
+    },
+    {
+      "name": "get_protocol_market_activity",
+      "sourceMigration": "202610080009_chain_aware_native_ids.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "646e76b03c95118d3826022507f238b6",
+      "liveMd5": "646e76b03c95118d3826022507f238b6"
+    },
+    {
+      "name": "get_protocol_signed_orderbook",
+      "sourceMigration": "202610080009_chain_aware_native_ids.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "7e0c90f8088b13497e750458581925e3",
+      "liveMd5": "7e0c90f8088b13497e750458581925e3"
+    },
+    {
+      "name": "get_protocol_metadata",
+      "sourceMigration": "202610080008_native_metadata_api.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "5492fe22126da7716ddec37b511fcda2",
+      "liveMd5": "5492fe22126da7716ddec37b511fcda2"
+    },
+    {
+      "name": "consume_protocol_wallet_link",
+      "sourceMigration": "202610080010_verified_wallet_links.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "ae6d7162c509243ab8c614bfe9f8ab22",
+      "liveMd5": "ae6d7162c509243ab8c614bfe9f8ab22"
+    },
+    {
+      "name": "get_my_native_reward_tasks",
+      "sourceMigration": "202610080013_native_reward_journey.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "88a81fb0a674a32390e697110b210a05",
+      "liveMd5": "88a81fb0a674a32390e697110b210a05"
+    },
+    {
+      "name": "get_my_protocol_activity",
+      "sourceMigration": "202610080013_native_reward_journey.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "f05380cadc92030f80fbb9b7385d7dea",
+      "liveMd5": "f05380cadc92030f80fbb9b7385d7dea"
+    },
+    {
+      "name": "acquire_protocol_job_lease",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "9f4bd4032b88554b5548b4380cbae6da",
+      "liveMd5": "9f4bd4032b88554b5548b4380cbae6da"
+    },
+    {
+      "name": "renew_protocol_job_lease",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "6f45be8e576f0ab0633eb560ef6e9cc7",
+      "liveMd5": "6f45be8e576f0ab0633eb560ef6e9cc7"
+    },
+    {
+      "name": "release_protocol_job_lease",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "7087d1718962af0a134cc1d5d2350465",
+      "liveMd5": "7087d1718962af0a134cc1d5d2350465"
+    },
+    {
+      "name": "assert_protocol_job_lease",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "3a9b86520429a42fffe10ea105b7adfe",
+      "liveMd5": "3a9b86520429a42fffe10ea105b7adfe"
+    },
+    {
+      "name": "apply_leased_protocol_event",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "784cc19e9ea4b346874cb3fce9e3d9bc",
+      "liveMd5": "784cc19e9ea4b346874cb3fce9e3d9bc"
+    },
+    {
+      "name": "advance_protocol_checkpoint",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "1409df19a0c1836e3dd1e7bf280131fd",
+      "liveMd5": "1409df19a0c1836e3dd1e7bf280131fd"
+    },
+    {
+      "name": "finish_protocol_job_run",
+      "sourceMigration": "202610080014_protocol_job_fencing.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "6e5d485842dcb7c9dc9ba2008fa743ca",
+      "liveMd5": "6e5d485842dcb7c9dc9ba2008fa743ca"
+    },
+    {
+      "name": "get_protocol_admin_snapshot",
+      "sourceMigration": "202610080016_admin_read_workspace.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "842c4e0e0611fa0f470b46e7a6683c43",
+      "liveMd5": "842c4e0e0611fa0f470b46e7a6683c43"
+    },
+    {
+      "name": "claim_market_import_run",
+      "sourceMigration": "202610110017_market_import_agent.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "fe6166503925bd1a760da372ab8456fb",
+      "liveMd5": "fe6166503925bd1a760da372ab8456fb"
+    },
+    {
+      "name": "finish_market_import_run",
+      "sourceMigration": "202610110017_market_import_agent.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "477b8c2e720e8dd99386031dcf472480",
+      "liveMd5": "477b8c2e720e8dd99386031dcf472480"
+    },
+    {
+      "name": "persist_market_candidates",
+      "sourceMigration": "202610110018_discovery_scheduler.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "7c6e1086a72adbf2e4a91ec794c43553",
+      "liveMd5": "7c6e1086a72adbf2e4a91ec794c43553"
+    },
+    {
+      "name": "get_market_previews",
+      "sourceMigration": "202610110017_market_import_agent.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "1ea8e4a741654f7062a93cbcc10e2c7e",
+      "liveMd5": "1ea8e4a741654f7062a93cbcc10e2c7e"
+    },
+    {
+      "name": "get_market_import_admin",
+      "sourceMigration": "202610120019_market_import_admin_stats.sql",
+      "status": "body_hash_mismatch",
+      "sourceMd5": "46553fe23b46fa4fc21667fbb24275ab",
+      "liveMd5": "c9b7497a703a03c5fb64dfe5afb2f478"
+    },
+    {
+      "name": "set_market_import_enabled",
+      "sourceMigration": "202610110017_market_import_agent.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "22403cc85bcbc0c654b185e6a28ec051",
+      "liveMd5": "22403cc85bcbc0c654b185e6a28ec051"
+    },
+    {
+      "name": "review_market_candidate",
+      "sourceMigration": "202610110017_market_import_agent.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "dd09546dd99b2162232c51247a887ae8",
+      "liveMd5": "dd09546dd99b2162232c51247a887ae8"
+    },
+    {
+      "name": "get_market_event_drafts",
+      "sourceMigration": "202610110018_discovery_scheduler.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "55271a3b46eb9f3de5375a379f2df6a0",
+      "liveMd5": "55271a3b46eb9f3de5375a379f2df6a0"
+    },
+    {
+      "name": "request_market_discovery",
+      "sourceMigration": "202610110018_discovery_scheduler.sql",
+      "status": "exact_body_hash_match",
+      "sourceMd5": "13dd64bacb9273a2f13317176993fc52",
+      "liveMd5": "13dd64bacb9273a2f13317176993fc52"
+    }
+  ],
+  "nativeApiColumnWriteGrantFindings": []
+}

@@ -8,7 +8,8 @@
     "verify:deployment": "node scripts/verify-deployment.mjs",
     "prepare:oracle:evidence": "node scripts/prepare-oracle-evidence.mjs",
     "prepare:source:verification": "node scripts/prepare-source-verification.mjs",
-    "test:fee-v2": "node --test test/fee-exchange-v2.test.mjs"
+    "test:fee-v2": "node --test test/fee-exchange-v2.test.mjs",
+    "test:security-sql": "npm ci --prefix test/sql-runtime --ignore-scripts --no-audit --no-fund && npm test --prefix test/sql-runtime"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.2.0",
