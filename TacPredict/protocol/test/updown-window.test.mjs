@@ -130,11 +130,11 @@ import {
   windowResult as result,
 } from "../../src/lib/updown/window.mjs";
 
-test("four assets and six window lengths", () => {
+test("four assets and four window lengths", () => {
   assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "bnb"]);
   assert.equal(assetFromSlug("BNB"), "bnb");
-  assert.deepEqual([...DURATIONS], [5, 15, 30, 60, 720, 1440]);
-  assert.deepEqual(DURATIONS.map(durationLabel), ["5 min", "15 min", "30 min", "1 hour", "12 hours", "24 hours"]);
+  assert.deepEqual([...DURATIONS], [5, 15, 720, 1440]);
+  assert.deepEqual(DURATIONS.map(durationLabel), ["5 min", "15 min", "12 hours", "24 hours"]);
 });
 
 test("candle size grows with the look-back and never exceeds 300 candles", () => {

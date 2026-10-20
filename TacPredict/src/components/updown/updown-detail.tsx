@@ -8,6 +8,8 @@ import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
 import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
 import { fromScaled } from "@/lib/pool/pool.mjs";
+import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
+import { copyFor } from "@/lib/pool/series-copy.mjs";
 import { useLivePrice } from "@/lib/updown/live-prices";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
@@ -94,6 +96,9 @@ export function UpDownDetail({
   const poolEnd =
     poolRound.data && BigInt(poolRound.data.endPrice) > 0n ? fromScaled(poolRound.data.endPrice) : null;
   const geckoNow = gecko.data?.[asset]?.price ?? null;
+  // Title and description the administrator saved for this coin (or the built-in default text).
+  const savedCopy = useQuery({ ...seriesCopyQueryOptions, enabled: poolOn });
+  const seriesCopy = copyFor(savedCopy.data, asset);
 
   const shownBeat = poolOn ? poolBeat : beat;
   const shownCurrent = poolOn ? (state === "past" ? poolEnd : geckoNow) : current;
@@ -102,7 +107,7 @@ export function UpDownDetail({
 
   const remaining = state === "live" ? w.end - nowMs : state === "upcoming" ? w.start - nowMs : 0;
   const countdown = formatCountdown(remaining);
-  const title = `${info.name} - ${durationLabel(minutes)}`;
+  const title = `${poolOn ? seriesCopy.title : info.name} - ${durationLabel(minutes)}`;
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
   const windowText = `${dayLabel(w.start, zone)}, ${clock(w.start, zone)} – ${sameDay ? "" : `${dayLabel(w.end, zone)}, `}${clock(w.end, zone)}`;
 
@@ -186,6 +191,8 @@ export function UpDownDetail({
             {state === "past" ? (result ? result.outcome : "Ended") : countdown}
           </div>
         </div>
+
+        {poolOn ? <p className="ud-sub ud-desc">{seriesCopy.description}</p> : null}
 
         <dl className="ud-prices">
           <div>

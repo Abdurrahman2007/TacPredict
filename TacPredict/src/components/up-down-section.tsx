@@ -18,6 +18,11 @@ import {
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
+import { useQuery } from "@tanstack/react-query";
+import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
+import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
+import { copyFor } from "@/lib/pool/series-copy.mjs";
+import { formatUsdc, nextRoundStart, poolShare } from "@/lib/pool/pool.mjs";
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
@@ -46,7 +51,16 @@ function AssetCard({
   const market = matchNativeMarket(markets, asset, w);
   const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
   const down = market?.outcomes.find((o) => /^down$/i.test(o.label)) ?? market?.outcomes[1];
-  const title = `${info.name} Up or Down - ${durationLabel(minutes)}`;
+  // Once the administrator turns a series on, the card shows the pool: the round that is open for
+  // bets is the next one, so Up and Down lead straight to it.
+  const poolConfig = useQuery(poolConfigQueryOptions);
+  const poolOn = Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const nextStart = nextRoundStart(nowMs, minutes);
+  const round = useQuery(poolRoundQueryOptions(asset, minutes, nextStart, poolOn));
+  const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
+  const share = round.data ? poolShare(round.data.up, round.data.down) : null;
+  const poolTotal = round.data ? BigInt(round.data.up) + BigInt(round.data.down) : null;
+  const title = `${copy.title} - ${durationLabel(minutes)}`;
   const search = { d: minutes };
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
 
@@ -88,16 +102,31 @@ function AssetCard({
             key={label}
             to="/up-down/$asset"
             params={{ asset: slugOf(asset) }}
-            search={{ ...search, side: label.toLowerCase() as "up" | "down" }}
+            search={{
+              ...search,
+              ...(poolOn ? { w: nextStart } : {}),
+              side: label.toLowerCase() as "up" | "down",
+            }}
             className={`ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ${label === "Up" ? "ud-outcome-up" : "ud-outcome-down"}`}
           >
-            {label} {cents(outcome)}
+            {poolOn
+              ? `${label}${share ? ` ${Math.round(label === "Up" ? share.up : share.down)}%` : ""}`
+              : `${label} ${cents(outcome)}`}
           </Link>
         ))}
       </div>
       <div className="tp-crypto-footer">
-        <span>{usdcShort(market?.native?.openInterestAtomic)} OI</span>
-        <span>{volumeText(market?.volume)} Vol</span>
+        {poolOn ? (
+          <>
+            <span>{poolTotal === null ? "Pool" : `${formatUsdc(poolTotal)} USDC pool`}</span>
+            <span>Bets close {formatCountdown(nextStart - nowMs)}</span>
+          </>
+        ) : (
+          <>
+            <span>{usdcShort(market?.native?.openInterestAtomic)} OI</span>
+            <span>{volumeText(market?.volume)} Vol</span>
+          </>
+        )}
       </div>
     </article>
   );

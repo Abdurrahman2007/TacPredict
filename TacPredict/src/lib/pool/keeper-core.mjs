@@ -77,11 +77,13 @@ export function reportItems(jobs, readings) {
 }
 
 /**
- * One keeper pass. Dependencies are injected so the logic is testable without a network:
+ * One keeper pass. `maxAttempts: 1` makes it a single look (used by a once-a-minute Worker cron, which
+ * simply tries again a minute later); the default keeps polling until the reading is fresh or time is up.
+ * Dependencies are injected so the logic is testable without a network:
  *   readWindows(jobs) -> window[]            fetchPrices(assets) -> CoinGecko body
  *   sendReports({ ends, starts }) -> hashes  sleep(ms)
  */
-export async function runKeeper({ nowMs, readWindows, fetchPrices, sendReports, sleep, pollMs = 10000, log = () => {} }) {
+export async function runKeeper({ nowMs, readWindows, fetchPrices, sendReports, sleep, pollMs = 10000, maxAttempts = Infinity, log = () => {} }) {
   const boundary = boundaryFor(nowMs());
   const lateBy = Math.floor(nowMs() / 1000) - boundary;
   if (lateBy > LATEST_ATTEMPT_S) return { status: "TOO_LATE", boundary };
@@ -101,6 +103,7 @@ export async function runKeeper({ nowMs, readWindows, fetchPrices, sendReports, 
       log(`price fetch failed: ${error instanceof Error ? error.message : "unknown"}`);
     }
     if (assets.every((asset) => readings[asset])) break;
+    if (attempts >= maxAttempts) break;
     if (Math.floor(nowMs() / 1000) - boundary > LATEST_ATTEMPT_S - pollMs / 1000) break;
     await sleep(pollMs);
   }

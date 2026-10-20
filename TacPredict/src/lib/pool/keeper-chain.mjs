@@ -3,6 +3,9 @@ import { createPublicClient, createWalletClient, http, parseAbi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { COINGECKO_IDS } from "./pool.mjs";
 import { runKeeper } from "./keeper-core.mjs";
+import { keeperEnv } from "./keeper-env.mjs";
+
+export { keeperEnv };
 
 const abi = parseAbi([
   "function getWindow(uint8 asset,uint32 duration,uint64 start) view returns ((uint128 upPool,uint128 downPool,uint128 startPrice,uint128 endPrice,uint128 fee,uint128 distributable,uint128 claimedWin,uint128 paidBonus,uint64 startObservedAt,uint64 endObservedAt,uint64 claimOpensAt,uint16 feeBps,uint8 state,uint8 result,bool feeBooked))",
@@ -16,18 +19,7 @@ const chain = {
   rpcUrls: { default: { http: ["https://mainnet.base.org"] } },
 };
 
-/** The environment names a Worker (or any host) must provide. The key is never logged. */
-export function keeperEnv(env) {
-  const key = String(env.POOL_REPORTER_PRIVATE_KEY ?? "").trim();
-  const pool = String(env.UPDOWN_POOL_ADDRESS ?? "").trim();
-  const rpc = String(env.BASE_PROTOCOL_RPC_URL ?? "").trim();
-  if (!/^0x[0-9a-fA-F]{64}$/.test(key)) return { error: "POOL_REPORTER_PRIVATE_KEY is not set" };
-  if (!/^0x[0-9a-fA-F]{40}$/.test(pool)) return { error: "UPDOWN_POOL_ADDRESS is not set" };
-  if (!rpc) return { error: "BASE_PROTOCOL_RPC_URL is not set" };
-  return { key, pool, rpc, geckoKey: String(env.COINGECKO_DEMO_API_KEY ?? "").trim() };
-}
-
-export async function runPoolKeeper(env, { fetchImpl = fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), nowMs = () => Date.now(), log = () => {} } = {}) {
+export async function runPoolKeeper(env, { fetchImpl = fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), nowMs = () => Date.now(), maxAttempts = Infinity, waitForReceipts = true, log = () => {} } = {}) {
   const config = keeperEnv(env);
   if (config.error) return { status: "NOT_CONFIGURED", reason: config.error };
   const account = privateKeyToAccount(config.key);
@@ -38,6 +30,7 @@ export async function runPoolKeeper(env, { fetchImpl = fetch, sleep = (ms) => ne
     nowMs,
     sleep,
     log,
+    maxAttempts,
     readWindows: (jobs) =>
       pub.multicall({
         allowFailure: false,
@@ -68,7 +61,7 @@ export async function runPoolKeeper(env, { fetchImpl = fetch, sleep = (ms) => ne
         hashes.push(await wallet.writeContract({ address: config.pool, abi, functionName: name, args: [items], nonce }));
         nonce += 1;
       }
-      for (const hash of hashes) await pub.waitForTransactionReceipt({ hash, timeout: 60000 });
+      if (waitForReceipts) for (const hash of hashes) await pub.waitForTransactionReceipt({ hash, timeout: 60000 });
       return hashes;
     },
   });

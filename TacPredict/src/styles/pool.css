@@ -107,3 +107,9 @@
   line-height: 1.65;
   color: #acb8be;
 }
+
+.ud-desc {
+  margin: 10px 0 14px;
+  max-width: 62ch;
+  line-height: 1.5;
+}

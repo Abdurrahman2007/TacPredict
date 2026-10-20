@@ -95,9 +95,24 @@ const discovery = esbuild.buildSync({
   minify: true,
 }).outputFiles[0].text;
 modules.push({ name: "market-discovery.mjs", content: discovery });
-const entry = `import {runMarketDiscovery} from './market-discovery.mjs';import {runFinalizedIndexer,safeError} from './protocol-indexer.mjs';import protocolArts from './protocol-indexer-artifacts.mjs';import app from './index.mjs';import assets from './static-assets.mjs';
+// Price reporter for the Up/Down pool: one viem bundle, run from the once-a-minute scheduled job.
+const keeper = esbuild.buildSync({
+  entryPoints: [path.join(root, "src/lib/pool/keeper-chain.mjs")],
+  bundle: true,
+  write: false,
+  format: "esm",
+  platform: "browser",
+  target: "es2022",
+  conditions: ["browser", "import", "default"],
+  minify: true,
+}).outputFiles[0].text;
+modules.push({ name: "pool-keeper.mjs", content: keeper });
+// A committed pool address in deployment.ts is the default when no UPDOWN_POOL_ADDRESS variable is set.
+const poolAddress =
+  (fs.readFileSync(path.join(root, "src/lib/pool/deployment.ts"), "utf8").match(/address:\s*"(0x[0-9a-fA-F]{40})"/) || [])[1] || "";
+const entry = `import {runPoolKeeper} from './pool-keeper.mjs';import {runMarketDiscovery} from './market-discovery.mjs';import {runFinalizedIndexer,safeError} from './protocol-indexer.mjs';import protocolArts from './protocol-indexer-artifacts.mjs';import app from './index.mjs';import assets from './static-assets.mjs';
 function staticResponse(input,init){const req=input instanceof Request?input:new Request(input,init);const asset=assets[new URL(req.url).pathname];if(!asset)return new Response('Not found',{status:404});if(!['GET','HEAD'].includes(req.method))return new Response('Method not allowed',{status:405});const bytes=Uint8Array.from(atob(asset.data),c=>c.charCodeAt(0));return new Response(req.method==='HEAD'?null:bytes,{encodeBody:'manual',headers:{'Content-Type':asset.type,'Content-Encoding':'gzip','Cache-Control':asset.cache,'X-Content-Type-Options':'nosniff'}});}
-export default {async scheduled(controller,env,ctx){if(controller.cron === '*/15 * * * *'){ctx.waitUntil(runMarketDiscovery(env).then(r=>console.log(JSON.stringify({job:"market-discovery",...r}))).catch(()=>console.error("Market discovery failed; no financial action submitted")));return;}const config={SUPABASE_URL:env.SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY:env.SUPABASE_SERVICE_ROLE_KEY,PROTOCOL_RPC_URL:env.BASE_PROTOCOL_RPC_URL,PROTOCOL_CHAIN_ID:'8453',INDEXER_REQUEST_LIMIT:'48'};ctx.waitUntil(runFinalizedIndexer(config,protocolArts,6).then(result=>console.log(JSON.stringify({job:"indexer",status:result?"SUCCESS":"SKIPPED",...result}))).catch(e=>console.error(safeError(e,config))));},async fetch(req,env,ctx){if(new URL(req.url).pathname === '/api/agent/scheduled') {
+export default {async scheduled(controller,env,ctx){if(controller.cron === '*/15 * * * *'){ctx.waitUntil(runMarketDiscovery(env).then(r=>console.log(JSON.stringify({job:"market-discovery",...r}))).catch(()=>console.error("Market discovery failed; no financial action submitted")));return;}ctx.waitUntil(runPoolKeeper({POOL_REPORTER_PRIVATE_KEY:env.POOL_REPORTER_PRIVATE_KEY,UPDOWN_POOL_ADDRESS:env.UPDOWN_POOL_ADDRESS||${JSON.stringify(poolAddress)},BASE_PROTOCOL_RPC_URL:env.BASE_PROTOCOL_RPC_URL,COINGECKO_DEMO_API_KEY:env.COINGECKO_DEMO_API_KEY},{maxAttempts:1,waitForReceipts:false}).then(r=>{if(r.status!=='NOTHING_DUE'&&r.status!=='TOO_LATE'&&r.status!=='NO_ROUNDS'&&r.status!=='NOT_CONFIGURED')console.log(JSON.stringify({job:"pool-keeper",status:r.status,boundary:r.boundary,ends:r.ends,starts:r.starts,hashes:r.hashes}))}).catch(e=>console.error("Pool keeper failed: "+String((e&&(e.shortMessage||e.message))||"error").replace(/https?:\\/\\/\\S+/g,"[url]").slice(0,160))));const config={SUPABASE_URL:env.SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY:env.SUPABASE_SERVICE_ROLE_KEY,PROTOCOL_RPC_URL:env.BASE_PROTOCOL_RPC_URL,PROTOCOL_CHAIN_ID:'8453',INDEXER_REQUEST_LIMIT:'34'};ctx.waitUntil(runFinalizedIndexer(config,protocolArts,6).then(result=>console.log(JSON.stringify({job:"indexer",status:result?"SUCCESS":"SKIPPED",...result}))).catch(e=>console.error(safeError(e,config))));},async fetch(req,env,ctx){if(new URL(req.url).pathname === '/api/agent/scheduled') {
 if(req.method !== 'POST')return new Response('Method not allowed',{status:405});
 const incoming=req.headers.get('Authorization') || '';
 const expected=env.MARKET_DISCOVERY_SCHEDULER_SECRET ? 'Bearer '+env.MARKET_DISCOVERY_SCHEDULER_SECRET : '';

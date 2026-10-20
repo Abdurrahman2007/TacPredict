@@ -13,7 +13,7 @@ const utc = (s) => Date.parse(`${s}:00Z`);
 
 test("every asset and window length gives an aligned draft with exact Coinbase rules", () => {
   for (const asset of ["bitcoin", "ethereum", "solana", "bnb"])
-    for (const minutes of [5, 15, 30, 60, 720, 1440]) {
+    for (const minutes of [5, 15, 720, 1440]) {
       const d = cryptoWindowTemplate(asset, minutes, NOW);
       const start = utc(d.times.openAt);
       const end = utc(d.times.closeAt);

@@ -20,5 +20,6 @@ export function runKeeper(deps: {
   sendReports: (input: { ends: unknown[]; starts: unknown[] }) => Promise<string[]>;
   sleep: (ms: number) => Promise<void>;
   pollMs?: number;
+  maxAttempts?: number;
   log?: (message: string) => void;
 }): Promise<{ status: string; boundary: number; [key: string]: unknown }>;

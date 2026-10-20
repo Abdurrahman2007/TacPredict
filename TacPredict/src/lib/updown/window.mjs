@@ -1,5 +1,5 @@
 /**
- * Pure helpers for Up/Down windows (5 min, 15 min, 30 min, 1 hour, 12 hours, 24 hours). Windows are aligned to the UTC clock,
+ * Pure helpers for Up/Down windows (5 min, 15 min, 12 hours, 24 hours). Windows are aligned to the UTC clock,
  * so "9:15 -> 9:20" is the same window for everybody. Every number comes from real Coinbase data
  * passed in by the caller; nothing here invents a price.
  */
@@ -10,7 +10,7 @@ export const ASSETS = {
   bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
-export const DURATIONS = [5, 15, 30, 60, 720, 1440];
+export const DURATIONS = [5, 15, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
