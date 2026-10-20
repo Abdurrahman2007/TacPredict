@@ -38,7 +38,7 @@ async function ctx(w: WalletState) {
 const friendly = (error: unknown) => {
   if (error instanceof Error && /^(Connect|Switch|Deploy|Enter|The contract|That)/.test(error.message)) return error;
   const text = poolErrorMessage(error);
-  const extra = /AccessControlUnauthorizedAccount|missing role/i.test(
+  const extra = /AccessControlUnauthorizedAccount|missing role|0xe2517d3f/i.test(
     [(error as { shortMessage?: string })?.shortMessage, (error as Error)?.message].join(" "),
   );
   return Error(extra ? "This wallet does not hold the role the contract needs for that action." : text);

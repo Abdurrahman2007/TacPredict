@@ -31,4 +31,7 @@ jobs:
       - run: node protocol/scripts/emit-pool-bytecode.mjs 20 10
         continue-on-error: true
       - run: npm --prefix protocol test
+      - name: Show failing test output as annotations
+        if: failure()
+        run: node protocol/scripts/ci-annotate-test.mjs protocol/test/pool-artifact.test.mjs
 # No secrets, wallet funding, deployment or mainnet activation in CI.
