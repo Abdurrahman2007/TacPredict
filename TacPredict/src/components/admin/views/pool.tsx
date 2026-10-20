@@ -692,8 +692,10 @@ function SetupTab({ config, ready }: { config: PoolConfig; ready: boolean }) {
       <Card title="2 · Reporter wallet (posts the CoinGecko price)">
         <p className="adm-muted" style={{ marginTop: 0 }}>
           A separate hot wallet posts each round's start and end price. It can only post prices. It cannot move USDC,
-          change a balance or withdraw. Create it yourself, keep its key only as a secret on the server, and fund it with a
-          little ETH for gas. Never paste the key anywhere else.
+          change a balance or withdraw. Create it yourself with{" "}
+          <span className="adm-mono">node protocol/scripts/new-reporter-wallet.mjs</span> (Codespaces or Termux), keep its
+          key only as the server secret, and fund the address with a little ETH on Base for gas. Never paste the key
+          anywhere else, including chats.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <input
