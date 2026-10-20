@@ -5,6 +5,7 @@
  */
 export const adminRouteSections = [
   "markets",
+  "pool",
   "engine",
   "trading",
   "resolution",
@@ -30,6 +31,7 @@ export const adminNavItems: AdminNavItem[] = [
   { kind: "overview", id: "overview", label: "Overview" },
   { kind: "page", id: "markets", label: "Markets", section: "markets", view: "all" },
   { kind: "page", id: "create", label: "Create market", section: "markets", view: "create" },
+  { kind: "page", id: "pool", label: "Up/Down pool", section: "pool", view: "status" },
   { kind: "page", id: "engine", label: "Market engine", section: "engine", view: "fixtures" },
   { kind: "page", id: "resolution", label: "Resolution", section: "resolution", view: "pending" },
   { kind: "page", id: "trades", label: "Trades", section: "trading", view: "trades" },
@@ -41,6 +43,7 @@ export const adminNavItems: AdminNavItem[] = [
 /** First view of every section; used when the URL has no `view`. */
 export const defaultViews: Record<AdminRouteSection, string> = {
   markets: "all",
+  pool: "status",
   engine: "fixtures",
   trading: "trades",
   resolution: "pending",
@@ -62,9 +65,15 @@ export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; labe
     { view: "resolving", label: "Resolving" },
     { view: "resolved", label: "Resolved" },
   ],
+  pool: [
+    { view: "status", label: "Status" },
+    { view: "series", label: "Series" },
+    { view: "rounds", label: "Rounds & refunds" },
+    { view: "setup", label: "Setup" },
+  ],
   engine: [
     { view: "fixtures", label: "Football & Cricket" },
-    { view: "crypto", label: "Crypto windows" },
+    { view: "crypto", label: "Crypto Up/Down" },
     { view: "providers", label: "Providers" },
   ],
   resolution: [

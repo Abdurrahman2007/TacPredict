@@ -41,7 +41,7 @@ const ONCHAIN = "https://basescan.org";
 type Msg = { tone: "info" | "warn" | "bad"; text: ReactNode } | null;
 
 /** One place that runs a wallet transaction, shows its result and refreshes the on-chain reads. */
-function useRunner() {
+export function useRunner() {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<Msg>(null);
@@ -71,7 +71,7 @@ function useRunner() {
   return { busy, msg, setMsg, run };
 }
 
-function Result({ msg }: { msg: Msg }) {
+export function Result({ msg }: { msg: Msg }) {
   return msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null;
 }
 
@@ -83,12 +83,51 @@ const plainUsdc = (atomic: string) => {
   return `${value / 1_000_000n}${fraction ? `.${fraction}` : ""}`;
 };
 
-export function PoolView({ view }: { view: string }) {
+/** Wallet state plus the explicit real-money approval every signing page asks for. */
+export function useSigning() {
   const wallet = useBaseWallet();
-  const config = useQuery(poolConfigQueryOptions);
   const [ack, setAck] = useState(false);
   const onBase = wallet.chainId === BASE_NETWORK.id;
   const ready = Boolean(wallet.provider && wallet.address && onBase && ack);
+  return { wallet, ack, setAck, onBase, ready };
+}
+
+export function SigningCard({ signing }: { signing: ReturnType<typeof useSigning> }) {
+  const { wallet, ack, setAck, onBase } = signing;
+  return (
+    <Card title="Signing">
+      {!wallet.address ? (
+        <Notice tone="warn">Connect the administrator wallet (top right) to sign transactions.</Notice>
+      ) : !onBase ? (
+        <Notice tone="warn">
+          The wallet is on another network.{" "}
+          <button type="button" className="adm-link" onClick={() => void wallet.switchToBase()}>
+            Switch to Base
+          </button>
+        </Notice>
+      ) : (
+        <p className="adm-muted" style={{ margin: 0 }}>
+          Connected as <span className="adm-mono">{shortAddress(wallet.address)}</span> on Base.
+        </p>
+      )}
+      <label className="flex gap-2 text-xs leading-6" style={{ marginTop: 10 }}>
+        <input
+          type="checkbox"
+          className="mt-1.5 size-4 shrink-0"
+          checked={ack}
+          onChange={(e) => setAck(e.target.checked)}
+        />
+        I approve signing real-money Base Mainnet transactions. This contract has not had an independent audit, so start
+        with small limits.
+      </label>
+    </Card>
+  );
+}
+
+export function PoolView({ view }: { view: string }) {
+  const signing = useSigning();
+  const { ready } = signing;
+  const config = useQuery(poolConfigQueryOptions);
   const tab = (data: PoolConfig) =>
     view === "series" ? (
       <SeriesTab config={data} ready={ready} />
@@ -105,32 +144,7 @@ export function PoolView({ view }: { view: string }) {
         title="Up / Down pool"
         subtitle="Live BTC, ETH, SOL and BNB rounds. Players bet USDC on Base. The contract pays winners and refunds; the administrator cannot touch any balance or position."
       />
-      <Card title="Signing">
-        {!wallet.address ? (
-          <Notice tone="warn">Connect the administrator wallet (top right) to sign transactions.</Notice>
-        ) : !onBase ? (
-          <Notice tone="warn">
-            The wallet is on another network.{" "}
-            <button type="button" className="adm-link" onClick={() => void wallet.switchToBase()}>
-              Switch to Base
-            </button>
-          </Notice>
-        ) : (
-          <p className="adm-muted" style={{ margin: 0 }}>
-            Connected as <span className="adm-mono">{shortAddress(wallet.address)}</span> on Base.
-          </p>
-        )}
-        <label className="flex gap-2 text-xs leading-6" style={{ marginTop: 10 }}>
-          <input
-            type="checkbox"
-            className="mt-1.5 size-4 shrink-0"
-            checked={ack}
-            onChange={(e) => setAck(e.target.checked)}
-          />
-          I approve signing real-money Base Mainnet transactions. This contract has not had an independent audit, so
-          start with small limits.
-        </label>
-      </Card>
+      <SigningCard signing={signing} />
       <Loaded query={config} label="pool contract">
         {(data) => tab(data)}
       </Loaded>
@@ -473,7 +487,10 @@ function RoundsTab({ config, ready }: { config: PoolConfig; ready: boolean }) {
       </Card>
 
       <Loaded query={round} label="round">
-        {(r) => (
+        {(r) =>
+          !r ? (
+            <Notice tone="warn">This round could not be read from the contract.</Notice>
+          ) : (
           <Card title="Round on chain">
             <div className="adm-grid-tiles">
               <Tile label="State" value={status ? <Badge tone={status.kind === "refund" ? "bad" : status.kind === "open" ? "info" : "ok"}>{status.label}</Badge> : "—"} />
@@ -490,7 +507,8 @@ function RoundsTab({ config, ready }: { config: PoolConfig; ready: boolean }) {
               <Tile label="Fee on this round" value={r.feeBps ? pct(r.feeBps) : "Set at first bet"} />
             </div>
           </Card>
-        )}
+          )
+        }
       </Loaded>
 
       <Card title="Refund control">

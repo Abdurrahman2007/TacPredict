@@ -3,28 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import {
   cricketTemplate,
-  cryptoWindowTemplate,
   footballTemplate,
   validateDraft,
   type Draft,
   type Fixture,
 } from "@/lib/protocol/market-templates.mjs";
 import { engineProvidersQuery, fixturesQuery } from "@/lib/sports/sports.functions";
-import {
-  ASSETS,
-  ASSET_KEYS,
-  DURATIONS,
-  durationLabel,
-  matchNativeMarket,
-  type UpDownAsset,
-} from "@/lib/updown/window.mjs";
 import { handOffDraft } from "../draft-handoff";
 import { Badge, Card, Loaded, Notice, PageHeader } from "../admin-ui";
+import { CryptoSeries } from "./crypto-series";
 
 export function EngineView({ view }: { view: string }) {
   switch (view) {
     case "crypto":
-      return <CryptoWindows />;
+      return <CryptoSeries />;
     case "providers":
       return <Providers />;
     default:
@@ -190,93 +182,6 @@ function FixtureRow({
         )}
       </td>
     </tr>
-  );
-}
-
-function CryptoWindows() {
-  const feed = useQuery(nativeMarketFeedQueryOptions);
-  const open = useOpenCreate();
-  return (
-    <div className="adm-stack">
-      <PageHeader
-        title="Crypto windows"
-        subtitle="Up / Down windows on the UTC clock for BTC, ETH, SOL and BNB. Prices come from Coinbase candles named in the rules."
-      />
-      <Card flush>
-        <div className="adm-table-wrap">
-          <table className="adm-table">
-            <thead>
-              <tr>
-                <th>Asset</th>
-                {DURATIONS.map((d) => (
-                  <th key={d}>{durationLabel(d)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {ASSET_KEYS.map((asset) => (
-                <tr key={asset}>
-                  <td style={{ fontWeight: 650 }}>{ASSETS[asset].name}</td>
-                  {DURATIONS.map((minutes) => (
-                    <td key={minutes}>
-                      <WindowCell
-                        asset={asset}
-                        minutes={minutes}
-                        markets={feed.data?.markets}
-                        onPrepare={open}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-      <p className="adm-muted" style={{ margin: 0 }}>
-        Each button prepares the next window that is at least two minutes away. Windows are
-        published one at a time with your wallet.
-      </p>
-    </div>
-  );
-}
-
-function WindowCell({
-  asset,
-  minutes,
-  markets,
-  onPrepare,
-}: {
-  asset: UpDownAsset;
-  minutes: number;
-  markets: Parameters<typeof matchNativeMarket>[0];
-  onPrepare: (draft: Draft) => void;
-}) {
-  const draft = cryptoWindowTemplate(asset, minutes);
-  const start = Date.parse(`${draft.times.openAt}:00Z`);
-  const exists = matchNativeMarket(markets, asset, {
-    start,
-    end: start + minutes * 60000,
-    minutes,
-  });
-  const label = new Intl.DateTimeFormat("en-GB", {
-    ...(minutes >= 720 ? { day: "2-digit" as const, month: "short" as const } : {}),
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "UTC",
-    hour12: false,
-  }).format(start);
-  return exists ? (
-    <Badge tone="ok">{label} live</Badge>
-  ) : (
-    <button
-      type="button"
-      className="adm-btn"
-      onClick={() => onPrepare(draft)}
-      title={`Window starts ${label} UTC`}
-    >
-      {label}
-    </button>
   );
 }
 

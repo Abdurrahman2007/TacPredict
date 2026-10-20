@@ -13,3 +13,7 @@ export function takeDraft(): Draft | null {
   pending = null;
   return draft;
 }
+/** True when a draft is waiting, without taking it. Lets Create market open on the right tab. */
+export function hasDraft(): boolean {
+  return pending !== null;
+}

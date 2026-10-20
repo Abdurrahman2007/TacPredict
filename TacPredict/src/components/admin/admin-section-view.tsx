@@ -3,6 +3,7 @@ import { adminRedirectFor, sectionTabs, type AdminRouteSection } from "@/lib/pro
 import { BlockchainView } from "./views/blockchain";
 import { EngineView } from "./views/engine";
 import { MarketsView } from "./views/markets";
+import { PoolView } from "./views/pool";
 import { ResolutionView } from "./views/resolution";
 import { SettingsView } from "./views/settings";
 import { TradingView } from "./views/trading";
@@ -33,6 +34,8 @@ function SectionBody({ section, view }: { section: AdminRouteSection; view: stri
   switch (section) {
     case "markets":
       return <MarketsView view={view} />;
+    case "pool":
+      return <PoolView view={view} />;
     case "engine":
       return <EngineView view={view} />;
     case "resolution":

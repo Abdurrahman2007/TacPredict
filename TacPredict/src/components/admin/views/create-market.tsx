@@ -2,7 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { SECTIONS, termsForSection, type Section } from "@/domain/markets/sections.mjs";
 import { validateDraft, type Draft, type DraftTimes } from "@/lib/protocol/market-templates.mjs";
-import { takeDraft } from "../draft-handoff";
+import { hasDraft, takeDraft } from "../draft-handoff";
+import { CryptoSeries } from "./crypto-series";
 import { NativeOperatorConsole } from "@/components/native-operator-console";
 import { prepareNativeMarket, uploadMarketImage } from "@/lib/protocol/admin.functions";
 import { prepareMarketImage } from "@/lib/protocol/market-image-client";
@@ -20,8 +21,36 @@ const FIELDS: { key: FormKey; label: string; rows: number }[] = [
   { key: "sourceUrl", label: "Evidence / source URL (https)", rows: 1 },
 ];
 
-/** Step 1 saves immutable terms in Supabase; step 2 publishes them with a wallet-signed Factory call. */
+/**
+ * Crypto comes first by coin (BTC, ETH, SOL, BNB) and fills itself in. Football and Cricket keep the
+ * match form: step 1 saves immutable terms in Supabase, step 2 publishes them with a wallet-signed call.
+ */
 export function CreateMarket() {
+  const [tab, setTab] = useState<"crypto" | "matches">(() => (hasDraft() ? "matches" : "crypto"));
+  return (
+    <div className="adm-stack">
+      <PageHeader
+        title="Create market"
+        subtitle={
+          tab === "crypto"
+            ? "Pick a coin. Title, rules, times and the Up / Down outcomes are filled in for you."
+            : "Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
+        }
+      />
+      <div className="adm-tabs" role="group" aria-label="Market kind" style={{ margin: 0 }}>
+        <button type="button" className="adm-tab" aria-pressed={tab === "crypto"} onClick={() => setTab("crypto")}>
+          Crypto Up / Down
+        </button>
+        <button type="button" className="adm-tab" aria-pressed={tab === "matches"} onClick={() => setTab("matches")}>
+          Football &amp; Cricket
+        </button>
+      </div>
+      {tab === "crypto" ? <CryptoSeries /> : <SportsMarketForm initialSection="Football" />}
+    </div>
+  );
+}
+
+function SportsMarketForm({ initialSection }: { initialSection: Section }) {
   const [prepared, setPrepared] = useState<PreparedTerms | null>(null);
   const [notice, setNotice] = useState<{ tone: "info" | "bad"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,7 +58,7 @@ export function CreateMarket() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    section: "Crypto" as Section,
+    section: initialSection,
     outcomes: "Yes,No",
     rules: "",
     source: "",
@@ -142,22 +171,14 @@ export function CreateMarket() {
 
   return (
     <div className="adm-stack">
-      <PageHeader
-        title="Create market"
-        subtitle="Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
-      />
-
       <Card title="Start from a draft">
         <p className="adm-muted">
-          Crypto Up/Down windows and Football / Cricket matches are prepared on the Market engine page with their rules
-          already written. Pick one there and it opens here.
+          Football and Cricket matches are prepared on the Market engine page with their rules already written. Pick one
+          there and it opens here.
         </p>
         <div className="adm-tabs">
           <Link to="/admin/$section" params={{ section: "engine" }} search={{ view: "fixtures" }} className="adm-btn">
             Football &amp; Cricket matches
-          </Link>
-          <Link to="/admin/$section" params={{ section: "engine" }} search={{ view: "crypto" }} className="adm-btn">
-            Crypto windows
           </Link>
           {templateTimes && (
             <button
@@ -284,7 +305,7 @@ export function CreateMarket() {
           <div className="adm-field">
             Section
             <div className="adm-tabs" role="group" aria-label="Section" style={{ margin: 0 }}>
-              {SECTIONS.map((name) => (
+              {SECTIONS.filter((name) => name !== "Crypto").map((name) => (
                 <button
                   key={name}
                   type="button"
