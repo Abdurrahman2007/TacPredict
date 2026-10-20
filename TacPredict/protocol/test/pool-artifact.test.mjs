@@ -10,7 +10,7 @@ const read = (file) => fs.readFileSync(new URL(`../../src/lib/pool/${file}`, imp
 test("the bytecode the admin panel deploys is exactly what the reviewed source compiles to", () => {
   const source = read("artifact.ts");
   const body = source.slice(source.indexOf("["), source.lastIndexOf("]"));
-  const committed = [...body.matchAll(/"([0-9a-fA-F]+)"/g)].map((m) => m[1]).join("");
+  const committed = [...body.matchAll(/"(?:0x)?([0-9a-fA-F]+)"/g)].map((m) => m[1]).join("");
   assert.ok(committed.length > 2000, "bytecode is packaged");
   assert.equal(committed.toLowerCase(), art.evm.bytecode.object.toLowerCase());
 });
