@@ -5,6 +5,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 const protocol = fileURLToPath(new URL("../", import.meta.url));
+const args = process.argv.slice(2);
+if (
+  args.length &&
+  (args.length !== 2 || args[0] !== "--schema-snapshot" || !args[1].startsWith("/"))
+)
+  throw Error("Only --schema-snapshot /absolute/local/path is supported");
+const snapshot = args.length ? args[1] : null;
 const native = join(protocol, "test/sql-runtime/node_modules/@embedded-postgres/linux-x64/native");
 if (
   process.platform !== "linux" ||
@@ -27,6 +34,7 @@ const env = {
   LD_LIBRARY_PATH: join(native, "lib"),
   TACP_LOCAL_PG_SOCKET: join(dir, "socket"),
   TACP_LOCAL_PG_RUNNER_PID: String(process.pid),
+  ...(snapshot ? { TACP_LOCAL_SCHEMA_SNAPSHOT: snapshot } : {}),
 };
 const run = (bin, args) => {
   const r = spawnSync(join(native, "bin", bin), args, {
@@ -70,6 +78,7 @@ try {
       "--test-concurrency=1",
       "test/supabase-security-sql.test.mjs",
       "test/supabase-security-concurrency.test.mjs",
+      ...(snapshot ? ["test/live-schema-staging.test.mjs"] : []),
     ],
     { cwd: protocol, env, stdio: "inherit", timeout: 120000 },
   );

@@ -1,0 +1,52 @@
+{
+  "baseCommit": "baf0d2a35f4f32027c24fa7738dc223feac64540",
+  "scope": "Stage4 authorized secret-only conversion and catalog export/local validation",
+  "postgres": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "version": "17.9",
+    "newRunnerCasesIncludingParent": 8,
+    "existingRunnerCases": 21,
+    "testLogSha256": "d06293f547740aff45227e037fccf8c07300eba171192b0100f61ce6415541eb",
+    "localReconstruction": {
+      "snapshotSha256": "1f6b33816a90753f59447c74a209afdf2754378a10828841e7a25b267551d53f",
+      "tables": 37,
+      "views": 2,
+      "policies": 29,
+      "sourceMatchedFunctions": 28,
+      "withheldFunctions": [
+        "claim_daily_reward",
+        "get_market_import_admin",
+        "get_reward_status",
+        "get_tac_promo_status",
+        "handle_new_tac_account",
+        "has_role",
+        "redeem_tac_promo",
+        "rls_auto_enable"
+      ],
+      "excludedAuthTriggers": [
+        "tac_account_created"
+      ],
+      "authEmulated": true,
+      "fullProductionClone": false,
+      "postgresVersion": "17.9",
+      "productionWrites": false,
+      "launchAuthorized": false
+    }
+  },
+  "syntaxChecks": "passed: three changed/new mjs files",
+  "prettier": "passed: changed/new JS and public report JSON/Markdown",
+  "gitDiffCheck": "passed",
+  "remoteCI": "not claimed; must check current PR separately",
+  "solidityEvm": "not rerun in Stage4; no Solidity edits",
+  "productionBuild": "not rerun",
+  "productionChanges": {
+    "cloudflare": "exactly two approved Text-to-Secret bindings; configuration-only version; code unchanged",
+    "database": "none",
+    "tradingActivation": false,
+    "mainnetTransactions": false,
+    "applicationCodeDeployment": false
+  },
+  "rawSnapshotPublished": false
+}

@@ -1,0 +1,65 @@
+{
+  "project": "lmqaiqvwcytmgwgwyfwx",
+  "classification": "production-read-only-catalog-export; local-only-fix-validation",
+  "observedAt": "2026-10-20T04:18:48.309511+00:00",
+  "productionPostgresVersion": "17.11",
+  "transactionReadOnly": "on",
+  "userRowsExported": false,
+  "productionDatabaseWrites": false,
+  "migrationLedgerPresent": false,
+  "catalogCounts": {
+    "relations": 39,
+    "columns": 321,
+    "constraints": 164,
+    "indexes": 64,
+    "views": 2,
+    "policies": 29,
+    "functions": 36,
+    "schemas": 3,
+    "apiRoles": 6
+  },
+  "querySha256": "be886ddd178729f7a604aff54e3a815bccbac52125649d2865ab3d0e16267d62",
+  "rawSnapshotPublished": false,
+  "sourceMatchedDefinitions": 28,
+  "withheldFunctionDefinitions": [
+    "claim_daily_reward",
+    "get_market_import_admin",
+    "get_reward_status",
+    "get_tac_promo_status",
+    "handle_new_tac_account",
+    "has_role",
+    "redeem_tac_promo",
+    "rls_auto_enable"
+  ],
+  "localReconstruction": {
+    "snapshotSha256": "1f6b33816a90753f59447c74a209afdf2754378a10828841e7a25b267551d53f",
+    "tables": 37,
+    "views": 2,
+    "policies": 29,
+    "sourceMatchedFunctions": 28,
+    "withheldFunctions": [
+      "claim_daily_reward",
+      "get_market_import_admin",
+      "get_reward_status",
+      "get_tac_promo_status",
+      "handle_new_tac_account",
+      "has_role",
+      "redeem_tac_promo",
+      "rls_auto_enable"
+    ],
+    "excludedAuthTriggers": ["tac_account_created"],
+    "authEmulated": true,
+    "fullProductionClone": false,
+    "postgresVersion": "17.9",
+    "productionWrites": false,
+    "launchAuthorized": false
+  },
+  "limitations": [
+    "No public/live user rows copied. Synthetic users/events only in ephemeral local database.",
+    "Supabase auth.users/auth.identities/auth.uid/auth.jwt are emulated; auth creation trigger excluded.",
+    "Role membership graph, storage/realtime/cron/extensions internals and unmatched function bodies not reproduced.",
+    "No production A/B login or wallet proof mutation test; local native financial isolation only.",
+    "Local PostgreSQL 17.9 differs from production 17.11.",
+    "No application deployment, security migration, indexer catch-up, trading activation, mainnet transaction or provider-health request."
+  ]
+}
