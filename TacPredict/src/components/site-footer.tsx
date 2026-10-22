@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Mail } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import "@/styles/site-footer.css";
 
@@ -59,6 +59,14 @@ export function SiteFooter() {
             <span>Telegram</span>
           </a>
         </div>
+        <nav className="footer-support" aria-label="Support and legal">
+          <h2>Support & Legal</h2>
+          <a href="mailto:support@tacpredict.fun">
+            <Mail size={18} aria-hidden="true" />
+            <span>support@tacpredict.fun</span>
+          </a>
+          <Link to="/terms">Terms of Service</Link>
+        </nav>
       </div>
       <div className="footer-bottom">
         <small>© {new Date().getUTCFullYear()} TacPredict</small>

@@ -115,9 +115,9 @@
 }
 .footer-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
-  max-width: 600px;
+  max-width: 900px;
 }
 .footer-columns h2 {
   margin: 0 0 12px;
@@ -236,4 +236,23 @@
 /* Keep the shared footer above the existing fixed trade bar as well as mobile navigation. */
 :root:has(.ud-bar) .tp-site-footer {
   padding-bottom: 124px;
+}
+
+.footer-support {
+  min-width: 0;
+}
+.footer-support a {
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.footer-support svg {
+  flex-shrink: 0;
+}
+@media (max-width: 639px) {
+  .footer-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-support {
+    grid-column: 1 / -1;
+  }
 }
