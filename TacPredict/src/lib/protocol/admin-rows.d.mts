@@ -12,7 +12,11 @@ export function atomicToDecimal(
   places?: number,
 ): string | null;
 export function priceToCents(value: string | bigint | null | undefined): string | null;
-export function shortHash(value: string | null | undefined, head?: number, tail?: number): string | null;
+export function shortHash(
+  value: string | null | undefined,
+  head?: number,
+  tail?: number,
+): string | null;
 export const MARKET_STATUSES: readonly string[];
 export type ParsedMarket =
   | {
@@ -73,3 +77,5 @@ export function blockLag(
 ): bigint | null;
 export function formatDuration(seconds: number | string | bigint): string | null;
 export function formatTimestamp(value: string | null | undefined): string | null;
+
+export function createdMarketCount(nextId: string | null | undefined): string | null;

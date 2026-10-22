@@ -18,10 +18,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh bg-background text-foreground">
       <BrandIntro />
       <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/" className="app-header-brand flex min-w-0 items-center gap-2.5" aria-label="TacPredict home">
-            <BrandMark className="size-10" />
-            <span className="app-header-name text-lg font-semibold tracking-tight">TacPredict</span>
+        <div className="mx-auto flex h-[3.75rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <Link
+            to="/"
+            className="app-header-brand flex min-w-0 items-center gap-2.5"
+            aria-label="TacPredict home"
+          >
+            <BrandMark className="size-9" />
+            <span className="app-header-name text-base font-semibold tracking-tight">
+              TacPredict
+            </span>
           </Link>
           <nav className="ml-8 hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navItems.map((item) => (
@@ -44,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               to="/rewards"
               aria-label="Your rewards"
-              className="header-reward grid size-10 place-items-center rounded-full border border-border bg-card text-primary transition-colors hover:bg-primary/10"
+              className="header-reward grid size-11 place-items-center rounded-full border border-border bg-card text-primary transition-colors hover:bg-primary/10"
             >
               <Gift className="size-[19px]" />
             </Link>
@@ -58,14 +64,32 @@ export function AppShell({ children }: { children: ReactNode }) {
           <footer className="mt-6 flex justify-center">
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" aria-label="Market data information" className="grid size-11 place-items-center rounded-full text-muted-foreground/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary">
+                <button
+                  type="button"
+                  aria-label="Market data information"
+                  className="grid size-11 place-items-center rounded-full text-muted-foreground/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
+                >
                   <Info size={15} aria-hidden="true" />
                 </button>
               </PopoverTrigger>
               <PopoverContent side="top" className="rounded-2xl text-xs leading-5">
                 <p className="font-semibold">Market data</p>
-                <p className="mt-2">Crypto spot data provided by <a href="https://www.coingecko.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">CoinGecko</a>. These reference prices are not prediction odds.</p>
-                <p className="mt-2 text-muted-foreground">Native volume and positions come from indexed TacPredict Base transactions. Preview and discovered listings are not tradeable.</p>
+                <p className="mt-2">
+                  Crypto spot data provided by{" "}
+                  <a
+                    href="https://www.coingecko.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline"
+                  >
+                    CoinGecko
+                  </a>
+                  . These reference prices are not prediction odds.
+                </p>
+                <p className="mt-2 text-muted-foreground">
+                  Native volume and positions come from indexed TacPredict Base transactions.
+                  Preview and discovered listings are not tradeable.
+                </p>
               </PopoverContent>
             </Popover>
           </footer>

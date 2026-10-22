@@ -150,7 +150,8 @@ export function parseBlockchainRows(rows) {
 
 export function countMarketsByStatus(markets) {
   const counts = Object.fromEntries(MARKET_STATUSES.map((s) => [s, 0]));
-  for (const m of markets) if (m.kind === "market" && m.status && m.status in counts) counts[m.status] += 1;
+  for (const m of markets)
+    if (m.kind === "market" && m.status && m.status in counts) counts[m.status] += 1;
   return counts;
 }
 
@@ -174,7 +175,13 @@ export function formatDuration(seconds) {
 export function formatTimestamp(value) {
   if (typeof value !== "string" || !value.trim()) return null;
   const text = value.trim();
-  const match = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]00(?::?00)?)?$/.exec(text);
+  const match =
+    /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]00(?::?00)?)?$/.exec(text);
   if (!match) return text;
   return match[3] ? `${match[1]} ${match[2]} UTC` : `${match[1]} ${match[2]}`;
+}
+
+export function createdMarketCount(nextId) {
+  if (!/^\d+$/.test(String(nextId ?? "")) || BigInt(nextId) < 1n) return null;
+  return (BigInt(nextId) - 1n).toString();
 }

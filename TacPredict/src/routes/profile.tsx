@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, RefreshCw, Search, ArrowDown, ArrowUp, Share2, Wallet } from "lucide-react";
+import {
+  ChevronDown,
+  Copy,
+  RefreshCw,
+  Search,
+  ArrowDown,
+  ArrowUp,
+  Share2,
+  Wallet,
+} from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { NativePortfolio } from "@/components/native-portfolio";
@@ -9,7 +18,9 @@ import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useOwnProtocolOrders } from "@/lib/protocol/portfolio-orders";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { money } from "@/lib/protocol/portfolio-view.mjs";
+import { money, selectedWalletSummary } from "@/lib/protocol/portfolio-view.mjs";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
+import { useQuery } from "@tanstack/react-query";
 import portfolioCss from "@/styles/portfolio-reference.css?url";
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -40,39 +51,28 @@ function PortfolioPage() {
     [descending, setDescending] = useState(true),
     [activeOnly, setActiveOnly] = useState(false),
     [notice, setNotice] = useState("");
-  const signedOut = auth.ready && !auth.user;
+  const [category, setCategory] = useState("All"),
+    [state, setState] = useState("All"),
+    [since, setSince] = useState("");
+  const feed = useQuery(nativeMarketFeedQueryOptions);
   const walletKnown = Boolean(
     wallet.address && wallet.chainId === 8453 && wallet.usdc !== null && !wallet.error,
   );
-  const hidden = false;
-  // Never show a loading dash: a balance is either the real amount or zero.
-  const show = (value: bigint | null) => money(value ?? 0n, hidden);
-  const linked = Boolean(q.data?.walletLinked) && !q.isError && !q.isPending;
-  const positions = (q.data?.positions ?? []).filter((p) => p.chainId === 8453);
-  const marked =
-    linked && positions.every((p) => p.valueAtomic !== null)
-      ? positions.reduce((sum, p) => sum + BigInt(p.valueAtomic!), 0n)
-      : null;
-  // Wallet + last-trade marked positions; claimable is not added twice.
-  const emptyAccount =
-    (signedOut && !wallet.address) ||
-    Boolean(
-      auth.ready &&
-      !wallet.address &&
-      !q.isPending &&
-      !q.isError &&
-      q.data &&
-      !q.data.walletLinked &&
-      positions.length === 0,
-    );
-  const total = emptyAccount ? 0n : walletKnown && marked !== null ? wallet.usdc! + marked : null;
-  const cash = walletKnown ? wallet.usdc : emptyAccount ? 0n : null;
-  const claimable = linked
-    ? positions.reduce((sum, p) => sum + BigInt(p.claimableAtomic), 0n)
-    : null;
-  const noHistory =
-    emptyAccount || Boolean(linked && q.data?.activity?.length === 0 && positions.length === 0);
-  const pnl = noHistory ? 0n : null; // Cost-basis/P&L history isn't available. Never synthesize performance.
+  const summary = selectedWalletSummary(
+    q.data?.positions ?? [],
+    wallet.address,
+    q.data?.verifiedWallets ?? [],
+    Boolean(auth.ready && auth.user && !q.isPending && !q.isError),
+  );
+  const show = (value: bigint | null) => money(value);
+  // Position value is last-trade marked, not an executable quote. Wallet USDC is never added.
+  const total = summary.markedAtomic;
+  const cash = walletKnown ? wallet.usdc : null;
+  const claimable = summary.claimableAtomic;
+  const noHistory = Boolean(
+    summary.verified && q.data?.activity?.length === 0 && summary.positions.length === 0,
+  );
+  const pnl = noHistory ? 0n : null;
   async function copyAddress() {
     if (!wallet.address) {
       login("/profile");
@@ -99,44 +99,67 @@ function PortfolioPage() {
   }
   return (
     <div className="tp-portfolio tp-portfolio-enter">
+      <div className="tp-portfolio-heading">
+        <h1>Portfolio</h1>
+        <button
+          className="tp-icon"
+          onClick={() => void copyAddress()}
+          aria-label="Copy wallet address"
+        >
+          <Copy size={15} />
+        </button>
+        <button
+          className="tp-icon"
+          onClick={() => {
+            void wallet.refresh();
+            if (auth.user) {
+              void q.refetch();
+              void orders.refetch();
+            }
+          }}
+          disabled={wallet.busy || q.isFetching || orders.isFetching}
+          aria-label="Refresh portfolio"
+        >
+          <RefreshCw size={14} className={q.isFetching ? "animate-spin" : ""} />
+        </button>
+      </div>
       <section className="tp-balances" aria-label="Portfolio balances">
         <div className="tp-b-left">
-          <div className="tp-label">
-            <h1>Portfolio</h1>
-            <button
-              className="tp-icon"
-              onClick={() => void copyAddress()}
-              aria-label="Copy wallet address"
-            >
-              <Copy size={15} />
-            </button>
-            <button
-              className="tp-icon"
-              onClick={() => {
-                void wallet.refresh();
-                if (auth.user) {
-                  void q.refetch();
-                  void orders.refetch();
-                }
-              }}
-              disabled={wallet.busy || q.isFetching || orders.isFetching}
-              aria-label="Refresh portfolio"
-            >
-              <RefreshCw size={14} className={q.isFetching ? "animate-spin" : ""} />
-            </button>
-          </div>
+          <p className="tp-label">Position value</p>
           <div className="tp-big">
-            <span>{show(total)}</span>
+            <span className={total === null ? "tp-unavailable" : ""}>{show(total)}</span>
           </div>
         </div>
         <div className="tp-b-right">
           <p className="tp-label">Wallet USDC</p>
-          <p className="tp-big tp-med">{show(cash)}</p>
+          <p className={`tp-big tp-med ${cash === null ? "tp-unavailable" : ""}`}>{show(cash)}</p>
           {claimable !== null && claimable > 0n ? (
             <span className="tp-status">Claimable {show(claimable)}</span>
           ) : null}
         </div>
       </section>
+      <div className="tp-account-context" role="status">
+        <span>
+          {wallet.address
+            ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}`
+            : "Connect a wallet to view your portfolio"}
+        </span>
+        <span>
+          {wallet.address
+            ? wallet.chainId === 8453
+              ? "Base Mainnet"
+              : "Unsupported network · switch to Base"
+            : "Base Mainnet · native USDC"}
+        </span>
+        <details>
+          <summary>How values are calculated</summary>
+          <p>
+            Position value uses finalized holdings at the last indexed trade, not a guaranteed sale
+            price. Wallet USDC is separate; claimable is not added twice. Profit/loss requires
+            verified cost basis and is unavailable when that history is missing.
+          </p>
+        </details>
+      </div>
       <section className="tp-pl" aria-label="Portfolio performance">
         <div className="tp-pl-head">
           <h2>
@@ -157,7 +180,7 @@ function PortfolioPage() {
           </div>
         </div>
         <div className="tp-pl-value">
-          <strong>{show(pnl)}</strong>
+          <strong className={pnl === null ? "tp-unavailable" : ""}>{show(pnl)}</strong>
           <button
             aria-label="Share portfolio link"
             className="tp-icon"
@@ -207,7 +230,7 @@ function PortfolioPage() {
               <PopoverTrigger asChild>
                 <button className="tp-select" aria-label="Sort positions">
                   {sort === "value" ? "Current value" : sort === "shares" ? "Shares" : "Recent"}
-                  <span aria-hidden="true">⌄</span>
+                  <ChevronDown aria-hidden="true" size={14} />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="tp-sort-menu w-44 p-1" align="end">
@@ -255,6 +278,60 @@ function PortfolioPage() {
           </>
         )}
       </div>
+      {tab === "Positions" && (
+        <div className="tp-detail-filters">
+          <label>
+            Category
+            <select
+              aria-label="Filter position category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {["All", "Crypto", "Football", "Cricket"].map((v) => (
+                <option key={v}>{v}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Status
+            <select
+              aria-label="Filter position status"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+            >
+              {["All", "Open", "Closed"].map((v) => (
+                <option key={v}>{v}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Updated since (UTC)
+            <input
+              aria-label="Positions updated since UTC"
+              type="date"
+              value={since}
+              onChange={(e) => setSince(e.target.value)}
+            />
+          </label>
+          {(category !== "All" || state !== "All" || since) && (
+            <button
+              className="tp-select"
+              onClick={() => {
+                setCategory("All");
+                setState("All");
+                setSince("");
+              }}
+            >
+              Clear filters
+            </button>
+          )}
+          {category !== "All" && (feed.isError || Boolean(feed.data?.error)) && (
+            <p role="alert">
+              Market classification unavailable. Retry market data before using category filters.
+            </p>
+          )}
+        </div>
+      )}
       <div className="tp-results">
         <NativePortfolio
           tab={tab === "History" ? "Activity" : tab}
@@ -262,6 +339,9 @@ function PortfolioPage() {
           sort={sort}
           descending={descending}
           activeOnly={activeOnly}
+          category={category}
+          state={state}
+          since={since}
         />
       </div>
       {notice && (

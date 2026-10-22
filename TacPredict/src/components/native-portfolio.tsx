@@ -1,7 +1,11 @@
 import { createWalletClient, custom, type Address } from "viem";
 import { base } from "viem/chains";
 import { getWalletLinkChallenge, proveWalletLink } from "@/lib/protocol/wallet-link.functions";
-import { visiblePositions } from "@/lib/protocol/portfolio-view.mjs";
+import {
+  filterPortfolioPositions,
+  selectedWalletSummary,
+  visiblePositions,
+} from "@/lib/protocol/portfolio-view.mjs";
 import { useOwnProtocolOrders } from "@/lib/protocol/portfolio-orders";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -12,7 +16,7 @@ import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { useLoginDialog } from "@/components/login-dialog";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { claimPosition } from "@/lib/protocol/execution";
+import { cancelSignedOrder, claimPosition } from "@/lib/protocol/execution";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
 import { usdcShort, sharesShort } from "@/lib/protocol/display.mjs";
 export function NativePortfolio({
@@ -21,12 +25,18 @@ export function NativePortfolio({
   sort = "value",
   descending = true,
   activeOnly = false,
+  category = "All",
+  state = "All",
+  since = "",
 }: {
   tab: string;
   search?: string;
   sort?: string;
   descending?: boolean;
   activeOnly?: boolean;
+  category?: string;
+  state?: string;
+  since?: string;
 }) {
   const q = useNativePortfolio(),
     auth = useProtocolUser(),
@@ -36,7 +46,49 @@ export function NativePortfolio({
   const orders = useOwnProtocolOrders();
   const [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
-  const positions = visiblePositions(q.data?.positions ?? [], search, sort, descending, activeOnly);
+  const summary = selectedWalletSummary(
+    q.data?.positions ?? [],
+    wallet.address,
+    q.data?.verifiedWallets ?? [],
+    Boolean(auth.ready && auth.user && !q.isPending && !q.isError),
+  );
+  const positions = filterPortfolioPositions(
+    visiblePositions(summary.positions, search, sort, descending, activeOnly),
+    (feed.data?.markets ?? []).flatMap((m) => (m.native ? [m.native] : [])),
+    category,
+    state,
+    since,
+  );
+  const ownOrders = (orders.data ?? []).filter(
+    (o) =>
+      o.order.maker.toLowerCase() === wallet.address?.toLowerCase() &&
+      o.title.toLowerCase().includes(search.toLowerCase()),
+  );
+  const [cancelled, setCancelled] = useState<Record<string, string>>({});
+  async function cancel(o: (typeof ownOrders)[number]) {
+    const d = feed.data?.deployments.find((d) => d.chainId === o.chainId);
+    if (!d || busy) return;
+    if (
+      !window.confirm(
+        `Cancel this ${o.side.toLowerCase()} order? Base network gas applies. Filled shares are not reversed.`,
+      )
+    )
+      return;
+    setBusy(true);
+    setNotice("");
+    try {
+      const hash = await cancelSignedOrder(wallet, d, o);
+      setCancelled((old) => ({ ...old, [o.id]: hash }));
+      setNotice(
+        `Cancellation transaction confirmed: ${hash}. Finalized order history updates after indexing.`,
+      );
+      await orders.refetch();
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : "Cancellation failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
   async function claim(p: (typeof positions)[number]) {
     const d = feed.data?.deployments.find((d) => d.chainId === p.chainId);
     if (!d) return;
@@ -92,7 +144,11 @@ export function NativePortfolio({
   const activity = q.data?.activity;
   return (
     <div className="mt-4 space-y-3">
-      {!auth.ready || (auth.user && q.isPending) ? null : q.isError ? (
+      {!auth.ready || (auth.user && q.isPending) ? (
+        <p role="status" className="finance-inline-alert">
+          Loading verified portfolio…
+        </p>
+      ) : q.isError ? (
         <div role="alert" className="finance-card">
           <h3 className="text-sm font-semibold">Positions unavailable</h3>
           <p className="mt-2 text-xs leading-6 text-muted-foreground">
@@ -122,63 +178,71 @@ export function NativePortfolio({
           </div>
         ) : (
           <EmptyState
-            title={
-              tab === "Open"
-                ? "No open orders."
-                : tab === "Activity"
-                  ? "No history yet."
-                  : "No positions found."
-            }
-            description={
-              tab === "Open"
-                ? "You have no unfilled orders right now."
-                : tab === "Activity"
-                  ? "Your confirmed transactions will appear here."
-                  : "Your confirmed positions will appear here."
-            }
+            title="Connect your wallet"
+            description="Sign in and verify wallet ownership to see private positions, orders and history."
           />
         )
       ) : tab === "Open" ? (
-        orders.isPending ? null : orders.isError ? (
+        orders.isPending ? (
+          <p role="status">Loading open orders…</p>
+        ) : orders.isError ? (
           <div className="finance-card" role="alert">
             Open orders unavailable.
             <button className="finance-pill mt-3" onClick={() => void orders.refetch()}>
               Retry
             </button>
           </div>
-        ) : !(orders.data ?? []).filter((o) => o.title.toLowerCase().includes(search.toLowerCase()))
-            .length ? (
+        ) : !ownOrders.length ? (
           <EmptyState
             title="No open orders."
-            description="You have no unfilled orders right now."
+            description="No unfilled orders were found for this wallet."
           />
         ) : (
-          (orders.data ?? [])
-            .filter((o) => o.title.toLowerCase().includes(search.toLowerCase()))
-            .map((o) => (
-              <article className="finance-card !p-4" key={o.id}>
-                <Link
-                  to="/markets/$marketId"
-                  params={{ marketId: o.marketId }}
-                  className="text-sm font-semibold"
+          ownOrders.map((o) => (
+            <article className="finance-card !p-4" key={o.id}>
+              <Link
+                to="/markets/$marketId"
+                params={{ marketId: o.marketId }}
+                className="text-sm font-semibold"
+              >
+                {o.title}
+              </Link>
+              <div className="mt-3 flex justify-between gap-3 text-xs text-muted-foreground">
+                <span>
+                  {o.side} · Outcome {o.outcomeIndex + 1} · {sharesShort(o.remainingAtomic)} shares
+                </span>
+                <span>Limit {usdcShort(o.priceAtomic)}</span>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {o.status === "PARTIAL" ? "Partially filled" : "Unfilled"} · Expires{" "}
+                {new Date(o.expiration).toLocaleString()}
+              </p>
+              {cancelled[o.id] ? (
+                <a
+                  className="finance-pill mt-3"
+                  href={`https://basescan.org/tx/${cancelled[o.id]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {o.title}
-                </Link>
-                <div className="mt-3 flex justify-between gap-3 text-xs text-muted-foreground">
-                  <span>
-                    {o.side} · Outcome {o.outcomeIndex + 1} · {sharesShort(o.remainingAtomic)}{" "}
-                    shares
-                  </span>
-                  <span>Limit {usdcShort(o.priceAtomic)}</span>
-                </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  {o.status === "PARTIAL" ? "Partially filled" : "Unfilled"} · Expires{" "}
-                  {new Date(o.expiration).toLocaleString()}
-                </p>
-              </article>
-            ))
+                  Cancellation confirmed · view transaction
+                </a>
+              ) : (
+                <button
+                  className="finance-pill mt-3"
+                  disabled={
+                    busy ||
+                    wallet.chainId !== o.chainId ||
+                    !feed.data?.deployments.some((d) => d.chainId === o.chainId)
+                  }
+                  onClick={() => void cancel(o)}
+                >
+                  {busy ? "Waiting for wallet…" : "Cancel order"}
+                </button>
+              )}
+            </article>
+          ))
         )
-      ) : !q.data?.walletLinked ? (
+      ) : !summary.verified ? (
         <div className="finance-card text-center">
           <h3 className="text-sm font-semibold">Verify your wallet</h3>
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground">
@@ -212,37 +276,46 @@ export function NativePortfolio({
             description="Your confirmed transactions will appear here."
           />
         ) : (
-          activity.map((a) => (
-            <article key={`${a.kind}-${a.id}`} className="finance-card !p-4">
-              <div className="flex flex-wrap justify-between items-start gap-2">
-                <div>
-                  <p className="text-sm font-semibold">{a.kind}</p>
-                  <Link
-                    to="/markets/$marketId"
-                    params={{ marketId: a.marketId }}
-                    className="mt-1 block text-xs text-muted-foreground"
-                  >
-                    {a.title}
-                  </Link>
-                </div>
-                <p className="text-sm tabular-nums">{usdcShort(a.amountAtomic)}</p>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[11px] text-muted-foreground">
-                  {new Date(a.timestamp).toLocaleDateString()} · Finalized
-                </span>
-                <a
-                  className="inline-flex min-h-11 items-center gap-1 text-xs text-primary"
-                  href={`https://basescan.org/tx/${a.txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Transaction
-                  <ArrowUpRight size={13} />
-                </a>
-              </div>
-            </article>
-          ))
+          <>
+            <p className="text-xs text-muted-foreground">
+              Account history · all verified wallets. Amounts are transfers, not profit/loss.
+            </p>
+            {activity
+              .filter(
+                (a) => a.chainId === 8453 && a.title.toLowerCase().includes(search.toLowerCase()),
+              )
+              .map((a) => (
+                <article key={`${a.kind}-${a.id}`} className="finance-card !p-4">
+                  <div className="flex flex-wrap justify-between items-start gap-2">
+                    <div>
+                      <p className="text-sm font-semibold">{a.kind}</p>
+                      <Link
+                        to="/markets/$marketId"
+                        params={{ marketId: a.marketId }}
+                        className="mt-1 block text-xs text-muted-foreground"
+                      >
+                        {a.title}
+                      </Link>
+                    </div>
+                    <p className="text-sm tabular-nums">{usdcShort(a.amountAtomic)}</p>
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] text-muted-foreground">
+                      {new Date(a.timestamp).toLocaleDateString()} · Finalized
+                    </span>
+                    <a
+                      className="inline-flex min-h-11 items-center gap-1 text-xs text-primary"
+                      href={`https://basescan.org/tx/${a.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Transaction
+                      <ArrowUpRight size={13} />
+                    </a>
+                  </div>
+                </article>
+              ))}
+          </>
         )
       ) : !positions.length ? (
         <EmptyState
@@ -273,18 +346,14 @@ export function NativePortfolio({
               </div>
               <div>
                 <p className="text-muted-foreground">Last-trade value</p>
-                <p className="mt-1 tabular-nums">
-                  {usdcShort(p.valueAtomic)}
-                </p>
+                <p className="mt-1 tabular-nums">{usdcShort(p.valueAtomic)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Claimable</p>
                 <p className="mt-1 tabular-nums">{usdcShort(p.claimableAtomic)}</p>
               </div>
             </div>
-            <p className="mt-4 text-[11px] text-muted-foreground">
-              Cost basis not yet indexed
-            </p>
+            <p className="mt-4 text-[11px] text-muted-foreground">Cost basis not yet indexed</p>
             {BigInt(p.claimableAtomic) > 0n && (
               <div className="mt-4">
                 <button
@@ -292,14 +361,14 @@ export function NativePortfolio({
                   disabled={
                     busy ||
                     !feed.data?.deployments.some((d) => d.chainId === p.chainId) ||
-                    wallet.address?.toLowerCase() !== p.wallet ||
+                    wallet.address?.toLowerCase() !== p.wallet.toLowerCase() ||
                     wallet.chainId !== p.chainId
                   }
                   onClick={() => void claim(p)}
                 >
                   {busy ? "Processing…" : p.status === "VOID" ? "Redeem void shares" : "Claim USDC"}
                 </button>
-                {wallet.address?.toLowerCase() !== p.wallet && (
+                {wallet.address?.toLowerCase() !== p.wallet.toLowerCase() && (
                   <p className="mt-2 text-xs text-muted-foreground">
                     Connect the position’s owner wallet to claim.
                   </p>

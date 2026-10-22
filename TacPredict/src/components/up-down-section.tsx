@@ -54,7 +54,10 @@ function AssetCard({
   // Once the administrator turns a series on, the card shows the pool: the round that is open for
   // bets is the next one, so Up and Down lead straight to it.
   const poolConfig = useQuery(poolConfigQueryOptions);
-  const poolOn = Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const poolOn =
+    Boolean(poolConfig.data?.address) &&
+    poolConfig.data?.series[`${asset}:${minutes}`] === true &&
+    poolConfig.data?.paused === false;
   const nextStart = nextRoundStart(nowMs, minutes);
   const round = useQuery(poolRoundQueryOptions(asset, minutes, nextStart, poolOn));
   const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
@@ -87,7 +90,17 @@ function AssetCard({
             {clock(w.end, zone)}
           </p>
         </div>
-        <span className="ud-live tp-crypto-live">LIVE {formatCountdown(w.end - nowMs)}</span>
+        <span
+          className={`${poolOn ? "ud-live" : "ud-muted"} tp-crypto-live`}
+          title={
+            poolOn
+              ? "Next round accepts bets until its start; wallet and contract checks still apply."
+              : "Reference price window only. This badge does not mean prediction trading is active."
+          }
+        >
+          {poolOn ? "BETS OPEN" : "PRICE WINDOW"}{" "}
+          {formatCountdown((poolOn ? nextStart : w.end) - nowMs)}
+        </span>
       </div>
       {large && <CoinGeckoChart asset={asset} window={w} summary />}
 

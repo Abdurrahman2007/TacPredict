@@ -17,16 +17,31 @@ const TOKENS = [
  * drawing, not data: it carries no price, number or quote.
  */
 export function BrandIntro() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try {
+      if (sessionStorage.getItem("tacpredict-intro-seen-v2")) return;
+      sessionStorage.setItem("tacpredict-intro-seen-v2", "1");
+    } catch {
+      /* Storage restrictions must not prevent opening the app. */
+    }
+    setVisible(true);
+  }, []);
   useEffect(() => {
     if (!visible) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const root = document.documentElement;
     const before = root.style.overflow;
     root.style.overflow = "hidden";
-    const timer = window.setTimeout(() => setVisible(false), reduced ? 500 : 2900);
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setVisible(false);
+    };
+    window.addEventListener("keydown", dismiss);
+    const timer = window.setTimeout(() => setVisible(false), reduced ? 0 : 2900);
     return () => {
       window.clearTimeout(timer);
+      window.removeEventListener("keydown", dismiss);
       root.style.overflow = before;
     };
   }, [visible]);
@@ -34,10 +49,13 @@ export function BrandIntro() {
   return (
     <div
       className="prediction-intro"
-      role="status"
-      aria-label="Opening TacPredict"
+      role="region"
+      aria-label="Opening TacPredict · decorative animation"
       onClick={() => setVisible(false)}
     >
+      <button type="button" className="pi-skip" onClick={() => setVisible(false)}>
+        Skip intro <span aria-hidden="true">↗</span>
+      </button>
       <div className="pi-glow" aria-hidden="true" />
       <div className="pi-stage" aria-hidden="true">
         <div className="pi-brand">
@@ -49,7 +67,13 @@ export function BrandIntro() {
             <path d="M0 28H320M0 84H320M0 140H320" />
             <path d="M64 8V162M128 8V162M192 8V162M256 8V162" />
           </g>
-          <path className="pi-beat" d="M0 84H320" stroke="#7d8b95" strokeWidth="1" strokeDasharray="3 6" />
+          <path
+            className="pi-beat"
+            d="M0 84H320"
+            stroke="#7d8b95"
+            strokeWidth="1"
+            strokeDasharray="3 6"
+          />
           <text className="pi-beat-label" x="6" y="76">
             Price to beat
           </text>
@@ -78,15 +102,34 @@ export function BrandIntro() {
             strokeWidth="2.6"
             strokeLinecap="round"
           />
-          <circle className="pi-now-ring" cx="140" cy="84" r="6" stroke="#c9d4dc" strokeWidth="1.2" />
+          <circle
+            className="pi-now-ring"
+            cx="140"
+            cy="84"
+            r="6"
+            stroke="#c9d4dc"
+            strokeWidth="1.2"
+          />
           <circle className="pi-now" cx="140" cy="84" r="3.6" fill="#edf2f5" />
           <g className="pi-end pi-end-up">
             <circle cx="292" cy="24" r="11" fill="#55c878" />
-            <path d="M292 29V19M287.5 23.5L292 19L296.5 23.5" stroke="#0f161a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M292 29V19M287.5 23.5L292 19L296.5 23.5"
+              stroke="#0f161a"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </g>
           <g className="pi-end pi-end-down">
             <circle cx="292" cy="146" r="11" fill="#ff454f" />
-            <path d="M292 141V151M287.5 146.5L292 151L296.5 146.5" stroke="#0f161a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M292 141V151M287.5 146.5L292 151L296.5 146.5"
+              stroke="#0f161a"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </g>
         </svg>
         <p className="pi-tagline">Up or Down · USDC on Base</p>

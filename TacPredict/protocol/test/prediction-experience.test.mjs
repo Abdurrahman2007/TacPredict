@@ -14,7 +14,7 @@ test("all market types share the reference detail and trade screen", () => {
   assert.ok(page.includes("DialogClose"));
   assert.ok(page.includes("translate-x-0"));
   assert.ok(page.includes("market.outcomes.length > 2")); // no duplicate binary rows
-  assert.ok(page.includes("p.marketId === market.native?.id")); // private positions use UUID, not display market id
+  assert.ok(page.includes("p.marketId === market.native?.marketId")); // portfolio RPC returns the chain-aware API market ID
   assert.ok(page.includes("p.chainId === market.native?.chainId"));
 });
 test("Sell retains owned-share execution and explicit approval acknowledgement", () => {
@@ -27,12 +27,15 @@ test("Sell retains owned-share execution and explicit approval acknowledgement",
   assert.ok(execution.includes("Insufficient owned outcome shares"));
   assert.ok(execution.includes("Verified runtime bytecode mismatch"));
 });
-test("opening is SSR-visible, reload-based, reduced-motion aware and never gates on storage", () => {
+test("opening is SSR-safe, session-once, reduced-motion aware and storage-failure tolerant", () => {
   const ui = src("components/brand-intro.tsx");
-  assert.ok(ui.includes("useState(true)"));
+  assert.ok(ui.includes("useState(false)"));
   assert.ok(ui.includes("prefers-reduced-motion"));
   assert.ok(ui.includes("BrandMark"));
-  assert.ok(!/localStorage|sessionStorage|Skip|Math.random/.test(ui));
+  assert.ok(!/localStorage|Math.random/.test(ui));
+  assert.ok(ui.includes("sessionStorage.getItem"));
+  assert.ok(ui.includes("catch"));
+  assert.ok(ui.includes("Skip intro"));
 });
 test("release helper retains AI and scheduled discovery without exporting server secrets", () => {
   const text = readFileSync(

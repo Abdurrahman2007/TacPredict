@@ -109,10 +109,10 @@ export function PredictionDetail({
     if (window.matchMedia("(max-width:1023px)").matches) setOpen(true);
   };
   const positions = (portfolio.data?.positions ?? []).filter(
-    (p) => p.marketId === market.native?.id && p.chainId === market.native?.chainId,
+    (p) => p.marketId === market.native?.marketId && p.chainId === market.native?.chainId,
   );
   const activity = (portfolio.data?.activity ?? []).filter(
-    (a) => a.marketId === market.native?.id && a.chainId === market.native?.chainId,
+    (a) => a.marketId === market.native?.marketId && a.chainId === market.native?.chainId,
   );
   const knownValue = positions.every((p) => p.valueAtomic !== null);
   const total = positions.reduce((n, p) => n + BigInt(p.valueAtomic ?? "0"), 0n);
