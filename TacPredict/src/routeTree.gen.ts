@@ -17,14 +17,14 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as UpDownRouteImport } from './routes/up-down'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminLoginRouteImport } from './routes/admin_.login'
+import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
+import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AdminSectionRouteImport } from './routes/admin.$section'
 import { Route as AdminMarketImporterRouteImport } from './routes/admin.market-importer'
-import { Route as AdminLoginRouteImport } from './routes/admin_.login'
-import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
-import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
 
 const IndexRoute = IndexRouteImport.update({
@@ -67,20 +67,10 @@ const UpDownRoute = UpDownRouteImport.update({
   path: '/up-down',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSectionRoute = AdminSectionRouteImport.update({
-  id: '/$section',
-  path: '/$section',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMarketImporterRoute = AdminMarketImporterRouteImport.update({
-  id: '/market-importer',
-  path: '/market-importer',
-  getParentRoute: () => AdminRoute,
+const UpDownAssetRoute = UpDownAssetRouteImport.update({
+  id: '/up-down_/$asset',
+  path: '/up-down/$asset',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin_/login',
@@ -92,6 +82,21 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSectionRoute = AdminSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketImporterRoute = AdminMarketImporterRouteImport.update({
+  id: '/market-importer',
+  path: '/market-importer',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const MarketsIndexRoute = MarketsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -101,11 +106,6 @@ const MarketsMarketIdRoute = MarketsMarketIdRouteImport.update({
   id: '/$marketId',
   path: '/$marketId',
   getParentRoute: () => MarketsRoute,
-} as any)
-const UpDownAssetRoute = UpDownAssetRouteImport.update({
-  id: '/up-down_/$asset',
-  path: '/up-down/$asset',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProtocolMetadataHashRoute = ApiProtocolMetadataHashRouteImport.update({
   id: '/api/protocol/metadata/$hash',
@@ -122,13 +122,13 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/up-down/$asset': typeof UpDownAssetRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
-  '/up-down/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
+  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
@@ -139,13 +139,13 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/up-down/$asset': typeof UpDownAssetRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
-  '/up-down/$asset': typeof UpDownAssetRoute
   '/admin': typeof AdminIndexRoute
+  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
@@ -159,13 +159,13 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/up-down': typeof UpDownRoute
+  '/admin_/login': typeof AdminLoginRoute
+  '/up-down_/$asset': typeof UpDownAssetRoute
+  '/auth_/callback': typeof AuthCallbackRoute
   '/admin/$section': typeof AdminSectionRoute
   '/admin/market-importer': typeof AdminMarketImporterRoute
-  '/admin_/login': typeof AdminLoginRoute
-  '/auth_/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
-  '/up-down_/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
+  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/markets/': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
@@ -180,13 +180,13 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin/login'
+    | '/up-down/$asset'
+    | '/auth/callback'
     | '/admin/$section'
     | '/admin/market-importer'
-    | '/admin/login'
-    | '/auth/callback'
-    | '/markets/$marketId'
-    | '/up-down/$asset'
     | '/admin/'
+    | '/markets/$marketId'
     | '/markets/'
     | '/api/protocol/metadata/$hash'
   fileRoutesByTo: FileRoutesByTo
@@ -197,13 +197,13 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin/login'
+    | '/up-down/$asset'
+    | '/auth/callback'
     | '/admin/$section'
     | '/admin/market-importer'
-    | '/admin/login'
-    | '/auth/callback'
-    | '/markets/$marketId'
-    | '/up-down/$asset'
     | '/admin'
+    | '/markets/$marketId'
     | '/markets'
     | '/api/protocol/metadata/$hash'
   id:
@@ -216,13 +216,13 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/up-down'
+    | '/admin_/login'
+    | '/up-down_/$asset'
+    | '/auth_/callback'
     | '/admin/$section'
     | '/admin/market-importer'
-    | '/admin_/login'
-    | '/auth_/callback'
-    | '/markets/$marketId'
-    | '/up-down_/$asset'
     | '/admin/'
+    | '/markets/$marketId'
     | '/markets/'
     | '/api/protocol/metadata/$hash'
   fileRoutesById: FileRoutesById
@@ -237,8 +237,8 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   UpDownRoute: typeof UpDownRoute
   AdminLoginRoute: typeof AdminLoginRoute
-  AuthCallbackRoute: typeof AuthCallbackRoute
   UpDownAssetRoute: typeof UpDownAssetRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
 }
 
@@ -300,26 +300,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UpDownRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/$section': {
-      id: '/admin/$section'
-      path: '/$section'
-      fullPath: '/admin/$section'
-      preLoaderRoute: typeof AdminSectionRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/market-importer': {
-      id: '/admin/market-importer'
-      path: '/market-importer'
-      fullPath: '/admin/market-importer'
-      preLoaderRoute: typeof AdminMarketImporterRouteImport
-      parentRoute: typeof AdminRoute
+    '/up-down_/$asset': {
+      id: '/up-down_/$asset'
+      path: '/up-down/$asset'
+      fullPath: '/up-down/$asset'
+      preLoaderRoute: typeof UpDownAssetRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin_/login': {
       id: '/admin_/login'
@@ -335,6 +321,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/$section': {
+      id: '/admin/$section'
+      path: '/$section'
+      fullPath: '/admin/$section'
+      preLoaderRoute: typeof AdminSectionRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/market-importer': {
+      id: '/admin/market-importer'
+      path: '/market-importer'
+      fullPath: '/admin/market-importer'
+      preLoaderRoute: typeof AdminMarketImporterRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/markets/': {
       id: '/markets/'
       path: '/'
@@ -348,13 +355,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/markets/$marketId'
       preLoaderRoute: typeof MarketsMarketIdRouteImport
       parentRoute: typeof MarketsRoute
-    }
-    '/up-down_/$asset': {
-      id: '/up-down_/$asset'
-      path: '/up-down/$asset'
-      fullPath: '/up-down/$asset'
-      preLoaderRoute: typeof UpDownAssetRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/protocol/metadata/$hash': {
       id: '/api/protocol/metadata/$hash'
@@ -403,8 +403,8 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   UpDownRoute: UpDownRoute,
   AdminLoginRoute: AdminLoginRoute,
-  AuthCallbackRoute: AuthCallbackRoute,
   UpDownAssetRoute: UpDownAssetRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
 }
 export const routeTree = rootRouteImport
