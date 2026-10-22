@@ -27,16 +27,13 @@ test("Sell retains owned-share execution and explicit approval acknowledgement",
   assert.ok(execution.includes("Insufficient owned outcome shares"));
   assert.ok(execution.includes("Verified runtime bytecode mismatch"));
 });
-test("opening is SSR-safe, session-once, reduced-motion aware and storage-failure tolerant", () => {
-  const ui = src("components/brand-intro.tsx");
-  assert.ok(ui.includes("useState(false)"));
-  assert.ok(ui.includes("prefers-reduced-motion"));
-  assert.ok(ui.includes("BrandMark"));
-  assert.ok(!/localStorage|Math.random/.test(ui));
-  assert.ok(ui.includes("sessionStorage.getItem"));
-  assert.ok(ui.includes("catch"));
-  assert.ok(ui.includes("Skip intro"));
+test("opening the app is direct and has no decorative intro overlay", () => {
+  const shell = src("components/app-shell.tsx");
+  assert.ok(!shell.includes("BrandIntro"));
+  assert.ok(!shell.includes("prediction-intro"));
+  assert.ok(shell.includes("<BrandMark"));
 });
+
 test("release helper retains AI and scheduled discovery without exporting server secrets", () => {
   const text = readFileSync(
     new URL("../../scripts/prepare-workers-deploy.cjs", import.meta.url),

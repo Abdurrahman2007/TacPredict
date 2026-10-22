@@ -90,12 +90,8 @@ test("recovery cancellation is simulated, maker-only, and not blocked by new-ris
   assert.match(cancel, /Only the maker/);
   assert.match(cancel, /simulateContract/);
   assert.match(cancel, /Cancellation failed/);
-  const intro = fs.readFileSync(
-    new URL("../../src/components/brand-intro.tsx", import.meta.url),
-    "utf8",
+  const shell = fs.readFileSync(
+    new URL("../../src/components/app-shell.tsx", import.meta.url), "utf8",
   );
-  assert.match(intro, /prefers-reduced-motion/);
-  assert.match(intro, /sessionStorage.getItem/);
-  assert.match(intro, /Escape/);
-  assert.match(intro, /Skip intro/);
+  assert.ok(!shell.includes("BrandIntro"), "opening the app must not mount an intro");
 });
