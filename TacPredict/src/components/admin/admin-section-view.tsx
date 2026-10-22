@@ -7,6 +7,7 @@ import { PoolView } from "./views/pool";
 import { ResolutionView } from "./views/resolution";
 import { SettingsView } from "./views/settings";
 import { TradingView } from "./views/trading";
+import { RankingView } from "./views/ranking";
 import { UsersView } from "./views/users";
 
 function SectionTabs({ section, view }: { section: AdminRouteSection; view: string }) {
@@ -44,6 +45,8 @@ function SectionBody({ section, view }: { section: AdminRouteSection; view: stri
       return <BlockchainView view={view} />;
     case "settings":
       return <SettingsView view={view} />;
+    case "ranking":
+      return <RankingView />;
     case "users":
       return <UsersView view={view} />;
     default:
@@ -56,9 +59,23 @@ export function AdminSectionView({ section, view }: { section: AdminRouteSection
   const redirect = adminRedirectFor(section, view);
   if (redirect === "overview") return <Navigate to="/admin" replace />;
   if (redirect === "engine")
-    return <Navigate to="/admin/$section" params={{ section: "engine" }} search={{ view: "providers" }} replace />;
+    return (
+      <Navigate
+        to="/admin/$section"
+        params={{ section: "engine" }}
+        search={{ view: "providers" }}
+        replace
+      />
+    );
   if (redirect === "users")
-    return <Navigate to="/admin/$section" params={{ section: "users" }} search={{ view: "users" }} replace />;
+    return (
+      <Navigate
+        to="/admin/$section"
+        params={{ section: "users" }}
+        search={{ view: "users" }}
+        replace
+      />
+    );
   return (
     <div className="adm-stack">
       <SectionTabs section={section} view={view} />

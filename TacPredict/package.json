@@ -10,9 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prebuild": "node scripts/build-brand-assets.cjs",
+    "prebuild": "node scripts/build-brand-assets.cjs && node scripts/build-ranking-avatars.cjs",
     "typecheck": "tsc --noEmit",
-    "predev": "node scripts/build-brand-assets.cjs"
+    "predev": "node scripts/build-brand-assets.cjs && node scripts/build-ranking-avatars.cjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

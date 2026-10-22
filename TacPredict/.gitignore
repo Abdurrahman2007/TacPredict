@@ -41,3 +41,6 @@ dist-ssr
 
 # Generated logo raster variants from scripts/brand-assets.json
 /public/brand/*-v2.png
+
+# Rebuilt from the committed avatar manifest.
+public/avatars/pixel-animals-v1.webp

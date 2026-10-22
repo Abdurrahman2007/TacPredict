@@ -36,6 +36,7 @@ export function SiteFooter() {
           <Link to="/markets" search={{ category: "Cricket" }}>
             Cricket
           </Link>
+          <Link to="/ranking">Ranking</Link>
           <Link to="/profile">Portfolio</Link>
         </nav>
         <nav className="footer-support" aria-label="Support">
