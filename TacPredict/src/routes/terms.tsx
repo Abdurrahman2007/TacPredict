@@ -116,6 +116,52 @@ const sections = [
     ],
   },
   {
+    title: "Privacy and Public Blockchain Records",
+    paragraphs: [
+      "Wallet addresses, transaction amounts, approvals and other onchain activity may be publicly visible and permanently recorded. A wallet address is not a guarantee of anonymity. Do not include personal or sensitive information in public transaction fields.",
+      "Connecting a wallet, requesting support or using optional account features may involve personal information. Provide only information reasonably needed for the relevant request and review any privacy notices presented when information is collected. These Terms are not a substitute for a privacy notice and do not waive your rights under applicable data-protection law.",
+      "Third-party wallets, analytics, infrastructure and linked services may handle data under their own policies. Blockchain records may not be alterable or erasable even if access to the interface or an account is discontinued.",
+    ],
+  },
+  {
+    title: "Platform Content and Intellectual Property",
+    paragraphs: [
+      "The TacPredict name, branding, interface and other Platform content may be protected by intellectual-property rights. Using the Platform does not transfer ownership of those rights. Subject to these Terms and applicable law, you may access the interface for its intended purposes.",
+      "Do not impersonate the Platform, misrepresent an affiliation or reproduce its branding in a misleading way. Third-party names, team logos, token symbols and data remain the property of their respective owners; their display does not imply sponsorship or endorsement.",
+      "Nothing in these Terms restricts rights expressly granted by an applicable open-source licence or other rights that cannot lawfully be restricted.",
+    ],
+  },
+  {
+    title: "Errors, Failed Transactions and Unsupported Transfers",
+    paragraphs: [
+      "Before signing, verify the network, asset, destination, contract, outcome, amount and allowance. Sending unsupported assets or using an incorrect network or address can cause permanent loss. Recovery is not guaranteed.",
+      "A pending, rejected or failed transaction is not a confirmed prediction. Confirm status using the relevant transaction receipt and market records. Repeated submissions may create separate transactions and additional fees. A displayed estimate, chart or notification is not proof of execution or settlement.",
+      "Report apparent interface errors to support@tacpredict.fun with a public transaction hash and a description. Never send credentials or recovery phrases. Reporting an error does not itself cancel a transaction, establish an entitlement to reimbursement or extend a market deadline.",
+    ],
+  },
+  {
+    title: "Complaints and Security Reports",
+    paragraphs: [
+      "For a complaint, include the relevant market identifier, public wallet address or transaction hash, the issue and the remedy requested. Send only information you are comfortable sharing through email. We may request additional non-secret information reasonably necessary to investigate.",
+      "Suspected phishing, unauthorized access or a vulnerability can be reported to support@tacpredict.fun. Do not exploit an issue, access other users’ information or disrupt services while investigating it. No reward or bug-bounty payment is promised unless expressly stated in a separate programme.",
+      "A support inquiry is not a substitute for any formal market dispute process. Follow the applicable market rules and deadlines. Support cannot guarantee an outcome or reverse an independently confirmed blockchain transaction. Nothing prevents a complaint to a competent regulator or exercise of legal rights.",
+    ],
+  },
+  {
+    title: "Electronic Communications and Notices",
+    paragraphs: [
+      "Platform information and updates may be provided through the interface or contact channels you choose to use. Check the relevant market rules and published notices before participating. Official social channels are informational and do not override these Terms, market rules or confirmed blockchain records.",
+      "Do not rely on unsolicited messages claiming guaranteed returns, special wallet access or urgent transfers. Support will not need your private key or recovery phrase. These Terms do not authorize unsolicited marketing or replace any consent required by applicable law.",
+    ],
+  },
+  {
+    title: "Responsible Participation",
+    paragraphs: [
+      "Set your own spending limits and do not participate using borrowed money or funds needed for essential expenses. Stop if participation causes financial stress or loss of control. No prediction method, chart or promotional material guarantees a profit.",
+      "You may stop using the interface at any time. This does not automatically close positions, cancel pending transactions or revoke wallet approvals; any outstanding activity remains subject to applicable contracts and market rules. If you need help restricting interface access, contact support without sharing wallet secrets.",
+    ],
+  },
+  {
     title: "General Provisions",
     paragraphs: [
       "If a provision is found unenforceable, the remaining provisions continue to apply to the extent permitted by law. Failure to enforce a provision does not waive the right to enforce it later.",
