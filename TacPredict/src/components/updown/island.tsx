@@ -28,7 +28,7 @@ export function UpDownIslandContent({
         <b>{label}</b>
         <span className="ud-island-values">
           <span className={live ? "ud-live" : "ud-muted"}>{stateText}</span>
-          <strong>{price === null ? "$0" : formatUsd(price, asset)}</strong>
+          <strong>{price === null ? "Unavailable" : formatUsd(price, asset)}</strong>
           {deltaText && (
             <span
               className={

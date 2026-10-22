@@ -60,7 +60,9 @@
 }
 .pi-beat-label {
   fill: #7d8b95;
-  font: 500 9px/1 system-ui, sans-serif;
+  font:
+    500 9px/1 system-ui,
+    sans-serif;
   letter-spacing: 0.04em;
   opacity: 0;
   animation: pi-fade 600ms 600ms ease-out forwards;
@@ -235,4 +237,22 @@
   .pi-down {
     stroke-dashoffset: 0;
   }
+}
+
+.pi-skip {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top));
+  right: 20px;
+  z-index: 2;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #50606c;
+  border-radius: 12px;
+  color: #edf2f5;
+  background: #182329;
+  font-size: 14px;
+}
+.pi-skip:focus-visible {
+  outline: 2px solid #edf2f5;
+  outline-offset: 4px;
 }

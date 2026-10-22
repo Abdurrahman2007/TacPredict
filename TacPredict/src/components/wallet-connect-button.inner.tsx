@@ -1,6 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useBalance } from "wagmi";
-import { formatUnits } from "viem";
+import { money } from "@/lib/protocol/portfolio-view.mjs";
 import { BASE_USDC_ADDRESS, PRIMARY_CHAIN_ID } from "@/lib/web3/constants";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +9,7 @@ function shortenAddress(address: string): string {
 }
 
 function formatUsdc(value: bigint | undefined): string {
-  if (value === undefined) return "0.00";
-  const n = Number(formatUnits(value, 6));
-  return n.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return value === undefined ? "Unavailable" : money(value).slice(1);
 }
 
 /** Wagmi/RainbowKit-backed control — only mount inside Web3Provider. */

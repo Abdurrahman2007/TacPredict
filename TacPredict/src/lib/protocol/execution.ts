@@ -359,7 +359,11 @@ export async function placeLimitSell(
     data: { chainId: chain.id as 8453 | 84532, marketUuid: m.id, order, signature },
   });
 }
-export async function cancelSignedOrder(w: WalletState, d: ProtocolDeployment, offer: BookOrder) {
+export async function cancelSignedOrder(
+  w: WalletState,
+  d: ProtocolDeployment,
+  offer: Pick<BookOrder, "order">,
+) {
   const { pub, wallet, account } = await protocolClients(w, d, false);
   if (offer.order.maker.toLowerCase() !== account.toLowerCase())
     throw Error("Only the maker can cancel this order");

@@ -1,5 +1,6 @@
 import {
   atomicToDecimal,
+  createdMarketCount,
   blockLag,
   formatDuration,
   formatTimestamp,
@@ -7,16 +8,7 @@ import {
   shortHash,
 } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
-import {
-  AddressLink,
-  Badge,
-  BASESCAN,
-  Card,
-  Loaded,
-  Notice,
-  PageHeader,
-  Tile,
-} from "../admin-ui";
+import { AddressLink, Badge, BASESCAN, Card, Loaded, Notice, PageHeader, Tile } from "../admin-ui";
 
 function RefreshButton({ onClick, busy }: { onClick: () => void; busy: boolean }) {
   return (
@@ -51,9 +43,7 @@ function ContractsView() {
         {(data) => {
           const { deployment } = parseBlockchainRows(data.rows);
           if (!deployment)
-            return (
-              <Notice tone="warn">No verified deployment is recorded yet.</Notice>
-            );
+            return <Notice tone="warn">No verified deployment is recorded yet.</Notice>;
           return (
             <>
               <div className="adm-grid-tiles">
@@ -86,10 +76,20 @@ function ContractsView() {
                 />
                 <Tile
                   label="Markets created (live)"
-                  value={live.data?.nextMarketId ?? (live.isPending ? "Reading…" : "Unavailable")}
+                  value={
+                    createdMarketCount(live.data?.nextMarketId) ??
+                    (live.isPending ? "Reading…" : "Unavailable")
+                  }
                   hint="Live from Base"
                 />
               </div>
+              <Notice tone="warn">
+                Deployment is not a live-trading approval. Before unpausing, verify immutable market
+                windows, genuine funded executable orders, finalized indexing, a complete funded
+                buy/sell → oracle challenge → claim/refund test, independent security review and
+                operational/legal sign-off. Up/Down Pool is a separate protocol and needs its own
+                verified deployment and funded reporter.
+              </Notice>
               <Card flush>
                 <div className="adm-table-wrap">
                   <table className="adm-table">
@@ -221,7 +221,9 @@ function IndexerView() {
                 <Tile
                   label="Latest indexer job"
                   value={job ? job.detail : dashboard.isPending ? "Reading…" : "Unavailable"}
-                  hint={job?.observedAt ? (formatTimestamp(job.observedAt) ?? undefined) : undefined}
+                  hint={
+                    job?.observedAt ? (formatTimestamp(job.observedAt) ?? undefined) : undefined
+                  }
                 />
               </div>
               {checkpoint?.blockHash ? (

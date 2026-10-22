@@ -30,12 +30,18 @@ function MyPositions({ market }: { market: Market }) {
   const portfolio = useNativePortfolio();
   const zone = useTimeZone();
   const positions = (portfolio.data?.positions ?? []).filter(
-    (p) => p.marketId === market.native?.id && p.chainId === market.native?.chainId,
+    (p) => p.marketId === market.native?.marketId && p.chainId === market.native?.chainId,
   );
   const history = (portfolio.data?.activity ?? []).filter(
-    (a) => a.marketId === market.native?.id && a.chainId === market.native?.chainId,
+    (a) => a.marketId === market.native?.marketId && a.chainId === market.native?.chainId,
   );
-  const total = positions.reduce((sum, p) => sum + BigInt(p.valueAtomic ?? "0"), 0n);
+  const total =
+    user &&
+    !portfolio.isPending &&
+    !portfolio.isError &&
+    positions.every((p) => p.valueAtomic !== null)
+      ? positions.reduce((sum, p) => sum + BigInt(p.valueAtomic!), 0n)
+      : null;
   return (
     <section className="ud-card" aria-label="Your positions">
       <div className="ud-tabs" role="group">
@@ -101,7 +107,7 @@ export function PositionsCard({ market }: { market: Market | null }) {
       <div className="ud-row" style={{ borderTop: "1px solid var(--ud-line)", marginTop: 8 }}>
         <span>Total</span>
         <i />
-        <b>$0</b>
+        <b>Unavailable</b>
       </div>
     </section>
   );
@@ -111,7 +117,7 @@ export function StatsCard({ market }: { market: Market | null }) {
   const rows: [string, string][] = [
     ["Open interest", usdcShort(market?.native?.openInterestAtomic)],
     ["Total volume", volumeText(market?.volume)],
-    ["Traders", String(market?.participants ?? 0)],
+    ["Traders", market ? String(market.participants) : "Unavailable"],
     ["Settlement", market?.native ? "$1 per share if correct" : "Price tracking only"],
   ];
   return (

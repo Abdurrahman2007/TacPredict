@@ -28,8 +28,12 @@ test("all engine durations route correctly and hydration uses a stable placehold
   );
   assert.ok(src("components/updown/updown-detail.tsx").includes("Loading price window"));
 });
-test("private up/down positions remain isolated by native UUID and chain", () => {
+test("private up/down positions remain isolated by chain-aware market ID and chain", () => {
   const t = src("components/updown/sections.tsx");
-  assert.ok(t.includes("p.marketId === market.native?.id && p.chainId === market.native?.chainId"));
-  assert.ok(t.includes("a.marketId === market.native?.id && a.chainId === market.native?.chainId"));
+  assert.ok(
+    t.includes("p.marketId === market.native?.marketId && p.chainId === market.native?.chainId"),
+  );
+  assert.ok(
+    t.includes("a.marketId === market.native?.marketId && a.chainId === market.native?.chainId"),
+  );
 });

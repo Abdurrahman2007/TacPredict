@@ -3,7 +3,13 @@ import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { BASE_NETWORK } from "@/lib/onchain/base";
@@ -96,7 +102,9 @@ export function PoolTradeBar({ context, ...c }: Common & { context: IslandContex
             ) : (
               <>
                 <span>
-                  {phase === "live" ? "This round is live. Bets closed at the start." : "This round has ended."}
+                  {phase === "live"
+                    ? "This round is live. Bets closed at the start."
+                    : "This round has ended."}
                 </span>
                 <Link
                   to="/up-down/$asset"
@@ -115,7 +123,8 @@ export function PoolTradeBar({ context, ...c }: Common & { context: IslandContex
         <DialogContent className="pd-trade-screen ud-trade-screen translate-x-0 translate-y-0 lg:-translate-x-1/2">
           <DialogTitle className="sr-only">Bet on {context.label}</DialogTitle>
           <DialogDescription className="sr-only">
-            Choose Up or Down, enter a USDC amount and confirm in your wallet. Bets close when the round starts.
+            Choose Up or Down, enter a USDC amount and confirm in your wallet. Bets close when the
+            round starts.
           </DialogDescription>
           <div className="pd-trade-top">
             <div className="pd-handle" />
@@ -127,7 +136,14 @@ export function PoolTradeBar({ context, ...c }: Common & { context: IslandContex
             </DialogClose>
           </div>
           <div className="pd-trade-content">
-            {side && <PoolBetPanel key={`${c.asset}-${c.minutes}-${c.startMs}`} {...c} initialSide={side} onDone={() => setSide(null)} />}
+            {side && (
+              <PoolBetPanel
+                key={`${c.asset}-${c.minutes}-${c.startMs}`}
+                {...c}
+                initialSide={side}
+                onDone={() => setSide(null)}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -136,7 +152,16 @@ export function PoolTradeBar({ context, ...c }: Common & { context: IslandContex
   );
 }
 
-function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSide, onDone }: Common & { initialSide: "up" | "down"; onDone: () => void }) {
+function PoolBetPanel({
+  asset,
+  minutes,
+  startMs,
+  nowMs,
+  config,
+  round,
+  initialSide,
+  onDone,
+}: Common & { initialSide: "up" | "down"; onDone: () => void }) {
   const wallet = useBaseWallet();
   const login = useLoginDialog();
   const queryClient = useQueryClient();
@@ -167,7 +192,10 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
             : "";
   const valid = atomic !== null && atomic >= min && problem === "" && open;
   const preview = useMemo(
-    () => (valid && atomic !== null ? previewBet({ up: r.up, down: r.down, feeBps, side, stake: atomic }) : null),
+    () =>
+      valid && atomic !== null
+        ? previewBet({ up: r.up, down: r.down, feeBps, side, stake: atomic })
+        : null,
     [valid, atomic, r.up, r.down, feeBps, side],
   );
   const share = poolShare(r.up, r.down);
@@ -176,7 +204,14 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
     setNotice("");
     setHash("");
     try {
-      const tx = await placePoolBet(wallet, config.address as `0x${string}`, { asset, minutes, startMs }, side, atomic, (step) => setBusy(step));
+      const tx = await placePoolBet(
+        wallet,
+        config.address as `0x${string}`,
+        { asset, minutes, startMs },
+        side,
+        atomic,
+        (step) => setBusy(step),
+      );
       setHash(tx);
       setNotice("Bet confirmed on Base.");
       setAmount("");
@@ -196,7 +231,13 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
     <section className="pool-bet" aria-label="Place a bet">
       <div className="pd-outcomes">
         {(["up", "down"] as const).map((s) => (
-          <button type="button" key={s} data-tone={s === "up" ? "positive" : "negative"} aria-pressed={side === s} onClick={() => setSide(s)}>
+          <button
+            type="button"
+            key={s}
+            data-tone={s === "up" ? "positive" : "negative"}
+            aria-pressed={side === s}
+            onClick={() => setSide(s)}
+          >
             {s === "up" ? "Up" : "Down"}{" "}
             <span>${formatUsdc(s === "up" ? r.up : r.down)} in pool</span>
           </button>
@@ -204,7 +245,7 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
       </div>
       <div className="pd-amount-panel">
         <div className="pd-balance">
-          <span>${wallet.usdc === null ? "0.00" : formatUsdc(wallet.usdc)}</span>
+          <span>{wallet.usdc === null ? "Unavailable" : `$${formatUsdc(wallet.usdc)}`}</span>
           <small>{wallet.address ? "Wallet USDC · Base" : "Connect a wallet to bet"}</small>
         </div>
         <label htmlFor={inputId} className="pd-amount-input">
@@ -218,7 +259,9 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
             value={amount}
             placeholder="0"
             style={{ width: `${Math.max(1, Math.min(12, amount.length || 1))}ch` }}
-            onChange={(e) => /^\d{0,7}(\.\d{0,6})?$/.test(e.target.value) && setAmount(e.target.value)}
+            onChange={(e) =>
+              /^\d{0,7}(\.\d{0,6})?$/.test(e.target.value) && setAmount(e.target.value)
+            }
           />
         </label>
         <div className="pd-presets">
@@ -229,7 +272,11 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
           ))}
         </div>
       </div>
-      {problem && <p role="alert" className="pool-problem">{problem}</p>}
+      {problem && (
+        <p role="alert" className="pool-problem">
+          {problem}
+        </p>
+      )}
       <dl className="pool-preview">
         <div>
           <dt>If {side === "up" ? "Up" : "Down"} wins you get</dt>
@@ -237,12 +284,20 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
         </div>
         <div>
           <dt>Profit</dt>
-          <dd>{preview && preview.opposed ? `+$${formatUsdc(preview.profit)}` : preview ? "Nobody on the other side yet" : "—"}</dd>
+          <dd>
+            {preview && preview.opposed
+              ? `+$${formatUsdc(preview.profit)}`
+              : preview
+                ? "Nobody on the other side yet"
+                : "—"}
+          </dd>
         </div>
       </dl>
       <p className="pool-note">
-        The payout is your stake plus your share of the other side, after a {feeBps / 100}% fee taken from the losing side only. It changes as people bet until the round starts
-        {share ? ` (pool now ${share.up.toFixed(0)}% Up / ${share.down.toFixed(0)}% Down)` : ""}. If nobody bets the other side, or the prices are equal, you are refunded in full.
+        The payout is your stake plus your share of the other side, after a {feeBps / 100}% fee
+        taken from the losing side only. It changes as people bet until the round starts
+        {share ? ` (pool now ${share.up.toFixed(0)}% Up / ${share.down.toFixed(0)}% Down)` : ""}. If
+        nobody bets the other side, or the prices are equal, you are refunded in full.
       </p>
       {!wallet.address ? (
         <button type="button" className="pd-submit" onClick={() => login()}>
@@ -253,7 +308,12 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
           Switch to Base
         </button>
       ) : (
-        <button type="button" className="pd-submit" onClick={() => void submit()} disabled={!valid || busy !== ""}>
+        <button
+          type="button"
+          className="pd-submit"
+          onClick={() => void submit()}
+          disabled={!valid || busy !== ""}
+        >
           {busy === "approve"
             ? "Approve USDC in your wallet…"
             : busy === "bet"
@@ -272,7 +332,11 @@ function PoolBetPanel({ asset, minutes, startMs, nowMs, config, round, initialSi
         <p role="status" className="pool-notice">
           {notice}{" "}
           {hash && (
-            <a href={`${BASE_NETWORK.explorer}/tx/${hash}`} target="_blank" rel="noopener noreferrer">
+            <a
+              href={`${BASE_NETWORK.explorer}/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View ↗
             </a>
           )}
@@ -327,7 +391,11 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
     <>
       <section className="ud-card pool-card" aria-label="Round pool">
         <h2>Round pool</h2>
-        <div className="pool-split" role="img" aria-label={share ? `${share.up}% Up, ${share.down}% Down` : "No bets yet"}>
+        <div
+          className="pool-split"
+          role="img"
+          aria-label={share ? `${share.up}% Up, ${share.down}% Down` : "No bets yet"}
+        >
           <span className="pool-split-up" style={{ width: `${share ? share.up : 50}%` }} />
           <span className="pool-split-down" style={{ width: `${share ? share.down : 50}%` }} />
         </div>
@@ -349,7 +417,12 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
         <div className="ud-row">
           <span>Price to beat · CoinGecko</span>
           <i />
-          <span className="tabular-nums">{price(r.startPrice) ?? (roundPhase(startMs, minutes, nowMs) === "betting" ? "Set at the start" : "Waiting for the reading")}</span>
+          <span className="tabular-nums">
+            {price(r.startPrice) ??
+              (roundPhase(startMs, minutes, nowMs) === "betting"
+                ? "Set at the start"
+                : "Waiting for the reading")}
+          </span>
         </div>
         {price(r.endPrice) && (
           <div className="ud-row">
@@ -365,8 +438,22 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
         </div>
         {missed && (
           <div className="pool-action">
-            <p>The price reading did not arrive in time, so every stake in this round can be refunded.</p>
-            <button type="button" className="pool-btn" disabled={Boolean(busy) || !wallet.address} onClick={() => void run("refund", () => refundMissedReading(wallet, config.address as `0x${string}`, ref), "Refund started. Claim your stake below.")}>
+            <p>
+              The price reading did not arrive in time, so every stake in this round can be
+              refunded.
+            </p>
+            <button
+              type="button"
+              className="pool-btn"
+              disabled={Boolean(busy) || !wallet.address}
+              onClick={() =>
+                void run(
+                  "refund",
+                  () => refundMissedReading(wallet, config.address as `0x${string}`, ref),
+                  "Refund started. Claim your stake below.",
+                )
+              }
+            >
               {busy === "refund" ? "Confirm in wallet…" : "Start the refund"}
             </button>
           </div>
@@ -404,8 +491,23 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
                   {p.refund ? "Refund" : "You won"} <b>${formatUsdc(p.payout)}</b>
                   {p.ready ? "" : " · opens shortly"}
                 </p>
-                <button type="button" className="pool-btn" disabled={!p.ready || Boolean(busy)} onClick={() => void run("claim", () => claimPoolRound(wallet, config.address as `0x${string}`, ref), p.refund ? "Refund paid to your wallet." : "Winnings paid to your wallet.")}>
-                  {busy === "claim" ? "Confirm in wallet…" : p.refund ? "Claim refund" : "Claim winnings"}
+                <button
+                  type="button"
+                  className="pool-btn"
+                  disabled={!p.ready || Boolean(busy)}
+                  onClick={() =>
+                    void run(
+                      "claim",
+                      () => claimPoolRound(wallet, config.address as `0x${string}`, ref),
+                      p.refund ? "Refund paid to your wallet." : "Winnings paid to your wallet.",
+                    )
+                  }
+                >
+                  {busy === "claim"
+                    ? "Confirm in wallet…"
+                    : p.refund
+                      ? "Claim refund"
+                      : "Claim winnings"}
                 </button>
               </div>
             ) : (
@@ -423,10 +525,20 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
   );
 }
 
-export function PoolRulesCard({ asset, minutes, feeBps }: { asset: PoolAsset; minutes: number; feeBps: number }) {
+export function PoolRulesCard({
+  asset,
+  minutes,
+  feeBps,
+}: {
+  asset: PoolAsset;
+  minutes: number;
+  feeBps: number;
+}) {
   return (
     <section className="ud-card ud-rules" aria-label="Rules summary">
-      <h2>Rules · {ASSETS[asset].name} {durationLabel(minutes)}</h2>
+      <h2>
+        Rules · {ASSETS[asset].name} {durationLabel(minutes)}
+      </h2>
       <ol className="pool-rules">
         {poolRules(asset, minutes, feeBps).map((line) => (
           <li key={line}>{line}</li>

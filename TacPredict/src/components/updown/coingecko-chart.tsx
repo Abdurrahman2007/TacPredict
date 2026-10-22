@@ -40,12 +40,12 @@ export function CoinGeckoChart({
             <dt title="First displayed CoinGecko observation; not the locked settlement price">
               {mode === "recent" ? "History start" : "Reference"}
             </dt>
-            <dd>{first ? formatUsd(first.price, asset) : "$0"}</dd>
+            <dd>{first ? formatUsd(first.price, asset) : "Unavailable"}</dd>
           </div>
           <div>
             <dt className="tp-current">{mode === "recent" ? "Latest" : "Now"}</dt>
             <dd className="tp-current">
-              {last ? formatUsd(last.price, asset) : "$0"}
+              {last ? formatUsd(last.price, asset) : "Unavailable"}
               {delta && series.length > 1 && (
                 <span className={delta.direction === "down" ? "ud-down" : "ud-up"}>
                   {delta.direction === "down" ? "↘" : "↗"}{" "}

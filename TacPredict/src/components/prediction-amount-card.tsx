@@ -88,7 +88,7 @@ export function PredictionAmountCard({
       setBusy(false);
     }
   }
-  const balance = wallet.usdc === null ? "0" : formatUsdc(wallet.usdc);
+  const balance = wallet.usdc === null ? "Unavailable" : formatUsdc(wallet.usdc);
   return (
     <section className="pd-order" aria-label="Trade order">
       <div className="pd-order-controls">

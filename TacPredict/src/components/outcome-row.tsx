@@ -27,9 +27,9 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
       >
         {outcome.probabilityKnown !== false && outcome.probability > 0
           ? `${(100 / outcome.probability).toFixed(2)}x`
-          : "0"}
+          : ""}
       </span>
-      <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-base font-semibold tabular-nums">
+      <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-sm font-semibold tabular-nums">
         {pct(outcome)}
       </span>
     </>

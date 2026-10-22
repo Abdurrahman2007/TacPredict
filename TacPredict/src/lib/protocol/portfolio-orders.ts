@@ -47,6 +47,8 @@ export function useOwnProtocolOrders() {
         .parse(data)
         .map((row) => ({
           id: row.order_id,
+          chainId: row.protocol_markets.chain_id,
+          order: row.signed_order,
           title: row.protocol_markets.title,
           marketId: row.protocol_markets.api_market_id,
           side: row.signed_order.isBuy ? "BUY" : "SELL",

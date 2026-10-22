@@ -10,7 +10,10 @@ test("only Crypto, Football and Cricket are shown", () => {
     assert.equal(sectionOf({ category, title: "Football cricket" }), null);
 });
 test("sports without a subcategory are sorted by title, anything else is hidden", () => {
-  assert.equal(sectionOf({ category: "Sports", title: "La Liga: Real Madrid vs Barcelona" }), "Football");
+  assert.equal(
+    sectionOf({ category: "Sports", title: "La Liga: Real Madrid vs Barcelona" }),
+    "Football",
+  );
   assert.equal(sectionOf({ category: "Sports", title: "Bangladesh vs India T20" }), "Cricket");
   assert.equal(sectionOf({ category: "Sports", title: "NBA finals winner" }), null);
   assert.equal(sectionOf({ category: "Sports", subcategory: "Tennis", title: "Cricket" }), null);
