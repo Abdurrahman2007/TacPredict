@@ -311,3 +311,135 @@
     font-size: 13px;
   }
 }
+
+/* Spacious, native-feeling ranking hierarchy. */
+.tp-ranking {
+  max-width: 900px;
+}
+.ranking-header {
+  margin: 28px 0 36px;
+}
+.ranking-header h1 {
+  font-size: 34px;
+}
+.ranking-header select {
+  min-height: 48px;
+  font-size: 16px;
+  padding-left: 20px;
+}
+.ranking-row {
+  min-height: 108px;
+  gap: 18px;
+  padding: 22px 16px;
+}
+.rank-number {
+  min-width: 36px;
+  height: 36px;
+  font-size: 21px;
+}
+.ranking-name {
+  flex: 1;
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ranking-amounts {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.ranking-amounts small {
+  font-size: 17px;
+  margin-top: 8px;
+}
+.ranking-list-label {
+  font-size: 13px;
+  padding: 16px;
+}
+.ranking-self {
+  border-radius: 24px;
+  background: #29333a;
+}
+.ranking-stats > div {
+  border-radius: 24px;
+  padding: 28px;
+}
+.ranking-stats strong {
+  font-size: 30px;
+  letter-spacing: -0.025em;
+}
+.trader-identity {
+  gap: 18px;
+}
+.trader-identity strong {
+  font-size: 24px;
+  letter-spacing: -0.025em;
+}
+.ranking-tabs button {
+  min-height: 48px;
+  font-size: 16px;
+}
+@media (max-width: 639px) {
+  .ranking-header h1 {
+    font-size: 32px;
+  }
+  .ranking-header select {
+    max-width: 132px;
+  }
+  .ranking-row {
+    gap: 12px;
+    min-height: 106px;
+    padding: 22px 0;
+  }
+  .ranking-self {
+    padding: 20px 12px;
+  }
+  .rank-number {
+    min-width: 30px;
+    height: 30px;
+    font-size: 19px;
+  }
+  .ranking-name {
+    font-size: 17px;
+  }
+  .ranking-amounts {
+    font-size: 20px;
+  }
+  .ranking-amounts small {
+    font-size: 16px;
+  }
+  .ranking-row .ranking-pixel-avatar {
+    width: 50px !important;
+    height: 50px !important;
+  }
+  .ranking-stats > div {
+    padding: 24px 20px;
+  }
+  .ranking-stats strong {
+    font-size: 27px;
+  }
+}
+@media (max-width: 359px) {
+  .ranking-row {
+    gap: 8px;
+  }
+  .ranking-row .ranking-pixel-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .ranking-name {
+    font-size: 15px;
+  }
+  .ranking-amounts {
+    font-size: 17px;
+  }
+  .ranking-amounts small {
+    font-size: 15px;
+  }
+  .ranking-header h1 {
+    font-size: 29px;
+  }
+  .ranking-stats strong {
+    font-size: 24px;
+  }
+}
