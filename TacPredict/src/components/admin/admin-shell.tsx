@@ -2,7 +2,15 @@ import { BRAND_LOGO_URL } from "@/lib/brand";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { Menu } from "lucide-react";
+import {
+  Menu,
+  LayoutDashboard,
+  Layers3,
+  PlusCircle,
+  Activity,
+  Users,
+  Settings,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WalletConnectButton } from "@/components/wallet-connect-button";
 import {
@@ -31,6 +39,11 @@ function useActiveNav() {
   const isActive = (item: AdminNavItem) => {
     if (item.kind === "overview") return pathname === "/admin";
     if (item.kind === "importer") return pathname.startsWith("/admin/market-importer");
+    if (
+      item.id === "settings" &&
+      ["engine", "ranking", "trading", "resolution", "blockchain"].includes(section)
+    )
+      return true;
     if (!isAdminRouteSection(section) || section !== item.section) return false;
     // "Create market" is its own entry; every other Markets tab belongs to "Markets".
     const current = view ?? defaultViews[item.section];
@@ -42,6 +55,15 @@ function useActiveNav() {
   };
   return { pathname, isActive };
 }
+
+const navIcons = {
+  overview: LayoutDashboard,
+  markets: Layers3,
+  create: PlusCircle,
+  pool: Activity,
+  users: Users,
+  settings: Settings,
+};
 
 export function AdminShell({ user, children }: { user: User; children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -79,6 +101,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
           <nav aria-label="Pages">
             {adminNavItems.map((item) => {
               const active = isActive(item);
+              const Icon = navIcons[item.id as keyof typeof navIcons] ?? Layers3;
               if (item.kind === "overview")
                 return (
                   <Link
@@ -88,6 +111,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
                     data-active={active}
                     onClick={close}
                   >
+                    <Icon size={18} aria-hidden="true" />
                     {item.label}
                   </Link>
                 );
@@ -100,6 +124,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
                     data-active={active}
                     onClick={close}
                   >
+                    <Icon size={18} aria-hidden="true" />
                     {item.label}
                   </Link>
                 );
@@ -113,6 +138,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
                   data-active={active}
                   onClick={close}
                 >
+                  <Icon size={18} aria-hidden="true" />
                   {item.label}
                 </Link>
               );
@@ -127,6 +153,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
               type="button"
               className="adm-btn adm-menu-btn"
               aria-label="Open navigation"
+              aria-expanded={open}
               onClick={() => setOpen(true)}
             >
               <Menu size={18} />

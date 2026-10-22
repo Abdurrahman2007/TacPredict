@@ -49,11 +49,8 @@ export function CryptoSeries() {
   const [asset, setAsset] = useState<PoolAsset | null>(null);
   return (
     <div className="adm-stack">
-      <PageHeader
-        title="Crypto · Up / Down"
-        subtitle="Pick a coin and everything else is filled in. Rounds start by themselves on the UTC clock; a series you turn on goes live and stays live."
-      />
-      <Card title="1 · Choose the coin">
+      <PageHeader title="Crypto · Up / Down" subtitle="Select coin · configure series" />
+      <Card title="Coin">
         <div
           role="group"
           aria-label="Coin"
@@ -218,7 +215,7 @@ function AssetForm({
 
   return (
     <>
-      <Card title={`2 · ${info.name} details`}>
+      <Card title="Basic Info">
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
           <img src={cryptoLogoUrl(info.logo)} alt={`${info.name} logo`} width={52} height={52} />
           <div>
@@ -230,7 +227,7 @@ function AssetForm({
         </div>
         <div style={{ display: "grid", gap: 14 }}>
           <label className="adm-field">
-            Title (editable)
+            Title
             <input
               className="adm-input"
               value={title}
@@ -240,7 +237,7 @@ function AssetForm({
             />
           </label>
           <label className="adm-field">
-            Description (editable)
+            Description
             <textarea
               className="adm-textarea"
               rows={3}
@@ -251,7 +248,7 @@ function AssetForm({
             />
           </label>
           <div className="adm-field">
-            Outcomes (fixed for every round)
+            Outcomes
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Badge tone="ok">1 · Up</Badge>
               <Badge tone="bad">2 · Down</Badge>
@@ -259,16 +256,16 @@ function AssetForm({
                 className="adm-muted"
                 style={{ fontSize: 12.5, fontWeight: 500, alignSelf: "center" }}
               >
-                Order and names cannot be changed.
+                Fixed order.
               </span>
             </div>
           </div>
           <div className="adm-field">
-            Price source (fixed)
+            Resolution source
             <div>
               <Badge tone="info">CoinGecko USD price</Badge>{" "}
               <span className="adm-muted" style={{ fontSize: 12.5, fontWeight: 500 }}>
-                When a round ends, the price read from CoinGecko decides Up or Down.
+                Reported boundary prices determine the result.
               </span>
             </div>
           </div>
@@ -280,7 +277,7 @@ function AssetForm({
         ) : null}
       </Card>
 
-      <Card title="3 · Round lengths (times are automatic)" flush>
+      <Card title="Timing" flush>
         <div className="adm-table-wrap">
           <table className="adm-table">
             <thead>
@@ -327,20 +324,23 @@ function AssetForm({
         </div>
       </Card>
 
-      <Card title="Rules shown to players (fixed)">
-        <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.65, fontSize: 13 }}>
-          {poolRules(asset, sample, config.feeBps || 300).map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-        {!config.feeBps ? (
+      <Card title="Rules">
+        <details>
+          <summary className="adm-link">Review fixed rules</summary>
+          <ul style={{ margin: "12px 0 0", paddingLeft: 18, lineHeight: 1.65, fontSize: 13 }}>
+            {poolRules(asset, sample, config.address ? config.feeBps : 300).map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </details>
+        {!config.address ? (
           <p className="adm-muted" style={{ margin: "8px 0 0", fontSize: 12.5 }}>
             The fee shown is the default until the contract is deployed.
           </p>
         ) : null}
       </Card>
 
-      <Card title="4 · Go live">
+      <Card title="Settings">
         {!pool ? (
           <Notice tone="warn">
             The pool contract is not deployed yet, so a series cannot go live. You can still save
@@ -369,7 +369,7 @@ function AssetForm({
             disabled={busy !== null || problem !== null}
             onClick={() => void onSave()}
           >
-            {busy === "save" ? "Saving…" : "Save title & description"}
+            {busy === "save" ? "Saving…" : "Save text"}
           </button>
           <button
             type="button"
@@ -379,7 +379,7 @@ function AssetForm({
             }
             onClick={() => void onGoLive()}
           >
-            {busy === "live" ? "Going live…" : "Go live"}
+            {busy === "live" ? "Enabling…" : "Enable series"}
           </button>
         </div>
         {!signing.ready && pool ? (

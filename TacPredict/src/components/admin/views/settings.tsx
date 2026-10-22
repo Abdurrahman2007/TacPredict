@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+import { ShieldCheck, Trophy, Activity, Network, Settings2, Download } from "lucide-react";
 import { formatTimestamp } from "@/lib/protocol/admin-rows.mjs";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
 import { Badge, Card, Loaded, PageHeader } from "../admin-ui";
@@ -17,7 +19,7 @@ function SystemView() {
   return (
     <div className="adm-stack">
       <PageHeader
-        title="System"
+        title="Settings"
         subtitle="Chain connection and indexer status."
         actions={
           <button
@@ -30,6 +32,33 @@ function SystemView() {
           </button>
         }
       />
+
+      <Card title="Workspace tools">
+        <div className="adm-tools-grid">
+          {[
+            { section: "ranking", view: "overview", label: "Ranking", icon: Trophy },
+            { section: "resolution", view: "pending", label: "Resolution", icon: ShieldCheck },
+            { section: "trading", view: "trades", label: "Trades", icon: Activity },
+            { section: "blockchain", view: "contracts", label: "Contracts", icon: Network },
+            { section: "engine", view: "public", label: "Home & Markets", icon: Settings2 },
+            { section: "engine", view: "providers", label: "Providers", icon: Download },
+          ].map(({ section, view, label, icon: Icon }) => (
+            <Link
+              key={label}
+              className="adm-tool-link"
+              to="/admin/$section"
+              params={{ section }}
+              search={{ view }}
+            >
+              <Icon size={18} />
+              {label}
+            </Link>
+          ))}
+        </div>
+        <Link className="adm-link" to="/admin/market-importer">
+          Market importer
+        </Link>
+      </Card>
       <Loaded query={live} label="chain status">
         {(data) => (
           <Card title="Base Mainnet">
@@ -49,7 +78,11 @@ function SystemView() {
                 )}
               </dd>
               <dt>RPC source</dt>
-              <dd>{data.rpcSource === "protocol" ? "Configured provider" : "Public endpoint (limited)"}</dd>
+              <dd>
+                {data.rpcSource === "protocol"
+                  ? "Configured provider"
+                  : "Public endpoint (limited)"}
+              </dd>
               <dt>Observed</dt>
               <dd>{formatTimestamp(data.observedAt) ?? data.observedAt}</dd>
             </dl>

@@ -52,16 +52,45 @@ export async function loadUsers(): Promise<{ users: AdminUser[]; truncated: bool
     if (data.users.length < PER_PAGE) break;
     if (page === MAX_PAGES) truncated = true;
   }
-  const [admins, walletRes, positionRes] = await Promise.all([
-    adminIds(),
-    db()
-      .from("protocol_wallets")
-      .select("id,address,user_id,verified_at")
-      .not("user_id", "is", null)
-      .limit(5000),
-    db().from("protocol_positions").select("wallet_id").eq("status", "OPEN").gt("shares_atomic", 0).limit(20000),
-  ]);
-  if (walletRes.error) throw Error("Could not read wallet links.");
+  async function wallets() {
+    const all: {
+      id: string;
+      address: string;
+      user_id: string | null;
+      verified_at: string | null;
+    }[] = [];
+    for (let start = 0; start < 5000; start += 1000) {
+      const r = await db()
+        .from("protocol_wallets")
+        .select("id,address,user_id,verified_at")
+        .not("user_id", "is", null)
+        .order("id")
+        .range(start, start + 999)
+        .abortSignal(AbortSignal.timeout(15000));
+      if (r.error || !r.data) throw Error("Could not read wallet links.");
+      all.push(...r.data);
+      if (r.data.length < 1000) return { data: all };
+    }
+    throw Error("Wallet list exceeds safe limit.");
+  }
+  async function positions() {
+    const all: { wallet_id: string }[] = [];
+    for (let start = 0; start < 20000; start += 1000) {
+      const r = await db()
+        .from("protocol_positions")
+        .select("id,wallet_id")
+        .eq("status", "OPEN")
+        .gt("shares_atomic", 0)
+        .order("id")
+        .range(start, start + 999)
+        .abortSignal(AbortSignal.timeout(15000));
+      if (r.error || !r.data) throw Error("Could not read position counts.");
+      all.push(...r.data);
+      if (r.data.length < 1000) return { data: all };
+    }
+    throw Error("Position list exceeds safe limit.");
+  }
+  const [admins, walletRes, positionRes] = await Promise.all([adminIds(), wallets(), positions()]);
   const openByWallet = new Map<string, number>();
   for (const p of (positionRes.data ?? []) as { wallet_id: string }[])
     openByWallet.set(p.wallet_id, (openByWallet.get(p.wallet_id) ?? 0) + 1);
