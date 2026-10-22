@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 export function BrandMark({ className }: { className?: string }) {
   return (
@@ -6,7 +7,7 @@ export function BrandMark({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <img
-        src="/brand/tacpredict-object.svg"
+        src={BRAND_LOGO_URL}
         width={64}
         height={64}
         className="h-full w-full object-contain"

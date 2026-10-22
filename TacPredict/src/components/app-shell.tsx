@@ -2,7 +2,6 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { House, LineChart, Wallet, Gift, Search, Info } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
-import { BrandIntro } from "./brand-intro";
 import { LoginButton } from "./login-dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 const navItems = [
@@ -16,7 +15,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const showSource = path === "/" || path.startsWith("/markets") || path === "/up-down";
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <BrandIntro />
       <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[3.75rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
           <Link

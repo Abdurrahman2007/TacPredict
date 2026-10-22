@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL } from "@/lib/brand";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2, LogOut, Wallet } from "lucide-react";
@@ -56,11 +57,7 @@ export function AuthPanel({
   return (
     <div className="auth-panel auth-compact min-w-0 bg-[#0f1827] px-6 pb-6 pt-9 text-white sm:px-8">
       <div className="text-center">
-        <img
-          src="/brand/tacpredict.svg"
-          alt="TacPredict"
-          className="mx-auto mb-3 size-11 rounded-xl"
-        />
+        <img src={BRAND_LOGO_URL} alt="TacPredict" className="mx-auto mb-3 size-11 rounded-xl" />
         <h1 className="text-[28px] font-semibold tracking-[-.025em]">
           {user || wallet.address ? "Your wallet" : "Connect wallet"}
         </h1>

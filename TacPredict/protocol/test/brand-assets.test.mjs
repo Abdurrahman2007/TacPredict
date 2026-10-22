@@ -17,26 +17,16 @@ test("token logos are the real upstream icons, never hand-drawn text badges", ()
   assert.ok(read("public/brand/crypto/LICENSE.md").includes("cryptocurrency-icons"));
 });
 
-test("opening animation uses only real shipped logos, carries no price figures and is session-once and skippable", () => {
-  const ui = read("src/components/brand-intro.tsx");
-  for (const name of ["btc", "eth", "sol", "bnb"]) assert.ok(ui.includes(`key: "${name}"`));
-  assert.ok(ui.includes("cryptoLogoUrl"));
-  assert.ok(read("src/lib/crypto-logo.ts").includes("/brand/crypto/"));
-  assert.ok(!/\$\s?\d|\d{2,}[.,]\d{2}/.test(ui), "no price-like figures in the opening scene");
-  assert.ok(ui.includes("prefers-reduced-motion"));
-  assert.ok(ui.includes("useState(false)"));
-  assert.ok(!/localStorage|Math\.random/.test(ui));
-  assert.ok(ui.includes("sessionStorage.getItem"));
-  assert.ok(ui.includes("catch"));
-  assert.ok(ui.includes("Skip intro"));
-  const css = read("src/styles/prediction-intro.css");
-  assert.ok(css.includes("prefers-reduced-motion: reduce"));
-  assert.ok(css.includes("visibility: hidden"), "the scene removes itself even before scripts run");
+test("opening the app is direct, with no intro overlay or animation component", () => {
+  const shell = read("src/components/app-shell.tsx");
+  assert.ok(!shell.includes("BrandIntro"));
+  assert.ok(!existsSync(new URL("src/components/brand-intro.tsx", root)));
+  assert.ok(!existsSync(new URL("src/styles/prediction-intro.css", root)));
+  assert.ok(!existsSync(new URL("public/brand/tacpredict-intro.mp4.b64", root)));
 });
 
 test("every logo is requested through the versioned helper so a replaced logo is never served from an old cache", () => {
   const files = [
-    "src/components/brand-intro.tsx",
     "src/components/market-icon.tsx",
     "src/components/up-down-section.tsx",
     "src/components/updown/island.tsx",
@@ -50,4 +40,32 @@ test("every logo is requested through the versioned helper so a replaced logo is
     assert.ok(!/`\/brand\/crypto\//.test(text), `${file} has no hard-coded logo path`);
   }
   assert.match(read("src/lib/crypto-logo.ts"), /\?v=\$\{LOGO_VERSION\}/);
+});
+
+test("the supplied blue-white mark is shared by public, auth, admin and wallet surfaces", () => {
+  const brand = read("src/lib/brand.ts");
+  assert.ok(brand.includes('blue-white-20261022'));
+  for (const file of ["src/components/brand-mark.tsx", "src/components/auth-panel.tsx", "src/components/admin/admin-login.tsx", "src/components/admin/admin-shell.tsx"])
+    assert.ok(read(file).includes("BRAND_LOGO_URL"), `${file} shares the supplied mark`);
+  assert.ok(read("src/lib/onchain/coinbase-auth.ts").includes("appLogoUrl: BRAND_LOGO_ABSOLUTE_URL"));
+  assert.ok(read("src/lib/web3/config.ts").includes("appIcon: BRAND_WALLET_ICON_URL"));
+  assert.equal(read("public/brand/tacpredict.svg"), read("public/brand/tacpredict-object.svg"));
+  assert.ok(read("public/brand/tacpredict.svg").includes("data:image/png;base64,"));
+  for (const file of ["src/components/admin/admin-login.tsx", "src/components/admin/admin-shell.tsx"])
+    assert.ok(!/aria-hidden="true">\s*TP\s*</.test(read(file)), "old admin TP badge is replaced");
+});
+
+test("browser and share logo variants are generated from versioned brand assets", () => {
+  const data = JSON.parse(read("scripts/brand-assets.json"));
+  assert.equal(data.sourceSha256.length, 64);
+  for (const file of ["public/favicon.ico", "public/brand/apple-touch-icon-v2.png", "public/brand/app-icon-v2.png", "public/brand/social-logo-v2.png"])
+    assert.ok(Buffer.from(data.assets[file], "base64").length > 500, `${file} has actual image data`);
+  const social = Buffer.from(data.assets["public/brand/social-logo-v2.png"], "base64");
+  assert.equal(social.readUInt32BE(16), 1200);
+  assert.equal(social.readUInt32BE(20), 630);
+  const rootUi = read("src/routes/__root.tsx");
+  assert.ok(rootUi.includes("apple-touch-icon"));
+  assert.ok(rootUi.includes('property: "og:image", content: BRAND_SOCIAL_URL'));
+  assert.ok(rootUi.includes('name: "twitter:image", content: BRAND_SOCIAL_URL'));
+  assert.ok(JSON.parse(read("package.json")).scripts.prebuild.includes("build-brand-assets.cjs"));
 });

@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL, BRAND_SOCIAL_URL } from "@/lib/brand";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
@@ -87,13 +88,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "TacPredict" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: BRAND_SOCIAL_URL },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "TacPredict logo" },
+      { name: "twitter:image", content: BRAND_SOCIAL_URL },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/brand/tacpredict.svg", type: "image/svg+xml" },
+      { rel: "icon", href: BRAND_LOGO_URL, type: "image/svg+xml" },
+      { rel: "alternate icon", href: "/favicon.ico?v=blue-white-20261022", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/brand/apple-touch-icon-v2.png", sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,

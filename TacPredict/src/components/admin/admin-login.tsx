@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL } from "@/lib/brand";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,9 +32,14 @@ export function AdminLoginForm() {
     <AdminCenter>
       <div className="adm-login-card">
         <div className="adm-brand" style={{ padding: 0 }}>
-          <div className="adm-brand-mark" aria-hidden="true">
-            TP
-          </div>
+          <img
+            src={BRAND_LOGO_URL}
+            className="adm-brand-mark"
+            width={34}
+            height={34}
+            alt=""
+            style={{ background: "#000", objectFit: "contain" }}
+          />
           <div>
             <b>TacPredict</b>
             <small>Admin</small>
@@ -41,7 +47,9 @@ export function AdminLoginForm() {
         </div>
         <div>
           <h1>Admin sign in</h1>
-          <p className="adm-sub">Enter your email and password. Next, confirm your authenticator code.</p>
+          <p className="adm-sub">
+            Enter your email and password. Next, confirm your authenticator code.
+          </p>
         </div>
         <form
           style={{ display: "grid", gap: 14 }}

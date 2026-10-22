@@ -10,8 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prebuild": "node scripts/build-brand-video.cjs",
-    "typecheck": "tsc --noEmit"
+    "prebuild": "node scripts/build-brand-assets.cjs",
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/build-brand-assets.cjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

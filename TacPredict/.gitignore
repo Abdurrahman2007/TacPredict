@@ -36,7 +36,8 @@ dist-ssr
 .env.*
 !.env.example
 
-# Generated from the source base64 video during prebuild
-/public/brand/tacpredict-intro.mp4
 
 /protocol/verification/
+
+# Generated logo raster variants from scripts/brand-assets.json
+/public/brand/*-v2.png

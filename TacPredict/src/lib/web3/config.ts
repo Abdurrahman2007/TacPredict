@@ -1,3 +1,4 @@
+import { BRAND_WALLET_ICON_URL } from "@/lib/brand";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   coinbaseWallet,
@@ -33,6 +34,7 @@ const walletConnectors = connectorsForWallets(
   ],
   {
     appName: "TacPredict",
+    appIcon: BRAND_WALLET_ICON_URL,
     projectId: WALLETCONNECT_PROJECT_ID,
   },
 );

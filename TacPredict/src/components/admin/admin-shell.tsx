@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL } from "@/lib/brand";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -57,9 +58,14 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
       <div className="adm-app">
         <aside className="adm-side" data-open={open} aria-label="Administrator navigation">
           <div className="adm-brand">
-            <div className="adm-brand-mark" aria-hidden="true">
-              TP
-            </div>
+            <img
+              src={BRAND_LOGO_URL}
+              className="adm-brand-mark"
+              width={34}
+              height={34}
+              alt=""
+              style={{ background: "#000", objectFit: "contain" }}
+            />
             <div>
               <b>TacPredict</b>
               <small>Admin</small>
