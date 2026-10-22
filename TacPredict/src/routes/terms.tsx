@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import "@/styles/terms.css";
 
 export const Route = createFileRoute("/terms")({
@@ -135,18 +134,27 @@ function TermsPage() {
   return (
     <article className="tp-terms" aria-labelledby="terms-title">
       <Link to="/" className="terms-back">
-        <ArrowLeft size={16} aria-hidden="true" /> Back home
+        Back to TacPredict
       </Link>
       <header>
-        <p className="terms-eyebrow">TacPredict.fun</p>
         <h1 id="terms-title">Terms of Service</h1>
+        <p className="terms-description">Terms of Service for the TacPredict prediction platform</p>
+        <p className="terms-platform">TacPredict.fun</p>
         <p className="terms-updated">
           Last updated: <time dateTime="2026-10-22">October 22, 2026</time>
         </p>
       </header>
-      <aside className="terms-risk" aria-label="Risk notice">
-        Participation involves financial risk. You may lose all funds you commit. Available only to
-        eligible users where permitted by law.
+      <aside className="terms-notice" aria-labelledby="restricted-notice-title">
+        <h2 id="restricted-notice-title">Restricted Territory Notice</h2>
+        <p>
+          The Platform is not available in restricted jurisdictions. If you are a restricted person,
+          do not use or attempt to access the Platform. Using a VPN or other tools to bypass these
+          restrictions is prohibited.
+        </p>
+        <p>
+          You must be at least 18 years old, or the age of majority in your jurisdiction if higher.
+          Participation involves financial risk: you may lose all funds you commit.
+        </p>
       </aside>
       {sections.map((section, index) => (
         <section key={section.title} aria-labelledby={`terms-section-${index + 1}`}>

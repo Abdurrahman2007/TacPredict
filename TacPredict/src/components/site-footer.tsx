@@ -38,6 +38,13 @@ export function SiteFooter() {
           </Link>
           <Link to="/profile">Portfolio</Link>
         </nav>
+        <nav className="footer-support" aria-label="Support">
+          <h2>Support</h2>
+          <a href="mailto:support@tacpredict.fun">
+            <Mail size={18} aria-hidden="true" />
+            <span>Email support</span>
+          </a>
+        </nav>
         <div className="footer-socials">
           <h2>Socials</h2>
           <a
@@ -59,12 +66,9 @@ export function SiteFooter() {
             <span>Telegram</span>
           </a>
         </div>
-        <nav className="footer-support" aria-label="Support and legal">
-          <h2>Support & Legal</h2>
-          <a href="mailto:support@tacpredict.fun">
-            <Mail size={18} aria-hidden="true" />
-            <span>support@tacpredict.fun</span>
-          </a>
+
+        <nav aria-label="Legal">
+          <h2>Legal</h2>
           <Link to="/terms">Terms of Service</Link>
         </nav>
       </div>
