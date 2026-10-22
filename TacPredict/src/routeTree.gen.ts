@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -51,6 +52,11 @@ const MarketsRoute = MarketsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
+  '/ranking': typeof RankingRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/profile': typeof ProfileRoute
+  '/ranking': typeof RankingRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
+  '/ranking': typeof RankingRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/markets'
     | '/profile'
+    | '/ranking'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/profile'
+    | '/ranking'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/markets'
     | '/profile'
+    | '/ranking'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -245,6 +257,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
+  RankingRoute: typeof RankingRoute
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
   TermsRoute: typeof TermsRoute
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -419,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
+  RankingRoute: RankingRoute,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
   TermsRoute: TermsRoute,
