@@ -232,3 +232,8 @@
     transform: none;
   }
 }
+
+/* Keep the shared footer above the existing fixed trade bar as well as mobile navigation. */
+:root:has(.ud-bar) .tp-site-footer {
+  padding-bottom: 124px;
+}
