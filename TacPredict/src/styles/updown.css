@@ -1009,3 +1009,10 @@
   bottom: 52px;
   max-height: min(320px, 50dvh);
 }
+/* Empty space between direction buttons still belongs to the card's navigation target. */
+.tp-crypto-actions {
+  pointer-events: none;
+}
+.tp-crypto-actions > a {
+  pointer-events: auto;
+}
