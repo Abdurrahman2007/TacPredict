@@ -1,46 +1,27 @@
+import { eventMarket } from "@/lib/markets/event-market";
 import { PredictionDetail } from "./prediction-detail";
 import { sortListings, type ListingSort } from "@/lib/markets/listing-sort.mjs";
 import { useQuery } from "@tanstack/react-query";
 import { eventDraftsQueryOptions, type EventDraft } from "@/lib/agent/events.functions";
-import type { Market } from "@/domain/markets/types";
 import { MarketCard } from "./market-card";
+import { isSportsListing } from "@/lib/markets/public-tabs.mjs";
 import { sectionOf } from "@/domain/markets/sections.mjs";
-export function eventMarket(p: EventDraft): Market {
-  return {
-    id: p.id,
-    title: p.title,
-    category: p.category,
-    closesAt: new Date(p.closeAt).toISOString().slice(0, 16).replace("T", " ") + " UTC",
-    endsAt: p.closeAt,
-    volume: "$0",
-    participants: 0,
-    outcomes: p.outcomes.map((label, i) => ({
-      id: String(i),
-      label,
-      probability: 0,
-      probabilityKnown: false,
-    })),
-    description:
-      "Source event discovered by the backend importer. Not a listed TacPredict on-chain market.",
-    source: p.source,
-    sourceUrl: p.sourceUrl,
-    resolutionCriteria:
-      "Independent TacPredict terms, source approval and on-chain publication are required.",
-  };
-}
 export function DiscoveredEvents({
   query = "",
   category = "All",
   sort = "Trending",
+  sportsOnly = false,
 }: {
   query?: string;
   category?: string;
   sort?: ListingSort;
+  sportsOnly?: boolean;
 }) {
   const q = useQuery(eventDraftsQueryOptions);
   const rows = sortListings(
     (q.data ?? []).filter(
       (p) =>
+        (!sportsOnly || isSportsListing(p)) &&
         (category === "All" ? sectionOf(p) !== null : sectionOf(p) === category) &&
         p.title.toLowerCase().includes(query.trim().toLowerCase()),
     ),

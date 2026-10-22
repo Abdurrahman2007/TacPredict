@@ -2,6 +2,7 @@ import { Bot, Clapperboard, Landmark, Newspaper, Shapes, Trophy } from "lucide-r
 import type { Market } from "@/domain/markets/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { marketSection, sectionOf } from "@/domain/markets/sections.mjs";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 export function MarketIcon({ market, className }: { market: Market; className?: string }) {
@@ -38,6 +39,19 @@ export function MarketIcon({ market, className }: { market: Market; className?: 
           decoding="async"
           referrerPolicy="no-referrer"
           onError={() => setFailed(market.image ?? null)}
+        />
+      </span>
+    );
+  const sport = marketSection(market) ?? sectionOf(market);
+  if (sport === "Football" || sport === "Cricket")
+    return (
+      <span className={cn("market-icon overflow-hidden", className)}>
+        <img
+          src={`/logos/sports/${sport.toLowerCase()}.svg`}
+          alt={`${sport} logo`}
+          className="size-full object-contain"
+          width={48}
+          height={48}
         />
       </span>
     );

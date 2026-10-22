@@ -1,4 +1,4 @@
-import { eventMarket } from "@/components/discovered-events";
+import { eventMarket } from "@/lib/markets/event-market";
 import { HomeMarketCard } from "@/components/home-market-card";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
@@ -14,7 +14,8 @@ import { SECTIONS, marketSection, sectionOf, type Section } from "@/domain/marke
 import homeCss from "@/styles/home-reference.css?url";
 import updownCss from "@/styles/updown.css?url";
 
-const feeds = ["Trending", "Live", "Upcoming", "New"] as const;
+import { HOME_FEEDS, isSportsListing } from "@/lib/markets/public-tabs.mjs";
+const feeds = HOME_FEEDS;
 type Feed = (typeof feeds)[number];
 
 export const Route = createFileRoute("/")({
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Discover prediction markets across crypto, sports, technology, news, and business. Base and USDC prediction-market design preview.",
+          "Explore live crypto price windows alongside Football and Cricket prediction markets on Base.",
       },
       { property: "og:title", content: "TacPredict — Prediction Markets" },
       {
@@ -73,7 +74,7 @@ function HomePage() {
   const native = useMemo(
     () =>
       homeFeedListings(
-        nativeFeed.markets.filter((m) => marketSection(m) !== null),
+        nativeFeed.markets.filter(isSportsListing),
         feed,
         Date.parse(nativeFeed.updatedAt),
       ).filter((m) => !m.endsAt || Date.parse(m.endsAt) > Date.parse(nativeFeed.updatedAt)),
@@ -82,7 +83,7 @@ function HomePage() {
   const listings = useMemo(() => {
     const imported =
       feed === "Trending" || feed === "New"
-        ? sortListings((events.data ?? []).filter((p) => sectionOf(p) !== null), feed).map(eventMarket)
+        ? sortListings((events.data ?? []).filter(isSportsListing), feed).map(eventMarket)
         : [];
     const nativeQuestions = new Set(
       native.map((m) => m.title.toLowerCase().replace(/[^a-z0-9]/g, "")),
@@ -132,14 +133,33 @@ function HomePage() {
         </p>
       )}
       {(feed === "Trending" || feed === "New") && <FeaturedCarousel markets={featured} />}
-      {feed === "Trending" && (
+      {(feed === "Trending" || feed === "Live") && (
         <div className="home-crypto-chart">
           <UpDownSection markets={nativeFeed.markets} snapshotTime={nativeFeed.updatedAt} />
+          <div className="home-long-rounds">
+            <UpDownSection
+              fixedMinutes={60}
+              markets={nativeFeed.markets}
+              snapshotTime={nativeFeed.updatedAt}
+            />
+            <UpDownSection
+              fixedMinutes={1440}
+              markets={nativeFeed.markets}
+              snapshotTime={nativeFeed.updatedAt}
+            />
+          </div>
         </div>
       )}
-      <HomeSection title="Crypto Markets" section="Crypto" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Crypto")} />
-      <HomeSection title="Football" section="Football" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Football")} />
-      <HomeSection title="Cricket" section="Cricket" markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Cricket")} />
+      <HomeSection
+        title="Football"
+        section="Football"
+        markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Football")}
+      />
+      <HomeSection
+        title="Cricket"
+        section="Cricket"
+        markets={listings.filter((m) => (marketSection(m) ?? sectionOf(m)) === "Cricket")}
+      />
       {(feed === "Trending" || feed === "New") && events.isError && (
         <p role="status" className="home-feed-notice">
           Event discovery is temporarily unavailable.
@@ -201,7 +221,8 @@ function HomeSection({
     </section>
   );
 }
-const label = (m: Market | undefined) => (m ? (marketSection(m) ?? sectionOf(m) ?? m.category) : "");
+const label = (m: Market | undefined) =>
+  m ? (marketSection(m) ?? sectionOf(m) ?? m.category) : "";
 function FeaturedCarousel({ markets }: { markets: Market[] }) {
   const rail = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);

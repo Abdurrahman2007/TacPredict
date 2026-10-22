@@ -8,7 +8,7 @@ import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
 import { useLivePrice } from "@/lib/updown/live-prices";
 import { usePriceWindow } from "@/lib/updown/use-price-window";
 import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
-import { fromScaled } from "@/lib/pool/pool.mjs";
+import { POOL_DURATIONS, fromScaled } from "@/lib/pool/pool.mjs";
 import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
 import { copyFor } from "@/lib/pool/series-copy.mjs";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
@@ -100,9 +100,11 @@ export function UpDownDetail({
   // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
   const poolConfig = useQuery(poolConfigQueryOptions);
   const poolOn =
-    Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
+    POOL_DURATIONS.includes(minutes) &&
+    Boolean(poolConfig.data?.address) &&
+    poolConfig.data?.series[`${asset}:${minutes}`] === true;
   const poolRound = useQuery(poolRoundQueryOptions(asset, minutes, w.start, poolOn));
-  const priceFeed = usePriceWindow(asset, w, nowMs);
+  const priceFeed = usePriceWindow(asset, w, nowMs, !poolOn);
   const poolBeat =
     poolRound.data && BigInt(poolRound.data.startPrice) > 0n
       ? fromScaled(poolRound.data.startPrice)

@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { UpDownDetail } from "@/components/updown/updown-detail";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
-import { ASSETS, DURATIONS, assetFromSlug, parseDuration } from "@/lib/updown/window.mjs";
+import { ASSETS, DISPLAY_DURATIONS, assetFromSlug, parseDuration } from "@/lib/updown/window.mjs";
 import updownCss from "@/styles/updown.css?url";
 
 export const Route = createFileRoute("/up-down_/$asset")({
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/up-down_/$asset")({
     const out: { d?: number; w?: number; side?: "up" | "down" } = {};
     if (search["side"] === "up" || search["side"] === "down") out.side = search["side"];
     const d = Number(search["d"]);
-    if (Number.isFinite(d) && DURATIONS.includes(d)) out.d = d;
+    if (Number.isFinite(d) && DISPLAY_DURATIONS.includes(d)) out.d = d;
     const w = Number(search["w"]);
     if (search["w"] !== undefined && Number.isFinite(w) && w > 0) out.w = w;
     return out;

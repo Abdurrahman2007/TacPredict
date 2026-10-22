@@ -686,3 +686,43 @@ a.adm-tab {
 .adm-stack > .adm-tabs {
   margin-bottom: 0;
 }
+
+.adm-public-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.adm-public-controls button[aria-pressed="true"],
+.adm-tabs button[aria-pressed="true"] {
+  background: var(--adm-brand-soft);
+  color: var(--adm-brand);
+  border-color: var(--adm-brand);
+}
+.adm-public-live {
+  display: grid;
+  gap: 12px;
+}
+.adm-public-live > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.adm-public-live b {
+  min-width: 42px;
+}
+.adm-public-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.adm-public-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.adm-public-icon img {
+  width: 100%;
+  height: 100%;
+}

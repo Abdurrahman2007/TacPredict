@@ -1,18 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
-import { marketPreviewsQueryOptions } from "@/lib/agent/discovery.functions";
 import { DiscoveredEvents } from "@/components/discovered-events";
-import { PrelaunchMarkets } from "@/components/prelaunch-markets";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { sortListings } from "@/lib/markets/listing-sort.mjs";
 import marketsCss from "@/styles/markets-compact.css?url";
 import { MarketCard } from "@/components/market-card";
-import { SECTION_FILTERS, marketSection, sectionOf } from "@/domain/markets/sections.mjs";
+import { marketSection, sectionOf } from "@/domain/markets/sections.mjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useMemo } from "react";
 
-const sortOptions = ["Trending", "Most active", "Ending soon", "New"] as const;
+import { MARKET_SORTS, SPORTS_FILTERS, isSportsListing } from "@/lib/markets/public-tabs.mjs";
+const sortOptions = MARKET_SORTS;
 type SortOption = (typeof sortOptions)[number];
 
 export const Route = createFileRoute("/markets/")({
@@ -20,7 +19,7 @@ export const Route = createFileRoute("/markets/")({
     search: Record<string, unknown>,
   ): { category?: string; sort?: SortOption; q?: string } => ({
     ...(typeof search["category"] === "string" &&
-    (SECTION_FILTERS as readonly string[]).includes(search["category"])
+    (SPORTS_FILTERS as readonly string[]).includes(search["category"])
       ? { category: search["category"] }
       : {}),
     ...(sortOptions.includes(search["sort"] as SortOption)
@@ -33,8 +32,7 @@ export const Route = createFileRoute("/markets/")({
       { title: "Markets — TacPredict" },
       {
         name: "description",
-        content:
-          "Explore Crypto Up/Down, Football and Cricket prediction markets on Base with USDC.",
+        content: "Explore Football and Cricket prediction markets on Base with USDC.",
       },
       { property: "og:title", content: "Markets — TacPredict" },
       {
@@ -65,18 +63,20 @@ function MarketsPage() {
   const sort = search.sort ?? "Trending";
   const query = "";
   const events = useQuery(eventDraftsQueryOptions);
-  const previews = useQuery(marketPreviewsQueryOptions);
-  const otherMatches = [...(events.data ?? []), ...(previews.data ?? [])].some(
-    (p) =>
-      (category === "All" ? sectionOf(p) !== null : sectionOf(p) === category) &&
-      p.title.toLowerCase().includes(query.toLowerCase()),
-  );
+  const otherMatches = (events.data ?? [])
+    .filter(isSportsListing)
+    .some(
+      (p) =>
+        (category === "All" ? sectionOf(p) !== null : sectionOf(p) === category) &&
+        p.title.toLowerCase().includes(query.toLowerCase()),
+    );
   const { data: liveFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
   const filtered = useMemo(
     () =>
       sortListings(
-        liveFeed.markets.filter((market) =>
-          category === "All" ? marketSection(market) !== null : marketSection(market) === category,
+        liveFeed.markets.filter(
+          (market) =>
+            isSportsListing(market) && (category === "All" || marketSection(market) === category),
         ),
         sort,
       ),
@@ -99,7 +99,7 @@ function MarketsPage() {
         role="navigation"
         aria-label="Market categories"
       >
-        {SECTION_FILTERS.map((category) => (
+        {SPORTS_FILTERS.map((category) => (
           <Link
             key={category}
             to="/markets"
@@ -153,7 +153,7 @@ function MarketsPage() {
             <MarketCard key={market.id} market={market} />
           ))}
         </div>
-      ) : sort === "Most active" || !otherMatches ? (
+      ) : sort === "Most active" || (!events.isPending && !otherMatches) ? (
         <div className="py-16 text-center">
           <p className="font-bold">
             {sort === "Most active" ? "No native activity yet" : "No markets in this category"}
@@ -167,8 +167,7 @@ function MarketsPage() {
         </p>
       ) : (
         <>
-          <PrelaunchMarkets query={query} category={category} sort={sort} />
-          <DiscoveredEvents query={query} category={category} sort={sort} />
+          <DiscoveredEvents query={query} category={category} sort={sort} sportsOnly />
         </>
       )}
       <p className="mt-5 text-center text-[0.65rem] font-semibold text-muted-foreground">
