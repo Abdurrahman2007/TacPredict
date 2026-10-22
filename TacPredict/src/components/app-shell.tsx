@@ -1,3 +1,4 @@
+import { SiteFooter } from "./site-footer";
 import { Link, useLocation } from "@tanstack/react-router";
 import { House, LineChart, Wallet, Gift, Search, Info } from "lucide-react";
 import type { ReactNode } from "react";
@@ -92,6 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Popover>
           </footer>
         )}
+        <SiteFooter />
       </main>
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"

@@ -69,3 +69,18 @@ test("browser and share logo variants are generated from versioned brand assets"
   assert.ok(rootUi.includes('name: "twitter:image", content: BRAND_SOCIAL_URL'));
   assert.ok(JSON.parse(read("package.json")).scripts.prebuild.includes("build-brand-assets.cjs"));
 });
+
+
+test("scroll discovery is in-page and social links use the exact supplied destinations", () => {
+  const discovery = read("src/components/market-discovery.tsx");
+  const footer = read("src/components/site-footer.tsx");
+  assert.ok(discovery.includes("IntersectionObserver"));
+  assert.ok(discovery.includes("prefers-reduced-motion"));
+  assert.ok(discovery.includes("if (!visible || reduced) return"));
+  assert.ok(!discovery.includes("sessionStorage"));
+  assert.ok(footer.includes('href="https://x.com/TacPredict"'));
+  assert.ok(footer.includes('href="https://t.me/TacPredict"'));
+  assert.ok(footer.includes('rel="noopener noreferrer"'));
+  assert.ok(read("src/components/app-shell.tsx").includes("<SiteFooter />"));
+  assert.ok(read("src/routes/index.tsx").includes("<MarketDiscovery />"));
+});

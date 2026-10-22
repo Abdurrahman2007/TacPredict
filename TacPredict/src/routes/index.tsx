@@ -1,3 +1,4 @@
+import { MarketDiscovery } from "@/components/market-discovery";
 import { eventMarket } from "@/lib/markets/event-market";
 import { HomeMarketCard } from "@/components/home-market-card";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -104,7 +105,7 @@ function HomePage() {
     return ordered;
   }, [listings]);
   return (
-    <div className="home-reference animate-enter">
+    <div className="home-reference">
       <nav className="home-feed-tabs home-reference-tabs scrollbar-none" aria-label="Market feed">
         {feeds.map((item) => (
           <Link
@@ -172,6 +173,7 @@ function HomePage() {
             : "No upcoming native markets scheduled yet."}
         </p>
       )}
+      <MarketDiscovery />
       {listings.length > 6 && (
         <button
           type="button"
