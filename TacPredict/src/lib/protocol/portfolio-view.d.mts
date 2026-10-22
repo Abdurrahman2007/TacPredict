@@ -38,3 +38,9 @@ export function filterPortfolioPositions<
   state?: string,
   since?: string,
 ): T[];
+
+export function overviewMoney(
+  value: string | bigint | null | undefined,
+  connected: boolean,
+  hidden?: boolean,
+): string;

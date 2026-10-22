@@ -1,10 +1,22 @@
 import { useId, useState, type PointerEvent } from "react";
 /** Read-only P/L view. Empty history is a zero baseline, never a synthetic price curve. */
-export function PortfolioPerformanceChart({ empty, period }: { empty: boolean; period: string }) {
+export function PortfolioPerformanceChart({
+  empty,
+  period,
+  preview = false,
+  hidden = false,
+}: {
+  empty: boolean;
+  period: string;
+  preview?: boolean;
+  hidden?: boolean;
+}) {
+  const baseline = empty || preview;
+  const amount = hidden ? "••••" : "$0.00";
   const id = useId().replace(/:/g, "");
   const [cursor, setCursor] = useState<number | null>(null);
   function scrub(e: PointerEvent<HTMLDivElement>) {
-    if (!empty) return;
+    if (!baseline || hidden) return;
     const box = e.currentTarget.getBoundingClientRect();
     setCursor(Math.max(0, Math.min(100, ((e.clientX - box.left) / box.width) * 100)));
   }
@@ -15,19 +27,21 @@ export function PortfolioPerformanceChart({ empty, period }: { empty: boolean; p
         tabIndex={0}
         role="group"
         aria-label={
-          empty
-            ? "Empty portfolio: zero profit or loss. Move pointer or use arrow keys to inspect."
+          baseline
+            ? preview
+              ? "Disconnected portfolio preview: zero baseline, not a wallet balance."
+              : "Empty portfolio: zero profit or loss. Move pointer or use arrow keys to inspect."
             : "Verified performance history is unavailable."
         }
         onPointerMove={scrub}
         onPointerDown={scrub}
         onPointerLeave={() => setCursor(null)}
         onFocus={() => {
-          if (empty) setCursor(50);
+          if (baseline && !hidden) setCursor(50);
         }}
         onBlur={() => setCursor(null)}
         onKeyDown={(e) => {
-          if (empty && ["ArrowLeft", "ArrowRight"].includes(e.key)) {
+          if (baseline && !hidden && ["ArrowLeft", "ArrowRight"].includes(e.key)) {
             e.preventDefault();
             setCursor(
               Math.max(0, Math.min(100, (cursor ?? 50) + (e.key === "ArrowRight" ? 5 : -5))),
@@ -43,19 +57,19 @@ export function PortfolioPerformanceChart({ empty, period }: { empty: boolean; p
             </linearGradient>
           </defs>
           <path className="tp-chart-grid" d="M0 30H400M0 70H400M0 110H400" />
-          {empty && (
+          {baseline && (
             <>
               <path d="M0 86H400V144H0Z" fill={`url(#zero-fill-${id})`} />
               <path className="tp-pnl-baseline" d="M0 86H400" />
             </>
           )}
         </svg>
-        {empty ? (
-          <span className="tp-chart-zero">$0.00</span>
+        {baseline ? (
+          <span className="tp-chart-zero">{amount}</span>
         ) : (
-          <span className="tp-chart-unavailable">No verified performance history</span>
+          <span className="tp-chart-unavailable">Performance history not yet available</span>
         )}
-        {empty && cursor !== null && (
+        {baseline && !hidden && cursor !== null && (
           <div className="tp-chart-cursor" style={{ left: `${cursor}%` }}>
             <i />
             <b />
@@ -69,14 +83,20 @@ export function PortfolioPerformanceChart({ empty, period }: { empty: boolean; p
                       : "translateX(-50%)",
               }}
             >
-              $0.00 <small>No trades</small>
+              {amount} <small>{preview ? "Preview" : "No trades"}</small>
             </span>
           </div>
         )}
       </div>
       <div className="tp-chart-caption">
         <span>{period}</span>
-        <span>{empty ? "No trades yet" : "History unavailable"}</span>
+        <span>
+          {preview
+            ? "Wallet not connected · preview"
+            : empty
+              ? "No trades yet"
+              : "Awaiting verified history"}
+        </span>
       </div>
     </div>
   );
