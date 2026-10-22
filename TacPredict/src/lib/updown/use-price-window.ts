@@ -9,7 +9,7 @@ import {
   mergeObservedCandles,
 } from "./chart-window.mjs";
 import { useLivePrice } from "./live-prices";
-import { spotWindowQueryOptions } from "./spot.functions";
+import { referenceWindowQueryOptions } from "./spot.functions";
 import { priceToBeat, seriesForWindow, thin, type UpDownAsset, type Win } from "./window.mjs";
 
 /** Source-coherent real chart observations; never replace a pool's reported settlement prices. */
@@ -25,7 +25,7 @@ export function usePriceWindow(asset: UpDownAsset, selected: Win, now = Date.now
     ),
   );
   const spot = useQuery({
-    ...spotWindowQueryOptions(asset, lookback, 15000),
+    ...referenceWindowQueryOptions(asset, lookback),
     enabled: dense && now > 0,
   });
   const live = useLivePrice(asset, dense);
