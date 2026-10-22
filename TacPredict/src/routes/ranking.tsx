@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Trophy, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { rankingOptions } from "@/lib/ranking/read.functions";
 import {
@@ -30,7 +30,22 @@ export const Route = createFileRoute("/ranking")({
   component: RankingPage,
 });
 const periodNames = { "1d": "24 hours", "7d": "7 days", "30d": "30 days", all: "All time" };
+const subscribeHydration = () => () => {};
 function RankingPage() {
+  const ready = useSyncExternalStore(
+    subscribeHydration,
+    () => true,
+    () => false,
+  );
+  return ready ? (
+    <RankingClient />
+  ) : (
+    <section className="tp-ranking" aria-busy="true" aria-label="Loading ranking">
+      <h1 className="sr-only">Ranking</h1>
+    </section>
+  );
+}
+function RankingClient() {
   const s = Route.useSearch(),
     period = s.period ?? "30d",
     page = s.page ?? 0,
@@ -183,7 +198,8 @@ function RankingPage() {
                   <span>
                     {a.title}
                     <small>
-                      {a.side} · {new Date(a.timestamp).toLocaleString()}
+                      {a.side} ·{" "}
+                      {new Date(a.timestamp).toISOString().slice(0, 19).replace("T", " ") + " UTC"}
                     </small>
                   </span>
                   <strong>{unsignedMoney(a.amountAtomic)}</strong>
@@ -303,8 +319,9 @@ function RankingPage() {
         </p>
         {data?.observedAt && (
           <p>
-            Finalized checkpoint: {new Date(data.observedAt).toLocaleString()}. Updates every
-            minute.
+            Finalized checkpoint:{" "}
+            {new Date(data.observedAt).toISOString().slice(0, 19).replace("T", " ") + " UTC"}.
+            Updates every minute.
           </p>
         )}
       </details>
