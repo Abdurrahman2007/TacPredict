@@ -304,34 +304,6 @@
 .onchain-brand-card {
   background: radial-gradient(ellipse at 0 100%, rgb(60 100 190 / 0.14), transparent 70%), #121a21;
 }
-.brand-intro {
-  background: #0f161a;
-  animation: brand-intro-exit 800ms ease both;
-}
-.brand-intro-mark {
-  animation: brand-arrive 660ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes brand-arrive {
-  from {
-    opacity: 0;
-    transform: perspective(600px) rotateY(-16deg) translateY(14px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: perspective(600px) rotateY(0) translateY(0) scale(1);
-  }
-}
-@keyframes brand-intro-exit {
-  0%,
-  64% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .price-chart-line {
     animation: chart-arrive 300ms ease-out;
@@ -426,197 +398,6 @@
 .auth-social button svg {
   width: 24px;
   height: 24px;
-}
-
-/* True perspective/extrusion logo intro; rendered at native resolution, not a video. */
-.brand-intro-3d {
-  animation: intro-dismiss 3.2s ease both;
-}
-.intro-ambient {
-  position: absolute;
-  width: min(90vw, 650px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(117, 74, 255, 0.18),
-    rgba(88, 64, 192, 0.03) 48%,
-    transparent 70%
-  );
-  animation: intro-ambient-pulse 3.2s ease both;
-}
-.intro-stage {
-  position: relative;
-  width: 260px;
-  height: 320px;
-}
-.intro-camera {
-  position: absolute;
-  top: 25px;
-  left: 50%;
-  width: 144px;
-  height: 144px;
-  margin-left: -72px;
-  perspective: 800px;
-}
-.intro-logo-model {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  animation: intro-orbit 3.2s cubic-bezier(0.22, 0.75, 0.25, 1) both;
-}
-.intro-logo-depth {
-  position: absolute;
-  inset: 0;
-  border-radius: 29px;
-  background: linear-gradient(145deg, #b598ff, #5c39cd 40%, #23123e);
-  border: 1px solid #8360eb;
-}
-.intro-logo-face {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: 29px;
-  transform: translateZ(1px);
-  backface-visibility: hidden;
-  background: #6341da;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
-    0 0 40px rgba(113, 72, 229, 0.1);
-}
-.intro-logo-face img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.intro-logo-shine {
-  position: absolute;
-  inset: -20%;
-  background: linear-gradient(
-    110deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.25) 48%,
-    transparent 58%
-  );
-  transform: translateX(-100%);
-  animation: intro-shine 2.7s ease 0.2s both;
-}
-.intro-floor {
-  position: absolute;
-  top: 192px;
-  left: 50%;
-  width: 130px;
-  height: 20px;
-  margin-left: -65px;
-  border-radius: 50%;
-  background: rgba(113, 72, 229, 0.3);
-  filter: blur(16px);
-  animation: intro-floor-glow 3.2s ease both;
-}
-.intro-wordmark {
-  position: absolute;
-  inset: 225px 0 auto;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: -0.035em;
-  color: #f4f2ff;
-  animation: intro-wordmark-reveal 3.2s ease both;
-}
-.intro-wordmark span {
-  display: block;
-  margin-top: 10px;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: #9391a5;
-}
-@keyframes intro-orbit {
-  0% {
-    opacity: 0;
-    transform: translateY(36px) rotateX(24deg) rotateY(-155deg) rotateZ(-12deg) scale(0.65);
-  }
-  22% {
-    opacity: 1;
-  }
-  58% {
-    transform: translateY(-10px) rotateX(12deg) rotateY(25deg) rotateZ(5deg) scale(1.05);
-  }
-  82%,
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0) rotateY(0) rotateZ(0) scale(1);
-  }
-}
-@keyframes intro-shine {
-  0%,
-  30% {
-    transform: translateX(-100%);
-  }
-  75%,
-  100% {
-    transform: translateX(100%);
-  }
-}
-@keyframes intro-wordmark-reveal {
-  0%,
-  30% {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  55%,
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes intro-floor-glow {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-}
-@keyframes intro-ambient-pulse {
-  0% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  65% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
-@keyframes intro-dismiss {
-  0%,
-  88% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .brand-intro-3d,
-  .intro-logo-model,
-  .intro-wordmark,
-  .intro-floor,
-  .intro-ambient,
-  .intro-logo-shine {
-    animation: none;
-  }
 }
 
 /* Compact sign-in and a dedicated accessible six-digit verification step. */
@@ -962,15 +743,11 @@
   }
 }
 
-/* Pixel assembly uses the actual brand artwork, transform-only, on every page load. */
-.pixel-logo { width: 150px; height: 150px; position: relative; margin: 0 auto; perspective: 700px; filter: drop-shadow(0 24px 28px #7950ed55); }
-.pixel-logo-tile { position: absolute; width: 12.6%; height: 12.6%; background-image: url('/brand/tacpredict-object.svg'); background-size: 800% 800%; animation: pixel-assemble 1050ms cubic-bezier(.16,1,.3,1) var(--delay) both; backface-visibility: hidden; }
-@keyframes pixel-assemble { from { opacity: 0; transform: translate3d(var(--px),var(--py),100px) rotateY(var(--turn)) scale(.3); } to { opacity: 1; transform: translate3d(0,0,0) rotateY(0) scale(1); } }
 .header-reward svg { animation: reward-glint 5s ease-in-out infinite; transform-origin: center bottom; }
 @keyframes reward-glint { 0%,80%,100% { transform: rotate(0); } 85% { transform: rotate(-9deg); } 90% { transform: rotate(9deg); } 95% { transform: rotate(-4deg); } }
 .login-popup { animation: auth-arrive 180ms cubic-bezier(.16,1,.3,1); }
 @keyframes auth-arrive { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
-@media (prefers-reduced-motion: reduce) { .header-reward svg, .pixel-logo-tile, .login-popup { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .header-reward svg, .login-popup { animation: none !important; } }
 
 .portfolio-funding { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); font-weight: 600; }
 .portfolio-funding:disabled { cursor: not-allowed; color: var(--muted-foreground); }
@@ -979,7 +756,6 @@
 .login-popup[data-state="open"] { animation: auth-arrive 180ms cubic-bezier(.16,1,.3,1); }
 .login-popup[data-state="closed"] { animation: auth-dismiss 120ms ease-out; }
 @keyframes auth-dismiss { from { opacity: 1; scale: 1; } to { opacity: 0; scale: .98; } }
-.intro-wordmark { animation-duration: 1.6s; }
 @media (prefers-reduced-motion: reduce) { .login-popup[data-state] { animation: none !important; } }
 
 /* Crisp vector icons and generous iOS-style targets on the Home feed rail. */
@@ -989,13 +765,9 @@
 .home-live-dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: #51c77d; box-shadow: 0 0 0 4px #51c77d15; }
 .home-feed-tabs > a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
-/* Background-free brand character, assembled in genuine CSS 3D space. */
+/* Shared background-free logo artwork. */
 .brand-object-mark { overflow: visible; border-radius: 0; background: transparent; }
-.brand-object-mark img { object-fit: contain; filter: drop-shadow(0 3px 5px #7950ed18); }
-.brand-intro-3d .intro-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 260px; height: 260px; perspective: 900px; }
-.brand-intro-3d .pixel-logo { width: 164px; height: 164px; transform-style: preserve-3d; filter: drop-shadow(0 18px 22px #7950ed28); animation: character-turn 2100ms cubic-bezier(.16,1,.3,1) both; }
-.brand-intro-3d .intro-wordmark { position: static; inset: auto; margin-top: 25px; font-size: 27px; line-height: 1.2; }
-@keyframes character-turn { 0% { transform: rotateX(14deg) rotateY(-35deg) rotateZ(-6deg) translateY(10px) scale(.9); } 62% { transform: rotateX(-4deg) rotateY(12deg) rotateZ(2deg) translateY(-5px) scale(1.03); } 100% { transform: rotateX(0) rotateY(0) rotateZ(0) translateY(0) scale(1); } }
+.brand-object-mark img { object-fit: contain; filter: none; }
 @media(max-width:639px) {
   .app-header-brand { gap: 7px; }
   .app-header-brand .brand-object-mark { width: 35px; height: 39px; }
@@ -1013,4 +785,3 @@
   .app-header-actions .header-reward { width: 32px; height: 32px; }
   .home-feed-tabs > a { font-size: 13px; }
 }
-@media(prefers-reduced-motion:reduce) { .brand-intro-3d .pixel-logo { animation: none; } }

@@ -1,3 +1,4 @@
+import { BRAND_LOGO_ABSOLUTE_URL } from "@/lib/brand";
 import type { WalletProvider } from "./wallet";
 let provider: WalletProvider | undefined;
 export async function getCoinbaseAuthProvider(): Promise<WalletProvider> {
@@ -6,7 +7,7 @@ export async function getCoinbaseAuthProvider(): Promise<WalletProvider> {
   if (!sdk) throw new Error("Coinbase Wallet sign-in needs a browser.");
   const wallet = sdk.createCoinbaseWalletSDK({
     appName: "TacPredict",
-    appLogoUrl: "https://tacpredict.fun/brand/tacpredict.svg",
+    appLogoUrl: BRAND_LOGO_ABSOLUTE_URL,
     appChainIds: [8453],
     preference: { options: "eoaOnly" },
   });

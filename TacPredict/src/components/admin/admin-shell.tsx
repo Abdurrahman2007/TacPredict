@@ -1,3 +1,4 @@
+import { BRAND_LOGO_URL } from "@/lib/brand";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -33,7 +34,11 @@ function useActiveNav() {
     if (!isAdminRouteSection(section) || section !== item.section) return false;
     // "Create market" is its own entry; every other Markets tab belongs to "Markets".
     const current = view ?? defaultViews[item.section];
-    return item.id === "create" ? current === "create" : item.id === "markets" ? current !== "create" : true;
+    return item.id === "create"
+      ? current === "create"
+      : item.id === "markets"
+        ? current !== "create"
+        : true;
   };
   return { pathname, isActive };
 }
@@ -57,9 +62,14 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
       <div className="adm-app">
         <aside className="adm-side" data-open={open} aria-label="Administrator navigation">
           <div className="adm-brand">
-            <div className="adm-brand-mark" aria-hidden="true">
-              TP
-            </div>
+            <img
+              src={BRAND_LOGO_URL}
+              className="adm-brand-mark"
+              width={34}
+              height={34}
+              alt=""
+              style={{ background: "#000", objectFit: "contain" }}
+            />
             <div>
               <b>TacPredict</b>
               <small>Admin</small>
@@ -71,7 +81,13 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
               const active = isActive(item);
               if (item.kind === "overview")
                 return (
-                  <Link key={item.id} to="/admin" className="adm-nav-item" data-active={active} onClick={close}>
+                  <Link
+                    key={item.id}
+                    to="/admin"
+                    className="adm-nav-item"
+                    data-active={active}
+                    onClick={close}
+                  >
                     {item.label}
                   </Link>
                 );
