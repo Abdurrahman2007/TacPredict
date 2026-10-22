@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   money,
+  overviewMoney,
   visiblePositions,
   remainingShares,
 } from "../../src/lib/protocol/portfolio-view.mjs";
@@ -39,4 +40,21 @@ test("only Base positions, real sort, search and active filter", () => {
 test("partial fills use atomic strings and never negative remaining", () => {
   assert.equal(remainingShares("10000000", "3000000"), "7000000");
   assert.throws(() => remainingShares("1", "2"));
+});
+
+test("overview zeros are disconnected previews, not substituted live balances", () => {
+  assert.equal(overviewMoney(null, false), "$0.00");
+  assert.equal(overviewMoney(undefined, false), "$0.00");
+  assert.equal(overviewMoney(null, true), "—");
+  assert.equal(overviewMoney(undefined, true), "—");
+  assert.equal(overviewMoney(0n, true), "$0.00");
+  assert.equal(overviewMoney(12450000n, true), "$12.45");
+  assert.equal(
+    overviewMoney("12345678901234567890123456789", true),
+    "$12,345,678,901,234,567,890,123.45",
+  );
+  for (const connected of [true, false]) {
+    assert.equal(overviewMoney(null, connected, true), "••••");
+    assert.equal(overviewMoney(12450000n, connected, true), "••••");
+  }
 });

@@ -100,3 +100,10 @@ export function filterPortfolioPositions(
     );
   });
 }
+
+/** Presentation-only zero preview when disconnected. Unknown connected funds stay unknown. */
+export function overviewMoney(value, connected, hidden = false) {
+  if (hidden) return "••••";
+  if (value === null || value === undefined) return connected ? "—" : "$0.00";
+  return money(value);
+}
