@@ -294,7 +294,8 @@ function RankingPage() {
         </p>
         <p>
           Unexplained token transfers or incomplete cost basis are not ranked. A dash means no
-          verified metric, not zero. Only public onchain activity is shown; email, login identity,
+          verified metric, not zero. Coverage is currently indexed Exchange markets; Up/Down pool
+          rounds are not included. Only public onchain activity is shown; email, login identity,
           private orders and wallet cash balances are never published. Trader names and pixel
           avatars are generated automatically from the public wallet address. Positions show current
           holdings (up to 100); activity shows the latest 50 executions in the selected period.
