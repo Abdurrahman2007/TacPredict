@@ -33,3 +33,10 @@ export function mergeObservedCandles(
   asOf: number,
   now: number,
 ): import("./window.mjs").Candle[];
+export function referenceLabelY(
+  referenceY: number,
+  latestY: number,
+  minY: number,
+  maxY: number,
+  gap?: number,
+): number;

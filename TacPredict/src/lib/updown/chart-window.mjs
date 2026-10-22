@@ -125,3 +125,13 @@ export function mergeObservedCandles(candles, ticks, gran, asOf, now) {
   }
   return [...rows.values()].sort((a, b) => a.time - b.time);
 }
+
+/** Keep reference and latest price tags separated, including when reference is below latest. */
+export function referenceLabelY(referenceY, latestY, minY, maxY, gap = 28) {
+  const clamp = (n) => Math.max(minY, Math.min(maxY, n));
+  const natural = clamp(referenceY);
+  if (Math.abs(natural - latestY) >= gap) return natural;
+  const above = clamp(latestY - gap);
+  const below = clamp(latestY + gap);
+  return Math.abs(above - latestY) >= gap ? above : below;
+}
