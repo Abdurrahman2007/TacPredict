@@ -1,5 +1,9 @@
 import { useId, useMemo, useState } from "react";
-import { nearestObservation, observedCandles } from "@/lib/updown/chart-window.mjs";
+import {
+  nearestObservation,
+  observedCandles,
+  referenceLabelY,
+} from "@/lib/updown/chart-window.mjs";
 import { clock, useTimeZone } from "@/lib/updown/use-clock";
 import {
   formatUsd,
@@ -84,12 +88,7 @@ export function UpDownChart({
   const color = "#315dff";
   const candles = ohlc?.length ? ohlc : observedCandles(series, w);
   const lastColor = beat === null ? color : last.price >= beat ? "#28b357" : "#ff333d";
-  const beatTagY =
-    beat !== null && Math.abs(y(beat) - y(last.price)) < 30
-      ? Math.max(T + 12, y(beat) - 30)
-      : beat !== null
-        ? y(beat)
-        : 0;
+  const beatTagY = beat === null ? 0 : referenceLabelY(y(beat), y(last.price), T + 12, H - B - 12);
   const observedProbe = series.find((p) => p.time === probe?.time) ?? null;
   const selectedIndex = observedProbe ? series.indexOf(observedProbe) : series.length - 1;
   const points = series.map((p) => `${x(p.time).toFixed(1)},${y(p.price).toFixed(1)}`);
@@ -170,8 +169,8 @@ export function UpDownChart({
         {ticks
           .filter(
             (t) =>
-              Math.abs(y(t) - y(last.price)) > 17 &&
-              (beat === null || Math.abs(y(t) - beatTagY) > 17),
+              Math.abs(y(t) - y(last.price)) > 24 &&
+              (beat === null || Math.abs(y(t) - beatTagY) > 24),
           )
           .map((t) => (
             <g key={t}>
