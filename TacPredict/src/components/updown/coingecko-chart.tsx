@@ -10,25 +10,25 @@ import {
 } from "@/lib/updown/window.mjs";
 import { UpDownChart } from "./updown-chart";
 
-/** Sampled prices, not tick-by-tick. Chart data never changes locked settlement evidence. */
+/** Real source observations and live ticks. Chart data never changes locked settlement evidence. */
 export function CoinGeckoChart({
   asset,
   window: selected,
   summary = false,
   evidence,
   chartType = "line",
+  dense = true,
 }: {
   asset: UpDownAsset;
   window: Win;
   summary?: boolean;
+  dense?: boolean;
   chartType?: "line" | "candles";
   evidence?: { points: PricePoint[]; beat: number | null; source: string } | undefined;
 }) {
-  const feed = usePriceWindow(asset, selected);
+  const feed = usePriceWindow(asset, selected, Date.now(), dense && !evidence);
   const { snapshot, history, pending } = feed;
-  const { series, range, mode } = evidence
-    ? chartView(evidence.points, selected, Date.now())
-    : feed;
+  const { series, range } = evidence ? chartView(evidence.points, selected, Date.now()) : feed;
   const boundary = evidence ? evidence.beat : feed.boundary;
   const first = series[0];
   const last = series.at(-1);
@@ -71,9 +71,10 @@ export function CoinGeckoChart({
           chartType={chartType}
           beat={boundary}
           asset={asset}
-          live={mode === "window" && Date.now() < selected.end}
-          interactive={!summary}
-          source={evidence?.source ?? "USD reference observations"}
+          live={Date.now() >= selected.start && Date.now() < selected.end}
+          interactive
+          ohlc={evidence ? undefined : feed.candles}
+          source={evidence?.source ?? feed.source}
         />
       ) : (
         <div className="ud-chart ud-chart-empty" role="status">
@@ -92,7 +93,7 @@ export function CoinGeckoChart({
           Retry
         </button>
       )}
-      {snapshot.data?.stale && (
+      {snapshot.data?.stale && !feed.candles?.length && evidence?.source !== "Coinbase" && (
         <span className="block text-right text-[10px] text-amber-300" role="status">
           Delayed prices
         </span>

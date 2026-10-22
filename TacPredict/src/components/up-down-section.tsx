@@ -8,7 +8,7 @@ import { cents, usdcShort, volumeText } from "@/lib/protocol/display.mjs";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
   ASSETS,
-  DURATIONS,
+  DISPLAY_DURATIONS,
   durationLabel,
   formatCountdown,
   makeWindow,
@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
 import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
 import { copyFor } from "@/lib/pool/series-copy.mjs";
-import { formatUsdc, nextRoundStart, poolShare } from "@/lib/pool/pool.mjs";
+import { POOL_DURATIONS, formatUsdc, nextRoundStart, poolShare } from "@/lib/pool/pool.mjs";
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
@@ -51,6 +51,7 @@ function AssetCard({
   // bets is the next one, so Up and Down lead straight to it.
   const poolConfig = useQuery(poolConfigQueryOptions);
   const poolOn =
+    POOL_DURATIONS.includes(minutes) &&
     Boolean(poolConfig.data?.address) &&
     poolConfig.data?.series[`${asset}:${minutes}`] === true &&
     poolConfig.data?.paused === false;
@@ -101,7 +102,7 @@ function AssetCard({
           {formatCountdown((poolOn ? nextStart : w.end) - nowMs)}
         </span>
       </div>
-      {large && <CoinGeckoChart asset={asset} window={w} summary />}
+      {large && <CoinGeckoChart asset={asset} window={w} summary dense={!poolOn} />}
 
       <div className="tp-crypto-actions">
         {(
@@ -152,12 +153,17 @@ export function UpDownSection({
   markets,
   snapshotTime,
   detailed = false,
+  fixedMinutes,
+  initialMinutes,
 }: {
   markets: Market[];
   snapshotTime: string;
   detailed?: boolean;
+  fixedMinutes?: number;
+  initialMinutes?: number | undefined;
 }) {
-  const [minutes, setMinutes] = useState(5);
+  const [chosenMinutes, setMinutes] = useState(initialMinutes ?? 5);
+  const minutes = fixedMinutes ?? chosenMinutes;
   const nowMs = useNow(Date.parse(snapshotTime) || 0);
   if (!nowMs)
     return (
@@ -174,10 +180,15 @@ export function UpDownSection({
     <section className={detailed ? "" : "mt-5"}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
-          Trending Up &amp; Down
+          {fixedMinutes === 60
+            ? "Live · 1H"
+            : fixedMinutes === 1440
+              ? "Live · 24H"
+              : "Trending Up & Down"}
         </h2>
         <Link
           to="/up-down"
+          search={fixedMinutes ? { d: fixedMinutes } : {}}
           className="flex min-h-11 shrink-0 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground"
         >
           View more
@@ -190,7 +201,7 @@ export function UpDownSection({
           role="group"
           aria-label="Window length"
         >
-          {DURATIONS.map((d) => (
+          {DISPLAY_DURATIONS.map((d) => (
             <button
               key={d}
               type="button"

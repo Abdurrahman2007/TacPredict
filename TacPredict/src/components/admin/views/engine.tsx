@@ -11,10 +11,13 @@ import {
 import { engineProvidersQuery, fixturesQuery } from "@/lib/sports/sports.functions";
 import { handOffDraft } from "../draft-handoff";
 import { Badge, Card, Loaded, Notice, PageHeader } from "../admin-ui";
+import { PublicPagesView } from "./public-pages";
 import { CryptoSeries } from "./crypto-series";
 
 export function EngineView({ view }: { view: string }) {
   switch (view) {
+    case "public":
+      return <PublicPagesView />;
     case "crypto":
       return <CryptoSeries />;
     case "providers":

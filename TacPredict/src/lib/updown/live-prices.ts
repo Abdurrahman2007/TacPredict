@@ -57,7 +57,10 @@ function onTick(asset: UpDownAsset, price: number, time: number) {
 
 function connect() {
   if (typeof window === "undefined" || typeof WebSocket === "undefined") return;
-  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING))
+  if (
+    socket &&
+    (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)
+  )
     return;
   let ws: WebSocket;
   try {
@@ -141,15 +144,16 @@ function subscribe(listener: () => void) {
 }
 
 /** Live price for one asset: socket ticks when connected, polled price otherwise. */
-export function useLivePrice(asset: UpDownAsset) {
+const noSubscription = () => () => {};
+export function useLivePrice(asset: UpDownAsset, enabled = true) {
   const live = useSyncExternalStore(
-    subscribe,
-    () => state[asset],
+    enabled ? subscribe : noSubscription,
+    () => (enabled ? state[asset] : EMPTY),
     () => EMPTY,
   );
   const polling = useQuery({
     ...spotTickersQueryOptions,
-    enabled: live.status !== "live",
+    enabled: enabled && live.status !== "live",
     refetchInterval: live.status !== "live" ? 5000 : false,
   });
   const fallback = live.status !== "live" ? (polling.data?.prices[asset] ?? null) : null;

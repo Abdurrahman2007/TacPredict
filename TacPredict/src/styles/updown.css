@@ -1134,3 +1134,42 @@
     transform: translateX(-50%) !important;
   }
 }
+
+/* The plot owns scrubbing; the remaining card still opens the detail route. */
+.ud-home-card .ud-chart {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+.ud-chart svg {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ud-home-card .ud-chart svg {
+  cursor: crosshair;
+}
+.tp-price-summary dd,
+.ud-prices dd {
+  font-variant-numeric: tabular-nums;
+}
+.home-long-rounds {
+  display: grid;
+  gap: 24px;
+}
+@media (min-width: 1100px) {
+  .home-long-rounds {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.ud-history-list {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: #3c4a51 transparent;
+}
+
+@media (min-width: 1100px) {
+  .home-long-rounds .ud-home-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

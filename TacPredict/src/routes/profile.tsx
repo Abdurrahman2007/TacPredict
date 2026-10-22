@@ -52,8 +52,7 @@ function PortfolioPage() {
     [activeOnly, setActiveOnly] = useState(false),
     [notice, setNotice] = useState("");
   const [category, setCategory] = useState("All"),
-    [state, setState] = useState("All"),
-    [since, setSince] = useState("");
+    [state, setState] = useState("All");
   const feed = useQuery(nativeMarketFeedQueryOptions);
   const walletKnown = Boolean(
     wallet.address && wallet.chainId === 8453 && wallet.usdc !== null && !wallet.error,
@@ -125,7 +124,12 @@ function PortfolioPage() {
       </div>
       <section className="tp-balances" aria-label="Portfolio balances">
         <div className="tp-b-left">
-          <p className="tp-label">Position value</p>
+          <p
+            className="tp-label"
+            title="Finalized holdings at the last indexed trade; not a guaranteed sale price"
+          >
+            Position value
+          </p>
           <div className="tp-big">
             <span className={total === null ? "tp-unavailable" : ""}>{show(total)}</span>
           </div>
@@ -144,21 +148,9 @@ function PortfolioPage() {
             ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}`
             : "Connect a wallet to view your portfolio"}
         </span>
-        <span>
-          {wallet.address
-            ? wallet.chainId === 8453
-              ? "Base Mainnet"
-              : "Unsupported network · switch to Base"
-            : "Base Mainnet · native USDC"}
-        </span>
-        <details>
-          <summary>How values are calculated</summary>
-          <p>
-            Position value uses finalized holdings at the last indexed trade, not a guaranteed sale
-            price. Wallet USDC is separate; claimable is not added twice. Profit/loss requires
-            verified cost basis and is unavailable when that history is missing.
-          </p>
-        </details>
+        {wallet.address && wallet.chainId !== 8453 && (
+          <span>Unsupported network · switch to Base</span>
+        )}
       </div>
       <section className="tp-pl" aria-label="Portfolio performance">
         <div className="tp-pl-head">
@@ -304,22 +296,12 @@ function PortfolioPage() {
               ))}
             </select>
           </label>
-          <label>
-            Updated since (UTC)
-            <input
-              aria-label="Positions updated since UTC"
-              type="date"
-              value={since}
-              onChange={(e) => setSince(e.target.value)}
-            />
-          </label>
-          {(category !== "All" || state !== "All" || since) && (
+          {(category !== "All" || state !== "All") && (
             <button
               className="tp-select"
               onClick={() => {
                 setCategory("All");
                 setState("All");
-                setSince("");
               }}
             >
               Clear filters
@@ -341,7 +323,7 @@ function PortfolioPage() {
           activeOnly={activeOnly}
           category={category}
           state={state}
-          since={since}
+          since=""
         />
       </div>
       {notice && (

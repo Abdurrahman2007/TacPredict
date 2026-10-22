@@ -72,6 +72,7 @@ export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; labe
     { view: "setup", label: "Setup" },
   ],
   engine: [
+    { view: "public", label: "Home & Markets" },
     { view: "fixtures", label: "Football & Cricket" },
     { view: "crypto", label: "Crypto Up/Down" },
     { view: "providers", label: "Providers" },
@@ -95,8 +96,12 @@ export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; labe
 };
 
 /** Old links to pages that were merged or removed land somewhere useful instead of an empty page. */
-export function adminRedirectFor(section: AdminRouteSection, view: string): "overview" | "users" | "engine" | null {
-  if (section === "treasury" || section === "analytics" || section === "notifications") return "overview";
+export function adminRedirectFor(
+  section: AdminRouteSection,
+  view: string,
+): "overview" | "users" | "engine" | null {
+  if (section === "treasury" || section === "analytics" || section === "notifications")
+    return "overview";
   if (section === "settings" && view === "admins") return "users";
   if (section === "settings" && (view === "categories" || view === "providers")) return "engine";
   if (section === "resolution" && view === "evidence") return "overview";

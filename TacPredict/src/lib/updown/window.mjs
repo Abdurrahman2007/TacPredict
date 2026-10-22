@@ -11,6 +11,7 @@ export const ASSETS = {
 };
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
 export const DURATIONS = [5, 15, 720, 1440];
+export const DISPLAY_DURATIONS = [5, 15, 60, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
@@ -41,7 +42,7 @@ export function durationLabel(minutes) {
 }
 export function parseDuration(value) {
   const n = Number(value);
-  return DURATIONS.includes(n) ? n : 5;
+  return DISPLAY_DURATIONS.includes(n) ? n : 5;
 }
 
 export function windowStartFor(nowMs, minutes) {
@@ -156,10 +157,9 @@ export function seriesForWindow({ candles, trades, ticks, w, nowMs, gran = 60000
   }
   for (const t of trades ?? []) if (t.time >= w.start && t.time <= stop) out.push(t);
   const lastKnown = out.length ? out[out.length - 1].time : -Infinity;
-  for (const t of ticks ?? []) if (t.time > lastKnown && t.time >= w.start && t.time <= stop) out.push(t);
-  return out
-    .filter((p) => Number.isFinite(p.time) && p.price > 0)
-    .sort((a, b) => a.time - b.time);
+  for (const t of ticks ?? [])
+    if (t.time > lastKnown && t.time >= w.start && t.time <= stop) out.push(t);
+  return out.filter((p) => Number.isFinite(p.time) && p.price > 0).sort((a, b) => a.time - b.time);
 }
 
 /** Shrinks a long series to at most `max` points, always keeping the first and last. */

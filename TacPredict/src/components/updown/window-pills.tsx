@@ -65,8 +65,8 @@ export function WindowPills({
         <button
           type="button"
           className="ud-pill"
-          aria-label={chartType === "line" ? "Show sampled candles" : "Show line chart"}
-          title={chartType === "line" ? "Sampled candles" : "Line chart"}
+          aria-label={chartType === "line" ? "Show candles" : "Show line chart"}
+          title={chartType === "line" ? "Candles" : "Line chart"}
           onClick={onToggleChart}
         >
           {chartType === "line" ? <ChartCandlestick size={18} /> : <LineChart size={18} />}

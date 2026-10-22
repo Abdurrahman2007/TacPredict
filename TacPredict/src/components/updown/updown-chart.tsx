@@ -1,7 +1,13 @@
 import { useId, useMemo, useState } from "react";
-import { observedCandles } from "@/lib/updown/chart-window.mjs";
+import { nearestObservation, observedCandles } from "@/lib/updown/chart-window.mjs";
 import { clock, useTimeZone } from "@/lib/updown/use-clock";
-import { formatUsd, type PricePoint, type UpDownAsset, type Win } from "@/lib/updown/window.mjs";
+import {
+  formatUsd,
+  type Candle,
+  type PricePoint,
+  type UpDownAsset,
+  type Win,
+} from "@/lib/updown/window.mjs";
 
 const W = 360;
 const L = 6;
@@ -29,6 +35,7 @@ export function UpDownChart({
   compact = false,
   interactive = true,
   chartType = "line",
+  ohlc,
 }: {
   w: Win;
   series: PricePoint[];
@@ -39,6 +46,7 @@ export function UpDownChart({
   compact?: boolean;
   interactive?: boolean;
   chartType?: "line" | "candles";
+  ohlc?: Candle[] | undefined;
 }) {
   const H = compact ? 176 : 232;
   const gradient = useId().replace(/:/g, "");
@@ -47,7 +55,10 @@ export function UpDownChart({
 
   const geometry = useMemo(() => {
     if (!series.length) return null;
-    const prices = series.map((p) => p.price);
+    const prices = [
+      ...series.map((p) => p.price),
+      ...(chartType === "candles" ? (ohlc ?? []).flatMap((c) => [c.low, c.high]) : []),
+    ];
     if (beat !== null) prices.push(beat);
     let low = Math.min(...prices);
     let high = Math.max(...prices);
@@ -64,14 +75,14 @@ export function UpDownChart({
     const x = (t: number) => L + Math.max(0, Math.min(1, (t - w.start) / span)) * (W - L - R);
     const y = (p: number) => T + (1 - (p - low) / (high - low)) * (H - T - B);
     return { low, high, x, y };
-  }, [series, beat, w, H]);
+  }, [series, beat, w, H, ohlc, chartType]);
 
   if (!geometry) return <div className="ud-chart ud-chart-empty">Waiting for price data…</div>;
 
   const { low, high, x, y } = geometry;
   const last = series[series.length - 1]!;
   const color = "#315dff";
-  const candles = observedCandles(series, w);
+  const candles = ohlc?.length ? ohlc : observedCandles(series, w);
   const lastColor = beat === null ? color : last.price >= beat ? "#28b357" : "#ff333d";
   const beatTagY =
     beat !== null && Math.abs(y(beat) - y(last.price)) < 30
@@ -92,12 +103,7 @@ export function UpDownChart({
       Math.min(1, (((clientX - bounds.left) / bounds.width) * W - L) / (W - L - R)),
     );
     const target = w.start + fraction * (w.end - w.start);
-    setProbe(
-      series.reduce(
-        (best, p) => (Math.abs(p.time - target) < Math.abs(best.time - target) ? p : best),
-        series[0]!,
-      ),
-    );
+    setProbe(nearestObservation(series, target));
   }
 
   return (
@@ -132,11 +138,23 @@ export function UpDownChart({
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={`${asset} ${source} price history. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
-        onPointerDown={(e) =>
-          interactive && inspect(e.clientX, e.currentTarget.getBoundingClientRect())
-        }
+        style={{ touchAction: interactive ? "pan-y" : undefined }}
+        onPointerDown={(e) => {
+          if (!interactive) return;
+          e.stopPropagation();
+          e.currentTarget.setPointerCapture(e.pointerId);
+          inspect(e.clientX, e.currentTarget.getBoundingClientRect());
+        }}
+        onPointerUp={(e) => {
+          if (e.currentTarget.hasPointerCapture(e.pointerId))
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        }}
+        onPointerCancel={() => setProbe(null)}
         onPointerMove={(e) => {
-          if (interactive && (e.pointerType === "mouse" || e.buttons === 1))
+          if (
+            interactive &&
+            (e.pointerType === "mouse" || e.currentTarget.hasPointerCapture(e.pointerId))
+          )
             inspect(e.clientX, e.currentTarget.getBoundingClientRect());
         }}
         onPointerLeave={(e) => {

@@ -18,3 +18,18 @@ export function referenceObservation(
   boundary: number,
   now: number,
 ): number | null;
+
+export function referenceChartView(
+  points: PricePoint[],
+  selected: Win,
+  now: number,
+): { series: PricePoint[]; mode: "recent" | "window"; range: Win };
+
+export function nearestObservation(points: PricePoint[], target: number): PricePoint | null;
+export function mergeObservedCandles(
+  candles: import("./window.mjs").Candle[],
+  ticks: PricePoint[],
+  gran: number,
+  asOf: number,
+  now: number,
+): import("./window.mjs").Candle[];

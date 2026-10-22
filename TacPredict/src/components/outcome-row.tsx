@@ -22,16 +22,16 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
           />
         </div>
       </div>
-      <span
-        title="Implied multiple from observed probability; not an executable quote"
-        className="shrink-0 text-sm tabular-nums text-muted-foreground"
-      >
-        {outcome.probabilityKnown !== false && outcome.probability > 0
-          ? `${(100 / outcome.probability).toFixed(2)}x`
-          : ""}
-      </span>
+      {outcome.probabilityKnown !== false && outcome.probability > 0 && (
+        <span
+          title="Implied multiple from observed probability; not an executable quote"
+          className="shrink-0 text-sm tabular-nums text-muted-foreground"
+        >
+          {(100 / outcome.probability).toFixed(2)}x
+        </span>
+      )}
       {probabilityLabel !== "Unavailable" && (
-        <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-sm font-semibold tabular-nums">
+        <span className="tp-probability grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-sm font-semibold tabular-nums">
           {probabilityLabel}
         </span>
       )}
