@@ -13,7 +13,9 @@ export const getSpotWindowData = createServerFn({ method: "GET" })
       .strict()
       .parse(v),
   )
-  .handler(async ({ data }) => (await import("./spot.server")).spotWindowData(data.asset, data.minutes));
+  .handler(async ({ data }) =>
+    (await import("./spot.server")).spotWindowData(data.asset, data.minutes),
+  );
 
 /** Latest price per asset; used when the live socket is not connected. */
 export const getSpotTickers = createServerFn({ method: "GET" }).handler(async () =>
@@ -36,3 +38,28 @@ export const spotTickersQueryOptions = queryOptions({
   staleTime: 2000,
   retry: 1,
 });
+
+/** Independently cached public reference OHLC; never used as settlement evidence. */
+export const getReferenceWindowData = createServerFn({ method: "GET" })
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        asset: assetSchema,
+        minutes: z.number().int().min(5).max(18000),
+      })
+      .strict()
+      .parse(v),
+  )
+  .handler(async ({ data }) =>
+    (await import("./reference.server")).referenceWindowData(data.asset, data.minutes),
+  );
+
+export const referenceWindowQueryOptions = (asset: UpDownAsset, minutes: number) =>
+  queryOptions({
+    queryKey: ["reference-window", asset, minutes],
+    queryFn: () => getReferenceWindowData({ data: { asset, minutes } }),
+    staleTime: 20000,
+    refetchInterval: 20000,
+    refetchIntervalInBackground: false,
+    retry: 1,
+  });

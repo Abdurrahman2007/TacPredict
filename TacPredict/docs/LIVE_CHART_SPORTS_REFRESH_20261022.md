@@ -19,3 +19,8 @@
 - Real touch events changed selected price/time without navigating away from Home.
 - Local-only fixture harness checked category logo loading and admin category/sort filtering at all three widths. No fixture market was written to production; the harness was removed before build.
 - No secret, signer, contract, market publication, trading activation or financial-state change is part of this update.
+
+## Production follow-up
+- Production verification found Coinbase Exchange HTTP429 on the chart-only dense feed. Reference charts now use the separately cached Coinbase Advanced public candles endpoint (no credentials), with strict real OHLC validation and a 20-second shared edge cache. Exchange settlement/oracle evidence requests are unchanged.
+- Official endpoint: https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/public/get-public-product-candles.md . All four products returned actual observed candles during verification; sparse markets retain gaps.
+- Private portfolio renders after hydration, preserving wallet/auth safeguards and eliminating server/client wallet markup mismatches. No trading activation or financial configuration changed.

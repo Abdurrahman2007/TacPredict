@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ChevronDown,
@@ -37,7 +37,20 @@ const periods = {
   YTD: "Year to Date",
   ALL: "All Time",
 } as const;
+const subscribeHydration = () => () => {};
 function PortfolioPage() {
+  const ready = useSyncExternalStore(
+    subscribeHydration,
+    () => true,
+    () => false,
+  );
+  return ready ? (
+    <PortfolioClient />
+  ) : (
+    <main className="tp-portfolio" aria-busy="true" aria-label="Loading portfolio" />
+  );
+}
+function PortfolioClient() {
   const wallet = useBaseWallet(),
     q = useNativePortfolio(),
     orders = useOwnProtocolOrders(),
