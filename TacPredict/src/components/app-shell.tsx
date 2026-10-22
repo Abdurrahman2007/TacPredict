@@ -1,13 +1,13 @@
 import { SiteFooter } from "./site-footer";
 import { Link, useLocation } from "@tanstack/react-router";
-import { House, LineChart, Wallet, Gift, Trophy, Info } from "lucide-react";
+import { House, Radio, Wallet, Gift, Trophy, Info } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { LoginButton } from "./login-dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 const navItems = [
   { to: "/" as const, label: "Home", icon: House },
-  { to: "/markets" as const, label: "Markets", icon: LineChart },
+  { to: "/markets" as const, label: "Markets", icon: Radio },
   { to: "/ranking" as const, label: "Ranking", icon: Trophy },
   { to: "/profile" as const, label: "Portfolio", icon: Wallet },
 ];
