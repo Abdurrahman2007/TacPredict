@@ -3,15 +3,15 @@ import { eventMarket } from "@/lib/markets/event-market";
 import { HomeMarketCard } from "@/components/home-market-card";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Flame, Sparkles, ArrowUp } from "lucide-react";
+import { useMemo } from "react";
+import { CalendarDays, ChevronRight, Flame, Sparkles, ArrowUp } from "lucide-react";
 import { UpDownSection } from "@/components/up-down-section";
 import { homeFeedListings } from "@/lib/markets/home-feed.mjs";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { eventDraftsQueryOptions } from "@/lib/agent/events.functions";
 import { sortListings } from "@/lib/markets/listing-sort.mjs";
 import type { Market } from "@/domain/markets/types";
-import { SECTIONS, marketSection, sectionOf, type Section } from "@/domain/markets/sections.mjs";
+import { marketSection, sectionOf, type Section } from "@/domain/markets/sections.mjs";
 import homeCss from "@/styles/home-reference.css?url";
 import updownCss from "@/styles/updown.css?url";
 
@@ -96,14 +96,6 @@ function HomePage() {
       ),
     ];
   }, [events.data, feed, native]);
-  const featured = useMemo(() => {
-    const ordered: Market[] = [];
-    for (const section of SECTIONS) {
-      const m = listings.find((m) => (marketSection(m) ?? sectionOf(m)) === section);
-      if (m) ordered.push(m);
-    }
-    return ordered;
-  }, [listings]);
   return (
     <div className="home-reference">
       <nav className="home-feed-tabs home-reference-tabs scrollbar-none" aria-label="Market feed">
@@ -133,7 +125,6 @@ function HomePage() {
           Native market data is temporarily unavailable. Please try again.
         </p>
       )}
-      {(feed === "Trending" || feed === "New") && <FeaturedCarousel markets={featured} />}
       {(feed === "Trending" || feed === "Live") && (
         <div className="home-crypto-chart">
           <UpDownSection markets={nativeFeed.markets} snapshotTime={nativeFeed.updatedAt} />
@@ -219,70 +210,6 @@ function HomeSection({
         {markets.slice(0, 5).map((m) => (
           <HomeMarketCard key={m.id} market={m} />
         ))}
-      </div>
-    </section>
-  );
-}
-const label = (m: Market | undefined) =>
-  m ? (marketSection(m) ?? sectionOf(m) ?? m.category) : "";
-function FeaturedCarousel({ markets }: { markets: Market[] }) {
-  const rail = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  if (!markets.length) return null;
-  const safe = Math.min(active, markets.length - 1);
-  const move = (index: number) => {
-    const next = (index + markets.length) % markets.length;
-    const item = rail.current?.children[next] as HTMLElement | undefined;
-    if (item && rail.current)
-      rail.current.scrollTo({
-        left: item.offsetLeft - rail.current.offsetLeft,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-      });
-  };
-  return (
-    <section className="home-featured" aria-label="Featured predictions">
-      <div
-        className="home-featured-rail scrollbar-none"
-        ref={rail}
-        onScroll={() => {
-          const el = rail.current;
-          if (el?.firstElementChild)
-            setActive(
-              Math.min(
-                markets.length - 1,
-                Math.round(
-                  el.scrollLeft / ((el.firstElementChild as HTMLElement).offsetWidth + 12),
-                ),
-              ),
-            );
-        }}
-      >
-        {markets.map((m) => (
-          <HomeMarketCard key={m.id} market={m} featured />
-        ))}
-      </div>
-      <div className="home-carousel-controls">
-        <button aria-label="Previous featured prediction" onClick={() => move(safe - 1)}>
-          <ChevronLeft size={16} />
-          {label(markets[safe])}
-        </button>
-        <div className="home-carousel-dots">
-          {markets.map((m, i) => (
-            <button
-              key={m.id}
-              aria-label={`Show featured ${label(m)} prediction`}
-              aria-pressed={safe === i}
-              className={safe === i ? "active" : ""}
-              onClick={() => move(i)}
-            />
-          ))}
-        </div>
-        <button aria-label="Next featured prediction" onClick={() => move(safe + 1)}>
-          Next
-          <ChevronRight size={16} />
-        </button>
       </div>
     </section>
   );
