@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimestamp, shortHash } from "@/lib/protocol/admin-rows.mjs";
 import {
@@ -7,6 +7,8 @@ import {
   setUserSuspended,
 } from "@/lib/protocol/admin-users.functions";
 import { matchesUserSearch, type AdminUser } from "@/lib/protocol/admin-users.mjs";
+import { getAdminUserDetails } from "@/lib/protocol/admin-dashboard.functions";
+import { adminMoney } from "@/lib/protocol/admin-dashboard.mjs";
 import { AddressLink, Badge, Card, Loaded, Notice, PageHeader, Tile } from "../admin-ui";
 
 type Tab = "all" | "admins" | "suspended";
@@ -41,7 +43,7 @@ export function UsersView({ view }: { view: string }) {
     <div className="adm-stack">
       <PageHeader
         title="Users"
-        subtitle="Accounts, linked wallets and admin access. Balances and positions come from Base and cannot be edited."
+        subtitle="Verified wallets · read-only balances"
         actions={
           <button
             type="button"
@@ -70,7 +72,9 @@ export function UsersView({ view }: { view: string }) {
               if (window.confirm(`${verb} ${u.email ?? u.id}?`))
                 void run(
                   suspend.mutateAsync({ userId: u.id, suspended }),
-                  suspended ? "Account suspended. They are signed out at next refresh." : "Account restored.",
+                  suspended
+                    ? "Account suspended. They are signed out at next refresh."
+                    : "Account restored.",
                 );
             }}
             onAdmin={(u, admin) => {
@@ -113,6 +117,7 @@ function UserList({
   onSuspend: (user: AdminUser, suspended: boolean) => void;
   onAdmin: (user: AdminUser, admin: boolean) => void;
 }) {
+  const [selected, setSelected] = useState<string | null>(null);
   const counts = useMemo(
     () => ({
       all: users.length,
@@ -124,7 +129,8 @@ function UserList({
   );
   const visible = users.filter(
     (u) =>
-      (tab === "all" || (tab === "admins" ? u.isAdmin : u.suspended)) && matchesUserSearch(u, search),
+      (tab === "all" || (tab === "admins" ? u.isAdmin : u.suspended)) &&
+      matchesUserSearch(u, search),
   );
 
   return (
@@ -182,65 +188,91 @@ function UserList({
                 <tr>
                   <th>Account</th>
                   <th>Wallet</th>
-                  <th>Joined</th>
-                  <th>Last seen</th>
-                  <th>Open positions</th>
+                  <th>Balance / trades</th>
+                  <th>Status</th>
                   <th aria-label="Actions" />
                 </tr>
               </thead>
               <tbody>
                 {visible.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ fontWeight: 650, overflowWrap: "anywhere" }}>
-                        {u.email ?? "No email (wallet sign-in)"}
-                      </div>
-                      <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
-                        {u.isAdmin ? <Badge tone="brand">Admin</Badge> : null}
-                        {u.suspended ? <Badge tone="bad">Suspended</Badge> : null}
-                        {u.id === actorId ? <Badge tone="mute">You</Badge> : null}
-                      </div>
-                    </td>
-                    <td>
-                      {u.wallets.length === 0 ? (
-                        <span className="adm-muted">None</span>
-                      ) : (
-                        u.wallets.map((w) => (
-                          <div key={w} title={w}>
-                            <AddressLink address={w} label={shortHash(w, 6, 4) ?? w} />
-                          </div>
-                        ))
-                      )}
-                    </td>
-                    <td>{formatTimestamp(u.createdAt) ?? "Unknown"}</td>
-                    <td>{formatTimestamp(u.lastSignInAt) ?? "Never"}</td>
-                    <td className="num">{u.openPositions}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <Fragment key={u.id}>
+                    <tr>
+                      <td>
+                        <div style={{ fontWeight: 650, overflowWrap: "anywhere" }}>
+                          {u.email ?? "No email (wallet sign-in)"}
+                        </div>
+                        <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                          {u.isAdmin ? <Badge tone="brand">Admin</Badge> : null}
+                          {u.suspended ? <Badge tone="bad">Suspended</Badge> : null}
+                          {u.id === actorId ? <Badge tone="mute">You</Badge> : null}
+                        </div>
+                      </td>
+                      <td>
+                        {u.wallets.length === 0 ? (
+                          <span className="adm-muted">None</span>
+                        ) : (
+                          u.wallets.map((w) => (
+                            <div key={w} title={w}>
+                              <AddressLink address={w} label={shortHash(w, 6, 4) ?? w} />
+                            </div>
+                          ))
+                        )}
+                      </td>
+                      <td>
                         <button
-                          type="button"
                           className="adm-btn"
-                          disabled={busy || (!u.suspended && (u.id === actorId || u.isAdmin))}
-                          title={
-                            !u.suspended && u.isAdmin
-                              ? "Remove the admin role first"
-                              : undefined
-                          }
-                          onClick={() => onSuspend(u, !u.suspended)}
+                          aria-expanded={selected === u.id}
+                          onClick={() => setSelected(selected === u.id ? null : u.id)}
                         >
-                          {u.suspended ? "Restore" : "Suspend"}
+                          {selected === u.id ? "Close details" : "View details"}
                         </button>
-                        <button
-                          type="button"
-                          className="adm-btn"
-                          disabled={busy || (u.isAdmin && u.id === actorId) || (!u.isAdmin && u.suspended)}
-                          onClick={() => onAdmin(u, !u.isAdmin)}
+                      </td>
+                      <td>
+                        <Badge tone={u.suspended ? "bad" : "ok"}>
+                          {u.suspended ? "Suspended" : "Active"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 6,
+                            flexWrap: "wrap",
+                            justifyContent: "flex-end",
+                          }}
                         >
-                          {u.isAdmin ? "Remove admin" : "Make admin"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          <button
+                            type="button"
+                            className="adm-btn"
+                            disabled={busy || (!u.suspended && (u.id === actorId || u.isAdmin))}
+                            title={
+                              !u.suspended && u.isAdmin ? "Remove the admin role first" : undefined
+                            }
+                            onClick={() => onSuspend(u, !u.suspended)}
+                          >
+                            {u.suspended ? "Restore" : "Suspend"}
+                          </button>
+                          <button
+                            type="button"
+                            className="adm-btn"
+                            disabled={
+                              busy || (u.isAdmin && u.id === actorId) || (!u.isAdmin && u.suspended)
+                            }
+                            onClick={() => onAdmin(u, !u.isAdmin)}
+                          >
+                            {u.isAdmin ? "Remove admin" : "Make admin"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {selected === u.id && (
+                      <tr className="adm-row-open">
+                        <td colSpan={5}>
+                          <UserDetails user={u} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
@@ -248,5 +280,61 @@ function UserList({
         )}
       </Card>
     </>
+  );
+}
+
+function UserDetails({ user }: { user: AdminUser }) {
+  const q = useQuery({
+    queryKey: ["admin-user-details", user.id],
+    queryFn: () => getAdminUserDetails({ data: { userId: user.id } }),
+    retry: 0,
+    staleTime: 30000,
+  });
+  return (
+    <div className="adm-stack">
+      <dl className="adm-kv">
+        <dt>Account</dt>
+        <dd className="adm-mono">{user.id}</dd>
+        <dt>Joined</dt>
+        <dd>{formatTimestamp(user.createdAt) ?? "Unavailable"}</dd>
+        <dt>Last seen</dt>
+        <dd>{formatTimestamp(user.lastSignInAt) ?? "Never"}</dd>
+        <dt>Open positions</dt>
+        <dd>{user.openPositions}</dd>
+      </dl>
+      <Loaded query={q} label="wallet balances">
+        {(d) => (
+          <>
+            <div className="adm-table-wrap">
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th>Verified wallet</th>
+                    <th>USDC balance</th>
+                    <th>Trades</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.wallets.map((w) => (
+                    <tr key={w.address}>
+                      <td>
+                        <AddressLink
+                          address={w.address}
+                          label={shortHash(w.address) ?? w.address}
+                        />
+                      </td>
+                      <td>{adminMoney(w.balanceAtomic)}</td>
+                      <td>{w.executions ?? "Unavailable"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!d.wallets.length && <p className="adm-caption">No verified wallets</p>}
+            <p className="adm-caption">{d.scope}. Balances cannot be edited.</p>
+          </>
+        )}
+      </Loaded>
+    </div>
   );
 }

@@ -14,11 +14,11 @@ type FormKey = "title" | "description" | "outcomes" | "rules" | "source" | "sour
 
 const FIELDS: { key: FormKey; label: string; rows: number }[] = [
   { key: "title", label: "Title", rows: 1 },
-  { key: "description", label: "Description / question detail", rows: 4 },
+  { key: "description", label: "Description", rows: 3 },
   { key: "outcomes", label: "Outcomes (comma-separated)", rows: 1 },
-  { key: "rules", label: "Resolution criteria", rows: 4 },
-  { key: "source", label: "Resolution source name", rows: 1 },
-  { key: "sourceUrl", label: "Evidence / source URL (https)", rows: 1 },
+  { key: "rules", label: "Rules", rows: 4 },
+  { key: "source", label: "Source", rows: 1 },
+  { key: "sourceUrl", label: "Source URL", rows: 1 },
 ];
 
 /**
@@ -29,19 +29,22 @@ export function CreateMarket() {
   const [tab, setTab] = useState<"crypto" | "matches">(() => (hasDraft() ? "matches" : "crypto"));
   return (
     <div className="adm-stack">
-      <PageHeader
-        title="Create market"
-        subtitle={
-          tab === "crypto"
-            ? "Pick a coin. Title, rules, times and the Up / Down outcomes are filled in for you."
-            : "Step 1 saves the terms. Step 2 publishes them on Base with your wallet. Trading stays paused until you unpause it."
-        }
-      />
+      <PageHeader title="Create market" />
       <div className="adm-tabs" role="group" aria-label="Market kind" style={{ margin: 0 }}>
-        <button type="button" className="adm-tab" aria-pressed={tab === "crypto"} onClick={() => setTab("crypto")}>
+        <button
+          type="button"
+          className="adm-tab"
+          aria-pressed={tab === "crypto"}
+          onClick={() => setTab("crypto")}
+        >
           Crypto Up / Down
         </button>
-        <button type="button" className="adm-tab" aria-pressed={tab === "matches"} onClick={() => setTab("matches")}>
+        <button
+          type="button"
+          className="adm-tab"
+          aria-pressed={tab === "matches"}
+          onClick={() => setTab("matches")}
+        >
           Football &amp; Cricket
         </button>
       </div>
@@ -67,6 +70,13 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
   });
   const [uploading, setUploading] = useState(false);
   const [templateTimes, setTemplateTimes] = useState<DraftTimes | null>(null);
+  const [manualTimes, setManualTimes] = useState<DraftTimes>({
+    openAt: "",
+    closeAt: "",
+    resolveAfter: "",
+    resolutionDeadline: "",
+  });
+  const activeTimes = templateTimes ?? manualTimes;
   const [tags, setTags] = useState<string[]>([]);
   const [fromEngine, setFromEngine] = useState(false);
 
@@ -75,7 +85,11 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
     const draft: Draft | null = takeDraft();
     if (!draft) return;
     const section: Section =
-      draft.subcategory === "Football" ? "Football" : draft.subcategory === "Cricket" ? "Cricket" : "Crypto";
+      draft.subcategory === "Football"
+        ? "Football"
+        : draft.subcategory === "Cricket"
+          ? "Cricket"
+          : "Crypto";
     setTemplateTimes(draft.times);
     setTags(draft.tags);
     setFromEngine(true);
@@ -114,14 +128,22 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
               sourceUrl: form.sourceUrl,
               category: terms.category,
               ...(terms.subcategory ? { subcategory: terms.subcategory } : {}),
-              ...(templateTimes ? { times: templateTimes } : {}),
+              times: activeTimes,
             },
             Date.now(),
-            { times: Boolean(templateTimes) },
+            { times: true },
           )
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form.title, form.outcomes, form.rules, form.sourceUrl, form.section, templateTimes],
+    [
+      form.title,
+      form.outcomes,
+      form.rules,
+      form.sourceUrl,
+      form.section,
+      templateTimes,
+      manualTimes,
+    ],
   );
 
   function edit(next: Partial<typeof form>) {
@@ -151,13 +173,19 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
     setNotice(null);
     const { image, section, ...fields } = form;
     void prepareNativeMarket({
-      data: { ...fields, ...termsForSection(section), outcomes: outcomeList, tags, ...(image ? { image } : {}) },
+      data: {
+        ...fields,
+        ...termsForSection(section),
+        outcomes: outcomeList,
+        tags,
+        ...(image ? { image } : {}),
+      },
     })
       .then((r) => {
         setPrepared(r);
         setNotice({
           tone: "info",
-          text: "Terms saved. Not published yet. Continue with step 2.",
+          text: "Saved. Review and sign to publish.",
         });
       })
       .catch((err) =>
@@ -171,38 +199,30 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
 
   return (
     <div className="adm-stack">
-      <Card title="Start from a draft">
-        <p className="adm-muted">
-          Football and Cricket matches are prepared on the Market engine page with their rules already written. Pick one
-          there and it opens here.
-        </p>
-        <div className="adm-tabs">
-          <Link to="/admin/$section" params={{ section: "engine" }} search={{ view: "fixtures" }} className="adm-btn">
-            Football &amp; Cricket matches
-          </Link>
-          {templateTimes && (
-            <button
-              className="adm-btn"
-              type="button"
-              onClick={() => {
-                setTemplateTimes(null);
-                setFromEngine(false);
-                setPrepared(null);
-              }}
-            >
-              Use custom times
-            </button>
-          )}
-        </div>
+      <div className="adm-inline">
+        <Link
+          to="/admin/$section"
+          params={{ section: "engine" }}
+          search={{ view: "fixtures" }}
+          className="adm-btn"
+        >
+          Use sports draft
+        </Link>
         {templateTimes && (
-          <p className="adm-muted">
-            {fromEngine ? "Draft from the Market engine. " : ""}UTC: {templateTimes.openAt.replace("T", " ")} to{" "}
-            {templateTimes.closeAt.replace("T", " ")}. Times are locked to these rules. Prepare a fresh draft if the
-            window is too close.
-          </p>
+          <button
+            className="adm-btn"
+            onClick={() => {
+              setTemplateTimes(null);
+              setFromEngine(false);
+              setPrepared(null);
+            }}
+          >
+            Custom timing
+          </button>
         )}
-      </Card>
-      <Card title="Step 1 · Market details">
+        {fromEngine && <span className="adm-caption">Draft loaded</span>}
+      </div>
+      <Card>
         <form
           style={{ display: "grid", gap: 14 }}
           onSubmit={(e) => {
@@ -242,88 +262,128 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
             </button>
           </div>
 
-          {FIELDS.map(({ key, label, rows }) => (
-            <label className="adm-field" key={key}>
-              {label}
-              <textarea
-                className="adm-textarea"
-                required
-                rows={rows}
-                disabled={busy || (key === "outcomes" && marketType === "binary")}
-                value={form[key]}
-                onChange={(e) => edit({ [key]: e.target.value } as Partial<typeof form>)}
-              />
-            </label>
-          ))}
-
-          <div className="adm-field">
-            Market picture (optional)
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              {form.image ? (
-                <img
-                  src={form.image}
-                  alt="Market picture preview"
-                  width={64}
-                  height={64}
-                  style={{
-                    borderRadius: 12,
-                    objectFit: "cover",
-                    border: "1px solid var(--adm-line)",
-                  }}
-                />
-              ) : null}
-              <label className="adm-btn" style={{ cursor: uploading ? "wait" : "pointer" }}>
-                {uploading ? "Uploading…" : form.image ? "Change picture" : "Choose picture"}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  hidden
-                  disabled={busy || uploading}
-                  onChange={(e) => {
-                    void pickImage(e.target.files?.[0]);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-              {form.image ? (
-                <button
-                  type="button"
-                  className="adm-btn"
-                  disabled={busy || uploading}
-                  onClick={() => edit({ image: "" })}
-                >
-                  Remove
-                </button>
-              ) : null}
-            </div>
-            <span className="adm-muted" style={{ fontSize: 12.5 }}>
-              PNG, JPEG or WebP. Resized automatically. The picture is locked into the market terms
-              with the rest of the metadata.
-            </span>
-          </div>
-
-          <div className="adm-field">
-            Section
-            <div className="adm-tabs" role="group" aria-label="Section" style={{ margin: 0 }}>
-              {SECTIONS.filter((name) => name !== "Crypto").map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  className="adm-tab"
-                  aria-pressed={form.section === name}
-                  disabled={busy}
-                  onClick={() => edit({ section: name })}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="adm-muted" style={{ margin: 0, fontSize: 12.5 }}>
-            Outcomes: {outcomeList.length ? outcomeList.join(" · ") : "none"} (2 to 8, all
-            different). Open and close times are set in step 2.
-          </p>
+          {(["Basic Info", "Rules", "Timing", "Resolution", "Settings"] as const).map(
+            (group, index) => (
+              <fieldset className="adm-form-section" key={group}>
+                <legend>
+                  <span>{index + 1}</span>
+                  {group}
+                </legend>
+                {group === "Timing" ? (
+                  <>
+                    <p className="adm-caption">UTC · betting closes before resolution</p>
+                    <div className="adm-form-columns">
+                      {(Object.keys(activeTimes) as (keyof DraftTimes)[]).map((key) => (
+                        <label className="adm-field" key={key}>
+                          {
+                            {
+                              openAt: "Opens",
+                              closeAt: "Closes",
+                              resolveAfter: "Resolve after",
+                              resolutionDeadline: "Resolution deadline",
+                            }[key]
+                          }
+                          <input
+                            className="adm-input"
+                            type="datetime-local"
+                            required
+                            readOnly={Boolean(templateTimes)}
+                            disabled={busy}
+                            value={activeTimes[key]}
+                            onChange={(e) => {
+                              setPrepared(null);
+                              setManualTimes((t) => ({ ...t, [key]: e.target.value }));
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                ) : group === "Settings" ? (
+                  <>
+                    <label className="adm-field">
+                      Sport
+                      <select
+                        className="adm-input"
+                        value={form.section}
+                        disabled={busy}
+                        onChange={(e) => edit({ section: e.target.value as Section })}
+                      >
+                        {SECTIONS.filter((n) => n !== "Crypto").map((n) => (
+                          <option key={n}>{n}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="adm-field">
+                      Picture · optional
+                      <input
+                        type="file"
+                        className="adm-input"
+                        accept="image/png,image/jpeg,image/webp"
+                        disabled={busy || uploading}
+                        onChange={(e) => {
+                          void pickImage(e.target.files?.[0]);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {form.image && (
+                      <div className="adm-inline">
+                        <img
+                          src={form.image}
+                          width={56}
+                          height={56}
+                          alt="Market preview"
+                          style={{ borderRadius: 12, objectFit: "cover" }}
+                        />
+                        <button
+                          className="adm-btn"
+                          type="button"
+                          onClick={() => edit({ image: "" })}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    <p className="adm-caption">
+                      {uploading ? "Uploading…" : "Terms lock after publication."}
+                    </p>
+                  </>
+                ) : (
+                  FIELDS.filter((f) =>
+                    group === "Basic Info"
+                      ? ["title", "description", "outcomes"].includes(f.key)
+                      : group === "Rules"
+                        ? f.key === "rules"
+                        : ["source", "sourceUrl"].includes(f.key),
+                  ).map(({ key, label, rows }) => (
+                    <label className="adm-field" key={key}>
+                      {label}
+                      {rows === 1 ? (
+                        <input
+                          className="adm-input"
+                          type={key === "sourceUrl" ? "url" : "text"}
+                          required
+                          disabled={busy || (key === "outcomes" && marketType === "binary")}
+                          value={form[key]}
+                          onChange={(e) => edit({ [key]: e.target.value })}
+                        />
+                      ) : (
+                        <textarea
+                          className="adm-textarea"
+                          required
+                          rows={rows}
+                          disabled={busy}
+                          value={form[key]}
+                          onChange={(e) => edit({ [key]: e.target.value })}
+                        />
+                      )}
+                    </label>
+                  ))
+                )}
+              </fieldset>
+            ),
+          )}
 
           {problems.length > 0 ? (
             <Notice tone="warn">
@@ -340,7 +400,18 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
             <button
               type="submit"
               className="adm-btn adm-btn-primary"
-              disabled={busy || uploading || outcomeList.length < 2 || problems.length > 0}
+              disabled={
+                busy ||
+                uploading ||
+                outcomeList.length < 2 ||
+                problems.length > 0 ||
+                !form.title.trim() ||
+                !form.description.trim() ||
+                !form.rules.trim() ||
+                !form.source.trim() ||
+                !form.sourceUrl.trim() ||
+                Object.values(activeTimes).some((v) => !v)
+              }
             >
               {busy ? "Saving…" : "Save market terms"}
             </button>
@@ -361,10 +432,11 @@ function SportsMarketForm({ initialSection }: { initialSection: Section }) {
         ) : null}
       </Card>
 
-      <Card title="Step 2 · Publish on Base">
+      <Card title="Review & publish">
         <NativeOperatorConsole
-          key={templateTimes?.openAt ?? "custom"}
-          initialTimes={templateTimes ?? undefined}
+          key={JSON.stringify(activeTimes)}
+          createOnly
+          initialTimes={activeTimes}
           prepared={prepared}
           outcomeCount={outcomeList.length || 2}
         />

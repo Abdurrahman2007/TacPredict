@@ -31,14 +31,9 @@ export type AdminNavItem =
 export const adminNavItems: AdminNavItem[] = [
   { kind: "overview", id: "overview", label: "Overview" },
   { kind: "page", id: "markets", label: "Markets", section: "markets", view: "all" },
-  { kind: "page", id: "create", label: "Create market", section: "markets", view: "create" },
-  { kind: "page", id: "pool", label: "Up/Down pool", section: "pool", view: "status" },
-  { kind: "page", id: "engine", label: "Market engine", section: "engine", view: "fixtures" },
-  { kind: "page", id: "resolution", label: "Resolution", section: "resolution", view: "pending" },
-  { kind: "page", id: "trades", label: "Trades", section: "trading", view: "trades" },
-  { kind: "page", id: "ranking", label: "Ranking", section: "ranking", view: "overview" },
+  { kind: "page", id: "create", label: "Create Market", section: "markets", view: "create" },
+  { kind: "page", id: "pool", label: "Up/Down Pool", section: "pool", view: "status" },
   { kind: "page", id: "users", label: "Users", section: "users", view: "users" },
-  { kind: "page", id: "blockchain", label: "Blockchain", section: "blockchain", view: "contracts" },
   { kind: "page", id: "settings", label: "Settings", section: "settings", view: "system" },
 ];
 
@@ -60,14 +55,6 @@ export const defaultViews: Record<AdminRouteSection, string> = {
 
 /** Tabs shown at the top of a section page. Sections without tabs are single pages. */
 export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; label: string }[]>> = {
-  markets: [
-    { view: "all", label: "All" },
-    { view: "live", label: "Live" },
-    { view: "upcoming", label: "Upcoming" },
-    { view: "closed", label: "Closed" },
-    { view: "resolving", label: "Resolving" },
-    { view: "resolved", label: "Resolved" },
-  ],
   pool: [
     { view: "status", label: "Status" },
     { view: "series", label: "Series" },

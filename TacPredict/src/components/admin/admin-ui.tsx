@@ -134,7 +134,7 @@ export function Loaded<T>({
   if (query.isError)
     return (
       <div className="adm-notice" data-tone="bad" role="alert">
-        {label} could not be loaded. Nothing has been estimated or substituted.{" "}
+        Could not load {label}.{" "}
         <button type="button" className="adm-link" onClick={() => void query.refetch()}>
           Retry
         </button>
