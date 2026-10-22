@@ -38,8 +38,8 @@ test("Marked duplicate price, history fallback and paragraph stack are absent", 
   const c = src("components/updown/coingecko-chart.tsx");
   for (const text of ["Recent history", "Source details", "cg-chart-heading", "minutes: 1440"])
     assert.ok(!c.includes(text));
-  assert.ok(c.includes("CoinGecko observations") || c.includes("CoinGecko chart"));
-  assert.ok(c.includes("beat={null}"));
+  assert.ok(c.includes("price chart"));
+  assert.ok(c.includes("beat={boundary}"));
   assert.ok(c.includes("summary = false"));
 });
 test("Admin-created BNB and long-duration detail charts support locked market times", () => {
@@ -60,7 +60,11 @@ test("compact cards have no repeated visible provider caption", () => {
   const c = src("components/updown/coingecko-chart.tsx");
   assert.ok(!c.includes('className="cg-attribution"'));
   assert.ok(c.includes("compact={summary}"));
-  assert.ok(src("components/updown/sections.tsx").includes("CoinGecko chart is display-only"));
+  assert.ok(
+    src("components/updown/sections.tsx").includes(
+      "Chart observations are not settlement evidence",
+    ),
+  );
 });
 test("chart is an interactive data-rendered SVG rather than a screenshot", () => {
   const c = src("components/updown/updown-chart.tsx");
@@ -86,7 +90,7 @@ test("removing repeated provider captions does not hide stale-data warnings", ()
 
 test("reference price windows do not masquerade as live prediction trading", () => {
   const s = src("components/up-down-section.tsx");
-  assert.ok(s.includes("PRICE WINDOW"));
+  assert.ok(s.includes("Reference price window only"));
   assert.ok(s.includes("poolConfig.data?.paused === false"));
   assert.ok(!s.includes(">LIVE "));
 });

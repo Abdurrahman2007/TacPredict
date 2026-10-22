@@ -6,7 +6,10 @@ import { POOL_DURATIONS } from "./pool.mjs";
 import type { PoolAsset } from "./pool.mjs";
 
 const asset = z.enum(["bitcoin", "ethereum", "solana", "bnb"]);
-const minutes = z.number().int().refine((v) => POOL_DURATIONS.includes(v), "Unsupported duration");
+const minutes = z
+  .number()
+  .int()
+  .refine((v) => POOL_DURATIONS.includes(v), "Unsupported duration");
 const start = z.number().int().positive();
 const user = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 
@@ -15,11 +18,18 @@ export const getPoolConfig = createServerFn({ method: "GET" }).handler(async () 
 );
 export const getPoolRound = createServerFn({ method: "GET" })
   .inputValidator((v: unknown) => z.object({ asset, minutes, start }).strict().parse(v))
-  .handler(async ({ data }) => (await import("./pool.server")).poolRound(data.asset, data.minutes, data.start));
+  .handler(async ({ data }) =>
+    (await import("./pool.server")).poolRound(data.asset, data.minutes, data.start),
+  );
 export const getPoolPosition = createServerFn({ method: "GET" })
   .inputValidator((v: unknown) => z.object({ asset, minutes, start, user }).strict().parse(v))
   .handler(async ({ data }) =>
-    (await import("./pool.server")).poolPosition(data.asset, data.minutes, data.start, data.user as Address),
+    (await import("./pool.server")).poolPosition(
+      data.asset,
+      data.minutes,
+      data.start,
+      data.user as Address,
+    ),
   );
 export const getPoolRecentPositions = createServerFn({ method: "GET" })
   .inputValidator((v: unknown) => z.object({ user }).strict().parse(v))
@@ -59,5 +69,26 @@ export const poolRecentQueryOptions = (who: string | null) =>
     staleTime: 10000,
     refetchInterval: 20000,
     enabled: Boolean(who),
+    retry: 1,
+  });
+
+/** Bounded, finalized on-chain history; a clock row alone never implies a round exists. */
+export const getPoolRoundHistory = createServerFn({ method: "GET" })
+  .inputValidator((v: unknown) => z.object({ asset, minutes, before: start }).strict().parse(v))
+  .handler(async ({ data }) =>
+    (await import("./pool.server")).poolRoundHistory(data.asset, data.minutes, data.before),
+  );
+export const poolHistoryQueryOptions = (
+  a: PoolAsset,
+  m: number,
+  before: number,
+  enabled: boolean,
+) =>
+  queryOptions({
+    queryKey: ["pool-history", a, m, before],
+    queryFn: () => getPoolRoundHistory({ data: { asset: a, minutes: m, before } }),
+    enabled: enabled && before > 0,
+    staleTime: 15000,
+    refetchInterval: 30000,
     retry: 1,
   });

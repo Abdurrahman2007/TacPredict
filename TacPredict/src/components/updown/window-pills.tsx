@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, LineChart } from "lucide-react";
+import { ChartCandlestick, ChevronDown, LineChart } from "lucide-react";
 import { clock, dayLabel, useTimeZone } from "@/lib/updown/use-clock";
 import {
   slugOf,
@@ -20,6 +20,8 @@ export function WindowPills({
   candles,
   gran,
   pastCount,
+  chartType = "line",
+  onToggleChart,
 }: {
   asset: UpDownAsset;
   minutes: number;
@@ -28,6 +30,8 @@ export function WindowPills({
   candles: Candle[] | undefined;
   gran: number;
   pastCount: number;
+  chartType?: "line" | "candles";
+  onToggleChart?: (() => void) | undefined;
 }) {
   const zone = useTimeZone();
   const current = windowStartFor(nowMs, minutes);
@@ -48,9 +52,21 @@ export function WindowPills({
 
   return (
     <div className="ud-pills" aria-label="Time windows">
-      <Link to="/up-down" className="ud-pill" aria-label="All Up/Down markets">
-        <LineChart size={18} />
-      </Link>
+      {onToggleChart ? (
+        <button
+          type="button"
+          className="ud-pill"
+          aria-label={chartType === "line" ? "Show sampled candles" : "Show line chart"}
+          title={chartType === "line" ? "Sampled candles" : "Line chart"}
+          onClick={onToggleChart}
+        >
+          {chartType === "line" ? <ChartCandlestick size={18} /> : <LineChart size={18} />}
+        </button>
+      ) : (
+        <Link to="/up-down" className="ud-pill" aria-label="All Up/Down markets">
+          <LineChart size={18} />
+        </Link>
+      )}
       <details className="ud-past" key={selected.start}>
         <summary className="ud-pill" style={{ listStyle: "none", cursor: "pointer" }}>
           Past <ChevronDown size={15} />

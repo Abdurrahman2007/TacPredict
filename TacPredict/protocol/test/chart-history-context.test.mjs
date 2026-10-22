@@ -47,10 +47,10 @@ test("duration bar is removed from detail and context range is visible", () => {
   assert.ok(!d.includes('className="ud-durations"'));
   assert.ok(d.includes("Starts in"));
   const c = src("components/updown/coingecko-chart.tsx");
-  assert.ok(c.includes("Recent price history"));
-  assert.ok(c.includes("clock(range.start"));
-  assert.ok(c.includes("History start"));
-  assert.ok(c.includes("Reload chart"));
+  assert.ok(src("components/updown/updown-chart.tsx").includes("clock(w.start"));
+  assert.ok(c.includes("w={range}"));
+  assert.ok(c.includes('"Beat:" : "Start:"'));
+  assert.ok(c.includes("Retry"));
   assert.ok(!c.includes("cg-attribution"));
 });
 test("full historical cache is separate from spot-only snapshot history", () => {

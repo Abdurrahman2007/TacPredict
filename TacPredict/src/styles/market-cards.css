@@ -92,3 +92,24 @@
     border-radius: 23px;
   }
 }
+
+/* Whole-card navigation keeps separate outcome targets and normal browser link behavior. */
+.tp-card {
+  position: relative;
+}
+.tp-card-hit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.tp-card-hit:focus-visible::after {
+  outline: 2px solid #bfceda;
+  outline-offset: 3px;
+}
+.tp-card-outcome,
+.tp-card-more {
+  position: relative;
+  z-index: 2;
+}

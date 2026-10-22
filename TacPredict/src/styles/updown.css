@@ -803,3 +803,209 @@
   font-weight: 400;
   line-height: 1.5;
 }
+
+/* Real, coded price cards: the stretched title link covers the card, not just its text. */
+.ud-home-card.tp-card {
+  position: relative;
+  padding: 20px;
+  border-radius: 26px;
+}
+.tp-card-hit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+}
+.tp-card-hit:focus-visible::after {
+  outline: 2px solid #bfceda;
+  outline-offset: 3px;
+}
+.tp-crypto-heading {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 16px 10px;
+}
+.tp-crypto-heading > img {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  grid-column: 1;
+  grid-row: 1;
+}
+.tp-crypto-copy {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.tp-crypto-title h3 {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+.tp-crypto-time {
+  font-size: 14px;
+  margin-top: 6px;
+}
+.tp-crypto-live {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+  color: #55c878;
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+.tp-crypto-live::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+.tp-price-summary {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+  gap: 12px;
+  margin: 22px 0 12px;
+}
+.tp-price-summary dt {
+  font-size: 14px;
+}
+.tp-price-summary dt::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8d9aa6;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.tp-price-summary dt.tp-current::before {
+  background: #315dff;
+}
+.tp-price-summary dd {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.tp-price-summary dd span {
+  font-size: 13px;
+  margin-left: 5px;
+  white-space: nowrap;
+}
+.tp-crypto-actions {
+  position: relative;
+  z-index: 2;
+  margin-top: 20px;
+  gap: 10px;
+}
+.ud-home-card .ud-outcome-up,
+.ud-home-card .ud-outcome-down {
+  min-height: 48px;
+  font-size: 16px;
+}
+.ud-home-card .cg-chart {
+  pointer-events: none;
+}
+.ud-home-card .cg-chart-retry {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  min-height: 44px;
+}
+.ud-home-card .ud-chart-empty {
+  min-height: 164px;
+}
+.ud-home-card .ud-chart svg {
+  cursor: pointer;
+}
+.cg-chart-retry {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+.ud-pill {
+  min-height: 44px;
+}
+.ud-pills {
+  overflow: visible;
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+.ud-past-menu {
+  width: min(270px, calc(100vw - 90px));
+}
+.ud-page .ud-prices dt {
+  font-size: 14px;
+}
+.ud-page .ud-prices dd {
+  font-size: clamp(18px, 4.7vw, 26px);
+}
+.ud-rules details summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ud-rules details summary::after {
+  content: "+";
+  color: #acb8be;
+}
+.ud-rules details[open] summary::after {
+  content: "−";
+}
+@media (min-width: 1000px) {
+  .ud-home-card.tp-card {
+    padding: 24px;
+  }
+  .tp-crypto-title h3 {
+    font-size: 20px;
+  }
+  .tp-price-summary dd {
+    font-size: 22px;
+  }
+}
+@media (max-width: 359px) {
+  .ud-home-card.tp-card {
+    padding: 16px;
+  }
+  .tp-price-summary dd {
+    font-size: 16px;
+  }
+  .tp-price-summary dd span {
+    display: block;
+    margin-left: 0;
+  }
+  .tp-crypto-title h3 {
+    font-size: 16px;
+  }
+  .tp-crypto-time {
+    font-size: 12px;
+  }
+}
+.pool-off-directions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.pool-off-directions > span {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 11px;
+  color: #acb8be;
+}
+.pool-off-directions button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+/* Past windows open above the control, clear of the fixed order/navigation bars. */
+.ud-past-menu {
+  top: auto;
+  bottom: 52px;
+  max-height: min(320px, 50dvh);
+}

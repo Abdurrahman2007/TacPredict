@@ -8,10 +8,17 @@ import { saveSeriesCopy, seriesCopyQueryOptions } from "@/lib/pool/pool-admin.fu
 import { setSeriesTx } from "@/lib/pool/pool-admin";
 import { cleanCopy, copyFor } from "@/lib/pool/series-copy.mjs";
 import type { PoolConfig } from "@/lib/pool/pool-types";
-import { POOL_ASSET_KEYS, POOL_DURATIONS, nextRoundStart, poolRules, type PoolAsset } from "@/lib/pool/pool.mjs";
+import {
+  POOL_ASSET_KEYS,
+  POOL_DURATIONS,
+  nextRoundStart,
+  poolRules,
+  type PoolAsset,
+} from "@/lib/pool/pool.mjs";
 import { ASSETS, durationLabel } from "@/lib/updown/window.mjs";
 import { Badge, Card, Loaded, Notice, PageHeader } from "../admin-ui";
 import { SigningCard, useSigning } from "./pool";
+import { RoundHistory } from "./round-history";
 
 type Signing = ReturnType<typeof useSigning>;
 type Saved = Parameters<typeof copyFor>[0];
@@ -24,7 +31,11 @@ const utc = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
   hour12: false,
 });
-const local = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+const local = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
 
 /**
  * Crypto comes first by coin. Picking BTC, ETH, SOL or BNB fills in everything: the title and
@@ -46,7 +57,11 @@ export function CryptoSeries() {
         <div
           role="group"
           aria-label="Coin"
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(168px, 1fr))", gap: 12 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(168px, 1fr))",
+            gap: 12,
+          }}
         >
           {POOL_ASSET_KEYS.map((key) => {
             const live = config.data
@@ -73,7 +88,11 @@ export function CryptoSeries() {
                   <span>{ASSETS[key].name}</span>
                   <span className="adm-muted" style={{ fontSize: 12, fontWeight: 500 }}>
                     {ASSETS[key].short} ·{" "}
-                    {live === null ? "…" : live === 0 ? "not live" : `${live} of ${POOL_DURATIONS.length} live`}
+                    {live === null
+                      ? "…"
+                      : live === 0
+                        ? "not live"
+                        : `${live} of ${POOL_DURATIONS.length} live`}
                   </span>
                 </span>
               </button>
@@ -84,12 +103,21 @@ export function CryptoSeries() {
 
       {asset ? (
         <Loaded query={config} label="pool contract">
-          {(data) => <AssetForm key={asset} asset={asset} config={data} saved={saved.data} signing={signing} />}
+          {(data) => (
+            <AssetForm
+              key={asset}
+              asset={asset}
+              config={data}
+              saved={saved.data}
+              signing={signing}
+            />
+          )}
         </Loaded>
       ) : (
         <Notice tone="info">Choose a coin above to continue.</Notice>
       )}
 
+      <RoundHistory key={asset ?? "bitcoin"} asset={asset ?? "bitcoin"} />
       <SigningCard signing={signing} />
     </div>
   );
@@ -128,7 +156,9 @@ function AssetForm({
   const sample = chosen[0] ?? POOL_DURATIONS[0] ?? 5;
 
   const toggle = (minutes: number) =>
-    setChosen((list) => (list.includes(minutes) ? list.filter((m) => m !== minutes) : [...list, minutes]));
+    setChosen((list) =>
+      list.includes(minutes) ? list.filter((m) => m !== minutes) : [...list, minutes],
+    );
 
   async function saveText() {
     if ("error" in clean) throw Error(clean.error);
@@ -142,7 +172,10 @@ function AssetForm({
     setMsg(null);
     try {
       await saveText();
-      setMsg({ tone: "info", text: "Title and description saved. The site shows them on the next refresh." });
+      setMsg({
+        tone: "info",
+        text: "Title and description saved. The site shows them on the next refresh.",
+      });
     } catch (error) {
       setMsg({ tone: "bad", text: error instanceof Error ? error.message : "Could not save." });
     } finally {
@@ -158,7 +191,10 @@ function AssetForm({
     try {
       await saveText();
       for (const minutes of target) {
-        setMsg({ tone: "info", text: `Turning on ${durationLabel(minutes)}… confirm in your wallet.` });
+        setMsg({
+          tone: "info",
+          text: `Turning on ${durationLabel(minutes)}… confirm in your wallet.`,
+        });
         await setSeriesTx(signing.wallet, pool, asset, minutes, true);
         done.push(durationLabel(minutes));
       }
@@ -170,7 +206,10 @@ function AssetForm({
       });
     } catch (error) {
       const reason = error instanceof Error ? error.message : "The transaction failed.";
-      setMsg({ tone: "bad", text: `${done.length ? `Already on: ${done.join(", ")}. ` : ""}${reason}` });
+      setMsg({
+        tone: "bad",
+        text: `${done.length ? `Already on: ${done.join(", ")}. ` : ""}${reason}`,
+      });
     } finally {
       setBusy(null);
       await queryClient.invalidateQueries({ queryKey: ["pool-config"] });
@@ -216,7 +255,10 @@ function AssetForm({
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Badge tone="ok">1 · Up</Badge>
               <Badge tone="bad">2 · Down</Badge>
-              <span className="adm-muted" style={{ fontSize: 12.5, fontWeight: 500, alignSelf: "center" }}>
+              <span
+                className="adm-muted"
+                style={{ fontSize: 12.5, fontWeight: 500, alignSelf: "center" }}
+              >
                 Order and names cannot be changed.
               </span>
             </div>
@@ -270,7 +312,8 @@ function AssetForm({
                     <td>
                       {next ? (
                         <>
-                          {utc.format(next)} UTC <span className="adm-muted">· {local.format(next)} your time</span>
+                          {utc.format(next)} UTC{" "}
+                          <span className="adm-muted">· {local.format(next)} your time</span>
                         </>
                       ) : (
                         "…"
@@ -300,9 +343,14 @@ function AssetForm({
       <Card title="4 · Go live">
         {!pool ? (
           <Notice tone="warn">
-            The pool contract is not deployed yet, so a series cannot go live. You can still save the title and
-            description now. Deploy it in{" "}
-            <Link to="/admin/$section" params={{ section: "pool" }} search={{ view: "setup" }} className="adm-link">
+            The pool contract is not deployed yet, so a series cannot go live. You can still save
+            the title and description now. Deploy it in{" "}
+            <Link
+              to="/admin/$section"
+              params={{ section: "pool" }}
+              search={{ view: "setup" }}
+              className="adm-link"
+            >
               Up / Down pool → Setup
             </Link>
             .
@@ -326,7 +374,9 @@ function AssetForm({
           <button
             type="button"
             className="adm-btn adm-btn-primary"
-            disabled={busy !== null || problem !== null || !pool || !signing.ready || chosen.length === 0}
+            disabled={
+              busy !== null || problem !== null || !pool || !signing.ready || chosen.length === 0
+            }
             onClick={() => void onGoLive()}
           >
             {busy === "live" ? "Going live…" : "Go live"}
@@ -334,7 +384,8 @@ function AssetForm({
         </div>
         {!signing.ready && pool ? (
           <p className="adm-muted" style={{ margin: "10px 0 0", fontSize: 12.5 }}>
-            Connect the administrator wallet on Base and tick the approval box below to enable Go live.
+            Connect the administrator wallet on Base and tick the approval box below to enable Go
+            live.
           </p>
         ) : null}
         {msg ? (

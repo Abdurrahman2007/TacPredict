@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from "react";
+import { observedCandles } from "@/lib/updown/chart-window.mjs";
 import { clock, useTimeZone } from "@/lib/updown/use-clock";
 import { formatUsd, type PricePoint, type UpDownAsset, type Win } from "@/lib/updown/window.mjs";
 
@@ -26,6 +27,8 @@ export function UpDownChart({
   live,
   source = "Coinbase",
   compact = false,
+  interactive = true,
+  chartType = "line",
 }: {
   w: Win;
   series: PricePoint[];
@@ -34,6 +37,8 @@ export function UpDownChart({
   live: boolean;
   source?: string;
   compact?: boolean;
+  interactive?: boolean;
+  chartType?: "line" | "candles";
 }) {
   const H = compact ? 176 : 232;
   const gradient = useId().replace(/:/g, "");
@@ -66,6 +71,14 @@ export function UpDownChart({
   const { low, high, x, y } = geometry;
   const last = series[series.length - 1]!;
   const color = "#315dff";
+  const candles = observedCandles(series, w);
+  const lastColor = beat === null ? color : last.price >= beat ? "#28b357" : "#ff333d";
+  const beatTagY =
+    beat !== null && Math.abs(y(beat) - y(last.price)) < 30
+      ? Math.max(T + 12, y(beat) - 30)
+      : beat !== null
+        ? y(beat)
+        : 0;
   const observedProbe = series.find((p) => p.time === probe?.time) ?? null;
   const selectedIndex = observedProbe ? series.indexOf(observedProbe) : series.length - 1;
   const points = series.map((p) => `${x(p.time).toFixed(1)},${y(p.price).toFixed(1)}`);
@@ -90,14 +103,15 @@ export function UpDownChart({
   return (
     <div
       className="ud-chart ud-chart-interactive"
-      role="slider"
-      tabIndex={0}
+      role={interactive ? "slider" : "img"}
+      tabIndex={interactive ? 0 : undefined}
       aria-label={`${asset} price chart. Drag or use arrow keys to inspect real observations.`}
-      aria-valuemin={0}
-      aria-valuemax={Math.max(0, series.length - 1)}
-      aria-valuenow={selectedIndex}
+      aria-valuemin={interactive ? 0 : undefined}
+      aria-valuemax={interactive ? Math.max(0, series.length - 1) : undefined}
+      aria-valuenow={interactive ? selectedIndex : undefined}
       aria-valuetext={`${formatUsd(series[selectedIndex]!.price, asset)} at ${clock(series[selectedIndex]!.time, zone, true)}; ${source}`}
       onKeyDown={(e) => {
+        if (!interactive) return;
         if (e.key === "Escape") setProbe(null);
         if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
           e.preventDefault();
@@ -118,9 +132,11 @@ export function UpDownChart({
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={`${asset} ${source} price history. Latest ${formatUsd(last.price, asset)}${beat !== null ? `, price to beat ${formatUsd(beat, asset)}` : ""}.`}
-        onPointerDown={(e) => inspect(e.clientX, e.currentTarget.getBoundingClientRect())}
+        onPointerDown={(e) =>
+          interactive && inspect(e.clientX, e.currentTarget.getBoundingClientRect())
+        }
         onPointerMove={(e) => {
-          if (e.pointerType === "mouse" || e.buttons === 1)
+          if (interactive && (e.pointerType === "mouse" || e.buttons === 1))
             inspect(e.clientX, e.currentTarget.getBoundingClientRect());
         }}
         onPointerLeave={(e) => {
@@ -134,7 +150,11 @@ export function UpDownChart({
           </linearGradient>
         </defs>
         {ticks
-          .filter((t) => Math.abs(y(t) - y(last.price)) > 17)
+          .filter(
+            (t) =>
+              Math.abs(y(t) - y(last.price)) > 17 &&
+              (beat === null || Math.abs(y(t) - beatTagY) > 17),
+          )
           .map((t) => (
             <g key={t}>
               <line
@@ -165,21 +185,54 @@ export function UpDownChart({
             <text x={L + 2} y={y(beat) - 6} fontSize="10.5" fill="#b8c4d9">
               Price to beat
             </text>
-            <rect x={W - R + 4} y={y(beat) - 9} width={R - 4} height="18" rx="9" fill="#2d363d" />
-            <text x={W - R + 8} y={y(beat) + 4} fontSize="10.5" fill="#e8edf3">
+            <rect x={W - R + 4} y={beatTagY - 9} width={R - 4} height="18" rx="9" fill="#2d363d" />
+            <text x={W - R + 8} y={beatTagY + 4} fontSize="10.5" fill="#e8edf3">
               {tick(beat)}
             </text>
           </g>
         )}
-        <path d={area} fill={`url(#${gradient})`} />
-        <path
-          d={line}
-          fill="none"
-          stroke={color}
-          strokeWidth="2.2"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+        {chartType === "candles" ? (
+          candles.map((c) => {
+            const width = Math.max(
+              3,
+              Math.min(12, ((W - L - R) / Math.max(1, candles.length)) * 0.65),
+            );
+            const center = x(c.time);
+            const fill = c.close >= c.open ? "#55c878" : "#ff3d35";
+            return (
+              <g key={c.time}>
+                <line
+                  x1={center}
+                  x2={center}
+                  y1={y(c.high)}
+                  y2={y(c.low)}
+                  stroke={fill}
+                  strokeWidth="1.4"
+                />
+                <rect
+                  x={center - width / 2}
+                  y={Math.min(y(c.open), y(c.close))}
+                  width={width}
+                  height={Math.max(1.2, Math.abs(y(c.open) - y(c.close)))}
+                  rx=".7"
+                  fill={fill}
+                />
+              </g>
+            );
+          })
+        ) : (
+          <>
+            <path d={area} fill={`url(#${gradient})`} />
+            <path
+              d={line}
+              fill="none"
+              stroke={color}
+              strokeWidth="2.2"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </>
+        )}
         {live && (
           <circle className="ud-pulse" cx={x(last.time)} cy={y(last.price)} r="4" fill={color} />
         )}
@@ -192,7 +245,7 @@ export function UpDownChart({
           strokeWidth="2"
         />
         <g aria-label={`Latest observed price ${formatUsd(last.price, asset)}`}>
-          <rect x={W - 79} y={y(last.price) - 11} width="78" height="22" rx="11" fill="#315dff" />
+          <rect x={W - 79} y={y(last.price) - 11} width="78" height="22" rx="11" fill={lastColor} />
           <text x={W - 40} y={y(last.price) + 4} textAnchor="middle" fontSize="10.5" fill="#fff">
             {formatUsd(last.price, asset)}
           </text>

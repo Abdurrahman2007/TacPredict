@@ -2,6 +2,7 @@ import { outcomeColor } from "@/lib/outcome-color";
 import type { MarketOutcome } from "@/domain/markets/types";
 import { pct } from "@/lib/protocol/display.mjs";
 export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: number }) {
+  const probabilityLabel = pct(outcome);
   const binary = /^(yes|no|up|down)$/i.test(outcome.label);
   return (
     <>
@@ -29,9 +30,11 @@ export function OutcomeRow({ outcome, index }: { outcome: MarketOutcome; index: 
           ? `${(100 / outcome.probability).toFixed(2)}x`
           : ""}
       </span>
-      <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-sm font-semibold tabular-nums">
-        {pct(outcome)}
-      </span>
+      {probabilityLabel !== "Unavailable" && (
+        <span className="grid min-h-11 min-w-16 shrink-0 place-items-center rounded-full bg-secondary px-3 text-sm font-semibold tabular-nums">
+          {probabilityLabel}
+        </span>
+      )}
     </>
   );
 }

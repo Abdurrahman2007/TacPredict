@@ -415,7 +415,7 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
           <span>{status.label}</span>
         </div>
         <div className="ud-row">
-          <span>Price to beat · CoinGecko</span>
+          <span>Price to beat</span>
           <i />
           <span className="tabular-nums">
             {price(r.startPrice) ??
@@ -426,7 +426,7 @@ export function PoolRoundCard({ asset, minutes, startMs, nowMs, config, round }:
         </div>
         {price(r.endPrice) && (
           <div className="ud-row">
-            <span>End price · CoinGecko</span>
+            <span>End price</span>
             <i />
             <span className="tabular-nums">{price(r.endPrice)}</span>
           </div>
@@ -560,8 +560,14 @@ export function PoolOffBar({ message }: { message: string }) {
   if (!ready) return null;
   return createPortal(
     <div className="ud-bar" style={{ bottom: navHeight }} aria-label="Betting status">
-      <div className="ud-bar-inner pool-bar-closed">
-        <span>{message}</span>
+      <div className="ud-bar-inner pool-off-directions" title={message}>
+        <button type="button" data-side="up" disabled aria-label={`Up — ${message}`}>
+          Up
+        </button>
+        <button type="button" data-side="down" disabled aria-label={`Down — ${message}`}>
+          Down
+        </button>
+        <span role="status">Trading opens soon</span>
       </div>
     </div>,
     document.body,
