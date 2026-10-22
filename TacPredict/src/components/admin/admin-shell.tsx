@@ -34,7 +34,11 @@ function useActiveNav() {
     if (!isAdminRouteSection(section) || section !== item.section) return false;
     // "Create market" is its own entry; every other Markets tab belongs to "Markets".
     const current = view ?? defaultViews[item.section];
-    return item.id === "create" ? current === "create" : item.id === "markets" ? current !== "create" : true;
+    return item.id === "create"
+      ? current === "create"
+      : item.id === "markets"
+        ? current !== "create"
+        : true;
   };
   return { pathname, isActive };
 }
@@ -77,7 +81,13 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
               const active = isActive(item);
               if (item.kind === "overview")
                 return (
-                  <Link key={item.id} to="/admin" className="adm-nav-item" data-active={active} onClick={close}>
+                  <Link
+                    key={item.id}
+                    to="/admin"
+                    className="adm-nav-item"
+                    data-active={active}
+                    onClick={close}
+                  >
                     {item.label}
                   </Link>
                 );
