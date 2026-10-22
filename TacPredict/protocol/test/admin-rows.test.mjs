@@ -36,7 +36,8 @@ test("market rows split into code/title and keep prepared terms separate", () =>
   const market = parseMarketRow({
     id: "uuid-1",
     label: "TACP-8453-000001 · Will BTC be above $120K · by Dec?",
-    detail: "On-chain ID 1\nStatus UPCOMING\nQuestion 0xq\nCondition 0xc\nClose 2026-12-31 00:00:00+00",
+    detail:
+      "On-chain ID 1\nStatus UPCOMING\nQuestion 0xq\nCondition 0xc\nClose 2026-12-31 00:00:00+00",
     usdcAtoms: "5000000",
     observedAt: "2026-10-12",
   });
@@ -52,7 +53,10 @@ test("market rows split into code/title and keep prepared terms separate", () =>
     usdcAtoms: null,
     observedAt: null,
   });
-  assert.deepEqual([terms.kind, terms.title, terms.metadataHash], ["terms", "Draft title", "0xabc"]);
+  assert.deepEqual(
+    [terms.kind, terms.title, terms.metadataHash],
+    ["terms", "Draft title", "0xabc"],
+  );
   const counts = countMarketsByStatus([market, terms]);
   assert.equal(counts.UPCOMING, 1);
   assert.equal(counts.OPEN, 0);
@@ -67,7 +71,14 @@ test("trade and resolution rows expose only recorded fields", () => {
     observedAt: "2026-10-13",
   });
   assert.deepEqual(
-    [trade.market, trade.outcomeIndex, trade.sharesAtomic, trade.priceAtomic, trade.txHash, trade.usdcAtomic],
+    [
+      trade.market,
+      trade.outcomeIndex,
+      trade.sharesAtomic,
+      trade.priceAtomic,
+      trade.txHash,
+      trade.usdcAtomic,
+    ],
     ["TACP-8453-000001", "0", "2000000", "620000", "0xdead", "1240000"],
   );
   const resolution = parseResolutionRow({
@@ -86,7 +97,13 @@ test("trade and resolution rows expose only recorded fields", () => {
 test("blockchain rows give checkpoint and verified contract addresses", () => {
   const a = (n) => "0x" + String(n).repeat(40);
   const parsed = parseBlockchainRows([
-    { id: "checkpoint", label: "Finalized checkpoint", detail: "52457637\nCanonical hash 0xhash", usdcAtoms: null, observedAt: "t" },
+    {
+      id: "checkpoint",
+      label: "Finalized checkpoint",
+      detail: "52457637\nCanonical hash 0xhash",
+      usdcAtoms: null,
+      observedAt: "t",
+    },
     {
       id: "deployment",
       label: "Verified Base deployment",
@@ -118,4 +135,12 @@ test("timestamps are labelled UTC only when the offset is zero", () => {
   assert.equal(formatTimestamp("2026-10-12 08:21:33+06"), "2026-10-12 08:21:33+06");
   assert.equal(formatTimestamp(""), null);
   assert.equal(formatTimestamp(null), null);
+});
+
+import { createdMarketCount } from "../../src/lib/protocol/admin-rows.mjs";
+test("created-market count subtracts next ID without loss of precision", () => {
+  assert.equal(createdMarketCount("1"), "0");
+  assert.equal(createdMarketCount("2"), "1");
+  assert.equal(createdMarketCount("9007199254740995"), "9007199254740994");
+  for (const v of [null, undefined, "", "0", "-1", "x"]) assert.equal(createdMarketCount(v), null);
 });

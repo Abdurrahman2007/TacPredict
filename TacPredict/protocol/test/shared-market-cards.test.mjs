@@ -83,3 +83,10 @@ test("removing repeated provider captions does not hide stale-data warnings", ()
   assert.ok(c.includes("snapshot.data?.stale"));
   assert.ok(c.includes("Delayed prices"));
 });
+
+test("reference price windows do not masquerade as live prediction trading", () => {
+  const s = src("components/up-down-section.tsx");
+  assert.ok(s.includes("PRICE WINDOW"));
+  assert.ok(s.includes("poolConfig.data?.paused === false"));
+  assert.ok(!s.includes(">LIVE "));
+});

@@ -37,10 +37,21 @@ export function useNativePortfolio() {
       if (registered.error) throw Error("Verified wallet link is unavailable.");
       const { data, error } = await client.rpc("get_my_protocol_portfolio");
       if (error) throw Error("Native portfolio is temporarily unavailable.");
+      const wallets = await client
+        .from("protocol_wallets")
+        .select("address")
+        .eq("user_id", user!.id)
+        .not("verified_at", "is", null);
+      if (wallets.error) throw Error("Verified wallet ownership is unavailable.");
+      const verifiedWallets = z
+        .array(z.object({ address: z.string().regex(/^0x[0-9a-fA-F]{40}$/) }))
+        .parse(wallets.data)
+        .map((w) => w.address);
       const activity = await client.rpc("get_my_protocol_activity");
       return {
         ...portfolioSchema.parse(data),
-        walletLinked: Boolean(registered.data),
+        walletLinked: verifiedWallets.length > 0,
+        verifiedWallets,
         activity: activity.error
           ? null
           : z

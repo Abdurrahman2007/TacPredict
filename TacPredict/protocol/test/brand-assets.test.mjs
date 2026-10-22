@@ -17,15 +17,18 @@ test("token logos are the real upstream icons, never hand-drawn text badges", ()
   assert.ok(read("public/brand/crypto/LICENSE.md").includes("cryptocurrency-icons"));
 });
 
-test("opening animation uses only real shipped logos, carries no price figures and stays reload-based", () => {
+test("opening animation uses only real shipped logos, carries no price figures and is session-once and skippable", () => {
   const ui = read("src/components/brand-intro.tsx");
   for (const name of ["btc", "eth", "sol", "bnb"]) assert.ok(ui.includes(`key: "${name}"`));
   assert.ok(ui.includes("cryptoLogoUrl"));
   assert.ok(read("src/lib/crypto-logo.ts").includes("/brand/crypto/"));
   assert.ok(!/\$\s?\d|\d{2,}[.,]\d{2}/.test(ui), "no price-like figures in the opening scene");
   assert.ok(ui.includes("prefers-reduced-motion"));
-  assert.ok(ui.includes("useState(true)"));
-  assert.ok(!/localStorage|sessionStorage|Math\.random/.test(ui));
+  assert.ok(ui.includes("useState(false)"));
+  assert.ok(!/localStorage|Math\.random/.test(ui));
+  assert.ok(ui.includes("sessionStorage.getItem"));
+  assert.ok(ui.includes("catch"));
+  assert.ok(ui.includes("Skip intro"));
   const css = read("src/styles/prediction-intro.css");
   assert.ok(css.includes("prefers-reduced-motion: reduce"));
   assert.ok(css.includes("visibility: hidden"), "the scene removes itself even before scripts run");

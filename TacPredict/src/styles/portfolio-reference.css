@@ -841,8 +841,133 @@
 }
 
 /* Separate funding actions visually from the performance card. */
-.tp-portfolio .tp-actions { padding-bottom: 28px; }
-@media(min-width:640px) { .tp-portfolio .tp-actions { padding-bottom: 32px; } }
+.tp-portfolio .tp-actions {
+  padding-bottom: 28px;
+}
+@media (min-width: 640px) {
+  .tp-portfolio .tp-actions {
+    padding-bottom: 32px;
+  }
+}
 
 /* Direct wallet collateral: no app deposit/withdraw layer. */
-.tp-portfolio .tp-balances { padding-bottom: 28px; }
+.tp-portfolio .tp-balances {
+  padding-bottom: 28px;
+}
+
+.tp-account-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 16px 0 24px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.tp-account-context p {
+  flex-basis: 100%;
+  max-width: 680px;
+  line-height: 1.6;
+}
+.tp-detail-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+  align-items: end;
+}
+.tp-detail-filters label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  min-width: 0;
+}
+.tp-detail-filters select,
+.tp-detail-filters input {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.tp-detail-filters :focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.tp-portfolio .tp-unavailable {
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
+  color: var(--tp-muted);
+}
+.tp-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
+.tp-label {
+  flex-wrap: wrap;
+}
+.tp-account-context {
+  padding: 0 16px;
+}
+@media (max-width: 420px) {
+  .tp-detail-filters {
+    gap: 10px;
+  }
+  .tp-detail-filters label {
+    flex: 1 1 120px;
+  }
+}
+
+.tp-portfolio-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+.tp-portfolio-heading h1 {
+  margin-right: auto;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.tp-account-context {
+  padding: 0;
+  margin: 4px 0 20px;
+}
+.tp-account-context details {
+  flex-basis: 100%;
+}
+.tp-account-context summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--foreground);
+}
+.tp-account-context summary::after {
+  content: "+";
+  margin-left: 8px;
+}
+.tp-account-context details[open] summary::after {
+  content: "−";
+}
+.tp-account-context details p {
+  margin-top: 4px;
+}
+
+.tp-periods button,
+.tp-filters button,
+.tp-search {
+  min-height: 44px;
+}
+.tp-account-context summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
