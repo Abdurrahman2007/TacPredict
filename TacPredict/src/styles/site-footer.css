@@ -115,9 +115,9 @@
 }
 .footer-columns {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
-  max-width: 900px;
+  max-width: 1104px;
 }
 .footer-columns h2 {
   margin: 0 0 12px;
@@ -251,8 +251,5 @@
 @media (max-width: 639px) {
   .footer-columns {
     grid-template-columns: 1fr 1fr;
-  }
-  .footer-support {
-    grid-column: 1 / -1;
   }
 }
