@@ -23,3 +23,7 @@ A native CLOB detail still uses its Coinbase evidence for its price-to-beat/curr
 - 166 fast regression tests passed, including exact/non-future boundaries, first eligible reference samples, sampled OHLC, UTC history alignment, non-overlapping pages, no fabricated settlement and nonblocking navigation. These tests are included in the CI command where relevant.
 - Local Home-card/detail QA at 320/390/1280 pixels used recorded public production observations, not fabricated fixture prices. Whole-card navigation, real price rendering, line/candle toggle, Past links, no page errors and no page overflow passed. Missing/native-market paths remain fail-closed.
 - Admin time-history component QA at 390/1280 passed for row count, pagination and page overflow. This was a local component harness, not a claim of authenticated production-admin E2E or a funded Mainnet test.
+
+## Time control refinement
+
+Past opens an accessible bottom sheet. Each historical time links to its selected window; unknown results remain neutral rather than invented. Only current and next windows appear beside Past. Live view follows the UTC boundary every second; fixed historical selections stay fixed. Keyboard Escape restores focus. Checked at 320, 390 and 1280px, including a five-minute rollover and history selection.

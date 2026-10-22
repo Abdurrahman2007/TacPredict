@@ -7,6 +7,7 @@ import {
   observedCandles,
 } from "../../src/lib/updown/chart-window.mjs";
 import { historyWindows, historyState } from "../../src/lib/updown/round-history.mjs";
+import { windowsAround, resolveWindow } from "../../src/lib/updown/window.mjs";
 const src = (p) => readFileSync(new URL("../../src/" + p, import.meta.url), "utf8");
 test("boundary labels need an exact, real, non-future observation", () => {
   assert.equal(
@@ -116,4 +117,23 @@ test("detail metadata cannot block reference navigation", () => {
   const s = src("routes/up-down_.$asset.tsx");
   assert.ok(s.includes("void context.queryClient.prefetchQuery"));
   assert.ok(!s.includes("await context.queryClient.ensureQueryData"));
+});
+
+test("time controls roll current into Past and show exactly one next window", () => {
+  const before = Date.UTC(2026, 9, 22, 12, 44, 59);
+  const after = before + 1000;
+  const a = windowsAround(before, 5, 12, 1);
+  const b = windowsAround(after, 5, 12, 1);
+  assert.equal(a.length, 14);
+  assert.equal(b.length, 14);
+  assert.equal(a.at(-1).start, b.at(-2).start);
+  assert.equal(a.at(-2).start, b.at(-3).start);
+  assert.equal(b.at(-1).start - a.at(-1).start, 300000);
+  assert.equal(resolveWindow(undefined, after, 5).start, b.at(-2).start);
+  assert.equal(resolveWindow(a.at(-2).start, after, 5).start, a.at(-2).start);
+  const ui = src("components/updown/window-pills.tsx");
+  assert.ok(ui.includes("windowsAround(nowMs, minutes, pastCount, 1)"));
+  assert.ok(ui.includes("DialogContent"));
+  assert.ok(ui.includes("onClick={() => setOpen(false)}"));
+  assert.ok(!ui.includes("No data"));
 });

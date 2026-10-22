@@ -1016,3 +1016,121 @@
 .tp-crypto-actions > a {
   pointer-events: auto;
 }
+@media (max-width: 359px) {
+  .ud-pills {
+    gap: 6px;
+  }
+  .ud-pill {
+    min-width: 44px;
+    padding-inline: 10px;
+    gap: 5px;
+    font-size: 12px;
+  }
+}
+
+/* History sits above navigation and order controls, like the reference sheet. */
+.ud-history-overlay {
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.48);
+}
+.ud-history-sheet {
+  z-index: 111;
+  top: auto !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  max-height: 68dvh;
+  transform: none !important;
+  --tw-translate-x: 0px !important;
+  --tw-translate-y: 0px !important;
+  translate: 0px 0px !important;
+  display: block;
+  padding: 10px 16px max(16px, env(safe-area-inset-bottom));
+  border: 1px solid #263238;
+  border-bottom: 0;
+  border-radius: 28px 28px 0 0;
+  background: #0e171b;
+  color: #f3f5f6;
+  animation: none !important;
+}
+.ud-history-sheet > button:last-child {
+  top: 2px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: #acb8be;
+}
+.ud-history-handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 4px;
+  background: #29343a;
+  margin: 0 auto 20px;
+}
+.ud-history-list {
+  max-height: calc(68dvh - 60px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.ud-history-list > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 56px;
+  padding: 10px 4px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+}
+.ud-history-list > a:hover,
+.ud-history-list > a[aria-current="page"] {
+  background: #1d282e;
+}
+.ud-history-list > a:focus-visible {
+  outline: 2px solid #6b9cff;
+  outline-offset: -2px;
+}
+.ud-history-time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.ud-history-day,
+.ud-history-unknown {
+  color: #acb8be;
+}
+.ud-history-day {
+  font-size: 16px;
+}
+.ud-history-result {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+}
+.ud-history-result.is-up {
+  background: #1c9c4b;
+}
+.ud-history-result.is-down {
+  background: #ef3340;
+}
+.ud-chevron-open {
+  transform: rotate(180deg);
+}
+@media (min-width: 640px) {
+  .ud-history-sheet {
+    left: 50%;
+    right: auto;
+    max-width: 640px;
+    transform: translateX(-50%) !important;
+  }
+}
