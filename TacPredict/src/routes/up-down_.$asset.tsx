@@ -27,8 +27,9 @@ export const Route = createFileRoute("/up-down_/$asset")({
       meta: [{ title: `${asset ? ASSETS[asset].name : "Up/Down"} Up or Down — TacPredict` }],
     };
   },
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(nativeMarketFeedQueryOptions).catch(() => null);
+  loader: ({ context }) => {
+    // Reference price navigation must not wait for a slow database/indexer read.
+    void context.queryClient.prefetchQuery(nativeMarketFeedQueryOptions);
   },
   notFoundComponent: () => <div className="py-16 text-center">Market not found.</div>,
   component: UpDownAssetPage,

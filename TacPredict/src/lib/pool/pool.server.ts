@@ -2,7 +2,13 @@ import { createPublicClient, http, keccak256, parseAbi, stringToHex, type Addres
 import { base } from "viem/chains";
 import { ERC20_ABI_TEXT, POOL_ABI_TEXT } from "./abi";
 import { configuredPoolAddress } from "./deployment";
-import { POOL_ASSET_KEYS, durationSeconds, POOL_DURATIONS, poolAssetId, type PoolAsset } from "./pool.mjs";
+import {
+  POOL_ASSET_KEYS,
+  durationSeconds,
+  POOL_DURATIONS,
+  poolAssetId,
+  type PoolAsset,
+} from "./pool.mjs";
 
 export const poolAbi = parseAbi(POOL_ABI_TEXT);
 export const erc20Abi = parseAbi(ERC20_ABI_TEXT);
@@ -46,19 +52,22 @@ export async function poolConfig(): Promise<PoolConfig> {
   if (!address) return empty;
   return cached(`config:${address}`, 4000, async () => {
     const pub = client();
-    const pairs = POOL_ASSET_KEYS.flatMap((asset) => POOL_DURATIONS.map((minutes) => ({ asset, minutes })));
-    const [feeBps, minBet, maxPerUser, maxPool, paused, ownerBalance, treasury] = await pub.multicall({
-      allowFailure: false,
-      contracts: [
-        { address, abi: poolAbi, functionName: "feeBps" },
-        { address, abi: poolAbi, functionName: "minBet" },
-        { address, abi: poolAbi, functionName: "maxPerUser" },
-        { address, abi: poolAbi, functionName: "maxPoolPerWindow" },
-        { address, abi: poolAbi, functionName: "bettingPaused" },
-        { address, abi: poolAbi, functionName: "ownerBalance" },
-        { address, abi: poolAbi, functionName: "treasury" },
-      ],
-    });
+    const pairs = POOL_ASSET_KEYS.flatMap((asset) =>
+      POOL_DURATIONS.map((minutes) => ({ asset, minutes })),
+    );
+    const [feeBps, minBet, maxPerUser, maxPool, paused, ownerBalance, treasury] =
+      await pub.multicall({
+        allowFailure: false,
+        contracts: [
+          { address, abi: poolAbi, functionName: "feeBps" },
+          { address, abi: poolAbi, functionName: "minBet" },
+          { address, abi: poolAbi, functionName: "maxPerUser" },
+          { address, abi: poolAbi, functionName: "maxPoolPerWindow" },
+          { address, abi: poolAbi, functionName: "bettingPaused" },
+          { address, abi: poolAbi, functionName: "ownerBalance" },
+          { address, abi: poolAbi, functionName: "treasury" },
+        ],
+      });
     const enabled = await pub.multicall({
       allowFailure: false,
       contracts: pairs.map(({ asset, minutes }) => ({
@@ -77,16 +86,26 @@ export async function poolConfig(): Promise<PoolConfig> {
       paused: Boolean(paused),
       ownerBalance: String(ownerBalance),
       treasury: String(treasury),
-      series: Object.fromEntries(pairs.map(({ asset, minutes }, i) => [`${asset}:${minutes}`, Boolean(enabled[i])])),
+      series: Object.fromEntries(
+        pairs.map(({ asset, minutes }, i) => [`${asset}:${minutes}`, Boolean(enabled[i])]),
+      ),
     };
   });
 }
 
 function roundArgs(asset: PoolAsset, minutes: number, startMs: number) {
-  return [poolAssetId(asset) ?? 0, durationSeconds(minutes), BigInt(Math.floor(startMs / 1000))] as const;
+  return [
+    poolAssetId(asset) ?? 0,
+    durationSeconds(minutes),
+    BigInt(Math.floor(startMs / 1000)),
+  ] as const;
 }
 
-export async function poolRound(asset: PoolAsset, minutes: number, startMs: number): Promise<PoolRound | null> {
+export async function poolRound(
+  asset: PoolAsset,
+  minutes: number,
+  startMs: number,
+): Promise<PoolRound | null> {
   const address = configuredPoolAddress();
   if (!address) return null;
   return cached(`round:${address}:${asset}:${minutes}:${startMs}`, 3000, async () => {
@@ -147,7 +166,8 @@ export async function poolRecentPositions(user: Address, nowMs: number): Promise
     for (const minutes of POOL_DURATIONS) {
       const size = minutes * 60000;
       const current = Math.floor(nowMs / size) * size;
-      for (let i = -(LOOKBACK[minutes] ?? 6); i <= 1; i += 1) targets.push({ asset, minutes, start: current + i * size });
+      for (let i = -(LOOKBACK[minutes] ?? 6); i <= 1; i += 1)
+        targets.push({ asset, minutes, start: current + i * size });
     }
   const pub = client();
   const positions = await pub.multicall({
@@ -183,17 +203,81 @@ export async function poolRecentPositions(user: Address, nowMs: number): Promise
   }));
 }
 
-export type PoolRoleStatus = { isReporter: boolean; isAdmin: boolean; isGuardian: boolean; ethBalance: string };
+export type PoolRoleStatus = {
+  isReporter: boolean;
+  isAdmin: boolean;
+  isGuardian: boolean;
+  ethBalance: string;
+};
 const role = (name: string) => keccak256(stringToHex(name));
 export async function poolRoleStatus(who: Address): Promise<PoolRoleStatus | null> {
   const address = configuredPoolAddress();
   if (!address) return null;
   const pub = client();
   const [isReporter, isAdmin, isGuardian, balance] = await Promise.all([
-    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [role("REPORTER_ROLE"), who] }),
-    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [`0x${"00".repeat(32)}`, who] }),
-    pub.readContract({ address, abi: poolAbi, functionName: "hasRole", args: [role("GUARDIAN_ROLE"), who] }),
+    pub.readContract({
+      address,
+      abi: poolAbi,
+      functionName: "hasRole",
+      args: [role("REPORTER_ROLE"), who],
+    }),
+    pub.readContract({
+      address,
+      abi: poolAbi,
+      functionName: "hasRole",
+      args: [`0x${"00".repeat(32)}`, who],
+    }),
+    pub.readContract({
+      address,
+      abi: poolAbi,
+      functionName: "hasRole",
+      args: [role("GUARDIAN_ROLE"), who],
+    }),
     pub.getBalance({ address: who }),
   ]);
   return { isReporter, isAdmin, isGuardian, ethBalance: String(balance) };
+}
+
+export async function poolRoundHistory(asset: PoolAsset, minutes: number, before: number) {
+  const { historyWindows } = await import("../updown/round-history.mjs");
+  const windows = historyWindows(Date.now(), minutes, before);
+  const address = configuredPoolAddress();
+  if (!address)
+    return { blockNumber: null, rows: windows.map((window) => ({ ...window, round: null })) };
+  return cached(`history:${address}:${asset}:${minutes}:${windows[0]!.start}`, 15000, async () => {
+    const pub = client();
+    const block = await pub.getBlock({ blockTag: "finalized" });
+    const readings = await pub.multicall({
+      blockNumber: block.number,
+      allowFailure: true,
+      contracts: windows.map((w) => ({
+        address,
+        abi: poolAbi,
+        functionName: "getWindow" as const,
+        args: roundArgs(asset, minutes, w.start),
+      })),
+    });
+    return {
+      blockNumber: String(block.number),
+      rows: windows.map((window, i) => {
+        const reading = readings[i];
+        if (!reading || reading.status !== "success")
+          return { ...window, round: null, readError: true };
+        const r = reading.result;
+        const round: PoolRound = {
+          up: String(r.upPool),
+          down: String(r.downPool),
+          feeBps: Number(r.feeBps),
+          state: Number(r.state),
+          result: Number(r.result),
+          startPrice: String(r.startPrice),
+          endPrice: String(r.endPrice),
+          startObservedAt: Number(r.startObservedAt),
+          endObservedAt: Number(r.endObservedAt),
+          claimOpensAt: Number(r.claimOpensAt),
+        };
+        return { ...window, round, readError: false };
+      }),
+    };
+  });
 }

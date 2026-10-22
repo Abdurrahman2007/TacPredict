@@ -1,9 +1,13 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { cryptoHistoryQueryOptions, cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import { chartView } from "@/lib/updown/chart-window.mjs";
-import { ASSETS, deltaInfo, formatUsd, type UpDownAsset, type Win } from "@/lib/updown/window.mjs";
-import { clock, useTimeZone } from "@/lib/updown/use-clock";
+import { usePriceWindow } from "@/lib/updown/use-price-window";
+import {
+  ASSETS,
+  deltaInfo,
+  formatUsd,
+  type PricePoint,
+  type UpDownAsset,
+  type Win,
+} from "@/lib/updown/window.mjs";
 import { UpDownChart } from "./updown-chart";
 
 /** Sampled prices, not tick-by-tick. Chart data never changes locked settlement evidence. */
@@ -11,41 +15,39 @@ export function CoinGeckoChart({
   asset,
   window: selected,
   summary = false,
+  evidence,
+  chartType = "line",
 }: {
   asset: UpDownAsset;
   window: Win;
   summary?: boolean;
+  chartType?: "line" | "candles";
+  evidence?: { points: PricePoint[]; beat: number | null; source: string } | undefined;
 }) {
-  const snapshot = useQuery(cryptoMarketQueryOptions);
-  const history = useQuery(cryptoHistoryQueryOptions(asset));
-  const zone = useTimeZone();
-  const view = useMemo(
-    () =>
-      chartView(
-        [...(history.data ?? []), ...(snapshot.data?.histories[asset] ?? [])],
-        selected,
-        Date.now(),
-      ),
-    [history.data, snapshot.data, asset, selected.start, selected.end],
-  );
-  const { series, range, mode } = view;
+  const feed = usePriceWindow(asset, selected);
+  const { snapshot, history, pending } = feed;
+  const { series, range, mode } = evidence
+    ? chartView(evidence.points, selected, Date.now())
+    : feed;
+  const boundary = evidence ? evidence.beat : feed.boundary;
   const first = series[0];
   const last = series.at(-1);
-  const delta = deltaInfo(last?.price, first?.price);
+  const reference = boundary ?? first?.price ?? null;
+  const delta = deltaInfo(last?.price, reference);
   return (
-    <section className="cg-chart" aria-label={`${ASSETS[asset].name} CoinGecko chart`}>
+    <section className="cg-chart" aria-label={`${ASSETS[asset].name} price chart`}>
       {summary && (
         <dl className="tp-price-summary">
           <div>
-            <dt title="First displayed CoinGecko observation; not the locked settlement price">
-              {mode === "recent" ? "History start" : "Reference"}
+            <dt title="Observed reference price; settlement follows the market rules">
+              {boundary !== null ? "Beat:" : "Start:"}
             </dt>
-            <dd>{first ? formatUsd(first.price, asset) : "Unavailable"}</dd>
+            <dd>{reference !== null ? formatUsd(reference, asset) : pending ? "Loading…" : "—"}</dd>
           </div>
           <div>
-            <dt className="tp-current">{mode === "recent" ? "Latest" : "Now"}</dt>
+            <dt className="tp-current">Now:</dt>
             <dd className="tp-current">
-              {last ? formatUsd(last.price, asset) : "Unavailable"}
+              {last ? formatUsd(last.price, asset) : pending ? "Loading…" : "—"}
               {delta && series.length > 1 && (
                 <span className={delta.direction === "down" ? "ud-down" : "ud-up"}>
                   {delta.direction === "down" ? "↘" : "↗"}{" "}
@@ -61,31 +63,21 @@ export function CoinGeckoChart({
           </div>
         </dl>
       )}
-      {mode === "recent" && series.length > 1 && (
-        <div className="cg-chart-context" aria-label="Displayed chart time range">
-          <span>Recent price history</span>
-          <span>
-            {clock(range.start, zone)} – {clock(range.end, zone)}
-          </span>
-        </div>
-      )}
       {series.length ? (
         <UpDownChart
           w={range}
           series={series}
           compact={summary}
-          beat={null}
+          chartType={chartType}
+          beat={boundary}
           asset={asset}
-          live={false}
-          source="CoinGecko"
+          live={mode === "window" && Date.now() < selected.end}
+          interactive={!summary}
+          source={evidence?.source ?? "USD reference observations"}
         />
       ) : (
         <div className="ud-chart ud-chart-empty" role="status">
-          <span>
-            {history.isPending || snapshot.isPending
-              ? "Loading chart…"
-              : "Price history temporarily unavailable"}
-          </span>
+          <span>{pending ? "Loading chart…" : "Price feed paused"}</span>
         </div>
       )}
       {series.length < 2 && !history.isPending && (
@@ -97,7 +89,7 @@ export function CoinGeckoChart({
             void snapshot.refetch();
           }}
         >
-          Reload chart
+          Retry
         </button>
       )}
       {snapshot.data?.stale && (

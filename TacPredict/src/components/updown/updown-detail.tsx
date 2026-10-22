@@ -5,12 +5,12 @@ import type { Market } from "@/domain/markets/types";
 import { ArrowLeft } from "lucide-react";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { spotWindowQueryOptions } from "@/lib/updown/spot.functions";
-import { cryptoMarketQueryOptions } from "@/lib/market-data.functions";
+import { useLivePrice } from "@/lib/updown/live-prices";
+import { usePriceWindow } from "@/lib/updown/use-price-window";
 import { poolConfigQueryOptions, poolRoundQueryOptions } from "@/lib/pool/pool.functions";
 import { fromScaled } from "@/lib/pool/pool.mjs";
 import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
 import { copyFor } from "@/lib/pool/series-copy.mjs";
-import { useLivePrice } from "@/lib/updown/live-prices";
 import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
 import {
   ASSETS,
@@ -21,6 +21,7 @@ import {
   matchNativeMarket,
   pastCountFor,
   priceToBeat,
+  seriesForWindow,
   resolveWindow,
   slugOf,
   windowResult,
@@ -54,6 +55,7 @@ export function UpDownDetail({
   loadedAt: number;
   initialSide?: "up" | "down" | undefined;
 }) {
+  const [chartType, setChartType] = useState<"line" | "candles">("line");
   const info = ASSETS[asset];
   const nowMs = useNow(loadedAt);
   const zone = useTimeZone();
@@ -75,35 +77,54 @@ export function UpDownDetail({
     ...spotWindowQueryOptions(asset, lookbackFor(pastNeeded), 30000),
     enabled: split && nowMs > 0,
   });
-  const live = useLivePrice(asset);
   const feed = useQuery(nativeMarketFeedQueryOptions);
+  const live = useLivePrice(asset);
+  const market = matchNativeMarket(feed.data?.markets, asset, w);
 
   const candles = spot.data?.candles;
   const gran = (spot.data?.granularity ?? 60) * 1000;
-  const beat = priceToBeat(candles, w.start, gran);
+  const nativeBeat = priceToBeat(candles, w.start, gran);
+  const nativeCurrent =
+    state === "past"
+      ? (windowResult(candles, w, gran)?.close ?? null)
+      : (live.price ?? spot.data?.trades.at(-1)?.price ?? candles?.at(-1)?.close ?? null);
+  const nativePoints = seriesForWindow({
+    candles,
+    trades: spot.data?.trades,
+    ticks: live.ticks,
+    w,
+    nowMs,
+    gran,
+  });
   const result = state === "past" ? windowResult(candles, w, gran) : null;
-  const lastTrade = spot.data?.trades[spot.data.trades.length - 1]?.price ?? null;
-  const lastCandle = candles?.[candles.length - 1]?.close ?? null;
-  const current =
-    state === "past" ? (result?.close ?? null) : (live.price ?? lastTrade ?? lastCandle);
   // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
   const poolConfig = useQuery(poolConfigQueryOptions);
-  const poolOn = Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const poolOn =
+    Boolean(poolConfig.data?.address) && poolConfig.data?.series[`${asset}:${minutes}`] === true;
   const poolRound = useQuery(poolRoundQueryOptions(asset, minutes, w.start, poolOn));
-  const gecko = useQuery({ ...cryptoMarketQueryOptions, enabled: poolOn });
+  const priceFeed = usePriceWindow(asset, w, nowMs);
   const poolBeat =
-    poolRound.data && BigInt(poolRound.data.startPrice) > 0n ? fromScaled(poolRound.data.startPrice) : null;
+    poolRound.data && BigInt(poolRound.data.startPrice) > 0n
+      ? fromScaled(poolRound.data.startPrice)
+      : null;
   const poolEnd =
-    poolRound.data && BigInt(poolRound.data.endPrice) > 0n ? fromScaled(poolRound.data.endPrice) : null;
-  const geckoNow = gecko.data?.[asset]?.price ?? null;
+    poolRound.data && BigInt(poolRound.data.endPrice) > 0n
+      ? fromScaled(poolRound.data.endPrice)
+      : null;
+  const geckoNow = priceFeed.series.at(-1)?.price ?? null;
   // Title and description the administrator saved for this coin (or the built-in default text).
   const savedCopy = useQuery({ ...seriesCopyQueryOptions, enabled: poolOn });
   const seriesCopy = copyFor(savedCopy.data, asset);
 
-  const shownBeat = poolOn ? poolBeat : beat;
-  const shownCurrent = poolOn ? (state === "past" ? poolEnd : geckoNow) : current;
+  const shownBeat = poolOn ? poolBeat : market ? nativeBeat : priceFeed.boundary;
+  const shownCurrent = poolOn
+    ? state === "past"
+      ? poolEnd
+      : geckoNow
+    : market
+      ? nativeCurrent
+      : geckoNow;
   const delta = deltaInfo(shownCurrent, shownBeat);
-  const market = matchNativeMarket(feed.data?.markets, asset, w);
 
   const remaining = state === "live" ? w.end - nowMs : state === "upcoming" ? w.start - nowMs : 0;
   const countdown = formatCountdown(remaining);
@@ -111,6 +132,7 @@ export function UpDownDetail({
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
   const windowText = `${dayLabel(w.start, zone)}, ${clock(w.start, zone)} – ${sameDay ? "" : `${dayLabel(w.end, zone)}, `}${clock(w.end, zone)}`;
 
+  const clockReady = nowMs > 0;
   const hero = useRef<HTMLDivElement>(null);
   const [islandOn, setIslandOn] = useState(false);
   useEffect(() => {
@@ -124,16 +146,19 @@ export function UpDownDetail({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [nowMs > 0]);
+  }, [clockReady]);
 
   const deltaText = delta ? formatUsd(Math.abs(delta.abs), asset) : null;
+  const poolResult =
+    poolRound.data?.state === 1 ? (poolRound.data.result === 1 ? "Up" : "Down") : null;
+  const settledResult = poolOn ? poolResult : market ? result?.outcome : null;
   const stateText =
     state === "live"
       ? `LIVE ${countdown}`
       : state === "upcoming"
         ? `IN ${countdown}`
-        : result
-          ? result.outcome
+        : settledResult
+          ? settledResult
           : "ENDED";
 
   const island = {
@@ -188,15 +213,21 @@ export function UpDownDetail({
           </div>
           <div className="ud-countdown" data-state={state} aria-live="off">
             {state === "upcoming" && <span className="ud-countdown-label">Starts in</span>}
-            {state === "past" ? (result ? result.outcome : "Ended") : countdown}
+            {state === "past" ? (settledResult ?? "Ended") : countdown}
           </div>
         </div>
 
-        {poolOn ? <p className="ud-sub ud-desc">{seriesCopy.description}</p> : null}
-
         <dl className="ud-prices">
           <div>
-            <dt>Price to beat · {poolOn ? "CoinGecko" : "Coinbase"}</dt>
+            <dt
+              title={
+                poolOn
+                  ? "Reported round start price"
+                  : "Reference observation; settlement follows the market rules"
+              }
+            >
+              Price to beat
+            </dt>
             <dd>
               {shownBeat !== null
                 ? formatUsd(shownBeat, asset)
@@ -204,27 +235,25 @@ export function UpDownDetail({
                   ? "Set at start"
                   : poolOn
                     ? "Waiting for the reading"
-                    : spot.isPending
+                    : priceFeed.pending
                       ? "Loading…"
-                      : "Unavailable"}
+                      : "Pending"}
             </dd>
           </div>
           <div>
             <dt>
-              {poolOn
-                ? state === "past"
-                  ? "Final · CoinGecko"
-                  : "Now · CoinGecko"
-                : state === "past"
-                  ? "Final · Coinbase"
-                  : "Oracle · Coinbase"}
+              {state === "past"
+                ? poolOn || market
+                  ? "Final price"
+                  : "Last price"
+                : "Current price"}
             </dt>
             <dd>
               {shownCurrent !== null
                 ? formatUsd(shownCurrent, asset)
-                : live.status === "connecting" || spot.isPending
+                : priceFeed.pending
                   ? "Loading…"
-                  : "Unavailable"}
+                  : "—"}
               {delta && deltaText && (
                 <span className="ud-delta" data-dir={delta.direction}>
                   {delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : ""}{" "}
@@ -236,15 +265,28 @@ export function UpDownDetail({
         </dl>
       </div>
 
-      <CoinGeckoChart asset={asset} window={w} />
+      <CoinGeckoChart
+        asset={asset}
+        window={w}
+        chartType={chartType}
+        evidence={
+          poolOn
+            ? { points: priceFeed.series, beat: poolBeat, source: "Reported round reference" }
+            : market
+              ? { points: nativePoints, beat: nativeBeat, source: "Coinbase" }
+              : undefined
+        }
+      />
       <WindowPills
         asset={asset}
         minutes={minutes}
         nowMs={nowMs}
         selected={w}
-        candles={split ? history.data?.candles : candles}
+        candles={poolOn || !market ? undefined : split ? history.data?.candles : candles}
         gran={((split ? history.data?.granularity : spot.data?.granularity) ?? 60) * 1000}
         pastCount={pastCountFor(minutes)}
+        chartType={chartType}
+        onToggleChart={() => setChartType((t) => (t === "line" ? "candles" : "line"))}
       />
 
       {poolOn && poolConfig.data ? (
@@ -257,7 +299,11 @@ export function UpDownDetail({
             config={poolConfig.data}
             round={poolRound.data ?? null}
           />
-          <PoolRulesCard asset={asset} minutes={minutes} feeBps={poolRound.data?.feeBps || poolConfig.data.feeBps} />
+          <PoolRulesCard
+            asset={asset}
+            minutes={minutes}
+            feeBps={poolRound.data?.feeBps || poolConfig.data.feeBps}
+          />
           <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
         </>
       ) : (

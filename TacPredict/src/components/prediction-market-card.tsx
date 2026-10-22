@@ -32,7 +32,11 @@ export function PredictionMarketCard({
         <span>{marketSection(market) ?? market.category}</span>
         <time dateTime={market.endsAt}>{close}</time>
       </div>
-      <Link to="/markets/$marketId" params={{ marketId: market.id }} className="tp-card-title">
+      <Link
+        to="/markets/$marketId"
+        params={{ marketId: market.id }}
+        className="tp-card-title tp-card-hit"
+      >
         <MarketIcon market={market} className="size-9 shrink-0" />
         <h3>{market.title}</h3>
       </Link>

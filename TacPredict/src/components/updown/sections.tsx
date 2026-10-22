@@ -92,22 +92,30 @@ function MyPositions({ market }: { market: Market }) {
 }
 
 export function PositionsCard({ market }: { market: Market | null }) {
+  const [tab, setTab] = useState("positions");
   if (market) return <MyPositions market={market} />;
   return (
     <section className="ud-card" aria-label="Your positions">
       <div className="ud-tabs">
-        <button type="button" aria-pressed="true">
+        <button
+          type="button"
+          aria-pressed={tab === "positions"}
+          onClick={() => setTab("positions")}
+        >
           Positions
         </button>
-        <button type="button" aria-pressed="false" disabled>
+        <button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>
           History
         </button>
       </div>
-      <p className="ud-muted">No positions</p>
+      <p className="ud-muted">{tab === "positions" ? "No positions" : "No history"}</p>
       <div className="ud-row" style={{ borderTop: "1px solid var(--ud-line)", marginTop: 8 }}>
         <span>Total</span>
         <i />
-        <b>Unavailable</b>
+        <b>—</b>
+        <Link to="/profile" className="ud-muted">
+          View All ↗
+        </Link>
       </div>
     </section>
   );
@@ -115,10 +123,9 @@ export function PositionsCard({ market }: { market: Market | null }) {
 
 export function StatsCard({ market }: { market: Market | null }) {
   const rows: [string, string][] = [
-    ["Open interest", usdcShort(market?.native?.openInterestAtomic)],
-    ["Total volume", volumeText(market?.volume)],
-    ["Traders", market ? String(market.participants) : "Unavailable"],
-    ["Settlement", market?.native ? "$1 per share if correct" : "Price tracking only"],
+    ["Open interest", market?.native ? usdcShort(market.native.openInterestAtomic) : "—"],
+    ["Total volume", market ? volumeText(market.volume) : "—"],
+    ["Traders", market ? String(market.participants) : "—"],
   ];
   return (
     <section className="ud-card ud-statistics" aria-label="Statistics">
@@ -143,33 +150,20 @@ export function RulesCard({
   minutes: number;
   market: Market | null;
 }) {
-  const name = ASSETS[asset].name;
   return (
     <section className="ud-card ud-rules" aria-label="Rules summary">
-      <h2>Rules Summary</h2>
-      <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
-        Each {durationLabel(minutes)} window runs on the UTC clock. The price to beat is the open of
-        the first Coinbase {ASSETS[asset].product} 60-second candle in the window. The final price
-        is the close of its last 60-second candle. Up wins if the final price is the same as or
-        higher than the price to beat; Down wins if it is lower. {name} oracle values use Coinbase.
-        The separate CoinGecko chart is display-only and is never substituted for locked settlement
-        evidence. Home chart reference and Now values are CoinGecko observations, not settlement
-        prices. Sampled prices are not tick-by-tick. When the selected window has fewer than two
-        observations, the chart displays up to one hour of preceding price history, labelled with
-        its actual times. This context is not the selected window's settlement evidence.
-      </p>
-      {market ? (
-        <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
-          {market.resolutionCriteria}{" "}
+      <details>
+        <summary>Rules Summary</summary>
+        <p className="ud-muted" style={{ lineHeight: 1.7, marginTop: 10 }}>
+          {market?.resolutionCriteria ??
+            `${ASSETS[asset].name} · ${durationLabel(minutes)} reference window. No prediction market is active for this window. Chart observations are not settlement evidence.`}
+        </p>
+        {market && (
           <a href={market.sourceUrl} target="_blank" rel="noopener noreferrer" className="ud-up">
             Source ↗
           </a>
-        </p>
-      ) : (
-        <p className="ud-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
-          There is no TacPredict market for this window yet, so it is shown for price tracking only.
-        </p>
-      )}
+        )}
+      </details>
     </section>
   );
 }

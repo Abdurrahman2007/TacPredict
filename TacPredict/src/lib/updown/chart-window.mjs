@@ -39,3 +39,45 @@ export function chartView(points, selected, now) {
           : selected,
   };
 }
+
+/** An exact observed boundary, never a nearest sample or a future reading. */
+export function boundaryObservation(points, boundary, now) {
+  return (
+    points.findLast(
+      (p) => p.time === boundary && p.time <= now && Number.isFinite(p.price) && p.price > 0,
+    )?.price ?? null
+  );
+}
+
+/** OHLC of observed samples only. Empty buckets stay empty; this is not oracle evidence. */
+export function observedCandles(points, range) {
+  const observations = chartWindow(points, range.start, range.end);
+  const gaps = observations
+    .slice(1)
+    .map((p, i) => p.time - observations[i].time)
+    .filter((g) => g > 0)
+    .sort((a, b) => a - b);
+  const cadence = gaps[Math.floor(gaps.length / 2)] ?? 0;
+  const size = Math.max(
+    60000,
+    cadence * 2,
+    Math.ceil((range.end - range.start) / 60 / 60000) * 60000,
+  );
+  const groups = new Map();
+  for (const p of observations) {
+    const key = Math.floor(p.time / size) * size;
+    const prev = groups.get(key);
+    if (prev) {
+      prev.high = Math.max(prev.high, p.price);
+      prev.low = Math.min(prev.low, p.price);
+      prev.close = p.price;
+    } else
+      groups.set(key, { time: p.time, open: p.price, high: p.price, low: p.price, close: p.price });
+  }
+  return [...groups.values()];
+}
+
+/** First actual reference sample after the boundary, within the published 3-minute grace. */
+export function referenceObservation(points, boundary, now) {
+  return chartWindow(points, boundary, Math.min(now, boundary + 180000))[0]?.price ?? null;
+}

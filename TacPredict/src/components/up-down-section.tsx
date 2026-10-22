@@ -47,10 +47,6 @@ function AssetCard({
   const info = ASSETS[asset];
   const zone = useTimeZone();
   const start = windowStartFor(nowMs, minutes);
-  const w = makeWindow(start, minutes);
-  const market = matchNativeMarket(markets, asset, w);
-  const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
-  const down = market?.outcomes.find((o) => /^down$/i.test(o.label)) ?? market?.outcomes[1];
   // Once the administrator turns a series on, the card shows the pool: the round that is open for
   // bets is the next one, so Up and Down lead straight to it.
   const poolConfig = useQuery(poolConfigQueryOptions);
@@ -59,12 +55,16 @@ function AssetCard({
     poolConfig.data?.series[`${asset}:${minutes}`] === true &&
     poolConfig.data?.paused === false;
   const nextStart = nextRoundStart(nowMs, minutes);
+  const w = makeWindow(poolOn ? nextStart : start, minutes);
+  const market = matchNativeMarket(markets, asset, w);
+  const up = market?.outcomes.find((o) => /^up$/i.test(o.label)) ?? market?.outcomes[0];
+  const down = market?.outcomes.find((o) => /^down$/i.test(o.label)) ?? market?.outcomes[1];
   const round = useQuery(poolRoundQueryOptions(asset, minutes, nextStart, poolOn));
   const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
   const share = round.data ? poolShare(round.data.up, round.data.down) : null;
   const poolTotal = round.data ? BigInt(round.data.up) + BigInt(round.data.down) : null;
   const title = `${copy.title} - ${durationLabel(minutes)}`;
-  const search = { d: minutes };
+  const search = { d: minutes, ...(poolOn ? { w: nextStart } : {}) };
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
 
   return (
@@ -80,7 +80,7 @@ function AssetCard({
             to="/up-down/$asset"
             params={{ asset: slugOf(asset) }}
             search={search}
-            className="tp-crypto-title"
+            className="tp-crypto-title tp-card-hit"
           >
             <h3>{title}</h3>
           </Link>
@@ -98,7 +98,6 @@ function AssetCard({
               : "Reference price window only. This badge does not mean prediction trading is active."
           }
         >
-          {poolOn ? "BETS OPEN" : "PRICE WINDOW"}{" "}
           {formatCountdown((poolOn ? nextStart : w.end) - nowMs)}
         </span>
       </div>
@@ -124,23 +123,27 @@ function AssetCard({
           >
             {poolOn
               ? `${label}${share ? ` ${Math.round(label === "Up" ? share.up : share.down)}%` : ""}`
-              : `${label} ${cents(outcome)}`}
+              : outcome && cents(outcome) !== "Unavailable"
+                ? `${label} ${cents(outcome)}`
+                : label}
           </Link>
         ))}
       </div>
-      <div className="tp-crypto-footer">
-        {poolOn ? (
-          <>
-            <span>{poolTotal === null ? "Pool" : `${formatUsdc(poolTotal)} USDC pool`}</span>
-            <span>Bets close {formatCountdown(nextStart - nowMs)}</span>
-          </>
-        ) : (
-          <>
-            <span>{usdcShort(market?.native?.openInterestAtomic)} OI</span>
-            <span>{volumeText(market?.volume)} Vol</span>
-          </>
-        )}
-      </div>
+      {(poolOn || market?.native) && (
+        <div className="tp-crypto-footer">
+          {poolOn ? (
+            <>
+              <span>{poolTotal === null ? "Pool" : `${formatUsdc(poolTotal)} USDC pool`}</span>
+              <span>Bets close {formatCountdown(nextStart - nowMs)}</span>
+            </>
+          ) : (
+            <>
+              <span>{usdcShort(market?.native?.openInterestAtomic)} OI</span>
+              <span>{volumeText(market?.volume)} Vol</span>
+            </>
+          )}
+        </div>
+      )}
     </article>
   );
 }
