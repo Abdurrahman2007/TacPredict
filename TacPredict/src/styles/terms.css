@@ -1,0 +1,69 @@
+.tp-terms {
+  max-width: 720px;
+  margin: 0 auto;
+  color: #b0bbc3;
+  font-size: 16px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.terms-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+.terms-eyebrow {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #8c99a3;
+}
+.tp-terms h1 {
+  margin: 0;
+  color: #f5f7fa;
+  font-size: clamp(30px, 6vw, 40px);
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.terms-updated {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+.terms-risk {
+  margin: 28px 0 40px;
+  padding: 20px 24px;
+  border: 1px solid #2f3a41;
+  border-radius: 16px;
+  background: #1d252a;
+  color: #e5eaf0;
+}
+.tp-terms section {
+  margin-top: 32px;
+}
+.tp-terms h2 {
+  margin: 0 0 12px;
+  color: #f0f3f5;
+  font-size: 21px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.tp-terms section p {
+  margin: 0 0 16px;
+}
+.tp-terms section a {
+  color: #a5bfff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tp-terms a:focus-visible {
+  outline: 2px solid #527dff;
+  outline-offset: 4px;
+}
+@media (max-width: 639px) {
+  .terms-risk {
+    padding: 20px;
+  }
+}
