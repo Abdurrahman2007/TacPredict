@@ -69,8 +69,8 @@ async function snapshot(): Promise<Snapshot> {
           .gte("block_number", deployment.deployment_block)
           .lte("block_number", checkpoint.block_number)
           .in("contract_address", addresses)
-          .order("tx_hash")
-          .order("log_index"),
+          .order("log_index")
+          .order("tx_hash"),
       "block_number",
       z.object({
         tx_hash: z.string().regex(/^0x[0-9a-f]{64}$/),
