@@ -37,6 +37,7 @@ function SystemView() {
         <div className="adm-tools-grid">
           {[
             { section: "ranking", view: "overview", label: "Ranking", icon: Trophy },
+            { section: "users", view: "referrals", label: "Referrals", icon: Trophy },
             { section: "resolution", view: "pending", label: "Resolution", icon: ShieldCheck },
             { section: "trading", view: "trades", label: "Trades", icon: Activity },
             { section: "blockchain", view: "contracts", label: "Contracts", icon: Network },

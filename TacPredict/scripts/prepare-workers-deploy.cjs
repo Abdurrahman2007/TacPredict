@@ -32,6 +32,13 @@ const config = {
   keep_vars: true,
   workers_dev: false,
   ai: { binding: "AI" },
+  d1_databases: [
+    {
+      binding: "TAC_ACCOUNTS",
+      database_name: "tacpredict-accounts",
+      database_id: "7cde07f3-086b-480e-b023-3819582d03dd",
+    },
+  ],
   triggers: { crons: ["* * * * *", "*/15 * * * *"] },
   vars: { SUPABASE_URL: url, SUPABASE_PUBLISHABLE_KEY: key },
 };

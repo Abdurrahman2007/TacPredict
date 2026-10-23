@@ -11,9 +11,9 @@ import {
 } from "react";
 import { WalletConnectButton } from "@/components/wallet-connect-button";
 import { useWeb3Ready } from "@/components/providers/web3-ready";
-import { safeAuthNext } from "@/lib/auth-config";
+import { safeAuthNext, type AuthNext } from "@/lib/auth-config";
 
-type Next = "/" | "/rewards" | "/profile";
+type Next = AuthNext;
 const LoginContext = createContext<(next?: Next) => void>(() => {});
 
 export const useLoginDialog = () => useContext(LoginContext);

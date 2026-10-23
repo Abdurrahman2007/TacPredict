@@ -1,6 +1,8 @@
+import { AccountProvider } from "./account-provider";
+import { AccountMenu } from "./account-menu";
 import { SiteFooter } from "./site-footer";
 import { Link, useLocation } from "@tanstack/react-router";
-import { House, Radio, Wallet, Gift, Trophy, Info } from "lucide-react";
+import { House, Radio, Wallet, Trophy, Info } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { LoginButton } from "./login-dialog";
@@ -12,6 +14,13 @@ const navItems = [
   { to: "/profile" as const, label: "Portfolio", icon: Wallet },
 ];
 export function AppShell({ children }: { children: ReactNode }) {
+  return (
+    <AccountProvider>
+      <ShellContent>{children}</ShellContent>
+    </AccountProvider>
+  );
+}
+function ShellContent({ children }: { children: ReactNode }) {
   const path = useLocation().pathname;
   const showSource = path === "/" || path.startsWith("/markets") || path === "/up-down";
   return (
@@ -46,14 +55,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="size-1.5 rounded-full bg-[#527dff]" />
               Base
             </span>
-            <Link
-              to="/rewards"
-              aria-label="Your rewards"
-              className="header-reward grid size-11 place-items-center rounded-full border border-border bg-card text-primary transition-colors hover:bg-primary/10"
-            >
-              <Gift className="size-[19px]" />
-            </Link>
             <LoginButton />
+            <AccountMenu />
           </div>
         </div>
       </header>
