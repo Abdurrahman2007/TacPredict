@@ -1,8 +1,8 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useEffect, type MutableRefObject } from "react";
-import { safeAuthNext } from "@/lib/auth-config";
+import { safeAuthNext, type AuthNext } from "@/lib/auth-config";
 
-type Next = "/" | "/rewards" | "/profile";
+type Next = AuthNext;
 
 /** Client-only: opens RainbowKit connect modal for useLoginDialog(). */
 export function LoginOpenEffect({

@@ -8,20 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { useLoginDialog } from "@/components/login-dialog";
 import { WalletConnectButton } from "@/components/wallet-connect-button";
-import { safeAuthNext } from "@/lib/auth-config";
+import { safeAuthNext, type AuthNext } from "@/lib/auth-config";
 import { shortAddress } from "@/lib/onchain/base";
 
 /**
  * Wallets-only auth surface. No email / Google / X / social login.
  * RainbowKit modal is the wallet chooser (MetaMask, Coinbase, Rainbow, Rabby, Trust, WC, Farcaster).
  */
-export function AuthPanel({
-  next = "/",
-  onSuccess,
-}: {
-  next?: "/" | "/rewards" | "/profile";
-  onSuccess?: () => void;
-}) {
+export function AuthPanel({ next = "/", onSuccess }: { next?: AuthNext; onSuccess?: () => void }) {
   const navigate = useNavigate();
   const openWallet = useLoginDialog();
   const wallet = useBaseWallet();

@@ -55,6 +55,10 @@ export const defaultViews: Record<AdminRouteSection, string> = {
 
 /** Tabs shown at the top of a section page. Sections without tabs are single pages. */
 export const sectionTabs: Partial<Record<AdminRouteSection, { view: string; label: string }[]>> = {
+  users: [
+    { view: "users", label: "Users" },
+    { view: "referrals", label: "Referrals" },
+  ],
   pool: [
     { view: "status", label: "Status" },
     { view: "series", label: "Series" },

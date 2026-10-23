@@ -8,6 +8,7 @@ import { ResolutionView } from "./views/resolution";
 import { SettingsView } from "./views/settings";
 import { TradingView } from "./views/trading";
 import { RankingView } from "./views/ranking";
+import { ReferralsView } from "./views/referrals";
 import { UsersView } from "./views/users";
 
 function SectionTabs({ section, view }: { section: AdminRouteSection; view: string }) {
@@ -48,7 +49,7 @@ function SectionBody({ section, view }: { section: AdminRouteSection; view: stri
     case "ranking":
       return <RankingView />;
     case "users":
-      return <UsersView view={view} />;
+      return view === "referrals" ? <ReferralsView /> : <UsersView view={view} />;
     default:
       return <TradingView view={view} />;
   }

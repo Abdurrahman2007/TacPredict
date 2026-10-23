@@ -1138,3 +1138,4 @@ a.adm-tab {
     display: inline-flex;
   }
 }
+.adm-referral-rows>article{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 0;border-bottom:1px solid #e3e8f1}.adm-referral-rows>article>div{display:grid;gap:8px;min-width:0}.adm-referral-rows small{font:11px monospace;color:#6b7f99;overflow-wrap:anywhere}.adm-referral-rows span{font-size:12px;color:#687b95}.adm-referral-rows b{font-size:14px;overflow-wrap:anywhere}.adm-referral-rows>article:last-child{margin-bottom:18px}.adm-referral-rows .adm-select{max-width:120px}

@@ -1,3 +1,4 @@
+import { useOverviewPrivacy } from "@/lib/accounts/privacy";
 import { useState, useSyncExternalStore } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -63,7 +64,7 @@ function PortfolioClient() {
     auth = useProtocolUser(),
     login = useLoginDialog();
   const [sortOpen, setSortOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useOverviewPrivacy();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [range, setRange] = useState<keyof typeof periods>("1D"),
     [tab, setTab] = useState("Positions"),

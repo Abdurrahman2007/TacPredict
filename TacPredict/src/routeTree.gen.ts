@@ -10,11 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RankingRouteImport } from './routes/ranking'
+import { Route as ReferralsRouteImport } from './routes/referrals'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -32,6 +34,11 @@ import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protoc
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -57,6 +64,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const RankingRoute = RankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferralsRoute = ReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -127,11 +139,13 @@ const ApiProtocolMetadataHashRoute = ApiProtocolMetadataHashRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/ranking': typeof RankingRoute
+  '/referrals': typeof ReferralsRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -148,9 +162,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/auth': typeof AuthRoute
   '/profile': typeof ProfileRoute
   '/ranking': typeof RankingRoute
+  '/referrals': typeof ReferralsRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -168,11 +184,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/ranking': typeof RankingRoute
+  '/referrals': typeof ReferralsRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
@@ -191,11 +209,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/admin'
     | '/auth'
     | '/markets'
     | '/profile'
     | '/ranking'
+    | '/referrals'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -212,9 +232,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/auth'
     | '/profile'
     | '/ranking'
+    | '/referrals'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -231,11 +253,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/admin'
     | '/auth'
     | '/markets'
     | '/profile'
     | '/ranking'
+    | '/referrals'
     | '/rewards'
     | '/search'
     | '/terms'
@@ -253,11 +277,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RankingRoute: typeof RankingRoute
+  ReferralsRoute: typeof ReferralsRoute
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
   TermsRoute: typeof TermsRoute
@@ -275,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -310,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/ranking'
       fullPath: '/ranking'
       preLoaderRoute: typeof RankingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/referrals': {
+      id: '/referrals'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof ReferralsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -435,11 +475,13 @@ const MarketsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RankingRoute: RankingRoute,
+  ReferralsRoute: ReferralsRoute,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
   TermsRoute: TermsRoute,
