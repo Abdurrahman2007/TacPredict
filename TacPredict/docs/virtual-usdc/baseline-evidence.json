@@ -1,0 +1,78 @@
+{
+  "scope": "phase1-review-only",
+  "repository": "Abdurrahman2007/TacPredict",
+  "auditedCommit": "2da5ae195cec916206e217ca71182b1baa8c39f7",
+  "checkedAtUtc": "2026-10-23T09:58:00.699623+00:00",
+  "productionVerifiedThisPhase": false,
+  "baseline": {
+    "typecheck": "pass",
+    "protocolCompile": "pass, all existing contracts including UpDownPool",
+    "protocolTest": {
+      "tests": 166,
+      "pass": 166,
+      "fail": 0,
+      "durationMs": 614174.274881,
+      "kind": "unchanged existing regression and local-chain simulations; not new virtual protocol tests"
+    },
+    "appBuild": "pass using synthetic non-secret Supabase placeholders; not production configuration verification",
+    "repoWideLint": {
+      "status": "fail",
+      "errors": 496,
+      "warnings": 19,
+      "preExisting": true,
+      "autoFixed": false
+    },
+    "appDependencyAudit": {
+      "advisories": {
+        "info": 0,
+        "low": 0,
+        "moderate": 33,
+        "high": 2,
+        "critical": 0,
+        "total": 35
+      },
+      "severityDoesNotProveReachability": true,
+      "dependenciesChanged": false
+    }
+  },
+  "preservedContracts": {
+    "MarketRegistry": {
+      "address": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+      "sourceSha256": "611465da83cc1ccebd35c6bbb6ea0b78eb141fb8835f00ab9cd942a43c45f1af"
+    },
+    "MarketFactory": {
+      "address": "0xe01c23aac6f152a2eA437A7E6Eb0a664A1908568",
+      "sourceSha256": "75ce9700839d195dff1225500f0561046da9d30f927d55ddca2d4b4a9e4d8290"
+    },
+    "ConditionalPositions": {
+      "address": "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7",
+      "sourceSha256": "d90c70bce328f3b610e9761ce4f1cd96f2a79ab5586ffe772cbc7a8a87bbadba"
+    },
+    "Exchange": {
+      "address": "0x7e5e40bAE779ebabB2295Ef6d009ab95b0307F85",
+      "sourceSha256": "506982574cefe5243e5ee72449454e35c53ff8a5d4326e454fab2c8c1dc69193"
+    },
+    "ResolutionOracle": {
+      "address": "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f",
+      "sourceSha256": "b5152bcbbf9cdc6af79a9ca2388211f3bc6b3518ff704812fe5e50ffa3bff050"
+    },
+    "Settlement": {
+      "address": "0x9b272C68F3338655a440B44DBc9CCB993D7650B3",
+      "sourceSha256": "45dad71e207952a535ffc0719d6a3f6ef9778f1f3f80931b783b9de12379ff90"
+    }
+  },
+  "manifestSha256": "a7f725ab97b7a2f2842f2f4c9e57c993c71966d27c8b799990253c60aff116a6",
+  "productionActions": [],
+  "implementedVirtualFeatures": [],
+  "draftSqlMigrationsCreated": false,
+  "knownUnverified": [
+    "new virtual math/contracts/accounting",
+    "grant eligibility/Sybil assurance",
+    "one-trade-per-transaction contract guard/Base EVM target",
+    "sponsor provider capabilities and budget",
+    "virtual Supabase schema/RLS/concurrency",
+    "BNB instrument and live sports source access",
+    "new points formula/business rules",
+    "local end-to-end virtual execution"
+  ]
+}
