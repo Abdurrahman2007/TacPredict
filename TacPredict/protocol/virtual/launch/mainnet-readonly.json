@@ -1,0 +1,45 @@
+{
+  "readOnly": true,
+  "chain": "base",
+  "checkedAt": "2026-10-24T05:21:21.656Z",
+  "contracts": [
+    {
+      "name": "registry",
+      "address": "0x8aCC19eb2F3DCCEdA99Af89cC30416D17f02cd0A",
+      "codeHash": "0x3014b10cebcaaf179998c1040d6cd6c0fb5ae6ba7d56429c487f420ae452bfed",
+      "manifestMatches": true
+    },
+    {
+      "name": "factory",
+      "address": "0xe01c23aac6f152a2eA437A7E6Eb0a664A1908568",
+      "codeHash": "0x580eb779b6e319b865387cd27d23f3f4215f57ee8915582f9323748a74688405",
+      "manifestMatches": true
+    },
+    {
+      "name": "positions",
+      "address": "0x00adb2c69B58f66aB64DDb0Da01B7C72A3E8F2A7",
+      "codeHash": "0x6bed0ba45fcd3b82d6419d7224872cf695edafc9863d657b702c391add0e6ef4",
+      "manifestMatches": true
+    },
+    {
+      "name": "exchange",
+      "address": "0x7e5e40bAE779ebabB2295Ef6d009ab95b0307F85",
+      "codeHash": "0x85de7121dbc41994d46d62ec2d8731ac000c13a99437d8e299292fe42ac7bc5b",
+      "manifestMatches": true
+    },
+    {
+      "name": "oracle",
+      "address": "0xF50797C34B214C81B80A9bd3e590C3cA0DF8118f",
+      "codeHash": "0x59396a37bbb2cf6d5e5e1c22a4081adc40e5b01f177d71e2b91209b9ad664ce8",
+      "manifestMatches": true
+    },
+    {
+      "name": "settlement",
+      "address": "0x9b272C68F3338655a440B44DBc9CCB993D7650B3",
+      "codeHash": "0x3705aec1eafcc02542356f1fc06bf55798ac0f02c97abb70903c24c4776ead86",
+      "manifestMatches": true
+    }
+  ],
+  "chainId": 8453,
+  "block": "53014967"
+}

@@ -44,3 +44,19 @@ test("application ABI matches separately compiled virtual contract; no asset ABI
   const detail = fs.readFileSync(root + "../../src/components/updown/updown-detail.tsx", "utf8");
   assert(detail.includes("!feed.data?.virtualMode"));
 });
+
+test("operations/verifier are dormant and cannot sign, spend or submit transactions", () => {
+  for (const p of ["scripts/operations.mts", "scripts/verify-sepolia.mts"]) {
+    const s = fs.readFileSync(root + p, "utf8");
+    assert.doesNotMatch(
+      s,
+      /privateKeyToAccount|sendTransaction|writeContract|sendRawTransaction|deployContract\s*\(/,
+    );
+  }
+  const ci = fs.readFileSync(
+    root + "../../../.github/workflows/virtual-trading-review.yml",
+    "utf8",
+  );
+  assert(ci.includes("fetch-depth: 0"));
+  assert.doesNotMatch(ci, /secrets\.|wrangler.*deploy|workflow_dispatch|schedule:/);
+});

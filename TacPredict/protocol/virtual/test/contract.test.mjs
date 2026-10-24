@@ -15,6 +15,7 @@ import {
 import { compile, root } from "../scripts/compile.mjs";
 const U = 1000000n;
 let rpc, wallets, accounts, artifact, server, batchArtifact;
+const transactionEvidence = [];
 const chain = {
   id: 31337,
   name: "Local Cancun",
@@ -53,7 +54,26 @@ before(async () => {
   accounts = await rpc.request({ method: "eth_accounts" });
   wallets = accounts.map((account) => createWalletClient({ chain, account, transport: http() }));
 });
-after(() => server?.kill());
+after(async () => {
+  server?.kill();
+  if (process.env.VIRTUAL_LOCAL_EVIDENCE_PATH) {
+    const fs = await import("node:fs");
+    fs.writeFileSync(
+      process.env.VIRTUAL_LOCAL_EVIDENCE_PATH,
+      JSON.stringify(
+        {
+          network: "local Cancun EVM",
+          chainId: 31337,
+          notSepolia: true,
+          notMainnet: true,
+          transactions: transactionEvidence,
+        },
+        (_, v) => (typeof v === "bigint" ? v.toString() : v),
+        2,
+      ) + "\n",
+    );
+  }
+});
 async function deploy(a = artifact, args = [accounts[0], 1000000n * U, 1000000n * U]) {
   const h = await wallets[0].deployContract({
     abi: a.abi,
@@ -78,9 +98,35 @@ async function send(address, fn, args = [], who = 0) {
   const h = await wallets[who].writeContract(request);
   const r = await rpc.waitForTransactionReceipt({ hash: h });
   assert.equal(r.status, "success");
+  if (
+    [
+      "buy",
+      "sell",
+      "propose",
+      "challenge",
+      "finalize",
+      "adjudicate",
+      "timeoutVoid",
+      "settleFor",
+      "setPaused",
+    ].includes(fn)
+  )
+    transactionEvidence.push({
+      function: fn,
+      engine: address,
+      wallet: accounts[who],
+      hash: r.transactionHash,
+      blockNumber: r.blockNumber,
+      blockHash: r.blockHash,
+      status: r.status,
+      gasUsed: r.gasUsed,
+      events: r.logs
+        .filter((l) => l.address.toLowerCase() === address.toLowerCase())
+        .map((l) => decodeEventLog({ abi: artifact.abi, ...l })),
+    });
   return r;
 }
-async function setup(n = 2, feeBps = 0) {
+async function setup(n = 2, feeBps = 0, overrides = {}) {
   const address = await deploy();
   for (const role of [
     "CREATOR_ROLE",
@@ -106,6 +152,7 @@ async function setup(n = 2, feeBps = 0) {
       maxPosition: 100000n * U,
       feeBps,
       outcomes: n,
+      ...overrides,
     },
   ]);
   await rpc.request({ method: "evm_setNextBlockTimestamp", params: [now + 11] });
@@ -547,4 +594,76 @@ test("future grant budgets, expiry and market seed budgets fail safely", async (
       },
     ]),
   );
+});
+
+test("seeded randomized 2/3-outcome sequences preserve K, ownership, cash and basis invariants", async () => {
+  let random = 0x12345678;
+  const next = () => {
+    random ^= random << 13;
+    random ^= random >>> 17;
+    random ^= random << 5;
+    return random >>> 0;
+  };
+  for (const outcomes of [2, 3]) {
+    const a = await setup(outcomes, 75);
+    await grant(a, 1, 2000n * U);
+    await grant(a, 2, 2000n * U);
+    for (let i = 0; i < 32; i++) {
+      const who = 1 + (next() % 2),
+        outcome = next() % outcomes;
+      const before = await read(a, "pool", [1n]);
+      const pos = await read(a, "positions", [1n, accounts[who], outcome]);
+      const sell = pos[0] > U && next() % 3 === 0;
+      await trade(a, !sell, sell ? pos[0] / 2n : BigInt(1 + (next() % 10)) * U, who, outcome);
+      const after = await read(a, "pool", [1n]);
+      const product = (p) => p.reserves.slice(0, outcomes).reduce((n, r) => n * r, 1n);
+      assert(product(after) >= product(before));
+      for (let j = 0; j < outcomes; j++) {
+        const p1 = await read(a, "positions", [1n, accounts[1], j]),
+          p2 = await read(a, "positions", [1n, accounts[2], j]);
+        assert.equal(after.reserves[j] + p1[0] + p2[0], after.collateral);
+        assert(after.reserves[j] >= after.terms.reserveFloor);
+        for (const p of [p1, p2]) {
+          assert(p[0] >= 0n && p[1] >= 0n);
+          if (p[0] === 0n) assert.equal(p[1], 0n);
+        }
+      }
+      await conserved(a);
+    }
+    await finalize(a, false, 0);
+    for (const who of [1, 2]) await send(a, "settleFor", [1n, accounts[who]], 0);
+    assert.equal((await read(a, "pool", [1n])).collateral, 0n);
+    await conserved(a);
+  }
+});
+
+test("extreme quantities, dust, true reserve exhaustion and position caps revert without state changes", async () => {
+  const a = await setup(3, 50, { reserveFloor: 100n * U - 1n });
+  await grant(a, 1, 1000n * U);
+  await assert.rejects(read(a, "quoteBuy", [1n, 0, U]));
+  await assert.rejects(read(a, "quoteBuy", [1n, 0, 1n]));
+  await assert.rejects(read(a, "quoteSell", [1n, 0, 18446744073709551615n]));
+  assert.equal(await read(a, "actionNonce", [accounts[1]]), 0n);
+  await conserved(a);
+  const b = await setup(2, 0, { maxPosition: U });
+  await grant(b);
+  await assert.rejects(trade(b, true, U));
+  assert.equal((await read(b, "positions", [1n, accounts[1], 0]))[0], 0n);
+  await conserved(b);
+});
+
+test("competing quotes cannot both execute against one pool revision", async () => {
+  const a = await setup();
+  await grant(a, 1);
+  await grant(a, 2);
+  const q = await read(a, "quoteBuy", [1n, 0, U]);
+  const now = (await rpc.getBlock()).timestamp;
+  const args = [1n, 0, U, q.output, q.revision, now + 100n, 0n];
+  const r = await Promise.allSettled([send(a, "buy", args, 1), send(a, "buy", args, 2)]);
+  assert.equal(r.filter((x) => x.status === "fulfilled").length, 1);
+  assert.equal(
+    (await read(a, "actionNonce", [accounts[1]])) + (await read(a, "actionNonce", [accounts[2]])),
+    1n,
+  );
+  await conserved(a);
 });

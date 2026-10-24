@@ -54,6 +54,13 @@ export function VirtualView() {
               <Tile key={label} label={label!} value={`${virtualMoney(value)} Virtual USDC`} />
             ))}
           </div>
+          <Notice tone={data.health.healthy ? "info" : "warn"}>
+            {data.health.healthy
+              ? "Accounting reconciled · indexer current"
+              : data.health.alerts.join(" · ")}
+            {" · "}
+            {data.health.lagBlocks} blocks behind · {data.health.ageSeconds}s age
+          </Notice>
           <Card title="Indexer">
             <p>
               Checkpoint {data.checkpoint} · Finalized {data.finalized} · Chain observed{" "}

@@ -1,5 +1,7 @@
 # Virtual USDC — review implementation
 
+**Follow-up launch hardening:** current checks, changed files, infrastructure observations, unresolved risks and approval gates are in [`launch/RUNBOOK.md`](launch/RUNBOOK.md) and [`launch/validation.json`](launch/validation.json). The original results below are historical, not a fresh launch clearance. New pools must include a `resolutionSpec` before hashing/publishing; published metadata cannot be edited to add one.
+
 **Not deployed, not live, not independently audited.** Existing six contracts and their deployment manifest are unchanged. No production schema/configuration/secrets changed. The prediction screen layout and CSS are retained; virtual mode changes data/transaction adapters, labels and activity rows only.
 
 ## What works locally

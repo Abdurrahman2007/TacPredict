@@ -14,6 +14,38 @@ export const metadataSchema = z
     source: z.string().min(1).max(200),
     sourceUrl: z.string().url().startsWith("https://"),
     rules: z.string().min(1).max(12000),
+    resolutionSpec: z
+      .discriminatedUnion("kind", [
+        z
+          .object({
+            kind: z.literal("crypto"),
+            sourceId: z.string().min(1),
+            maxFetchAgeSeconds: z.number().int().min(1).max(86400),
+            asset: z.enum(["BTC", "ETH", "SOL", "BNB"]),
+            intervalSeconds: z.union([
+              z.literal(300),
+              z.literal(900),
+              z.literal(1800),
+              z.literal(3600),
+              z.literal(43200),
+              z.literal(86400),
+            ]),
+            observationToleranceSeconds: z.number().int().min(0),
+            tie: z.enum(["down", "void"]),
+          })
+          .strict(),
+        z
+          .object({
+            kind: z.literal("sports"),
+            sourceId: z.string().min(1),
+            maxFetchAgeSeconds: z.number().int().min(1).max(86400),
+            sport: z.enum(["football", "cricket"]),
+            eventId: z.string().min(1),
+            draw: z.enum(["third-outcome", "void"]),
+          })
+          .strict(),
+      ])
+      .optional(),
   })
   .strict();
 const schema = z
@@ -24,6 +56,7 @@ const schema = z
     startBlock: z.string().regex(/^\d+$/),
     enabled: z.boolean(),
     markets: z.array(metadataSchema).max(200),
+    maxProjectionAgeSeconds: z.number().int().min(1).max(3600).default(120),
   })
   .strict();
 const forbidden = new Set([
@@ -56,7 +89,11 @@ export function virtualConfig() {
     startBlock: parsed.startBlock,
     enabled: parsed.enabled,
   };
-  return { deployment, markets: parsed.markets };
+  return {
+    deployment,
+    markets: parsed.markets,
+    maxProjectionAgeSeconds: parsed.maxProjectionAgeSeconds,
+  };
 }
 export async function virtualRuntime() {
   const config = virtualConfig();

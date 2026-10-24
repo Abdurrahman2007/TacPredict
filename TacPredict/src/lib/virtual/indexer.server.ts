@@ -15,8 +15,9 @@ export async function runVirtualIndexer(maxBlocks = 16) {
     const b = await client.getBlock({ blockNumber: n });
     return { number: b.number, hash: b.hash, parentHash: b.parentHash, timestamp: b.timestamp };
   };
+  const started = Date.now();
   try {
-    return await indexVirtualRange(
+    const result = await indexVirtualRange(
       {
         block,
         head: () => client.getBlockNumber({ cacheTime: 0 }),
@@ -65,6 +66,28 @@ export async function runVirtualIndexer(maxBlocks = 16) {
       d.engine,
       maxBlocks,
     );
+    console.info(
+      JSON.stringify({
+        job: "virtual-indexer",
+        status: "SUCCESS",
+        chainId: d.chainId,
+        checkpoint: result.checkpoint,
+        blocks: result.blocks,
+        durationMs: Date.now() - started,
+      }),
+    );
+    return result;
+  } catch (e) {
+    console.error(
+      JSON.stringify({
+        job: "virtual-indexer",
+        status: "FAILED",
+        chainId: d.chainId,
+        durationMs: Date.now() - started,
+        code: "RPC_DATABASE_OR_RECONCILIATION_FAILURE",
+      }),
+    );
+    throw e;
   } finally {
     await virtualDb.rpc("virtual_release_lease", { _deployment: d.id, _fence: fence });
   }

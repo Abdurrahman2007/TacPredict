@@ -2,6 +2,8 @@
 import fs from "node:fs";
 import { encodeFunctionData, keccak256, stringToHex } from "viem";
 import { compile } from "./compile.mjs";
+import { metadataSchema } from "../../../src/lib/virtual/runtime.server.ts";
+import { validateResolutionSpec } from "../../../src/lib/virtual/market-data.ts";
 const [metadataPath, termsPath] = process.argv.slice(2);
 if (!metadataPath || !termsPath) throw Error("Usage: prepare-pool.mjs metadata.json terms.json");
 const metadata = JSON.parse(fs.readFileSync(metadataPath)),
@@ -19,6 +21,10 @@ function canonical(v) {
     );
   return JSON.stringify(v);
 }
+metadataSchema.parse(metadata);
+if (!metadata.resolutionSpec)
+  throw Error("Explicit resolution source policy required before publishing a new virtual pool");
+validateResolutionSpec(metadata.resolutionSpec, metadata.category, metadata.outcomes.length);
 const rulesHash = keccak256(stringToHex(canonical(metadata)));
 const t = { rulesHash };
 for (const k of [
