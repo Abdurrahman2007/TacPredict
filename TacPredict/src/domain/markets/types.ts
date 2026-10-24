@@ -9,6 +9,7 @@ export type MarketOutcome = {
 };
 
 export type Market = {
+  virtual?: import("@/lib/virtual/types").VirtualMarketRef;
   native?: import("@/lib/protocol/types").NativeMarket;
   id: string;
   title: string;

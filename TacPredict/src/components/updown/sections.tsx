@@ -22,6 +22,7 @@ import {
   windowStartFor,
   type UpDownAsset,
 } from "@/lib/updown/window.mjs";
+import { VirtualPortfolio } from "@/components/virtual/virtual-portfolio";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
 
 function MyPositions({ market }: { market: Market }) {
@@ -93,6 +94,24 @@ function MyPositions({ market }: { market: Market }) {
 
 export function PositionsCard({ market }: { market: Market | null }) {
   const [tab, setTab] = useState("positions");
+  if (market?.virtual)
+    return (
+      <section className="ud-card">
+        <div className="ud-tabs">
+          {["positions", "history"].map((t) => (
+            <button key={t} aria-pressed={tab === t} onClick={() => setTab(t)}>
+              {t === "positions" ? "Positions" : "History"}
+            </button>
+          ))}
+        </div>
+        <VirtualPortfolio
+          deployment={market.virtual.deployment}
+          marketId={market.virtual.onchainId}
+          markets={[market]}
+          tab={tab === "history" ? "History" : "Positions"}
+        />
+      </section>
+    );
   if (market) return <MyPositions market={market} />;
   return (
     <section className="ud-card" aria-label="Your positions">
@@ -169,6 +188,18 @@ export function RulesCard({
 }
 
 export function ActivityCard({ market }: { market: Market | null }) {
+  if (market?.virtual)
+    return (
+      <section className="mt-7" aria-label="Your activity">
+        <h2>Your activity</h2>
+        <VirtualPortfolio
+          deployment={market.virtual.deployment}
+          marketId={market.virtual.onchainId}
+          markets={[market]}
+          tab="History"
+        />
+      </section>
+    );
   if (market) return <NativeActivity marketId={market.id} />;
   return (
     <section className="mt-7" aria-label="Market activity">

@@ -4,6 +4,7 @@
  * Only pages that show real data or do real work are listed.
  */
 export const adminRouteSections = [
+  "virtual",
   "markets",
   "pool",
   "engine",
@@ -29,6 +30,7 @@ export type AdminNavItem =
   | { kind: "importer"; id: string; label: string };
 
 export const adminNavItems: AdminNavItem[] = [
+  { kind: "page", id: "virtual", label: "Virtual Trading", section: "virtual", view: "overview" },
   { kind: "overview", id: "overview", label: "Overview" },
   { kind: "page", id: "markets", label: "Markets", section: "markets", view: "all" },
   { kind: "page", id: "create", label: "Create Market", section: "markets", view: "create" },
@@ -39,6 +41,7 @@ export const adminNavItems: AdminNavItem[] = [
 
 /** First view of every section; used when the URL has no `view`. */
 export const defaultViews: Record<AdminRouteSection, string> = {
+  virtual: "overview",
   markets: "all",
   pool: "status",
   engine: "fixtures",

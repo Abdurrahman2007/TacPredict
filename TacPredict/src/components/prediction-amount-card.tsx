@@ -10,7 +10,19 @@ import { placeLimitBuy, placeLimitSell, fillOffer } from "@/lib/protocol/executi
 import { limitQuote, usdcAtomic } from "@/lib/protocol/orders";
 import { BASE_NETWORK, formatUsdc } from "@/lib/onchain/base";
 import { cents, sharesShort, usdcShort } from "@/lib/protocol/display.mjs";
-export function PredictionAmountCard({
+import { VirtualAmountCard } from "./virtual/virtual-amount-card";
+export function PredictionAmountCard(props: {
+  market: Market;
+  selected?: string | undefined;
+  onSelect: (id: string) => void;
+}) {
+  return props.market.virtual ? (
+    <VirtualAmountCard {...props} />
+  ) : (
+    <NativePredictionAmountCard {...props} />
+  );
+}
+function NativePredictionAmountCard({
   market,
   selected,
   onSelect,

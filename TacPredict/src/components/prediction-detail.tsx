@@ -13,6 +13,7 @@ import { MarketCountdown } from "./market-countdown";
 import { CryptoDetailChart } from "./crypto-detail-chart";
 import { ProbabilityHistoryChart } from "./probability-history";
 import { MobileOutcomeDock } from "./mobile-outcome-dock";
+import { VirtualPortfolio } from "./virtual/virtual-portfolio";
 import { PredictionAmountCard } from "./prediction-amount-card";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from "./ui/dialog";
 import "@/styles/prediction-detail.css";
@@ -49,10 +50,16 @@ export function MarketIsland({
       <div className="pd-island-copy">
         <strong>{name}</strong>
         <div className="pd-island-meta">
-          {market.native && market.startsAt && market.endsAt ? (
+          {(market.native || market.virtual) && market.startsAt && market.endsAt ? (
             <MarketCountdown market={market} snapshotTime={new Date().toISOString()} />
           ) : (
-            <span>{market.native ? market.native.status : "Listing pending"}</span>
+            <span>
+              {market.virtual
+                ? "Virtual USDC"
+                : market.native
+                  ? market.native.status
+                  : "Listing pending"}
+            </span>
           )}
           {spot && (
             <span className="pd-island-price">
@@ -89,7 +96,7 @@ export function PredictionDetail({
   useEffect(() => setMounted(true), []);
   const [tab, setTab] = useState("Positions");
   const heading = useRef<HTMLDivElement>(null);
-  const portfolio = useNativePortfolio();
+  const portfolio = useNativePortfolio(!market.virtual);
   useEffect(() => {
     setSelected(initial || market.outcomes[0]?.id || "0");
     setOpen(Boolean(initial && window.matchMedia("(max-width:1023px)").matches));
@@ -136,7 +143,13 @@ export function PredictionDetail({
           <div ref={heading} className="pd-heading">
             <div className="pd-category">
               {market.category}
-              <span>{market.native ? market.native.status : "Listing pending"}</span>
+              <span>
+                {market.virtual
+                  ? "Virtual USDC"
+                  : market.native
+                    ? market.native.status
+                    : "Listing pending"}
+              </span>
             </div>
             <div className="pd-title-row">
               <MarketIcon market={market} />
@@ -148,7 +161,7 @@ export function PredictionDetail({
                 </h1>
                 <p>{marketWindowLabel(market) || market.closesAt}</p>
               </div>
-              {market.native && market.startsAt && (
+              {(market.native || market.virtual) && market.startsAt && (
                 <MarketCountdown market={market} snapshotTime={new Date().toISOString()} />
               )}
             </div>
@@ -163,7 +176,7 @@ export function PredictionDetail({
           ) : market.native ? (
             <ProbabilityHistoryChart market={market} />
           ) : null}
-          {!market.native && (
+          {!market.native && !market.virtual && (
             <details className="pd-data-note">
               <summary>Price tracking only · Trading unavailable</summary>
               <p>
@@ -197,7 +210,14 @@ export function PredictionDetail({
                 </button>
               ))}
             </div>
-            {portfolio.isError ? (
+            {market.virtual ? (
+              <VirtualPortfolio
+                deployment={market.virtual.deployment}
+                marketId={market.virtual.onchainId}
+                markets={[market]}
+                tab={tab}
+              />
+            ) : portfolio.isError ? (
               <p role="status">Account data unavailable. No estimate is substituted.</p>
             ) : tab === "Positions" ? (
               positions.length ? (
@@ -230,7 +250,9 @@ export function PredictionDetail({
             )}
             <div className="pd-position-footer">
               <strong>
-                Total {usdcShort(total.toString())}
+                {market.virtual
+                  ? "Virtual USDC · No real-money redemption"
+                  : `Total ${usdcShort(total.toString())}`}
                 {!knownValue || portfolio.isError ? " · awaiting data" : ""}
               </strong>
               <Link to="/profile">
@@ -241,9 +263,20 @@ export function PredictionDetail({
           <section className="pd-statistics">
             <h2>Statistics</h2>
             {[
-              ["Open interest", usdcShort(market.native?.openInterestAtomic)],
-              ["Traded volume", usdcShort(market.native?.volumeAtomic)],
-              ["Traders", String(market.native?.traders ?? 0)],
+              [
+                "Open interest",
+                market.virtual ? "—" : usdcShort(market.native?.openInterestAtomic),
+              ],
+              [
+                "Traded volume",
+                market.virtual
+                  ? `${market.volume} Virtual USDC`
+                  : usdcShort(market.native?.volumeAtomic),
+              ],
+              [
+                "Traders",
+                String(market.virtual ? market.participants : (market.native?.traders ?? 0)),
+              ],
             ].map(([label, value]) => (
               <div className="pd-stat" key={label}>
                 <span>{label}</span>

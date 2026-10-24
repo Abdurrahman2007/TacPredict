@@ -1,3 +1,4 @@
+import { VirtualView } from "./views/virtual";
 import { Link, Navigate } from "@tanstack/react-router";
 import { adminRedirectFor, sectionTabs, type AdminRouteSection } from "@/lib/protocol/admin-nav";
 import { BlockchainView } from "./views/blockchain";
@@ -34,6 +35,8 @@ function SectionTabs({ section, view }: { section: AdminRouteSection; view: stri
 
 function SectionBody({ section, view }: { section: AdminRouteSection; view: string }) {
   switch (section) {
+    case "virtual":
+      return <VirtualView />;
     case "markets":
       return <MarketsView view={view} />;
     case "pool":

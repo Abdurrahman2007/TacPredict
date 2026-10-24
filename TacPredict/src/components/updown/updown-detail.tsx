@@ -79,7 +79,17 @@ export function UpDownDetail({
   });
   const feed = useQuery(nativeMarketFeedQueryOptions);
   const live = useLivePrice(asset);
-  const market = matchNativeMarket(feed.data?.markets, asset, w);
+  const virtualMarket = feed.data?.markets.find(
+    (m) =>
+      m.virtual &&
+      m.category === "Crypto" &&
+      new RegExp(`\\b(${info.name}|${info.short})\\b`, "i").test(m.title) &&
+      Math.abs(Date.parse(m.startsAt ?? "") - w.start) <= 1500 &&
+      Math.abs(Date.parse(m.endsAt ?? "") - w.end) <= 1500,
+  );
+  const market =
+    virtualMarket ??
+    (feed.data?.virtualMode ? null : matchNativeMarket(feed.data?.markets, asset, w));
 
   const candles = spot.data?.candles;
   const gran = (spot.data?.granularity ?? 60) * 1000;
@@ -100,6 +110,8 @@ export function UpDownDetail({
   // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
   const poolConfig = useQuery(poolConfigQueryOptions);
   const poolOn =
+    feed.isSuccess &&
+    !feed.data?.virtualMode &&
     POOL_DURATIONS.includes(minutes) &&
     Boolean(poolConfig.data?.address) &&
     poolConfig.data?.series[`${asset}:${minutes}`] === true;

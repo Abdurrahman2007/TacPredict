@@ -1,0 +1,99 @@
+{
+  "status": "review-only; not deployed or live",
+  "base_main_commit": "2da5ae195cec916206e217ca71182b1baa8c39f7",
+  "classification": {
+    "source_verified": [
+      "six original contracts, Base deployment manifest, original compiler and old real execution clients unchanged",
+      "virtual path has no real asset call or fallback; no automatic grant/campaign",
+      "existing prediction layout/CSS reused with virtual data/transaction adapters"
+    ],
+    "locally_tested": [
+      "25 virtual contract/backend/database/safety tests passed",
+      "166 existing regression tests passed",
+      "actual Cancun EVM receipts indexed into disposable PostgreSQL and reconciled to contract state",
+      "Solidity compile, application typecheck and production-mode build passed with synthetic local environment values",
+      "changed application-source lint: 0 errors, 3 pre-existing warnings",
+      "isolated virtual development dependency audit: 0 reported vulnerabilities"
+    ],
+    "production_verified": [],
+    "unverified": [
+      "deployed Base Sepolia/Mainnet behavior",
+      "production Cloudflare/Supabase/provider integration",
+      "real supported-wallet mobile/browser end-to-end flow",
+      "independent security audit and comprehensive fuzz/invariant coverage",
+      "campaign eligibility, liquidity/fee limits, points weights and reward budgets"
+    ]
+  },
+  "checks": {
+    "virtual_tests": {
+      "command": "npm --prefix protocol/virtual test",
+      "passed": 25,
+      "failed": 0,
+      "duration_ms": 21359.316288
+    },
+    "existing_regression_tests": {
+      "command": "npm --prefix protocol test",
+      "passed": 166,
+      "failed": 0,
+      "duration_ms": 528355.810067
+    },
+    "contract_compile": {
+      "command": "npm --prefix protocol/virtual run compile",
+      "status": "passed",
+      "solc": "0.8.38",
+      "evm": "cancun",
+      "runtime_bytes": 15998
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "status": "passed"
+    },
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "environment": "synthetic local placeholders; no virtual deployment configured; no deploy command"
+    },
+    "changed_source_lint": {
+      "errors": 0,
+      "warnings": 3,
+      "warning_scope": "existing hooks/fast-refresh warnings in touched files"
+    },
+    "full_repository_lint": {
+      "command": "npm run lint",
+      "status": "failed: existing repository formatting baseline",
+      "errors": 496,
+      "warnings": 19,
+      "note": "No broad unrelated formatting changes made; new/changed application sources have no lint errors."
+    },
+    "isolated_virtual_toolchain_audit": {
+      "command": "npm audit --prefix protocol/virtual --json",
+      "reported_vulnerabilities": 0,
+      "note": "Existing app/protocol dependencies and lockfiles were not changed."
+    },
+    "local_gas_example": {
+      "buy_units": 115508,
+      "partial_sell_units": 136474,
+      "note": "Local EVM example only, not a fee quote or live Base measurement."
+    }
+  },
+  "safety": {
+    "old_six_contracts_changed": false,
+    "production_migrations_run": false,
+    "secrets_changed": false,
+    "mainnet_transactions_sent": false,
+    "testnet_deployed": false,
+    "production_configuration_changed": false,
+    "trading_activated": false,
+    "automatic_500_grant": false,
+    "sponsorship_implemented": false
+  },
+  "remaining_blockers": [
+    "independent review and adversarial economic testing",
+    "approved new deployment and constructor/market budgets",
+    "test campaign eligibility and proofs before users can trade",
+    "isolated migration/configuration and continuous protected indexing",
+    "metadata/resolution governance and authentic market sources",
+    "full deployed wallet E2E validation",
+    "monthly points abuse policy and publication approvals"
+  ]
+}
