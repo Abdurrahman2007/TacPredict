@@ -1,0 +1,45 @@
+{
+  "classification": "locally tested design arithmetic only; not implemented Solidity, fuzz suite, audit, gas benchmark or live verification",
+  "seed": 8453,
+  "cases": 1200,
+  "case_groups": {
+    "2_outcomes_fee_0_bps": 200,
+    "2_outcomes_fee_50_bps": 200,
+    "2_outcomes_fee_100_bps": 200,
+    "3_outcomes_fee_0_bps": 200,
+    "3_outcomes_fee_50_bps": 200,
+    "3_outcomes_fee_100_bps": 200
+  },
+  "assertions": [
+    "buy and sell product nondecreasing with conservative rounding",
+    "outcome inventory plus user shares equals locked virtual collateral",
+    "positive reserves",
+    "immediate full roundtrip cash no greater than initial cash input",
+    "partial plus remaining cost basis equals original basis"
+  ],
+  "example": {
+    "unit": 1000000,
+    "seed_example_only": 100000000,
+    "buy_cash": 10000000,
+    "fee_bps_example_only": 0,
+    "shares_out": 19090909,
+    "reserves_after_buy": [
+      90909091,
+      110000000
+    ],
+    "partial_sell_shares": 9545454,
+    "partial_net_cash": 5113442,
+    "partial_removed_basis": 4999999,
+    "partial_realized_pnl": 113443,
+    "immediate_full_sell_net_cash_alternative": 9999999,
+    "full_roundtrip_pnl_alternative": -1
+  },
+  "rpc_probe": {
+    "status": "unverified",
+    "method": "read-only RPC probe",
+    "failure": "HTTP 403 before chain ID response",
+    "deployment": false,
+    "transactionSubmitted": false
+  },
+  "production_changes": false
+}
