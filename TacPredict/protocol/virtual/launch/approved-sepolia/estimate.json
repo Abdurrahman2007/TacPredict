@@ -1,0 +1,22 @@
+{
+  "scope": "Base Sepolia private test only",
+  "chainId": 84532,
+  "admin": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+  "seedBudgetAtoms": "10000000000",
+  "grantBudgetAtoms": "100000000",
+  "maximumTotalTestGasWei": "10000000000000000",
+  "deploymentDataHash": "0x5367e381cd2d81b5a62a2f427e0ba958055018d867e72f715fa0cb6898f2dd5f",
+  "broadcast": false,
+  "balanceWei": "0",
+  "gasPriceWei": "6000000",
+  "deploymentGasEstimate": "3573309",
+  "estimatedL2ExecutionFeeWei": "21439854000000",
+  "estimateUsesSimulatedBalance": true,
+  "note": "Read-only simulation with balance override, not faucet funding or a transaction. L1 fees additional; wallet must refresh full gas quote.",
+  "observedAtUtc": "2026-10-24T07:37:45.283102+00:00",
+  "baseReviewCommit": "90dcc8d40d7833730e4547ad4f03dfcde052b147",
+  "contractSourceSha256": "db89b275a34f2fd7f167cc892300692c472abcd06c9ece71ad5ae228ac7dae6c",
+  "spentTestEthWei": "0",
+  "deploymentStatus": "NOT_DEPLOYED_ZERO_TEST_ETH",
+  "budgetIsCapNotEstimate": true
+}
