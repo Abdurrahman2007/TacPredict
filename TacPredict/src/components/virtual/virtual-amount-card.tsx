@@ -9,6 +9,7 @@ import { prepareVirtual, observeVirtual } from "@/lib/virtual/functions";
 import { executeVirtualTrade, reconciledVirtualTransaction } from "@/lib/virtual/execution";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
 import { virtualQuoteKey, assertQuoteIntent } from "@/lib/virtual/guards";
+import { browserPending, pendingChanged, writePending } from "@/lib/virtual/pending";
 import type { TradeIntent } from "@/lib/virtual/types";
 export function VirtualAmountCard({
   market,
@@ -34,6 +35,44 @@ export function VirtualAmountCard({
     [notice, setNotice] = useState("");
   const [debounced, setDebounced] = useState("");
   const [submitted, setSubmitted] = useState<{ hash: Hex; intent: TradeIntent } | null>(null);
+  const [recoveryBlocked, setRecoveryBlocked] = useState(false);
+  const [recoveryHash, setRecoveryHash] = useState("");
+  const [recovering, setRecovering] = useState(false);
+  useEffect(() => {
+    function restore() {
+      setRecoveryBlocked(false);
+      if (!w.address) {
+        setSubmitted(null);
+        return;
+      }
+      try {
+        const p = browserPending(ref.deployment, w.address);
+        setSubmitted((old) =>
+          p?.hash
+            ? old?.hash === p.hash && JSON.stringify(old.intent) === JSON.stringify(p.intent)
+              ? old
+              : { hash: p.hash, intent: p.intent }
+            : null,
+        );
+        if (p && !p.hash) {
+          setRecoveryBlocked(true);
+          setNotice(
+            "Wallet submission unresolved. Check wallet activity before retrying; contact support for reconciliation.",
+          );
+        }
+      } catch {
+        setRecoveryBlocked(true);
+        setNotice("Pending transaction recovery unavailable. Contact support before retrying.");
+      }
+    }
+    restore();
+    window.addEventListener("storage", restore);
+    window.addEventListener(pendingChanged, restore);
+    return () => {
+      window.removeEventListener("storage", restore);
+      window.removeEventListener(pendingChanged, restore);
+    };
+  }, [ref.deployment, w.address]);
   useEffect(() => {
     const t = setTimeout(() => setDebounced(amount), 350);
     return () => clearTimeout(t);
@@ -70,17 +109,22 @@ export function VirtualAmountCard({
     retry: 0,
   });
   const observation = useQuery({
-    queryKey: ["virtual", ref.deployment.id, "receipt", submitted?.hash],
+    queryKey: ["virtual", ref.deployment.id, "receipt", submitted?.hash, submitted?.intent],
     enabled: Boolean(submitted),
     queryFn: () => observeVirtual({ data: submitted! }),
-    refetchInterval: (q) => (q.state.data?.status === "pending" ? 4000 : false),
+    refetchInterval: (q) =>
+      ["pending", "reorged"].includes(q.state.data?.status ?? "pending") ? 4000 : false,
     retry: 1,
   });
   useEffect(() => {
     if (!submitted || !observation.data) return;
     const s = observation.data.status;
     if (s !== "pending") {
-      reconciledVirtualTransaction(ref.deployment, submitted.intent.wallet, submitted.hash, s);
+      try {
+        reconciledVirtualTransaction(ref.deployment, submitted.intent.wallet, submitted.hash, s);
+      } catch {
+        setRecoveryBlocked(true);
+      }
       setNotice(`${s}: ${submitted.hash}. Balances follow verified indexing.`);
       void client.invalidateQueries({ queryKey: ["virtual", ref.deployment.id, "account"] });
     }
@@ -102,8 +146,35 @@ export function VirtualAmountCard({
     }
   }
   const waiting = Boolean(
-    submitted && (!observation.data || observation.data.status === "pending"),
+    recoveryBlocked ||
+    (submitted &&
+      !["confirmed", "finalized", "reverted"].includes(observation.data?.status ?? "pending")),
   );
+  async function recover() {
+    if (!w.address || recovering || busy) return;
+    setRecovering(true);
+    try {
+      const p = browserPending(ref.deployment, w.address);
+      if (!p || !/^0x[0-9a-fA-F]{64}$/.test(recoveryHash))
+        throw Error("Enter the transaction hash from your wallet activity.");
+      const hash = recoveryHash as Hex;
+      const result = await observeVirtual({ data: { hash, intent: p.intent } });
+      // A different/reverted/cancelled transaction cannot prove this intent executed.
+      if (result.status !== "confirmed" && result.status !== "finalized")
+        throw Error(
+          "No canonical successful trade matching the saved intent. Recovery stays locked.",
+        );
+      writePending(window.localStorage, ref.deployment, { hash, intent: p.intent });
+      reconciledVirtualTransaction(ref.deployment, w.address, hash, result.status);
+      setRecoveryBlocked(false);
+      setNotice(`Verified on-chain: ${hash}. Balances follow verified indexing.`);
+      await client.invalidateQueries({ queryKey: ["virtual"] });
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : "Recovery unavailable; no trade credited.");
+    } finally {
+      setRecovering(false);
+    }
+  }
   async function submit() {
     const q = quote.data;
     if (lock.current || busy || waiting || !q || priceError || amount !== debounced) return;
@@ -231,6 +302,30 @@ export function VirtualAmountCard({
             at the observed gas price. Base L1 data fees are additional; confirm the full fee in
             your wallet. Estimates change.
           </p>
+        )}
+        {waiting && (
+          <div>
+            <label>
+              Recover submitted trade
+              <input
+                value={recoveryHash}
+                onChange={(e) => setRecoveryHash(e.target.value.trim())}
+                placeholder="Transaction hash from wallet activity"
+                maxLength={66}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={busy || recovering || !auth.user}
+              onClick={() => void recover()}
+            >
+              {recovering ? "Verifying receipt…" : "Verify transaction"}
+            </button>
+            <p>
+              A hash alone never confirms a trade. Cancelled or unknown submissions require support
+              review.
+            </p>
+          </div>
         )}
         <p>Nontransferable virtual credits. No real-money value, withdrawals or token approvals.</p>
       </details>

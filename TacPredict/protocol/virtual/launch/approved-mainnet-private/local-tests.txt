@@ -1,0 +1,67 @@
+LOCAL EVM ONLY; NOT MAINNET RECEIPTS
+
+
+> test
+> node --import tsx --test --test-concurrency=1 test/*.test.mjs
+
+✔ receipt success plus exact trusted event; hash/signature/API result alone never confirms (7.909383ms)
+✔ wallet projection is exact, isolated, idempotent and fail closed on missing history (0.475304ms)
+✔ indexer commits contiguous blocks, reconciles provisional reorg and preserves finality (1.166168ms)
+✔ missing/mismatched receipt blocks projection and checkpoint advancement (0.594548ms)
+✔ versioned points candidates defer open episodes, net losses, flag churn and ignore provisional/duplicates (2.944516ms)
+✔ deployment has no campaign, grant, trade roles or automatic balance (543.402344ms)
+✔ configurable Merkle grants bind chain, engine, wallet, amount and replay; no fixed 500 (103.664701ms)
+Local EVM gas units, not Base fee: buy=115508 sell=136474
+✔ Buy and Sell use distinct successful transactions; exact cost basis and event snapshots (164.641183ms)
+✔ three-outcome fee accounting, partial sales, mark value and inventory conservation (522.50869ms)
+✔ invalid input, insufficient balance/shares, slippage, nonce and revision fail atomically (102.092612ms)
+✔ reserve-floor and max-position liquidity bounds reject rather than fabricate a fill (73.901218ms)
+✔ transaction-wide latch blocks sequential smart-wallet trades, not just reentrancy (76.849948ms)
+✔ guardian pause, unauthorized resume and closing boundary; settlement still works while paused (118.274308ms)
+✔ disputed result cannot finalize early; independent arbiter and timeout void (134.788598ms)
+✔ winning and losing terminal PnL, multiwallet void rounding and final result immutability (146.780946ms)
+✔ local E2E: genuine contract receipts through fenced PostgreSQL indexer into reconciled positions (3859.580124ms)
+✔ winning/losing settlement realizes exact basis and independent arbitration finalizes only after challenge (214.241004ms)
+✔ future grant budgets, expiry and market seed budgets fail safely (118.245976ms)
+✔ seeded randomized 2/3-outcome sequences preserve K, ownership, cash and basis invariants (2939.769583ms)
+✔ extreme quantities, dust, true reserve exhaustion and position caps revert without state changes (124.373769ms)
+✔ competing quotes cannot both execute against one pool revision (185.926142ms)
+✔ lease fence and atomic block journal reject stale writers and duplicate trades (3397.271547ms)
+✔ RLS isolates verified wallets and forbids anonymous/client accounting writes and service RPCs (11.52813ms)
+✔ rewind keeps orphaned evidence but excludes projections; finalized history cannot rewind (11.297545ms)
+✔ null/expired fences cannot write; approved formula history is immutable (6.815404ms)
+✔ approved snapshots cannot gain, lose or mutate candidate scores (11.952995ms)
+✔ null expected cursor cannot bypass sequential checkpoint fence (18.930197ms)
+✔ canonical indexing never confirms an observation whose stored intent disagrees with the trade (19.622871ms)
+✔ published proxy runtime is exact and modified/absent proxy code is rejected (1280.36181ms)
+✔ proxy creation yields exact reviewed engine, explicit admin, finite virtual caps and no activation (105.255034ms)
+✔ salt/admin changes alter predicted engine and runtime tampering fails closed (7.752703ms)
+✔ execution persists before wallet send and ambiguous send failure cannot be retried (8.989971ms)
+✔ a restored hash blocks wallet execution even without an in-memory pending entry (0.367196ms)
+✔ explicit wallet rejection clears only the no-hash attempt and permits a new prompt (2.61442ms)
+✔ missing cross-tab lock support or unavailable lock never prompts wallet (0.357286ms)
+✔ quotes are isolated by market, wallet, deployment, side, outcome and quantity (1.507752ms)
+✔ old/future projections and invalid age policies block trading, not verified zero (0.283155ms)
+✔ a previously mined receipt disappearing becomes reorged, not fresh pending (0.139904ms)
+✔ health checks reconcile conservation, checkpoint age, finality and independent pause (3.279042ms)
+✔ server boundary strips provider URLs and secrets while preserving deliberate safe messages (4.007586ms)
+✔ a frozen RPC head cannot look fresh merely because the indexer is equally old (0.353967ms)
+✔ crypto evidence checks asset, frozen interval, positive exact boundary samples, tie and freshness (1.842735ms)
+✔ sports evidence rejects wrong fixtures, non-final, future, abandoned and stale results; explicit draw policy (0.335063ms)
+✔ a closing observation cannot postdate the alleged source fetch (0.178633ms)
+✔ pending intent survives a reload; hash is a recovery hint, not a receipt (1.59507ms)
+✔ unknown, invalid and reorged observations never release a pending hash (0.391497ms)
+✔ corrupt, foreign or oversized recovery records fail closed (0.704466ms)
+✔ unavailable or silently dropping storage cannot permit a submission (0.223463ms)
+✔ only explicit wallet rejection is safely retryable without a hash (0.197771ms)
+✔ six original contracts, addresses, old compiler and real execution paths remain unchanged (7.583729ms)
+✔ application ABI matches separately compiled virtual contract; no asset ABI or fallback (6103.179055ms)
+✔ operations/verifier are dormant and cannot sign, spend or submit transactions (0.665332ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39576.665016

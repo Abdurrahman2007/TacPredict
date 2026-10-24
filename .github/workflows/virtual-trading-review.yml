@@ -2,6 +2,8 @@ name: Virtual trading review checks
 on:
   pull_request:
     paths:
+      - 'TacPredict/package.json'
+      - 'TacPredict/package-lock.json'
       - 'TacPredict/protocol/virtual/**'
       - 'TacPredict/src/lib/virtual/**'
       - 'TacPredict/src/components/virtual/**'
