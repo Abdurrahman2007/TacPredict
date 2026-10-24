@@ -19,7 +19,14 @@ export function compile(extra = {}) {
           viaIR: true,
           evmVersion: "cancun",
           outputSelection: {
-            "*": { "*": ["abi", "evm.bytecode.object", "evm.deployedBytecode.object"] },
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode.object",
+                "evm.deployedBytecode.object",
+                "evm.deployedBytecode.immutableReferences",
+              ],
+            },
           },
         },
       }),

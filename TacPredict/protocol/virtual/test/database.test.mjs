@@ -207,3 +207,62 @@ test("approved snapshots cannot gain, lose or mutate candidate scores", async ()
     "10",
   );
 });
+
+test("null expected cursor cannot bypass sequential checkpoint fence", async () => {
+  const f = (await db.query("SELECT public.virtual_acquire_lease($1) AS f", [dep])).rows[0].f;
+  for (const args of [
+    [dep, f, 9, "h9", "h1", 12, "[]", null],
+    [dep, f, 2, "h2", "h1", 12, null, 1],
+  ])
+    await assert.rejects(
+      db.query("SELECT public.virtual_commit_block($1,$2,$3,$4,$5,$6,$7,$8)", args),
+    );
+  await assert.rejects(db.query("SELECT public.virtual_rewind($1,$2,NULL,NULL)", [dep, f]));
+  await assert.rejects(
+    db.query("SELECT public.virtual_finalize_blocks($1,$2,NULL,NULL)", [dep, f]),
+  );
+  assert.equal(
+    (await db.query("SELECT checkpoint FROM public.virtual_deployments WHERE id=$1", [dep])).rows[0]
+      .checkpoint,
+    "1",
+  );
+});
+
+test("canonical indexing never confirms an observation whose stored intent disagrees with the trade", async () => {
+  const f = (await db.query("SELECT lease_fence FROM virtual_deployments WHERE id=$1", [dep]))
+    .rows[0].lease_fence;
+  const base = { wallet, marketId: "1", outcome: 0, isBuy: true, input: "100", nonce: "0" };
+  for (const [hash, intent] of [
+    ["good", base],
+    ["bad", { ...base, nonce: "999" }],
+  ])
+    await db.query(
+      "INSERT INTO virtual_transactions(deployment_id,tx_hash,wallet,status,intent) VALUES($1,$2,$3,'pending',$4)",
+      [dep, hash, wallet, JSON.stringify(intent)],
+    );
+  const events = ["good", "bad"].map((txHash, i) => ({
+    name: "TradeExecuted",
+    wallet,
+    marketId: "1",
+    txHash,
+    blockHash: "h2new",
+    blockNumber: "2",
+    logIndex: i,
+    args: { outcome: 0, isBuy: true, input: "100", nonce: "0" },
+  }));
+  await db.query("SELECT virtual_commit_block($1,$2,2,$3,$4,12,$5,1)", [
+    dep,
+    f,
+    "h2new",
+    "h1",
+    JSON.stringify(events),
+  ]);
+  const rows = (
+    await db.query(
+      "SELECT tx_hash,status FROM virtual_transactions WHERE deployment_id=$1 ORDER BY tx_hash",
+      [dep],
+    )
+  ).rows;
+  assert.equal(rows.find((r) => r.tx_hash === "good").status, "confirmed");
+  assert.equal(rows.find((r) => r.tx_hash === "bad").status, "invalid");
+});

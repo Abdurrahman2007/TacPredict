@@ -1,0 +1,323 @@
+ACTUAL LOCAL CHECKS — not Sepolia/Mainnet execution
+
+INITIAL REPRODUCTION: 165 passed, 1 failed (stale six-entry nav assertion; actual seventh Virtual Trading entry). Corrected expectation and reran.
+
+FINAL VIRTUAL SUITE
+
+> test
+> node --import tsx --test --test-concurrency=1 test/*.test.mjs
+
+✔ receipt success plus exact trusted event; hash/signature/API result alone never confirms (7.939301ms)
+✔ wallet projection is exact, isolated, idempotent and fail closed on missing history (0.465274ms)
+✔ indexer commits contiguous blocks, reconciles provisional reorg and preserves finality (1.128311ms)
+✔ missing/mismatched receipt blocks projection and checkpoint advancement (0.498764ms)
+✔ versioned points candidates defer open episodes, net losses, flag churn and ignore provisional/duplicates (2.8745ms)
+✔ deployment has no campaign, grant, trade roles or automatic balance (553.277889ms)
+✔ configurable Merkle grants bind chain, engine, wallet, amount and replay; no fixed 500 (119.202668ms)
+Local EVM gas units, not Base fee: buy=115508 sell=136474
+✔ Buy and Sell use distinct successful transactions; exact cost basis and event snapshots (175.320007ms)
+✔ three-outcome fee accounting, partial sales, mark value and inventory conservation (446.822197ms)
+✔ invalid input, insufficient balance/shares, slippage, nonce and revision fail atomically (114.811146ms)
+✔ reserve-floor and max-position liquidity bounds reject rather than fabricate a fill (58.401104ms)
+✔ transaction-wide latch blocks sequential smart-wallet trades, not just reentrancy (71.535503ms)
+✔ guardian pause, unauthorized resume and closing boundary; settlement still works while paused (107.551742ms)
+✔ disputed result cannot finalize early; independent arbiter and timeout void (94.340719ms)
+✔ winning and losing terminal PnL, multiwallet void rounding and final result immutability (126.647708ms)
+✔ local E2E: genuine contract receipts through fenced PostgreSQL indexer into reconciled positions (2908.271373ms)
+✔ winning/losing settlement realizes exact basis and independent arbitration finalizes only after challenge (115.585146ms)
+✔ future grant budgets, expiry and market seed budgets fail safely (60.179426ms)
+✔ seeded randomized 2/3-outcome sequences preserve K, ownership, cash and basis invariants (1647.196716ms)
+✔ extreme quantities, dust, true reserve exhaustion and position caps revert without state changes (132.13736ms)
+✔ competing quotes cannot both execute against one pool revision (71.548497ms)
+✔ lease fence and atomic block journal reject stale writers and duplicate trades (2172.334415ms)
+✔ RLS isolates verified wallets and forbids anonymous/client accounting writes and service RPCs (6.042093ms)
+✔ rewind keeps orphaned evidence but excludes projections; finalized history cannot rewind (7.017588ms)
+✔ null/expired fences cannot write; approved formula history is immutable (5.32713ms)
+✔ approved snapshots cannot gain, lose or mutate candidate scores (7.270424ms)
+✔ null expected cursor cannot bypass sequential checkpoint fence (4.07605ms)
+✔ canonical indexing never confirms an observation whose stored intent disagrees with the trade (5.499027ms)
+✔ quotes are isolated by market, wallet, deployment, side, outcome and quantity (1.548051ms)
+✔ old/future projections and invalid age policies block trading, not verified zero (0.226991ms)
+✔ a previously mined receipt disappearing becomes reorged, not fresh pending (0.145182ms)
+✔ health checks reconcile conservation, checkpoint age, finality and independent pause (3.589777ms)
+✔ server boundary strips provider URLs and secrets while preserving deliberate safe messages (3.772162ms)
+✔ a frozen RPC head cannot look fresh merely because the indexer is equally old (0.362032ms)
+✔ crypto evidence checks asset, frozen interval, positive exact boundary samples, tie and freshness (1.723061ms)
+✔ sports evidence rejects wrong fixtures, non-final, future, abandoned and stale results; explicit draw policy (0.319231ms)
+✔ a closing observation cannot postdate the alleged source fetch (0.150599ms)
+✔ six original contracts, addresses, old compiler and real execution paths remain unchanged (6.570662ms)
+✔ application ABI matches separately compiled virtual contract; no asset ABI or fallback (5862.508284ms)
+✔ operations/verifier are dormant and cannot sign, spend or submit transactions (0.450071ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24665.484877
+
+FINAL EXISTING REGRESSION SUITE
+
+> test
+> node --test test/protocol.test.mjs test/ui-order-math.test.mjs test/reward-view.test.mjs test/deployment-verifier.test.mjs test/job-fencing.test.mjs test/indexer-config.test.mjs test/base-account-proof.test.mjs test/oracle-observer.test.mjs test/request-budget.test.mjs test/admin-workspace.test.mjs test/admin-rows.test.mjs test/updown-pool.test.mjs test/updown-window.test.mjs test/sections.test.mjs test/market-templates.test.mjs test/sports-fixtures.test.mjs test/brand-assets.test.mjs test/pool-keeper.test.mjs test/pool-artifact.test.mjs test/launch-readiness.test.mjs test/portfolio-view.test.mjs test/portfolio-cancellation.test.mjs test/reference-cards.test.mjs test/coingecko-charts.test.mjs test/chart-history-context.test.mjs test/shared-market-cards.test.mjs test/live-chart-sports.test.mjs test/reference-feed.test.mjs test/ranking.test.mjs test/admin-minimal.test.mjs test/accounts.test.mjs
+
+(node:2347) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ username canonicalization, reserved words and referral expiry (4.944896ms)
+✔ sign-in required, cross-origin writes denied, no arbitrary owner input (88.738921ms)
+✔ referral signup permanently binds and credits inviter exactly once, not invitee (17.861689ms)
+✔ existing profiles, old auth accounts, non-wallet identities and self-referrals never rebind (10.936777ms)
+✔ duplicate username returns red-field error and never overwrites another account (9.288279ms)
+✔ server rate limits writes and cannot be bypassed by client amount fields (19.141326ms)
+✔ admin changes require authorization and reason; old codes survive rotation; audit is atomic (4.360861ms)
+✔ policy applies prospectively; review and revocation preserve one reward record (6.640577ms)
+✔ daily cap queues extra rewards and suspended inviters cannot bind new accounts (11.36236ms)
+✔ concurrent duplicate bootstrap cannot mint a second referral reward (3.931272ms)
+✔ oversized JSON and invalid usernames fail without database mutation (2.535714ms)
+✔ minimal dashboard never invents zero and formats atomic money exactly (1.064809ms)
+✔ market metrics are execution volume and unique wallet participants, not liquidity (0.95324ms)
+✔ new reads keep role + MFA and contain no financial writes (1.344067ms)
+✔ seven sidebar jobs include isolated Virtual Trading and retain operational tools in Settings (0.467938ms)
+✔ creation view cannot expose guardian unpause controls (0.380116ms)
+✔ creation timing review remounts when any immutable timestamp changes (0.220057ms)
+✔ user lookup does not silently truncate wallet or position pages (0.189099ms)
+✔ atomic amounts stay exact beyond Number precision and unknown stays null (1.121482ms)
+✔ detail fields are read by exact key prefix (0.198049ms)
+✔ market rows split into code/title and keep prepared terms separate (0.921115ms)
+✔ trade and resolution rows expose only recorded fields (0.32493ms)
+✔ blockchain rows give checkpoint and verified contract addresses (0.496181ms)
+✔ indexer lag is unknown unless both numbers are known (0.192191ms)
+✔ timestamps are labelled UTC only when the offset is zero (0.47703ms)
+✔ created-market count subtracts next ID without loss of precision (0.173134ms)
+✔ Astra-derived USDC formatter remains exact beyond Number range (1.220451ms)
+✔ snapshot validation rejects other chains, negative amounts and excess rows (2.502105ms)
+✔ new privileged reads and preparation enforce database role and AAL2 (0.591521ms)
+✔ exact nine-call compiled constructor and paused bootstrap batch is accepted (12.527424ms)
+✔ a successful outer bundle never conceals a failed admin user operation (2.930934ms)
+✔ changed recipient or changed constructor hash is rejected (3.921107ms)
+✔ token logos are the real upstream icons, never hand-drawn text badges (1.662965ms)
+✔ opening the app is direct, with no intro overlay or animation component (0.223653ms)
+✔ every logo is requested through the versioned helper so a replaced logo is never served from an old cache (1.490009ms)
+✔ the supplied blue-white mark is shared by public, auth, admin and wallet surfaces (0.748053ms)
+✔ browser and share logo variants are generated from versioned brand assets (1.841924ms)
+✔ scroll discovery is in-page and social links use the exact supplied destinations (0.245087ms)
+✔ a future window shows real recent history, never future or invented points (1.528998ms)
+✔ a sparse live window gets labelled context rather than one isolated dot (0.221601ms)
+✔ a populated live window uses only its own observations (0.185892ms)
+✔ past-window context cannot include prices after its closing time (0.184326ms)
+✔ missing provider observations remain empty rather than fabricate a line (0.140323ms)
+✔ duration bar is removed from detail and context range is visible (0.869286ms)
+✔ full historical cache is separate from spot-only snapshot history (0.362695ms)
+✔ a lone recent observation keeps its real timestamp even for a future window (0.162134ms)
+✔ all four assets use the real CoinGecko ID and server-only key (1.036721ms)
+✔ Home and detail share real price charts without changing locked oracle evidence (0.461671ms)
+✔ provider status does not claim configured keys are verified live connections (1.176411ms)
+✔ only Base Mainnet and Base Sepolia pass deployment chain guard (0.828553ms)
+✔ immutable placeholders are masked, executable instructions are never masked (0.335322ms)
+✔ scheduled indexer requires bounded work and refuses absent server configuration (1.684295ms)
+✔ scheduled indexer rejects any other database or non-Base chain before requests (0.257357ms)
+{"chain":84532,"job":"indexer","status":"skipped","reason":"Another writer owns the lease"}
+✔ a second writer does no work when acquisition is denied (1.890012ms)
+✔ successful lease owner fences work and records completion before release (0.442821ms)
+✔ expired fencing halts writes and records failed run (0.550951ms)
+✔ server keys and private RPC endpoint values never enter error output (0.280014ms)
+✔ unknown review, liquidity, indexer and E2E remain release blockers (0.842509ms)
+✔ a flag or wrong chain cannot claim a live release (0.231086ms)
+✔ selected wallet totals exclude other wallets, other chains and wallet cash (1.254168ms)
+✔ category/status/UTC updated filters use real fields and do not mutate rows (0.284359ms)
+✔ recovery cancellation is simulated, maker-only, and not blocked by new-risk pause (0.590455ms)
+✔ short rounds show 30-minute real context, never fabricated or future points (2.093658ms)
+✔ scrubbing chooses nearest real observation at first/middle/last, never interpolated prices (0.205367ms)
+✔ live candles use only later real ticks and leave empty minutes empty (0.723202ms)
+✔ 1H is a display duration, not a silently enabled contract series (0.47313ms)
+✔ public sports tabs and admin tabs share definitions; crypto stays outside Markets (0.709744ms)
+✔ sport logos are local and portfolio removes exactly the marked controls (0.365708ms)
+✔ every asset and window length gives an aligned draft with exact Coinbase rules (4.857939ms)
+✔ BNB uses BNB-USD and the title names the window (0.185494ms)
+✔ unsupported asset, length or clock is rejected (0.264055ms)
+✔ football draft: three outcomes, locked rules for every non-result case (0.990685ms)
+✔ cricket draft: two outcomes, tie, DLS, no-result and postponed all stated (0.4115ms)
+✔ fixtures that are too close, malformed or lack an id are refused (0.514583ms)
+✔ the engine blocks sports rules that skip postponed, abandoned, tie or void clauses (0.260055ms)
+✔ time checks catch past, reversed and missing times (0.224941ms)
+✔ custom drafts can skip the time check but sports rules are still enforced (0.394524ms)
+✔ oracle compares exact USD decimals and rejects malformed inputs (1.382273ms)
+✔ observation accepts only a single closed, consistent exact candle (5.838163ms)
+✔ oracle spec is cryptographically bound to published metadata, rules, source and close time (5.608465ms)
+✔ the bytecode the admin panel deploys is exactly what the reviewed source compiles to (1.067552ms)
+✔ the function list the app and admin panel call exists in the compiled contract (4.981779ms)
+✔ the constructor takes admin, USDC, treasury and fee in that order (0.747008ms)
+✔ boundary lists only the rounds that really start or end there (1.694083ms)
+✔ only rounds with bets that still miss a price are due (0.77131ms)
+✔ a reading counts only if it was taken at or after the boundary and soon enough (0.370518ms)
+✔ keeper posts the end price and the next start price from one fresh reading (0.587533ms)
+✔ a stale reading is never posted; one look stops, polling waits for a fresh one (0.418055ms)
+✔ a failing price feed does not crash the pass and posts nothing (0.24137ms)
+✔ too late or nothing to do means no price lookup at all (0.198398ms)
+✔ report items carry exactly what the contract checks (0.181836ms)
+✔ keeper environment is checked without echoing the key (0.382449ms)
+✔ the payout shown to players matches the contract formula (0.3235ms)
+✔ missed-reading refund becomes available only after the grace period (0.176748ms)
+✔ wallet-approved cancellation works while new-risk trading is paused (3.823676ms)
+✔ wrong maker and wrong network never prompt a write (0.861742ms)
+✔ rejected simulation cannot broadcast and reverted receipt cannot claim success (0.736332ms)
+✔ USDC formatting stays exact beyond Number precision and distinguishes unknown (1.005974ms)
+✔ only Base positions, real sort, search and active filter (0.786252ms)
+✔ partial fills use atomic strings and never negative remaining (0.168484ms)
+✔ overview zeros are disconnected previews, not substituted live balances (0.191041ms)
+This version of µWS is not compatible with your Node.js build:
+
+Error: Cannot find module '../binaries/uws_linux_x64_137.node'
+Require stack:
+- <checkout>/TacPredict/protocol/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- <checkout>/TacPredict/protocol/node_modules/ganache/dist/node/core.js
+Falling back to a NodeJS implementation; performance may be degraded.
+
+
+PASS IDs, immutable locked terms and exact USDC collateral
+PASS Pause blocks risk-increasing actions but complete-set merge remains available
+PASS Real typed signatures, partial fills and USDC transfer
+PASS Wrong-chain signature, self-trade and cancellation rejected
+PASS Nonce invalidation and insufficient collateral are atomic
+PASS Closed market blocks new positions/trades; oracle pins evidence source and time
+PASS Permissionless finalization and burn-before-transfer redemption; cannot double-claim
+PASS Dispute blocks public finalize and unauthorized arbitrator
+PASS Timeout refund cannot be triggered early
+PASS Oracle unavailable: permissionless void and full-set principal recovery
+PASS Disputed timeout returns both bonds and cannot later finalize
+PASS CLOB crossing orders settle at seller price with exact cumulative buyer limit
+PASS Void secondary trades pay current shares, conserve vault and do not fake original principal
+PASS One-atomic-unit full-set timeout refunds preserve principal with aggregate rounding
+PASS Seeded split/merge/transfer invariants conserve native USDC and all outcome supplies
+PASS Randomized five-outcome void redemption cannot overpay or double-claim
+{"passed":16,"contracts":6,"localOnly":true,"chain":"Base Sepolia simulation","mainnetDeployed":false}
+✔ test/protocol.test.mjs (217709.989571ms)
+✔ complete-set cost basis yields 200/-200 USDC P&L; independent payout cross-check (3.295569ms)
+✔ redemption cannot double-count settlement (0.488211ms)
+✔ open-market gain does not become settled profit (9.788617ms)
+✔ unexplained gift invalidates both cost bases (0.359546ms)
+✔ volume and settlement windows use their own real timestamps (0.26694ms)
+✔ old settlement is not current-period P&L (0.256601ms)
+✔ void payouts preserve aggregate precision (0.285932ms)
+✔ duplicates, missing transfers and missing timestamps fail closed (4.024983ms)
+✔ exact atomic math, signed formatting and zero-wallet rejection (0.30942ms)
+✔ public data never links auth identities; admin requires role/AAL2; search removed (0.83095ms)
+✔ boundary labels need an exact, real, non-future observation (1.802369ms)
+✔ UTC history is aligned, bounded, newest first, and pages never overlap (0.462647ms)
+✔ elapsed time never fabricates a settled or funded round (0.18126ms)
+✔ cards stretch the real route link, retain direction links, and never invent cents (0.649627ms)
+✔ admin reads finalized on-chain rows without wallet signing or fabricated results (0.325545ms)
+✔ reference start uses a real post-boundary sample in the grace period, never an earlier or late point (0.214787ms)
+✔ sampled OHLC uses only actual observations, leaving empty buckets empty (0.908964ms)
+✔ detail metadata cannot block reference navigation (0.1878ms)
+✔ time controls roll current into Past and show exactly one next window (0.450681ms)
+✔ reference OHLC preserves actual values in chronological order (1.281258ms)
+✔ reference OHLC rejects malformed, impossible and future observations without filling gaps (0.350422ms)
+✔ public chart source stays server-side and independent from settlement evidence (4.291926ms)
+✔ price tags do not collide when the reference is above or below latest (0.261889ms)
+✔ free Worker budget reserves three requests for completion and lease release (1.230013ms)
+✔ free Worker request cap cannot be accidentally raised beyond forty-eight (0.204015ms)
+✔ signed out, unknown and failed verification never mark progress complete (0.783619ms)
+✔ X linking is next before unavailable onchain launch (0.139425ms)
+✔ requirements alone do not fabricate recorded credit (0.115803ms)
+✔ only fully verified recorded credit displays earned (0.111137ms)
+✔ previously recorded credit remains visible if X is later unlinked (0.131719ms)
+✔ only Crypto, Football and Cricket are shown (0.78037ms)
+✔ sports without a subcategory are sorted by title, anything else is hidden (0.535689ms)
+✔ native markets use their stored subcategory (0.147113ms)
+✔ terms round-trip into a stored category plus subcategory (0.749031ms)
+✔ Home and Markets use one renderer for every market creation source (1.413781ms)
+✔ Home omits marked duration toolbar; all durations remain on detailed view (1.004537ms)
+✔ Selected-window chart never falls back to a different day or invents missing points (0.736101ms)
+✔ Marked duplicate price, history fallback and paragraph stack are absent (0.414915ms)
+✔ Admin-created BNB and long-duration detail charts support locked market times (0.391458ms)
+✔ multi-outcome trade dock does not hide football Away (0.191556ms)
+✔ compact cards have no repeated visible provider caption (0.252412ms)
+✔ chart is an interactive data-rendered SVG rather than a screenshot (0.211642ms)
+✔ removing repeated provider captions does not hide stale-data warnings (0.257609ms)
+✔ reference price windows do not masquerade as live prediction trading (0.255398ms)
+✔ football fixtures: only scheduled matches with real teams, named by our competition label (10.820755ms)
+✔ football result uses regulation time, not extra time or penalties (0.372859ms)
+✔ football: postponed or cancelled is a void suggestion, live or odd statuses never decide (0.195032ms)
+✔ cricket fixtures: T20 and Bangladesh ODIs that have not started, time read as UTC (1.212898ms)
+✔ cricket result: clean wins are suggested, void states are void, ties go to a person (0.575365ms)
+✔ proposal maps a suggestion onto the market outcomes or stays empty (0.276904ms)
+PASS UI exact atomic order math: six decimals, large integers, budget ceiling, invalid values rejected
+✔ test/ui-order-math.test.mjs (243.464143ms)
+This version of µWS is not compatible with your Node.js build:
+
+Error: Cannot find module '../binaries/uws_linux_x64_137.node'
+Require stack:
+- <checkout>/TacPredict/protocol/node_modules/ganache/node_modules/@trufflesuite/uws-js-unofficial/src/uws.js
+- <checkout>/TacPredict/protocol/node_modules/ganache/dist/node/core.js
+Falling back to a NodeJS implementation; performance may be degraded.
+
+
+PASS Deployment is Base-only, native-USDC-only and caps the fee
+PASS Series are off until the admin turns them on, and only for real assets and durations
+PASS Bets: only before the start, aligned, within limits, and the stake is held by the contract
+PASS The pool cap and the pause switch stop new bets; claims are never paused
+PASS Up wins: exact fee from the losing side, exact payouts, dust to the owner, no early or double claim
+PASS Down wins when the end price is lower
+PASS Equal prices refund every stake and take no fee
+PASS A round with bets on one side only is refunded in full, even if the price moved
+PASS Price readings must be from the boundary, from the reporter, and in time
+PASS A batch reports several assets at once and is all-or-nothing
+PASS Missing price readings: nobody can refund early, then anyone can refund everyone
+PASS A missing end reading also refunds, after the start was reported
+PASS Guardian refund control: only during review, only returns stakes, never a payout
+PASS A guardian can void before the start and the round then takes no bets
+PASS The fee a round starts with cannot be raised afterwards; caps and roles are enforced
+PASS 12 hour and 24 hour rounds run on UTC boundaries and settle the same way
+PASS Randomised rounds conserve every USDC: payouts plus the owner share equal the stakes
+PASS The owner can never withdraw more than fees and dust, and the pool keeps open stakes
+{"passed":18,"contract":"UpDownPool","localOnly":true,"chain":"Base Sepolia simulation","mainnetDeployed":false}
+✔ test/updown-pool.test.mjs (286525.214648ms)
+✔ windows are aligned to the clock (0.929425ms)
+✔ window parameter falls back to the current window when invalid (0.205111ms)
+✔ window list is ordered and includes the live one (4.281882ms)
+✔ price to beat and result come only from real candles (0.870911ms)
+✔ delta and countdown (0.251178ms)
+✔ native market is matched by asset, title and exact window (2.354578ms)
+✔ series prefers candles, then trades, then live ticks, clipped to the window (0.400884ms)
+✔ thin keeps ends; formatting; slugs (14.50493ms)
+✔ four assets and four window lengths (0.23422ms)
+✔ candle size grows with the look-back and never exceeds 300 candles (0.344129ms)
+✔ coarse candles give the same price to beat and result as minute candles (0.238699ms)
+✔ a coarse candle never stands in for a shorter window (0.117159ms)
+ℹ tests 166
+ℹ suites 0
+ℹ pass 166
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 531260.868516
+
+COMPILE
+
+> compile
+> node scripts/compile.mjs
+
+VirtualAMM compiled (Cancun); runtime bytes: 15998
+
+TYPECHECK
+
+> typecheck
+> tsc --noEmit
+
+
+BUILD
+
+✓ built in 3.34s
+[nitro] ℹ Using auto generated worker name: abdurrahman2007-tacpredict-tacpredict
+ℹ Generated .output/server/wrangler.json
+ℹ Generated .wrangler/deploy/config.json
+ℹ Generated .output/public/_headers
+ℹ Generated .output/nitro.json
+
+[nitro] ✔ You can preview this build using npx vite preview
+[nitro] ✔ You can deploy this build using npx nitro deploy --prebuilt
+
+LINT: changed virtual/disclosure sources 0 errors/0 warnings. Full repository: 496 errors, 19 warnings, existing baseline.

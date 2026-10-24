@@ -1,8 +1,10 @@
-import { TransactionReceiptNotFoundError, type Address, type Hex } from "viem";
+import { TransactionReceiptNotFoundError, formatEther, type Address, type Hex } from "viem";
 import { virtualAmmAbi } from "./abi";
 import { virtualRuntime } from "./runtime.server";
 import { virtualDb } from "./database.server";
 import { verifyTradeReceipt } from "./receipt";
+import { validateResolutionSpec } from "./market-data";
+import { assertFreshProjection, assertFreshChainTime, missingReceiptStatus } from "./guards";
 import type { TradeIntent } from "./types";
 export async function prepareVirtualTrade(
   wallet: Address,
@@ -13,13 +15,24 @@ export async function prepareVirtualTrade(
 ) {
   const r = await virtualRuntime();
   if (!r.deployment.enabled) throw Error("Virtual trading disabled");
-  if (!r.markets.some((m) => m.id === marketId && outcome < m.outcomes.length))
-    throw Error("Unknown virtual market/outcome");
+  const meta = r.markets.find(
+    (m) => m.id === marketId && outcome >= 0 && outcome < m.outcomes.length,
+  );
+  if (!meta) throw Error("Unknown virtual market/outcome");
+  if (!meta.resolutionSpec) throw Error("Market source policy not verified; trading blocked");
+  validateResolutionSpec(meta.resolutionSpec, meta.category, meta.outcomes.length);
   const { readVirtualAccount } = await import("./read.server");
   const projected = await readVirtualAccount(wallet);
   const amount = BigInt(input);
   if (amount <= 0n || amount > 18446744073709551615n) throw Error("Invalid quantity");
   const b = await r.client.getBlock({ blockTag: "latest" });
+  assertFreshChainTime(
+    b.timestamp,
+    BigInt(Math.floor(Date.now() / 1000)),
+    r.maxProjectionAgeSeconds,
+  );
+  const indexed = await r.client.getBlock({ blockNumber: BigInt(projected.blockNumber) });
+  assertFreshProjection(indexed.timestamp, b.timestamp, r.maxProjectionAgeSeconds);
   const q = await r.client.readContract({
     address: r.deployment.engine,
     abi: virtualAmmAbi,
@@ -41,6 +54,11 @@ export async function prepareVirtualTrade(
     args: [BigInt(marketId)],
     blockNumber: b.number,
   });
+  if (
+    meta.resolutionSpec.kind === "crypto" &&
+    pool.terms.closeAt - pool.terms.openAt !== BigInt(meta.resolutionSpec.intervalSeconds)
+  )
+    throw Error("Invalid crypto resolution policy");
   const cash = await r.client.readContract({
     address: r.deployment.engine,
     abi: virtualAmmAbi,
@@ -66,7 +84,18 @@ export async function prepareVirtualTrade(
     isBuy ? cash < amount || position[0] + q.output > pool.terms.maxPosition : position[0] < amount
   )
     throw Error("Insufficient virtual balance/shares or position limit");
+  const deadline = b.timestamp + 120n;
+  const gasUnits = await r.client.estimateContractGas({
+    account: wallet,
+    address: r.deployment.engine,
+    abi: virtualAmmAbi,
+    functionName: isBuy ? "buy" : "sell",
+    args: [BigInt(marketId), outcome, amount, q.output, q.revision, deadline, nonce],
+  });
+  const gasPrice = await r.client.getGasPrice();
   return {
+    gasUnits: gasUnits.toString(),
+    executionGasEth: formatEther(gasUnits * gasPrice),
     deployment: r.deployment,
     intent: {
       wallet,
@@ -81,7 +110,7 @@ export async function prepareVirtualTrade(
     revision: q.revision.toString(),
     blockNumber: b.number.toString(),
     blockHash: b.hash,
-    deadline: (b.timestamp + 120n).toString(),
+    deadline: deadline.toString(),
   };
 }
 export async function observeVirtualTrade(hash: Hex, intent: TradeIntent) {
@@ -105,6 +134,17 @@ export async function observeVirtualTrade(hash: Hex, intent: TradeIntent) {
     blockHash = receipt.blockHash;
   } catch (e) {
     if (!(e instanceof TransactionReceiptNotFoundError)) throw e;
+    const previous = await virtualDb
+      .from("virtual_transactions")
+      .select("block_number,block_hash")
+      .eq("deployment_id", d.id)
+      .eq("tx_hash", hash)
+      .eq("wallet", intent.wallet.toLowerCase())
+      .maybeSingle();
+    if (previous.error) throw Error("Prior transaction evidence unavailable");
+    status = missingReceiptStatus(previous.data);
+    blockNumber = previous.data?.block_number ?? null;
+    blockHash = previous.data?.block_hash ?? null;
   }
   const saved = await virtualDb.from("virtual_transactions").upsert(
     {

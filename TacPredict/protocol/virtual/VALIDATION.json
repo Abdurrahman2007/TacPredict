@@ -95,5 +95,7 @@
     "metadata/resolution governance and authentic market sources",
     "full deployed wallet E2E validation",
     "monthly points abuse policy and publication approvals"
-  ]
+  ],
+  "superseded_by": "launch/validation.json",
+  "historical_report_notice": "Original PR report retained for history. Current reproduction found/fixed the seven-entry admin navigation regression; use the launch report for current results, security findings and NO-GO decision."
 }

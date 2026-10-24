@@ -1,0 +1,45 @@
+name: Virtual trading review checks
+on:
+  pull_request:
+    paths:
+      - 'TacPredict/protocol/virtual/**'
+      - 'TacPredict/src/lib/virtual/**'
+      - 'TacPredict/src/components/virtual/**'
+      - 'TacPredict/supabase/migration-drafts/**'
+      - '.github/workflows/virtual-trading-review.yml'
+permissions:
+  contents: read
+jobs:
+  virtual-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: TacPredict
+    env:
+      SUPABASE_URL: https://local-test.invalid
+      SUPABASE_SERVICE_ROLE_KEY: local-test-placeholder
+      VITE_SUPABASE_URL: https://local-test.invalid
+      VITE_SUPABASE_PUBLISHABLE_KEY: local-test-placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            TacPredict/package-lock.json
+            TacPredict/protocol/virtual/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix protocol/virtual
+      - run: npm --prefix protocol/virtual run compile
+      - run: npm --prefix protocol/virtual test
+        env:
+          VIRTUAL_LOCAL_EVIDENCE_PATH: /tmp/virtual-local-receipts.json
+      - run: npm run typecheck
+      - run: npx --no-install eslint src/lib/virtual src/components/virtual src/components/admin/views/virtual.tsx
+      - run: npm run build
+      - name: No production operation
+        run: echo 'Local EVM and disposable PostgreSQL only. No deployment, production migration, signing key or activation.'

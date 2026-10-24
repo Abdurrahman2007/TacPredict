@@ -94,8 +94,10 @@ DECLARE d public.virtual_deployments%ROWTYPE; e jsonb; tr jsonb;
 BEGIN
  SELECT * INTO STRICT d FROM public.virtual_deployments WHERE id=_deployment FOR UPDATE;
  IF d.lease_fence IS NULL OR _fence IS NULL OR d.lease_until IS NULL OR d.lease_fence IS DISTINCT FROM _fence OR d.lease_until<=clock_timestamp() OR d.checkpoint<>_expected OR _number<>_expected+1
+ OR _number IS NULL OR _expected IS NULL OR _hash IS NULL OR _parent IS NULL OR _timestamp IS NULL OR _events IS NULL
+ OR _number<>trunc(_number) OR _expected<>trunc(_expected) OR _timestamp<0 OR _timestamp<>trunc(_timestamp)
  OR (d.checkpoint_hash IS NOT NULL AND d.checkpoint_hash<>_parent) THEN RAISE EXCEPTION 'Stale fence/checkpoint/parent'; END IF;
- IF jsonb_typeof(_events)<>'array' THEN RAISE EXCEPTION 'Event array required'; END IF;
+ IF jsonb_typeof(_events) IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'Event array required'; END IF;
  INSERT INTO public.virtual_blocks VALUES(_deployment,_number,_hash,_parent,_timestamp,true)
  ON CONFLICT(deployment_id,hash) DO UPDATE SET canonical=true;
  FOR e IN SELECT value FROM jsonb_array_elements(_events) LOOP
@@ -107,7 +109,11 @@ BEGIN
  IF EXISTS(SELECT 1 FROM public.virtual_chain_events WHERE deployment_id=_deployment AND block_hash=_hash AND canonical
  AND event->>'name'='TradeExecuted' GROUP BY tx_hash HAVING count(*)>1) THEN RAISE EXCEPTION 'Multiple trades in transaction'; END IF;
  FOR tr IN SELECT event FROM public.virtual_chain_events WHERE deployment_id=_deployment AND block_hash=_hash AND canonical AND event->>'name'='TradeExecuted' LOOP
-  UPDATE public.virtual_transactions SET status='confirmed',block_number=_number,block_hash=_hash,updated_at=now()
+  UPDATE public.virtual_transactions SET status=CASE WHEN
+   intent->>'marketId'=tr->>'marketId' AND intent->>'outcome'=tr->'args'->>'outcome'
+   AND intent->>'isBuy'=tr->'args'->>'isBuy' AND intent->>'input'=tr->'args'->>'input'
+   AND intent->>'nonce'=tr->'args'->>'nonce' THEN 'confirmed' ELSE 'invalid' END,
+   block_number=_number,block_hash=_hash,updated_at=now()
   WHERE deployment_id=_deployment AND tx_hash=tr->>'txHash' AND wallet=tr->>'wallet';
  END LOOP;
  UPDATE public.virtual_deployments SET checkpoint=_number,checkpoint_hash=_hash,lease_until=clock_timestamp()+interval '120 seconds' WHERE id=_deployment;
@@ -117,7 +123,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 DECLARE d public.virtual_deployments%ROWTYPE;
 BEGIN
  SELECT * INTO STRICT d FROM public.virtual_deployments WHERE id=_deployment FOR UPDATE;
- IF d.lease_fence IS NULL OR _fence IS NULL OR d.lease_until IS NULL OR d.lease_fence IS DISTINCT FROM _fence OR d.lease_until<=clock_timestamp() OR _number<d.finalized_block OR _number>d.checkpoint OR _number<d.start_block-1
+ IF d.lease_fence IS NULL OR _fence IS NULL OR d.lease_until IS NULL OR d.lease_fence IS DISTINCT FROM _fence OR d.lease_until<=clock_timestamp() OR _number IS NULL OR _number<>trunc(_number) OR _number<d.finalized_block OR _number>d.checkpoint OR _number<d.start_block-1
  THEN RAISE EXCEPTION 'Unsafe rewind'; END IF;
  IF _number>=d.start_block AND NOT EXISTS(SELECT 1 FROM public.virtual_blocks WHERE deployment_id=_deployment AND number=_number AND hash=_hash AND canonical)
  THEN RAISE EXCEPTION 'Unknown rewind ancestor'; END IF;
@@ -131,7 +137,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 DECLARE d public.virtual_deployments%ROWTYPE;
 BEGIN
  SELECT * INTO STRICT d FROM public.virtual_deployments WHERE id=_deployment FOR UPDATE;
- IF d.lease_fence IS NULL OR _fence IS NULL OR d.lease_until IS NULL OR d.lease_fence IS DISTINCT FROM _fence OR d.lease_until<=clock_timestamp() OR _number<d.finalized_block OR _number>d.checkpoint
+ IF d.lease_fence IS NULL OR _fence IS NULL OR d.lease_until IS NULL OR d.lease_fence IS DISTINCT FROM _fence OR d.lease_until<=clock_timestamp() OR _number IS NULL OR _number<>trunc(_number) OR _hash IS NULL OR _number<d.finalized_block OR _number>d.checkpoint
  OR NOT EXISTS(SELECT 1 FROM public.virtual_blocks WHERE deployment_id=_deployment AND number=_number AND hash=_hash AND canonical)
  THEN RAISE EXCEPTION 'Finality proof mismatch'; END IF;
  UPDATE public.virtual_deployments SET finalized_block=_number,finalized_hash=_hash WHERE id=_deployment;

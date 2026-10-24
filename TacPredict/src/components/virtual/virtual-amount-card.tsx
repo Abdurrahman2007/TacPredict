@@ -8,6 +8,7 @@ import { useLoginDialog } from "@/components/login-dialog";
 import { prepareVirtual, observeVirtual } from "@/lib/virtual/functions";
 import { executeVirtualTrade, reconciledVirtualTransaction } from "@/lib/virtual/execution";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
+import { virtualQuoteKey, assertQuoteIntent } from "@/lib/virtual/guards";
 import type { TradeIntent } from "@/lib/virtual/types";
 export function VirtualAmountCard({
   market,
@@ -45,7 +46,14 @@ export function VirtualAmountCard({
     /* invalid is not a quote */
   }
   const quote = useQuery({
-    queryKey: ["virtual", ref.deployment.id, "quote", w.address, outcome, mode, atomic.toString()],
+    queryKey: virtualQuoteKey(
+      ref.deployment.id,
+      ref.onchainId,
+      w.address ?? undefined,
+      outcome,
+      mode,
+      atomic.toString(),
+    ),
     enabled: Boolean(auth.user && w.address && ref.deployment.enabled && atomic > 0n),
     queryFn: () =>
       prepareVirtual({
@@ -103,6 +111,13 @@ export function VirtualAmountCard({
     setBusy(true);
     setNotice("");
     try {
+      assertQuoteIntent(q.intent, {
+        wallet: w.address as Address,
+        marketId: ref.onchainId,
+        outcome,
+        isBuy: mode === "buy",
+        input: atomic.toString(),
+      });
       const result = await executeVirtualTrade(w, q, minOut, (hash) =>
         setSubmitted({ hash, intent: q.intent }),
       );
@@ -208,6 +223,13 @@ export function VirtualAmountCard({
               : `${virtualMoney(quote.data.output)} Virtual USDC`}{" "}
             · Fee {virtualMoney(quote.data.fee)} · Minimum received{" "}
             {virtualMoney(minOut.toString())}. No automatic partial fills.
+          </p>
+        )}
+        {quote.data && (
+          <p>
+            Estimated execution gas: {quote.data.gasUnits} units · {quote.data.executionGasEth} ETH
+            at the observed gas price. Base L1 data fees are additional; confirm the full fee in
+            your wallet. Estimates change.
           </p>
         )}
         <p>Nontransferable virtual credits. No real-money value, withdrawals or token approvals.</p>

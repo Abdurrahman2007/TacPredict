@@ -24,8 +24,8 @@ const sections = [
   {
     title: "Nature of the Service",
     paragraphs: [
-      "TacPredict provides prediction-market interfaces and information relating to future events, including cryptocurrency price movements (BTC, ETH, SOL and BNB) and football and cricket outcomes. Where enabled and legally available, eligible users may participate using supported stablecoins such as USDC.",
-      "Reference prices, preview listings and scheduled time windows are not necessarily tradable markets. A countdown or a live price chart does not mean real-money trading is available. Availability depends on the relevant market, supported contracts and applicable restrictions.",
+      "TacPredict provides prediction-market interfaces and information relating to cryptocurrency price movements (BTC, ETH, SOL and BNB) and football and cricket outcomes. The Virtual USDC feature uses internal, nontransferable accounting units, not real USDC, money, a redeemable token or a claim on treasury assets.",
+      "Virtual balances and virtual trading profits cannot be deposited, withdrawn, transferred, bridged or converted into real assets. No starting-balance campaign, reward allocation or future TAC token is promised. Reference charts and scheduled windows do not establish that any market or trading feature is enabled.",
       "The Platform does not provide financial, investment or legal advice. The legal classification of prediction-market activities depends on applicable law; these Terms do not establish that the Platform is licensed, exempt from licensing, or lawful in any particular jurisdiction.",
     ],
   },
@@ -46,15 +46,15 @@ const sections = [
   {
     title: "Risk Disclosure",
     paragraphs: [
-      "You may lose 100% of the funds you commit to a market. Cryptocurrency and prediction markets are volatile. Liquidity may be limited, and a position may not be sellable when you want.",
-      "External data sources, oracles, networks and smart contracts may fail, be delayed, contain errors or be affected by security incidents. A stablecoin may lose its intended value. Past performance does not guarantee future results. Only use funds you can afford to lose.",
+      "You may lose all Virtual USDC committed to a market; this is a loss of virtual accounting units, not a cash balance. Virtual liquidity is finite and a position may not be sellable when you want. Virtual performance is not evidence of achievable real-world returns.",
+      "Data sources, networks, wallets and smart contracts may fail, be delayed or contain errors. Native ETH network fees are real expenses and are not refundable by the virtual accounting system. Only spend network fees you can afford to lose.",
     ],
   },
   {
-    title: "Real-Money Transactions and Fees",
+    title: "Virtual Balances and Network Fees",
     paragraphs: [
-      "Only supported assets and networks may be used where trading is enabled. USDC and other stablecoins are digital assets, not bank deposits or a guarantee of redemption into US Dollars.",
-      "Review the market, outcome, amount, wallet permissions and any network or Platform fees before confirming. Confirmed blockchain transactions are generally irreversible; cancellations or refunds are not guaranteed. The Platform does not guarantee liquidity, execution price, uninterrupted access or the availability of any market.",
+      "Do not send real USDC or any other asset to obtain a Virtual USDC balance. Virtual grants, if separately authorized in the future, have their own eligibility and finite budget; no user can demand a grant or redemption.",
+      "Each Buy and Sell requires its own successful blockchain transaction and verified event. A signature, pending transaction hash or interface notification alone is not a completed trade. Review network, contract, outcome, virtual amount and gas before confirming. A virtual fee is not a real-USDC charge. Liquidity, execution price and uninterrupted access are not guaranteed.",
       "You are responsible for applicable taxes and reporting obligations. Network fees may be incurred even when a transaction fails.",
     ],
   },
@@ -157,7 +157,7 @@ const sections = [
   {
     title: "Responsible Participation",
     paragraphs: [
-      "Set your own spending limits and do not participate using borrowed money or funds needed for essential expenses. Stop if participation causes financial stress or loss of control. No prediction method, chart or promotional material guarantees a profit.",
+      "Set your own activity and gas-spending limits. Do not spend borrowed money or essential funds on network fees. Stop if participation causes stress or loss of control. No chart, virtual profit, ranking or promotional material guarantees a real-world reward.",
       "You may stop using the interface at any time. This does not automatically close positions, cancel pending transactions or revoke wallet approvals; any outstanding activity remains subject to applicable contracts and market rules. If you need help restricting interface access, contact support without sharing wallet secrets.",
     ],
   },
@@ -187,7 +187,7 @@ function TermsPage() {
         <p className="terms-description">Terms of Service for the TacPredict prediction platform</p>
         <p className="terms-platform">TacPredict.fun</p>
         <p className="terms-updated">
-          Last updated: <time dateTime="2026-10-22">October 22, 2026</time>
+          Last updated: <time dateTime="2026-10-24">October 24, 2026</time>
         </p>
       </header>
       <aside className="terms-notice" aria-labelledby="restricted-notice-title">
