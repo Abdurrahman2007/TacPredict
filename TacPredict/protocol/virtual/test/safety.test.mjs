@@ -46,7 +46,13 @@ test("application ABI matches separately compiled virtual contract; no asset ABI
 });
 
 test("operations/verifier are dormant and cannot sign, spend or submit transactions", () => {
-  for (const p of ["scripts/operations.mts", "scripts/verify-sepolia.mts"]) {
+  for (const p of [
+    "scripts/operations.mts",
+    "scripts/verify-sepolia.mts",
+    "scripts/verify-mainnet-canary.mjs",
+    "scripts/prepare-mainnet-canary.mjs",
+    "scripts/deployment-proxy.mjs",
+  ]) {
     const s = fs.readFileSync(root + p, "utf8");
     assert.doesNotMatch(
       s,
