@@ -84,7 +84,9 @@ export function UpDownTradeBar({
           <DialogTitle className="sr-only">Trade {context.label}</DialogTitle>
           <DialogDescription className="sr-only">
             Choose Buy or Sell and review your order. Reference prices are not executable quotes.
-            Wallet approval is required for a real trade.
+            {view.virtual
+              ? "Virtual USDC only. Each trade requires its own transaction."
+              : "Wallet approval is required for a real trade."}
           </DialogDescription>
           <div className="pd-trade-top">
             <div className="pd-handle" />

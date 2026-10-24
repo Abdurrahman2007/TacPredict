@@ -44,3 +44,9 @@ dist-ssr
 
 # Rebuilt from the committed avatar manifest.
 public/avatars/pixel-animals-v1.webp
+
+# Isolated virtual protocol development output
+protocol/virtual/artifacts/
+protocol/virtual/cache/
+unsigned-sepolia-deployment.json
+unsigned-pool.json

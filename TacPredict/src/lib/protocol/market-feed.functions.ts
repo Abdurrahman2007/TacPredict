@@ -18,6 +18,8 @@ export type NativeFeed = {
   updatedAt: string;
   deployments: ProtocolDeployment[];
   error?: string;
+  virtualMode?: boolean;
+  virtualDeployment?: import("@/lib/virtual/types").VirtualDeployment;
 };
 const resultSchema = z.object({
   markets: z.array(nativeMarketSchema),
@@ -54,9 +56,22 @@ export function toMarket(m: NativeMarket): Market {
 }
 export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
   async (): Promise<NativeFeed> => {
-    if (cached && cached.expires > Date.now()) return cached.value;
+    if (cached && cached.expires > Date.now() && !process.env["VIRTUAL_TRADING_CONFIG"])
+      return cached.value;
     const updatedAt = new Date().toISOString();
     try {
+      const { readVirtualCatalogue } = await import("@/lib/virtual/read.server");
+      const virtual = await readVirtualCatalogue();
+      if (virtual)
+        return {
+          markets: virtual.markets,
+          cryptoUpDown: {},
+          deployments: [],
+          source: "TacPredict",
+          updatedAt,
+          virtualMode: true,
+          virtualDeployment: virtual.deployment,
+        };
       const { readProtocolRpc } = await import("./read.server");
       const data = resultSchema.parse(
         await readProtocolRpc("get_protocol_market_feed", { _limit: "150" }),
@@ -94,8 +109,10 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         source: "TacPredict",
         updatedAt,
         deployments: [],
-        error:
-          "Native markets are not available yet. No external odds or demo balances are substituted.",
+        virtualMode: Boolean(process.env["VIRTUAL_TRADING_CONFIG"]),
+        error: process.env["VIRTUAL_TRADING_CONFIG"]
+          ? "Virtual markets unavailable. No real-USDC fallback is permitted."
+          : "Native markets are not available yet. No external odds or demo balances are substituted.",
       };
     }
   },

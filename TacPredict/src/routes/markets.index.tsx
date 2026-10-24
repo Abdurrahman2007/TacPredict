@@ -90,7 +90,8 @@ function MarketsPage() {
           <h1 className="page-title truncate">Markets</h1>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-          {filtered.length} native {filtered.length === 1 ? "market" : "markets"}
+          {filtered.length} {liveFeed.virtualMode ? "virtual" : "native"}{" "}
+          {filtered.length === 1 ? "market" : "markets"}
         </span>
       </div>
 

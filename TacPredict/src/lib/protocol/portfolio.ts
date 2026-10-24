@@ -26,11 +26,11 @@ const portfolioSchema = z.object({
     }),
   ),
 });
-export function useNativePortfolio() {
+export function useNativePortfolio(enabled = true) {
   const { user } = useProtocolUser();
   return useQuery({
     queryKey: ["native-portfolio", user?.id ?? "signed-out"],
-    enabled: Boolean(user),
+    enabled: Boolean(user) && enabled,
     queryFn: async () => {
       const client = supabase as unknown as SupabaseClient;
       const registered = await client.rpc("register_my_protocol_wallet");

@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
+import { VirtualPortfolio } from "@/components/virtual/virtual-portfolio";
+import { useVirtualAccount } from "@/lib/virtual/hooks";
 import { NativePortfolio } from "@/components/native-portfolio";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
@@ -58,8 +60,11 @@ function PortfolioPage() {
   );
 }
 function PortfolioClient() {
+  const feed = useQuery(nativeMarketFeedQueryOptions);
+  const virtualMode = Boolean(feed.data?.virtualMode);
+  const virtualAccount = useVirtualAccount(feed.data?.virtualDeployment);
   const wallet = useBaseWallet(),
-    q = useNativePortfolio(),
+    q = useNativePortfolio(feed.isSuccess && !virtualMode),
     orders = useOwnProtocolOrders(),
     auth = useProtocolUser(),
     login = useLoginDialog();
@@ -75,7 +80,6 @@ function PortfolioClient() {
     [notice, setNotice] = useState("");
   const [category, setCategory] = useState("All"),
     [state, setState] = useState("All");
-  const feed = useQuery(nativeMarketFeedQueryOptions);
   const walletKnown = Boolean(
     wallet.address && wallet.chainId === 8453 && wallet.usdc !== null && !wallet.error,
   );
@@ -89,13 +93,33 @@ function PortfolioClient() {
   const disconnected = !wallet.address;
   const show = (value: bigint | null) => overviewMoney(value, !disconnected, hidden);
   // Position value is last-trade marked, not an executable quote. Wallet USDC is never added.
-  const total = summary.markedAtomic;
-  const cash = walletKnown ? wallet.usdc : null;
-  const claimable = summary.claimableAtomic;
+  const total = virtualMode
+    ? virtualAccount.data
+      ? BigInt(virtualAccount.data.positionValue)
+      : null
+    : summary.markedAtomic;
+  const cash = virtualMode
+    ? virtualAccount.data
+      ? BigInt(virtualAccount.data.balance)
+      : null
+    : walletKnown
+      ? wallet.usdc
+      : null;
+  const claimable = virtualMode
+    ? virtualAccount.data
+      ? BigInt(virtualAccount.data.claimable)
+      : null
+    : summary.claimableAtomic;
   const noHistory = Boolean(
     summary.verified && q.data?.activity?.length === 0 && summary.positions.length === 0,
   );
-  const pnl = noHistory ? 0n : null;
+  const pnl = virtualMode
+    ? virtualAccount.data
+      ? BigInt(virtualAccount.data.realizedPnl)
+      : null
+    : noHistory
+      ? 0n
+      : null;
   async function copyAddress() {
     if (!wallet.address) {
       login("/profile");
@@ -142,7 +166,8 @@ function PortfolioClient() {
               void wallet.refresh();
               if (auth.user) {
                 void q.refetch();
-                void orders.refetch();
+                if (virtualMode) void virtualAccount.refetch();
+                else void orders.refetch();
               }
             }}
             disabled={wallet.busy || q.isFetching || orders.isFetching}
@@ -199,9 +224,9 @@ function PortfolioClient() {
           <div className="tp-card-top">
             <span>
               <CircleDollarSign size={16} />
-              Wallet USDC
+              {virtualMode ? "Virtual USDC" : "Wallet USDC"}
             </span>
-            <span className="tp-currency">USDC</span>
+            <span className="tp-currency">{virtualMode ? "VIRTUAL" : "USDC"}</span>
           </div>
           <strong className="tp-cash-value">{show(cash)}</strong>
           <div className="tp-claim-row">
@@ -215,16 +240,18 @@ function PortfolioClient() {
             </button>
           ) : (
             <p className="tp-cash-note">
-              {wallet.chainId !== 8453
-                ? "Unsupported network · switch to Base"
-                : wallet.error
-                  ? "Balance could not load · refresh to retry"
-                  : "USDC stays in your wallet"}
+              {virtualMode
+                ? "Virtual credits · No withdrawals or real-money redemption"
+                : wallet.chainId !== 8453
+                  ? "Unsupported network · switch to Base"
+                  : wallet.error
+                    ? "Balance could not load · refresh to retry"
+                    : "USDC stays in your wallet"}
             </p>
           )}
         </div>
       </section>
-      {!disconnected && (q.isError || wallet.error) && (
+      {!disconnected && (virtualMode ? virtualAccount.isError : q.isError || wallet.error) && (
         <div className="tp-data-warning" role="alert">
           Some data could not load. Refresh to retry; missing amounts are shown as —.
         </div>
@@ -248,9 +275,11 @@ function PortfolioClient() {
           <span>
             {disconnected
               ? "Connect to track performance"
-              : noHistory
-                ? "No trades yet"
-                : "Verified P&L not yet available"}
+              : virtualMode
+                ? `All-time realized P&L · Unrealized ${show(virtualAccount.data ? BigInt(virtualAccount.data.unrealizedPnl) : null)}`
+                : noHistory
+                  ? "No trades yet"
+                  : "Verified P&L not yet available"}
           </span>
         </div>
         <div className="tp-periods" aria-label="Performance period">
@@ -267,7 +296,11 @@ function PortfolioClient() {
         </div>
         <PortfolioPerformanceChart
           key={range}
-          empty={noHistory}
+          empty={
+            virtualMode
+              ? Boolean(virtualAccount.data && virtualAccount.data.trades.length === 0)
+              : noHistory
+          }
           preview={disconnected}
           hidden={hidden}
           period={periods[range]}
@@ -276,7 +309,13 @@ function PortfolioClient() {
       <section className="tp-holdings" aria-label="Portfolio activity">
         <div className="tp-holdings-heading">
           <h2>Your activity</h2>
-          <span>{disconnected ? "Ready when you are" : "Indexed Exchange"}</span>
+          <span>
+            {disconnected
+              ? "Ready when you are"
+              : virtualMode
+                ? "Indexed Virtual AMM"
+                : "Indexed Exchange"}
+          </span>
         </div>
         <div className="tp-segment" aria-label="Portfolio views">
           {["Positions", "Orders", "History"].map((item) => (
@@ -428,6 +467,17 @@ function PortfolioClient() {
                 <ArrowUpRight size={14} />
               </Link>
             </div>
+          ) : virtualMode ? (
+            feed.data?.virtualDeployment ? (
+              <VirtualPortfolio
+                deployment={feed.data.virtualDeployment}
+                tab={tab}
+                markets={feed.data.markets}
+                search={search}
+              />
+            ) : (
+              <p role="alert">Virtual trading data unavailable. No real-USDC fallback.</p>
+            )
           ) : (
             <NativePortfolio
               tab={tab === "History" ? "Activity" : tab === "Orders" ? "Open" : tab}
@@ -447,7 +497,7 @@ function PortfolioClient() {
           {notice}
         </p>
       )}
-      {wallet.error && (
+      {wallet.error && !virtualMode && (
         <p className="tp-notice" role="alert">
           {wallet.error}
         </p>
