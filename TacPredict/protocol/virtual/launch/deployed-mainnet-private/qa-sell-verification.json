@@ -1,0 +1,133 @@
+{
+  "chainId": 8453,
+  "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "hash": "0x17248450f8903d4d1b5ef410ede2ae014cd5024576efc7756c77135922fd0211",
+  "status": "confirmed",
+  "blockNumber": "53121560",
+  "blockHash": "0x3c4607b5e2d16113f9195237f2b655118f35414787a32ee1216333fff5a4c1af",
+  "intent": {
+    "wallet": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+    "marketId": "1",
+    "outcome": 0,
+    "isBuy": false,
+    "input": "1999900",
+    "nonce": "1"
+  },
+  "tradeEvent": {
+    "name": "TradeExecuted",
+    "args": {
+      "wallet": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+      "marketId": "1",
+      "nonce": "1",
+      "outcome": 0,
+      "isBuy": false,
+      "input": "1999900",
+      "output": "999999",
+      "fee": "0",
+      "revision": "3",
+      "remainingShares": "0",
+      "remainingBasis": "0",
+      "realizedPnlDelta": "-1",
+      "cashAfter": "99999999"
+    },
+    "wallet": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+    "marketId": "1",
+    "txHash": "0x17248450f8903d4d1b5ef410ede2ae014cd5024576efc7756c77135922fd0211",
+    "blockHash": "0x3c4607b5e2d16113f9195237f2b655118f35414787a32ee1216333fff5a4c1af",
+    "blockNumber": "53121560",
+    "logIndex": 290
+  },
+  "virtualCashAtoms": "99999999",
+  "virtualCash": "99.999999",
+  "sharesAtoms": "0",
+  "shares": "0",
+  "basisAtoms": "0",
+  "realizedPnlAtoms": "-1",
+  "actionNonce": "2",
+  "poolRevision": "3",
+  "conservationVerified": true,
+  "userOperationHash": "0xf4e7ad8052c1d02891008a095a430fa8522e9bcc6a41453c6c59de374dabefc3",
+  "operationActualGasCostWei": "1888672500000",
+  "operationActualGasCostEth": "0.0000018886725",
+  "cumulativeOperationActualGasCostWei": "35249610500000",
+  "cumulativeOperationActualGasCostEth": "0.0000352496105",
+  "nativeBalanceEth": "0.000017605676462059",
+  "entryPointDepositEth": "0.000003866294687898",
+  "maximumCumulativeGasWei": "100000000000000",
+  "privateQAOnly": true,
+  "pointsEligible": false,
+  "rankingEligible": false,
+  "publicTradingActivated": false,
+  "reconciliation": {
+    "canonicalHistory": true,
+    "distinctTradeTransactions": true,
+    "projectionMatchesChain": true,
+    "duplicateEventsIdempotent": true,
+    "tradeCount": 2,
+    "projection": {
+      "balance": "99999999",
+      "realizedPnl": "-1",
+      "positions": [
+        {
+          "marketId": "1",
+          "outcome": 0,
+          "shares": "0",
+          "basis": "0"
+        }
+      ],
+      "trades": [
+        {
+          "name": "TradeExecuted",
+          "args": {
+            "wallet": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1999900",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1999900",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          },
+          "wallet": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+          "marketId": "1",
+          "txHash": "0x94d4cee23fb2216f71285952a43bc865d48efafcfe5ec220a8ce272fc6596721",
+          "blockHash": "0xcd870b9df707b34574b7e5c027ca1a6fcb52d98ff659886025acfb5c26f02cec",
+          "blockNumber": "53121350",
+          "logIndex": 334
+        },
+        {
+          "name": "TradeExecuted",
+          "args": {
+            "wallet": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+            "marketId": "1",
+            "nonce": "1",
+            "outcome": 0,
+            "isBuy": false,
+            "input": "1999900",
+            "output": "999999",
+            "fee": "0",
+            "revision": "3",
+            "remainingShares": "0",
+            "remainingBasis": "0",
+            "realizedPnlDelta": "-1",
+            "cashAfter": "99999999"
+          },
+          "wallet": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+          "marketId": "1",
+          "txHash": "0x17248450f8903d4d1b5ef410ede2ae014cd5024576efc7756c77135922fd0211",
+          "blockHash": "0x3c4607b5e2d16113f9195237f2b655118f35414787a32ee1216333fff5a4c1af",
+          "blockNumber": "53121560",
+          "logIndex": 290
+        }
+      ]
+    }
+  },
+  "gasAccountingScope": "Only administrator UserOperation actualGasCost; unrelated bundled operations excluded. Not a claim of full wallet-level fee reconciliation.",
+  "verifiedAt": "2026-10-26T16:40:04.218Z"
+}

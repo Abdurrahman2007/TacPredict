@@ -21,12 +21,17 @@
       "kind": "QA-Buy",
       "txHash": "0x94d4cee23fb2216f71285952a43bc865d48efafcfe5ec220a8ce272fc6596721",
       "operationActualGasCostWei": "1729949000000"
+    },
+    {
+      "kind": "QA-Sell",
+      "txHash": "0x17248450f8903d4d1b5ef410ede2ae014cd5024576efc7756c77135922fd0211",
+      "operationActualGasCostWei": "1888672500000"
     }
   ],
-  "cumulativeOperationActualGasCostWei": "33360938000000",
-  "cumulativeOperationActualGasCostEth": "0.000033360938",
-  "remainingApprovedGasWei": "66639062000000",
+  "cumulativeOperationActualGasCostWei": "35249610500000",
+  "cumulativeOperationActualGasCostEth": "0.0000352496105",
+  "remainingApprovedGasWei": "64750389500000",
   "nativeWalletBalanceEth": "0.000017605676462059",
-  "entryPointDepositEth": "0.000005754967187898",
+  "entryPointDepositEth": "0.000003866294687898",
   "note": "Operation-specific EntryPoint costs; deposits are not additional spent gas. Keep wallet quotes/receipts and any additional L1/service charges reconciled. Public trading is not activated."
 }

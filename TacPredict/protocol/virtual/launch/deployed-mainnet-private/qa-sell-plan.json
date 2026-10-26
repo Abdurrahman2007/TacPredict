@@ -34,5 +34,7 @@
   "oneTradeOnly": true,
   "noRealAssetTransfer": true,
   "broadcast": false,
-  "status": "AWAITING_WALLET_APPROVAL_NOT_EXECUTED"
+  "status": "confirmed",
+  "txHash": "0x17248450f8903d4d1b5ef410ede2ae014cd5024576efc7756c77135922fd0211",
+  "verification": "qa-sell-verification.json"
 }
