@@ -1,0 +1,34 @@
+{
+  "chainId": 8453,
+  "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "scope": "Private one-wallet 100 Virtual USDC allocation and creator/guardian permissions only; no market, no trade, no real asset transfer",
+  "amountAtoms": "100000000",
+  "campaignId": "1",
+  "root": "0x449c401f981385a96effb96444fc36b9c5ecd45b0fa01eb530ded40005eb4c8d",
+  "proof": [],
+  "endsAt": "1793635677",
+  "actions": [
+    "grantRole",
+    "grantRole",
+    "configureCampaign",
+    "claimGrant"
+  ],
+  "realValueWei": "0",
+  "broadcast": false,
+  "observedBlock": "53120765",
+  "createdAtUtc": "2026-10-26T16:07:58.500Z",
+  "simulationVerified": true,
+  "simulatedGasUsed": [
+    "0xc86a",
+    "0xc86a",
+    "0x21ebc",
+    "0x1e71b"
+  ],
+  "totalTargetGasEstimate": "366251",
+  "feePlanningReserveWei": "6127514000000",
+  "feePlanningReserveEth": "0.000006127514",
+  "currentNativeBalanceEth": "0.000017605676462059",
+  "priorVerifiedOperationGasWei": "26384865000000",
+  "status": "AWAITING_WALLET_APPROVAL_NOT_APPLIED"
+}

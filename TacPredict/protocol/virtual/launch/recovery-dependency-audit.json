@@ -1,0 +1,111 @@
+{
+  "before": {
+    "info": 0,
+    "low": 0,
+    "moderate": 22,
+    "high": 18,
+    "critical": 0,
+    "total": 40
+  },
+  "after": {
+    "info": 0,
+    "low": 0,
+    "moderate": 21,
+    "high": 17,
+    "critical": 0,
+    "total": 38
+  },
+  "remainingDirectAdvisories": [
+    {
+      "name": "decode-uri-component",
+      "severity": "moderate",
+      "range": "<=0.4.2",
+      "fixAvailable": {
+        "name": "wagmi",
+        "version": "3.7.9",
+        "isSemVerMajor": true
+      },
+      "advisories": [
+        {
+          "title": "decode-uri-component: Denial of service via exponential decoding of malformed percent-encoded input",
+          "url": "https://github.com/advisories/GHSA-vcc3-ghjq-m6fr",
+          "range": "<=0.4.2"
+        }
+      ]
+    },
+    {
+      "name": "esbuild",
+      "severity": "moderate",
+      "range": "<=0.24.2",
+      "fixAvailable": {
+        "name": "drizzle-kit",
+        "version": "0.18.1",
+        "isSemVerMajor": true
+      },
+      "advisories": [
+        {
+          "title": "esbuild enables any website to send any requests to the development server and read the response",
+          "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+          "range": "<=0.24.2"
+        }
+      ]
+    },
+    {
+      "name": "stream-json",
+      "severity": "moderate",
+      "range": "<=3.5.0",
+      "fixAvailable": true,
+      "advisories": [
+        {
+          "title": "stream-json: pick/ignore/filter/replace filters are O(depth²) on nested input — small crafted JSON blocks the event loop for seconds→minutes (DoS)",
+          "url": "https://github.com/advisories/GHSA-528h-pc64-c93x",
+          "range": "<=3.4.0"
+        },
+        {
+          "title": "stream-json: JSONC parser and verifier re-scan the whole accumulated comment on every input chunk",
+          "url": "https://github.com/advisories/GHSA-hqr4-qq8f-hg3x",
+          "range": "<=3.5.0"
+        },
+        {
+          "title": "stream-json has a prototype pollution issue: Assembler writes this.current[this.key] on plain objects",
+          "url": "https://github.com/advisories/GHSA-mjw6-4jj6-33hc",
+          "range": "<3.6.0"
+        }
+      ]
+    },
+    {
+      "name": "uuid",
+      "severity": "moderate",
+      "range": "<11.1.1",
+      "fixAvailable": {
+        "name": "wagmi",
+        "version": "3.7.9",
+        "isSemVerMajor": true
+      },
+      "advisories": [
+        {
+          "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+          "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+          "range": "<11.1.1"
+        }
+      ]
+    },
+    {
+      "name": "zod",
+      "severity": "high",
+      "range": "<4.6.6",
+      "fixAvailable": {
+        "name": "wagmi",
+        "version": "3.7.9",
+        "isSemVerMajor": true
+      },
+      "advisories": [
+        {
+          "title": "Zod can exhaust memory while validating oversized constrained collections",
+          "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+          "range": "<4.6.6"
+        }
+      ]
+    }
+  ]
+}

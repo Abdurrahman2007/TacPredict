@@ -9,6 +9,14 @@ import {
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import type { WalletState } from "@/lib/onchain/wallet";
+import {
+  browserPending,
+  clearPending,
+  isExplicitWalletRejection,
+  notifyPending,
+  pendingKey,
+  writePending,
+} from "./pending";
 import { virtualAmmAbi } from "./abi";
 import { verifyTradeReceipt } from "./receipt";
 import type { VirtualDeployment, TradeIntent } from "./types";
@@ -23,14 +31,17 @@ export type PreparedTrade = {
   blockHash: Hex;
 };
 const pending = new Map<string, Hex | null>();
-const key = (d: VirtualDeployment, w: string) => `${d.id}:${w.toLowerCase()}`;
+const key = (d: VirtualDeployment, w: string) => pendingKey(d, w);
 export function reconciledVirtualTransaction(
   d: VirtualDeployment,
   w: string,
   hash: Hex,
   status: string,
 ) {
-  if (status !== "pending" && pending.get(key(d, w)) === hash) pending.delete(key(d, w));
+  if (clearPending(window.localStorage, d, w, hash, status)) {
+    pending.delete(key(d, w));
+    notifyPending();
+  }
 }
 export async function executeVirtualTrade(
   w: WalletState,
@@ -38,9 +49,26 @@ export async function executeVirtualTrade(
   minOut: bigint,
   onSubmitted: (hash: Hex) => void,
 ) {
+  if (typeof navigator === "undefined" || !navigator.locks)
+    throw Error("This browser cannot safely coordinate virtual transactions");
+  return navigator.locks.request(
+    pendingKey(q.deployment, q.intent.wallet),
+    { ifAvailable: true },
+    async (lock) => {
+      if (!lock) throw Error("A virtual transaction is already active in another tab");
+      return executeLocked(w, q, minOut, onSubmitted);
+    },
+  );
+}
+async function executeLocked(
+  w: WalletState,
+  q: PreparedTrade,
+  minOut: bigint,
+  onSubmitted: (hash: Hex) => void,
+) {
   const d = q.deployment,
     k = key(d, q.intent.wallet);
-  if (pending.has(k))
+  if (pending.has(k) || browserPending(d, q.intent.wallet))
     throw Error("Reconcile your pending virtual transaction before another trade");
   if (
     !d.enabled ||
@@ -54,6 +82,7 @@ export async function executeVirtualTrade(
     throw Error("Wallet, network, quote or minimum output unavailable");
   pending.set(k, null);
   let hash: Hex | undefined;
+  let sendAttempted = false;
   try {
     const chain =
       d.chainId === 8453
@@ -89,7 +118,13 @@ export async function executeVirtualTrade(
       ],
     });
     const wallet = createWalletClient({ chain, account, transport: custom(w.provider) });
+    // Persist before the wallet prompt. An ambiguous RPC failure must not permit a blind retry.
+    writePending(window.localStorage, d, { hash: null, intent: q.intent });
+    notifyPending();
+    sendAttempted = true;
     hash = await wallet.writeContract(request);
+    writePending(window.localStorage, d, { hash, intent: q.intent });
+    notifyPending();
     pending.set(k, hash);
     onSubmitted(hash);
     const receipt = await pub.waitForTransactionReceipt({
@@ -97,6 +132,8 @@ export async function executeVirtualTrade(
       timeout: 120000,
       onReplaced: (r) => {
         hash = r.transaction.hash;
+        writePending(window.localStorage, d, { hash, intent: q.intent });
+        notifyPending();
         pending.set(k, hash);
         onSubmitted(hash);
       },
@@ -104,10 +141,17 @@ export async function executeVirtualTrade(
     const canonical = await pub.getBlock({ blockNumber: receipt.blockNumber });
     const result = verifyTradeReceipt(receipt, d.engine, q.intent, canonical.hash, -1n); // finality is verified by the server/indexer, never guessed
     if (result.status !== "confirmed") throw Error(`Virtual transaction ${result.status}`);
-    pending.delete(k);
+    reconciledVirtualTransaction(d, q.intent.wallet, receipt.transactionHash, result.status);
     return { hash: receipt.transactionHash, status: result.status };
   } catch (e) {
-    if (!hash) pending.delete(k);
+    if (!sendAttempted || (!hash && isExplicitWalletRejection(e))) {
+      if (sendAttempted) {
+        window.localStorage.removeItem(k);
+        notifyPending();
+      }
+      pending.delete(k);
+    }
+    // Unknown send failures, invalid replacements and reorgs stay locked for reconciliation.
     throw e;
   }
 }

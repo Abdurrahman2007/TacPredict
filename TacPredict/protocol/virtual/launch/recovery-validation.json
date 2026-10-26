@@ -1,0 +1,102 @@
+{
+  "scope": "Review-only security and durable pending recovery; not live",
+  "parent_commit": "de33f24afcda81c7cc1d3f01fa3a88fad3801ab7",
+  "recorded_at_utc": "2026-10-24T06:36:00.584026+00:00",
+  "checks": {
+    "virtual_compile": {
+      "result": "pass",
+      "classification": "locally-tested"
+    },
+    "virtual_tests": {
+      "passed": 49,
+      "failed": 0,
+      "classification": "locally-tested",
+      "command": "npm --prefix protocol/virtual test"
+    },
+    "legacy_tests": {
+      "passed": 166,
+      "failed": 0,
+      "classification": "locally-tested",
+      "command": "npm --prefix protocol test"
+    },
+    "typecheck": {
+      "result": "pass",
+      "command": "npm run typecheck"
+    },
+    "scoped_lint": {
+      "result": "pass",
+      "errors": 0,
+      "warnings": 0,
+      "command": "npx --no-install eslint src/lib/virtual src/components/virtual src/components/admin/views/virtual.tsx"
+    },
+    "full_lint": {
+      "result": "fail",
+      "errors": 496,
+      "warnings": 19,
+      "note": "Existing repo-wide failures, same counts as parent report; no mass reformatting."
+    },
+    "build": {
+      "result": "pass",
+      "command": "npm run build",
+      "environment": "synthetic local placeholders; no production credentials/deploy"
+    },
+    "reproducible_install": {
+      "result": "pass",
+      "command": "npm ci --ignore-scripts"
+    },
+    "virtual_toolchain_audit": {
+      "total": 0
+    },
+    "root_audit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 21,
+      "high": 17,
+      "critical": 0,
+      "total": 38
+    },
+    "legacy_toolchain_install_audit": {
+      "total": 36,
+      "critical": 5,
+      "high": 23,
+      "moderate": 6,
+      "low": 2,
+      "note": "Unchanged legacy development toolchain"
+    },
+    "parent_remote_ci": {
+      "result": "both success",
+      "virtual": "https://github.com/Abdurrahman2007/TacPredict/actions/runs/40067255466/job/120792995760",
+      "legacy": "https://github.com/Abdurrahman2007/TacPredict/actions/runs/40067255404/job/120792995527",
+      "note": "Parent PR24 only; not deployment evidence"
+    }
+  },
+  "virtual_contract_source_sha256": "db89b275a34f2fd7f167cc892300692c472abcd06c9ece71ad5ae228ac7dae6c",
+  "contract_changes": false,
+  "migration_changes": false,
+  "production_actions": [],
+  "sepolia_deployment": "NOT_DEPLOYED_PERMISSION_BLOCKED",
+  "mainnet_deployment": "NOT_DEPLOYED_NOT_AUTHORIZED",
+  "remaining_gates": [
+    "dependency/security review",
+    "staged remote DB and wallet E2E",
+    "real market-source validation",
+    "safe cancellation/ambiguous submission reconciliation",
+    "explicit wallet/cost/allocation approval",
+    "legal/operational review",
+    "separate production approvals"
+  ],
+  "changed_files": [
+    ".github/workflows/virtual-trading-review.yml",
+    "TacPredict/package-lock.json",
+    "TacPredict/package.json",
+    "TacPredict/protocol/virtual/launch/RECOVERY-REVIEW.md",
+    "TacPredict/protocol/virtual/launch/recovery-dependency-audit.json",
+    "TacPredict/protocol/virtual/launch/recovery-test-results.txt",
+    "TacPredict/protocol/virtual/launch/recovery-validation.json",
+    "TacPredict/protocol/virtual/test/execution-recovery.test.mjs",
+    "TacPredict/protocol/virtual/test/pending.test.mjs",
+    "TacPredict/src/components/virtual/virtual-amount-card.tsx",
+    "TacPredict/src/lib/virtual/execution.ts",
+    "TacPredict/src/lib/virtual/pending.ts"
+  ]
+}
