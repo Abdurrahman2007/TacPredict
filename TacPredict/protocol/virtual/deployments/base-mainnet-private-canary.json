@@ -17,7 +17,7 @@
   "productionDatabaseChanged": false,
   "privateAllocationStatus": "confirmed onchain",
   "poolStatus": "created, canonical receipt/state verified; private QA only",
-  "privateBalanceAtoms": "100000000",
+  "privateBalanceAtoms": "99000000",
   "privateAccountSetupTx": "0x9ed654dc724798d1926747cd8dfbaeabde690bdd9963d1f603b1edc0481770cb",
   "qaPoolId": "1",
   "qaPoolCreateTx": "0x47ecfa56c8fa5ab616fa4be0822007b5d4074612df89fc3359f906c4fa96bce5",
@@ -26,5 +26,9 @@
   "qaCloseAt": "1793035507",
   "qaPointsEligible": false,
   "qaRankingEligible": false,
-  "buySellValidation": "not completed yet"
+  "buySellValidation": "Buy canonical receipt/event/state verified; Sell not executed yet",
+  "qaBuyTx": "0x94d4cee23fb2216f71285952a43bc865d48efafcfe5ec220a8ce272fc6596721",
+  "qaSharesAtoms": "1999900",
+  "qaBasisAtoms": "1000000",
+  "qaRealizedPnlAtoms": "0"
 }
