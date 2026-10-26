@@ -1,0 +1,17 @@
+{
+  "chainId": 8453,
+  "deploymentTx": "0x955e6210f5a598e9f605ab89607e9c157e553eb234d3c366a462ea8ccca0b2f9",
+  "userOperationHash": "0xa25e958547c0978bb49ec74155d1b0c7c65516931a12299fbd8a536827b1f963",
+  "paymaster": "0x0000000000000000000000000000000000000000",
+  "operationSuccess": true,
+  "actualGasCostWei": "26384865000000",
+  "actualGasCostEth": "0.000026384865",
+  "actualGasUsed": "4059210",
+  "maximumCumulativeGasWei": "100000000000000",
+  "remainingApprovedGasWei": "73615135000000",
+  "nativeWalletBalanceWei": "17605676462059",
+  "nativeWalletBalanceEth": "0.000017605676462059",
+  "entryPointDepositWei": "12731040187898",
+  "entryPointDepositEth": "0.000012731040187898",
+  "note": "EntryPoint event is operation-specific actualGasCost; deposit is separate refundable gas funding, not additional gas fee. Wallet quote/any L1 or service charges must be reconciled before further signing."
+}
