@@ -1,0 +1,55 @@
+{
+  "chainId": 8453,
+  "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "scope": "Only private QA pool, no actual BTC/ETH/sports event, not a public market",
+  "expectedPoolId": "1",
+  "metadata": {
+    "kind": "private-contract-QA",
+    "title": "TacPredict private on-chain QA \u2014 NOT a live crypto or sports market",
+    "chainId": 8453,
+    "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+    "marketId": "1",
+    "outcomes": [
+      "QA Yes",
+      "QA No"
+    ],
+    "realExternalEvent": false,
+    "nonRedeemable": true,
+    "pointsEligible": false,
+    "rankingEligible": false,
+    "rules": "Internal validation of one Buy and a separately mined Sell only. No claim about any real-world outcome or market data. No proposer/arbiter roles are enabled; any remaining positions use permissionless timeout void after the on-chain resolution deadline.",
+    "resolution": {
+      "kind": "timeout-void-only",
+      "source": "Immutable on-chain timing; no external price or match result",
+      "closeAt": "1793035507",
+      "resolutionDeadline": "1793036107"
+    },
+    "publicListing": false
+  },
+  "terms": {
+    "rulesHash": "0xbb4c53bec1d9faca27820f3e4687dbc8a340b0604e2c26e87013b358267ddeaa",
+    "openAt": "1793031907",
+    "closeAt": "1793035507",
+    "resolveAfter": "1793035507",
+    "resolutionDeadline": "1793036107",
+    "challengePeriod": 60,
+    "seed": "10000000000",
+    "reserveFloor": "100000000",
+    "maxCashIn": "10000000",
+    "maxSharesIn": "100000000",
+    "maxPosition": "100000000",
+    "feeBps": 0,
+    "outcomes": 2
+  },
+  "targetGasEstimate": "206132",
+  "planningFeeReserveEth": "0.000003885848",
+  "nativeBalanceEth": "0.000017605676462059",
+  "previousOperationGasCostEth": "0.0000293332455",
+  "maximumCumulativeGasWei": "100000000000000",
+  "simulationVerified": true,
+  "createdAtUtc": "2026-10-26T16:15:08.299Z",
+  "mustApproveBeforeOpenAt": "1793031907",
+  "openAtUtc": "2026-10-26T16:25:07.000Z",
+  "broadcast": false
+}

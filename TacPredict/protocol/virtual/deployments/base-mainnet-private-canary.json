@@ -15,6 +15,8 @@
   "publicTradingActivated": false,
   "productionAppConfigChanged": false,
   "productionDatabaseChanged": false,
-  "privateAllocationStatus": "pending wallet approval",
-  "poolStatus": "not created"
+  "privateAllocationStatus": "confirmed onchain",
+  "poolStatus": "QA pool creation awaiting wallet approval; not yet created",
+  "privateBalanceAtoms": "100000000",
+  "privateAccountSetupTx": "0x9ed654dc724798d1926747cd8dfbaeabde690bdd9963d1f603b1edc0481770cb"
 }
