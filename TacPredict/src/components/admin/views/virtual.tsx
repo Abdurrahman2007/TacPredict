@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { advanceVirtualIndexer, getVirtualOperations } from "@/lib/virtual/functions";
+import {
+  advanceVirtualIndexer,
+  getVirtualOperations,
+  previewVirtualCampaign,
+} from "@/lib/virtual/functions";
 import { virtualMoney } from "@/lib/virtual/hooks";
 import { PageHeader, Card, Tile, Notice } from "../admin-ui";
 export function VirtualView() {
@@ -21,6 +25,18 @@ export function VirtualView() {
       setNotice(e instanceof Error ? e.message : "Indexer unavailable");
     } finally {
       setBusy(false);
+    }
+  }
+  const [campaignJson, setCampaignJson] = useState("");
+  const [campaignResult, setCampaignResult] = useState("");
+  async function preview() {
+    try {
+      const result = await previewVirtualCampaign({
+        data: { draft: JSON.parse(campaignJson), version: 1, saveDraft: false },
+      });
+      setCampaignResult(JSON.stringify(result, null, 2));
+    } catch (e) {
+      setCampaignResult(e instanceof Error ? e.message : "Preview unavailable");
     }
   }
   const data = q.data;
@@ -76,6 +92,27 @@ export function VirtualView() {
           </Notice>
         </>
       )}
+      <Card title="Monthly campaigns · Draft only">
+        <p>Virtual USDC only · No grants or public claims enabled</p>
+        <label>
+          Campaign JSON
+          <textarea
+            className="adm-input"
+            rows={5}
+            value={campaignJson}
+            onChange={(e) => setCampaignJson(e.target.value)}
+            aria-label="Campaign draft JSON"
+          />
+        </label>
+        <button className="adm-btn" onClick={() => void preview()}>
+          Preview allocations
+        </button>
+        {campaignResult && (
+          <pre className="overflow-auto text-xs" role="status">
+            {campaignResult}
+          </pre>
+        )}
+      </Card>
       {notice && <Notice>{notice}</Notice>}
     </div>
   );

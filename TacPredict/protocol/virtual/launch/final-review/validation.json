@@ -1,0 +1,96 @@
+{
+  "reviewOnly": true,
+  "productionChanged": false,
+  "newMainnetTransactions": 0,
+  "newSepoliaDeployments": 0,
+  "compile": {
+    "compiler": "solc 0.8.38",
+    "evm": "cancun",
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "runtimeBytes": {
+      "VirtualAMM": 15998,
+      "VirtualPriceAMM": 22450
+    }
+  },
+  "virtualSuite": {
+    "passed": 71,
+    "failed": 0,
+    "log": "virtual-tests.log"
+  },
+  "newPriceEngineSuite": {
+    "passed": 12,
+    "failed": 0,
+    "log": "price-e2e.log",
+    "receiptEvidence": "local-price-transactions.json",
+    "network": "local Cancun chain 31337 only",
+    "recordedTrades": 8,
+    "uniqueTradeHashes": 8,
+    "tradeGasUsedRange": [
+      126837,
+      161323
+    ]
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "networkDeployment": false
+  },
+  "scopedLint": {
+    "errors": 0,
+    "warnings": 1,
+    "warning": "Existing trade-bar useEffect dependency warning"
+  },
+  "fullLint": {
+    "current": {
+      "errors": 469,
+      "warnings": 19,
+      "affectedFiles": 67
+    },
+    "baseline": {
+      "errors": 496,
+      "warnings": 19,
+      "affectedFiles": 70
+    },
+    "scope": "Full repository ESLint; not a clean lint gate. Baseline is unchanged prior review worktree."
+  },
+  "legacyRegression": {
+    "initialFullSweep": {
+      "tests": 211,
+      "passed": 206,
+      "failed": 5,
+      "log": "legacy-initial-tests.log"
+    },
+    "finalNonLongChainSweep": {
+      "tests": 209,
+      "passed": 208,
+      "failed": 1,
+      "log": "legacy-final-fast-tests.log"
+    },
+    "longChainFiles": {
+      "protocol.test.mjs": "passed in full sweep, unchanged by subsequent expectation repairs",
+      "updown-pool.test.mjs": "passed in full sweep, unchanged by subsequent expectation repairs"
+    },
+    "remainingFailure": "world-market-ui Rewards header route assertion also fails on unchanged baseline; app-shell/navigation unchanged",
+    "finalCombinedCoverage": "210 passed / 1 known baseline failure across split runs; not a fresh single all-green full sweep"
+  },
+  "visual": {
+    "routes": [
+      "/profile disconnected"
+    ],
+    "viewports": [
+      "390x844",
+      "1280x900"
+    ],
+    "geometryMatched": true,
+    "pageErrors": 0,
+    "horizontalOverflow": false,
+    "connectedTradingVisualE2E": "unverified"
+  },
+  "contractSourceSha256": {
+    "VirtualAMM.sol": "db89b275a34f2fd7f167cc892300692c472abcd06c9ece71ad5ae228ac7dae6c",
+    "VirtualPriceAMM.sol": "26c670e15f1ea97882987ba32712aa60403b72e2135b5252818f43035e9447bc"
+  }
+}

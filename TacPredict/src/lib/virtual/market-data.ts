@@ -6,7 +6,7 @@ export type ResolutionSpec = {
 } & (
   | {
       kind: "crypto";
-      asset: "BTC" | "ETH" | "SOL" | "BNB";
+      asset: "BTC" | "ETH" | "SOL" | "XRP" | "BNB";
       intervalSeconds: 300 | 900 | 1800 | 3600 | 43200 | 86400;
       observationToleranceSeconds: number;
       tie: "down" | "void";
@@ -51,7 +51,7 @@ export function validateResolutionSpec(s: ResolutionSpec, category: string, outc
     if (
       category !== "Crypto" ||
       outcomes !== 2 ||
-      !["BTC", "ETH", "SOL", "BNB"].includes(s.asset) ||
+      !["BTC", "ETH", "SOL", "XRP", "BNB"].includes(s.asset) ||
       ![300, 900, 1800, 3600, 43200, 86400].includes(s.intervalSeconds) ||
       !Number.isInteger(s.observationToleranceSeconds) ||
       s.observationToleranceSeconds < 0 ||

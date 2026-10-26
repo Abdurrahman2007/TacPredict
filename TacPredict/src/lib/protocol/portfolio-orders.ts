@@ -18,11 +18,11 @@ const rowSchema = z.object({
     chain_id: z.literal(8453),
   }),
 });
-export function useOwnProtocolOrders() {
+export function useOwnProtocolOrders(enabled = true) {
   const { user } = useProtocolUser();
   return useQuery({
     queryKey: ["own-base-orders", user?.id ?? "signed-out"],
-    enabled: Boolean(user),
+    enabled: enabled && Boolean(user),
     retry: 0,
     staleTime: 15000,
     refetchInterval: 30000,

@@ -1,0 +1,131 @@
+{
+  "source": "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-base-1.json",
+  "chainId": 8453,
+  "block": "53122465",
+  "blockHash": "0x5dfb0bf6cc31d943685746683877d3d786774612f2db298bcb3a7b6af3b217a0",
+  "timestamp": "1793034277",
+  "readOnly": true,
+  "results": [
+    {
+      "name": "ETH / USD",
+      "address": "0x50015f8b17fb2C290Dde41fDc246ed0dcEE93a8b",
+      "publishedHeartbeat": 1200,
+      "decimals": 8,
+      "round": "18446744073709561771",
+      "answer": "232297595443",
+      "updatedAt": "1793034245",
+      "ageSeconds": "32",
+      "positive": true
+    },
+    {
+      "name": "BTC / USD",
+      "address": "0x32F587986D3fb47601157c19615d568BeD0BCabc",
+      "publishedHeartbeat": 1200,
+      "decimals": 8,
+      "round": "18446744073709650410",
+      "answer": "8022491043075",
+      "updatedAt": "1793034073",
+      "ageSeconds": "204",
+      "positive": true
+    },
+    {
+      "name": "SOL / USD",
+      "address": "0xDa5Fd22F9382e57534fEdA4fF544878aa1cf401f",
+      "publishedHeartbeat": 86400,
+      "decimals": 8,
+      "round": "18446744073709557035",
+      "answer": "10141253886",
+      "updatedAt": "1793034189",
+      "ageSeconds": "88",
+      "positive": true
+    },
+    {
+      "name": "XRP / USD",
+      "address": "0xF35059FB4471333F81E4F39fA40260FF53Dc340b",
+      "publishedHeartbeat": 86400,
+      "decimals": 8,
+      "round": "18446744073709557256",
+      "answer": "129111779",
+      "updatedAt": "1793033527",
+      "ageSeconds": "750",
+      "positive": true
+    },
+    {
+      "name": "BNB / USD",
+      "address": "0x4b7836916781CAAfbb7Bd1E5FDd20ED544B453b1",
+      "publishedHeartbeat": 86400,
+      "decimals": 8,
+      "round": "36893488147419105885",
+      "answer": "74224216000",
+      "updatedAt": "1793033783",
+      "ageSeconds": "494",
+      "positive": true
+    },
+    {
+      "name": "SOL / USD",
+      "address": "0x5D424D5a664a9f3c820F422297077d49877F9C93",
+      "publishedHeartbeat": 86400,
+      "decimals": 8,
+      "round": "18446744073709553345",
+      "answer": "10123096109",
+      "updatedAt": "1793032181",
+      "ageSeconds": "2096",
+      "positive": true
+    },
+    {
+      "name": "ETH / USD",
+      "address": "0x5731Ae06077c79A3B292498940211E0aE7130bd3",
+      "publishedHeartbeat": 1200,
+      "decimals": 18,
+      "round": "18446744073709616591",
+      "answer": "2322386620597770000000",
+      "updatedAt": "1793034075",
+      "ageSeconds": "202",
+      "positive": true
+    },
+    {
+      "name": "ETH / USD",
+      "address": "0xa4250cE1aA15Ff4cb5E5a8655293b65694e436Ed",
+      "publishedHeartbeat": 1200,
+      "decimals": 8,
+      "round": "18446744073709638238",
+      "answer": "232249399644",
+      "updatedAt": "1793034081",
+      "ageSeconds": "196",
+      "positive": true
+    },
+    {
+      "name": "BTC / USD",
+      "address": "0xC01502b887D09B0f329981764268fC32a94cB453",
+      "publishedHeartbeat": 1200,
+      "decimals": 8,
+      "round": "18446744073709563325",
+      "answer": "8026367535781",
+      "updatedAt": "1793034269",
+      "ageSeconds": "8",
+      "positive": true
+    },
+    {
+      "name": "BTC / USD",
+      "address": "0x8D9e0911A532e2a3C005667B475E6F9742355f2b",
+      "publishedHeartbeat": 1200,
+      "decimals": 18,
+      "round": "18446744073709628965",
+      "answer": "80221945358720000000000",
+      "updatedAt": "1793034075",
+      "ageSeconds": "202",
+      "positive": true
+    },
+    {
+      "name": "XRP / USD",
+      "address": "0x281F1D237Fa1382d96f7A4fd190500D182042e3b",
+      "publishedHeartbeat": 86400,
+      "decimals": 8,
+      "round": "18446744073709553642",
+      "answer": "129448570",
+      "updatedAt": "1793033937",
+      "ageSeconds": "340",
+      "positive": true
+    }
+  ]
+}

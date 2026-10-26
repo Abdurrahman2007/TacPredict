@@ -109,12 +109,7 @@ export function UpDownDetail({
   const result = state === "past" ? windowResult(candles, w, gran) : null;
   // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
   const poolConfig = useQuery(poolConfigQueryOptions);
-  const poolOn =
-    feed.isSuccess &&
-    !feed.data?.virtualMode &&
-    POOL_DURATIONS.includes(minutes) &&
-    Boolean(poolConfig.data?.address) &&
-    poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const poolOn = false; /* virtual-only product: legacy pool disabled */
   const poolRound = useQuery(poolRoundQueryOptions(asset, minutes, w.start, poolOn));
   const priceFeed = usePriceWindow(asset, w, nowMs, !poolOn);
   const poolBeat =

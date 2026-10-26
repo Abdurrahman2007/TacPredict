@@ -105,7 +105,7 @@ export function VirtualAmountCard({
         },
       }),
     staleTime: 0,
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     retry: 0,
   });
   const observation = useQuery({
@@ -234,10 +234,12 @@ export function VirtualAmountCard({
                     ? "negative"
                     : "neutral"
               }
+              title="Share price in Virtual USDC cents"
               aria-pressed={String(outcome) === o.id}
               onClick={() => onSelect(o.id)}
             >
-              {o.label} <span>{o.probability.toFixed(1)}¢</span>
+              {o.label}{" "}
+              <span>{o.probabilityKnown === false ? "—" : `${o.probability.toFixed(1)}¢`}</span>
             </button>
           ))}
         </div>
@@ -292,7 +294,7 @@ export function VirtualAmountCard({
             {mode === "buy"
               ? `${virtualMoney(quote.data.output)} shares`
               : `${virtualMoney(quote.data.output)} Virtual USDC`}{" "}
-            · Fee {virtualMoney(quote.data.fee)} · Minimum received{" "}
+            · Fee {virtualMoney(quote.data.fee)} Virtual USDC · Minimum received{" "}
             {virtualMoney(minOut.toString())}. No automatic partial fills.
           </p>
         )}

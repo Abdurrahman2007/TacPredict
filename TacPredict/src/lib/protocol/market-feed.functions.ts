@@ -72,36 +72,15 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
           virtualMode: true,
           virtualDeployment: virtual.deployment,
         };
-      const { readProtocolRpc } = await import("./read.server");
-      const data = resultSchema.parse(
-        await readProtocolRpc("get_protocol_market_feed", { _limit: "150" }),
-      );
-      const markets = data.markets.map(toMarket);
-      const cryptoUpDown: NativeFeed["cryptoUpDown"] = {};
-      for (const [key, re] of [
-        ["bitcoin", /\b(bitcoin|btc)\b/i],
-        ["ethereum", /\b(ethereum|eth)\b/i],
-        ["solana", /\b(solana|sol)\b/i],
-        ["bnb", /\bbnb\b/i],
-      ] as const) {
-        const m = markets.find(
-          (m) =>
-            m.category === "Crypto" &&
-            re.test(m.title) &&
-            /up or down/i.test(m.title) &&
-            m.native?.status === "OPEN",
-        );
-        if (m) cryptoUpDown[key] = m;
-      }
-      const value: NativeFeed = {
-        markets,
-        cryptoUpDown,
+      return {
+        markets: [],
+        cryptoUpDown: {},
+        deployments: [],
         source: "TacPredict",
         updatedAt,
-        deployments: data.deployments,
+        virtualMode: true,
+        error: "Virtual markets are not configured. Real-USDC trading is disabled.",
       };
-      cached = { value, expires: Date.now() + 20000 };
-      return value;
     } catch {
       return {
         markets: [],
@@ -109,7 +88,7 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         source: "TacPredict",
         updatedAt,
         deployments: [],
-        virtualMode: Boolean(process.env["VIRTUAL_TRADING_CONFIG"]),
+        virtualMode: true,
         error: process.env["VIRTUAL_TRADING_CONFIG"]
           ? "Virtual markets unavailable. No real-USDC fallback is permitted."
           : "Native markets are not available yet. No external odds or demo balances are substituted.",
@@ -120,8 +99,8 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
 export const nativeMarketFeedQueryOptions = queryOptions({
   queryKey: ["native-market-feed", "v1"],
   queryFn: () => getNativeMarketFeed(),
-  staleTime: 20000,
-  refetchInterval: 30000,
+  staleTime: 3000,
+  refetchInterval: 5000,
   retry: 0,
   refetchOnWindowFocus: false,
 });

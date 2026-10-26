@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Gift, LockKeyhole, ChevronRight } from "lucide-react";
-import { useRewardTasks } from "@/lib/use-reward-tasks";
+/** No legacy real-USDC task queries or implicit campaign offer. */
 export function LockedRewardCard() {
-  const { user, data, isError } = useRewardTasks();
-  const earned = !isError && data?.locked_credit === 15;
   return (
     <Link
       to="/rewards"
@@ -14,19 +12,11 @@ export function LockedRewardCard() {
           <Gift className="size-5" />
         </span>
         <div>
-          <p className="text-sm font-semibold">
-            {earned ? "Earned credit · 15 USDC" : "Welcome reward · 15 USDC"}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {earned
-              ? "Locked promotional credit · Not withdrawable"
-              : user
-                ? "Complete welcome tasks to qualify"
-                : "Sign in to start your welcome tasks"}
-          </p>
+          <p className="text-sm font-semibold">Virtual USDC campaigns</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">No campaign is active</p>
           <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground">
             <LockKeyhole className="size-3" />
-            Separate from available wallet funds
+            Non-redeemable virtual units
           </p>
         </div>
       </div>

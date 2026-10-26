@@ -24,7 +24,7 @@ const sections = [
   {
     title: "Nature of the Service",
     paragraphs: [
-      "TacPredict provides prediction-market interfaces and information relating to cryptocurrency price movements (BTC, ETH, SOL and BNB) and football and cricket outcomes. The Virtual USDC feature uses internal, nontransferable accounting units, not real USDC, money, a redeemable token or a claim on treasury assets.",
+      "TacPredict provides prediction-market interfaces and information relating to cryptocurrency price movements (BTC, ETH, SOL, XRP and BNB) and football and cricket outcomes. The Virtual USDC feature uses internal, nontransferable accounting units, not real USDC, money, a redeemable token or a claim on treasury assets.",
       "Virtual balances and virtual trading profits cannot be deposited, withdrawn, transferred, bridged or converted into real assets. No starting-balance campaign, reward allocation or future TAC token is promised. Reference charts and scheduled windows do not establish that any market or trading feature is enabled.",
       "The Platform does not provide financial, investment or legal advice. The legal classification of prediction-market activities depends on applicable law; these Terms do not establish that the Platform is licensed, exempt from licensing, or lawful in any particular jurisdiction.",
     ],

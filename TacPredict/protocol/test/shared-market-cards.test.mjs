@@ -91,6 +91,6 @@ test("removing repeated provider captions does not hide stale-data warnings", ()
 test("reference price windows do not masquerade as live prediction trading", () => {
   const s = src("components/up-down-section.tsx");
   assert.ok(s.includes("Reference price window only"));
-  assert.ok(s.includes("poolConfig.data?.paused === false"));
+  assert.ok(s.includes("const poolOn = false"));
   assert.ok(!s.includes(">LIVE "));
 });

@@ -44,22 +44,23 @@ export const poolConfigQueryOptions = queryOptions({
   refetchInterval: 15000,
   retry: 1,
 });
-export const poolRoundQueryOptions = (a: PoolAsset, m: number, s: number, enabled = true) =>
+export const poolRoundQueryOptions = (a: string, m: number, s: number, enabled = true) =>
   queryOptions({
     queryKey: ["pool-round", a, m, s],
-    queryFn: () => getPoolRound({ data: { asset: a, minutes: m, start: s } }),
+    queryFn: () => getPoolRound({ data: { asset: asset.parse(a), minutes: m, start: s } }),
     staleTime: 3000,
     refetchInterval: 6000,
-    enabled,
+    enabled: enabled && asset.safeParse(a).success,
     retry: 1,
   });
-export const poolPositionQueryOptions = (a: PoolAsset, m: number, s: number, who: string | null) =>
+export const poolPositionQueryOptions = (a: string, m: number, s: number, who: string | null) =>
   queryOptions({
     queryKey: ["pool-position", a, m, s, who],
-    queryFn: () => getPoolPosition({ data: { asset: a, minutes: m, start: s, user: who ?? "" } }),
+    queryFn: () =>
+      getPoolPosition({ data: { asset: asset.parse(a), minutes: m, start: s, user: who ?? "" } }),
     staleTime: 3000,
     refetchInterval: 8000,
-    enabled: Boolean(who),
+    enabled: Boolean(who) && asset.safeParse(a).success,
     retry: 1,
   });
 export const poolRecentQueryOptions = (who: string | null) =>
@@ -78,15 +79,10 @@ export const getPoolRoundHistory = createServerFn({ method: "GET" })
   .handler(async ({ data }) =>
     (await import("./pool.server")).poolRoundHistory(data.asset, data.minutes, data.before),
   );
-export const poolHistoryQueryOptions = (
-  a: PoolAsset,
-  m: number,
-  before: number,
-  enabled: boolean,
-) =>
+export const poolHistoryQueryOptions = (a: string, m: number, before: number, enabled: boolean) =>
   queryOptions({
     queryKey: ["pool-history", a, m, before],
-    queryFn: () => getPoolRoundHistory({ data: { asset: a, minutes: m, before } }),
+    queryFn: () => getPoolRoundHistory({ data: { asset: asset.parse(a), minutes: m, before } }),
     enabled: enabled && before > 0,
     staleTime: 15000,
     refetchInterval: 30000,

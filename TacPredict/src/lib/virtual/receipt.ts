@@ -1,5 +1,5 @@
 import { decodeEventLog, type Hex, type TransactionReceipt } from "viem";
-import { virtualAmmAbi } from "./abi";
+import { virtualPriceAmmAbi } from "./price-abi";
 import type { TradeIntent, VirtualEvent } from "./types";
 const economicEvents = new Set([
   "VirtualGrant",
@@ -11,6 +11,10 @@ const economicEvents = new Set([
   "ResultChallenged",
   "TradingPauseChanged",
   "CampaignConfigured",
+  "MonthlyCampaign",
+  "CampaignState",
+  "StartPriceCaptured",
+  "PricePolicyFrozen",
 ]);
 export function decodeVirtualEvents(receipt: TransactionReceipt, engine: Hex): VirtualEvent[] {
   if (receipt.status !== "success") return [];
@@ -18,7 +22,7 @@ export function decodeVirtualEvents(receipt: TransactionReceipt, engine: Hex): V
   for (const log of receipt.logs) {
     if (log.address.toLowerCase() !== engine.toLowerCase()) continue;
     const event = decodeEventLog({
-      abi: virtualAmmAbi,
+      abi: virtualPriceAmmAbi,
       data: log.data,
       topics: log.topics,
       strict: true,
@@ -28,7 +32,7 @@ export function decodeVirtualEvents(receipt: TransactionReceipt, engine: Hex): V
     // Pool terms are recorded by their frozen onchain getter, not used as client-controlled accounting.
     const args = Object.fromEntries(
       Object.entries(raw)
-        .filter(([k]) => k !== "terms")
+        .filter(([k]) => k !== "terms" && k !== "policy")
         .map(([k, v]) => [k, typeof v === "bigint" ? v.toString() : v]),
     ) as VirtualEvent["args"];
     events.push({

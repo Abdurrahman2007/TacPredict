@@ -6,6 +6,7 @@ export type VirtualDeployment = {
   codeHash: Hex;
   startBlock: string;
   enabled: boolean;
+  model?: "fpmm-v1" | "feed-v1";
 };
 export type VirtualMarketRef = { deployment: VirtualDeployment; onchainId: string };
 export type TradeIntent = {

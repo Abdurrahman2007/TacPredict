@@ -21,6 +21,10 @@ fs.writeFileSync(
 );
 const source = fs
   .readFileSync(new URL("src/lib/protocol/execution.ts", root), "utf8")
+  .replace(
+    'from "@/lib/virtual/product-policy"',
+    `from ${JSON.stringify(new URL("src/lib/virtual/product-policy.ts", root).pathname)}`,
+  )
   .replace('from "viem"', `from ${JSON.stringify(path.join(dir, "viem.mjs"))}`)
   .replace(
     'from "./orders"',
@@ -98,30 +102,26 @@ function mock({ chain = 8453, simError = false, receipt = "success" } = {}) {
   return calls;
 }
 try {
-  await test("wallet-approved cancellation works while new-risk trading is paused", async () => {
+  await test("obsolete real-USDC cancellation is disabled before any wallet RPC", async () => {
     const calls = mock();
-    assert.equal(await cancelSignedOrder(w, d, offer), hash);
-    assert.deepEqual(
-      calls.map((c) => c[0]),
-      ["simulate", "write"],
+    await assert.rejects(cancelSignedOrder(w, d, offer), /Real-USDC execution is disabled/);
+    assert.equal(calls.length, 0);
+  });
+  await test("wrong maker/network cannot bypass virtual-only execution policy", async () => {
+    const calls = mock({ chain: 1 });
+    await assert.rejects(
+      cancelSignedOrder({ ...w, address: other }, d, offer),
+      /Real-USDC execution is disabled/,
     );
-    assert.equal(calls[0][1].functionName, "cancelOrder");
-    assert.equal(calls[0][1].args[0].shares, 1000000n);
-  });
-  await test("wrong maker and wrong network never prompt a write", async () => {
-    let calls = mock();
-    await assert.rejects(cancelSignedOrder({ ...w, address: other }, d, offer), /Only the maker/);
-    assert.equal(calls.length, 0);
-    calls = mock({ chain: 1 });
-    await assert.rejects(cancelSignedOrder(w, d, offer), /Switch your wallet/);
     assert.equal(calls.length, 0);
   });
-  await test("rejected simulation cannot broadcast and reverted receipt cannot claim success", async () => {
-    let calls = mock({ simError: true });
-    await assert.rejects(cancelSignedOrder(w, d, offer), /simulation denied/);
-    assert.equal(calls.filter((c) => c[0] === "write").length, 0);
-    mock({ receipt: "reverted" });
-    await assert.rejects(cancelSignedOrder(w, d, offer), /Cancellation failed/);
+  await test("legacy real-asset policy cannot be enabled by tradingEnabled or successful RPC stubs", async () => {
+    const calls = mock();
+    await assert.rejects(
+      cancelSignedOrder(w, { ...d, tradingEnabled: true }, offer),
+      /Real-USDC execution is disabled/,
+    );
+    assert.equal(calls.length, 0);
   });
 } finally {
   delete globalThis.__tacCancellation;

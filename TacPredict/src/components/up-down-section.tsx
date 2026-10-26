@@ -28,6 +28,7 @@ const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
   { asset: "ethereum", large: true },
   { asset: "solana", large: true },
+  { asset: "xrp", large: true },
   { asset: "bnb", large: true },
 ];
 
@@ -50,11 +51,7 @@ function AssetCard({
   // Once the administrator turns a series on, the card shows the pool: the round that is open for
   // bets is the next one, so Up and Down lead straight to it.
   const poolConfig = useQuery(poolConfigQueryOptions);
-  const poolOn =
-    POOL_DURATIONS.includes(minutes) &&
-    Boolean(poolConfig.data?.address) &&
-    poolConfig.data?.series[`${asset}:${minutes}`] === true &&
-    poolConfig.data?.paused === false;
+  const poolOn = false; // Legacy real-USDC pool disabled, including initial loading.
   const nextStart = nextRoundStart(nowMs, minutes);
   const w = makeWindow(poolOn ? nextStart : start, minutes);
   const market = matchNativeMarket(markets, asset, w);

@@ -5,8 +5,9 @@ export type CryptoMarketSnapshot = {
   bitcoin: { price: number; change24h: number; high24h: number; low24h: number; marketCap: number };
   ethereum: { price: number; change24h: number };
   solana: { price: number; change24h: number };
+  xrp: { price: number; change24h: number };
   bnb: { price: number; change24h: number };
-  histories: Record<"bitcoin" | "ethereum" | "solana" | "bnb", PricePoint[]>;
+  histories: Record<"bitcoin" | "ethereum" | "solana" | "bnb" | "xrp", PricePoint[]>;
   source: "CoinGecko";
   stale?: boolean;
   updatedAt: string;
@@ -30,7 +31,13 @@ export const cryptoMarketQueryOptions = queryOptions({
 
 export const getCryptoAssetHistory = createServerFn({ method: "GET" })
   .inputValidator((value: unknown) => {
-    if (value !== "bitcoin" && value !== "ethereum" && value !== "solana" && value !== "bnb")
+    if (
+      value !== "bitcoin" &&
+      value !== "ethereum" &&
+      value !== "solana" &&
+      value !== "bnb" &&
+      value !== "xrp"
+    )
       throw Error("Unsupported crypto asset");
     return value;
   })
@@ -38,7 +45,9 @@ export const getCryptoAssetHistory = createServerFn({ method: "GET" })
     const { coingeckoAssetHistory } = await import("./coingecko.server");
     return coingeckoAssetHistory(data);
   });
-export const cryptoHistoryQueryOptions = (asset: "bitcoin" | "ethereum" | "solana" | "bnb") =>
+export const cryptoHistoryQueryOptions = (
+  asset: "bitcoin" | "ethereum" | "solana" | "bnb" | "xrp",
+) =>
   queryOptions({
     queryKey: ["crypto-asset-history", "coingecko-v3", asset],
     queryFn: () => getCryptoAssetHistory({ data: asset }),
