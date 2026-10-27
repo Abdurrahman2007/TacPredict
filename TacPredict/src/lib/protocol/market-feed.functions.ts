@@ -1,19 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
-import { z } from "zod";
-import {
-  nativeMarketSchema,
-  deploymentSchema,
-  atomicDecimal,
-  marketStatus,
-  type NativeMarket,
-  type ProtocolDeployment,
-} from "./types";
+import { atomicDecimal, marketStatus, type NativeMarket, type ProtocolDeployment } from "./types";
 import type { Market } from "@/domain/markets/types";
 import { usdcShort } from "./display.mjs";
 export type NativeFeed = {
   markets: Market[];
-  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana" | "bnb", Market>>;
+  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana" | "xrp" | "bnb", Market>>;
   source: "TacPredict";
   updatedAt: string;
   deployments: ProtocolDeployment[];
@@ -21,11 +13,7 @@ export type NativeFeed = {
   virtualMode?: boolean;
   virtualDeployment?: import("@/lib/virtual/types").VirtualDeployment;
 };
-const resultSchema = z.object({
-  markets: z.array(nativeMarketSchema),
-  deployments: z.array(deploymentSchema),
-});
-let cached: { value: NativeFeed; expires: number } | undefined;
+/** Historical data conversion only; never a real-USDC execution fallback. */
 export function toMarket(m: NativeMarket): Market {
   const price = (a: string) => Number(atomicDecimal(a));
   return {
@@ -56,12 +44,19 @@ export function toMarket(m: NativeMarket): Market {
 }
 export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
   async (): Promise<NativeFeed> => {
-    if (cached && cached.expires > Date.now() && !process.env["VIRTUAL_TRADING_CONFIG"])
-      return cached.value;
     const updatedAt = new Date().toISOString();
     try {
       const { readVirtualCatalogue } = await import("@/lib/virtual/read.server");
-      const virtual = await readVirtualCatalogue();
+      const { coalesceCatalogue } = await import("@/lib/virtual/catalogue-coalescer.server");
+      const virtual = await coalesceCatalogue(
+        [
+          "virtual-catalogue-v1",
+          process.env["VIRTUAL_TRADING_CONFIG"] ?? null,
+          process.env["VIRTUAL_RPC_URL"] ?? null,
+          process.env["SUPABASE_URL"] ?? null,
+        ],
+        () => readVirtualCatalogue(),
+      );
       if (virtual)
         return {
           markets: virtual.markets,

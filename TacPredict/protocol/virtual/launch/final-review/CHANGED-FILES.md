@@ -1,7 +1,8 @@
 # Exact files changed relative to PR #25 baseline
 
-All paths are repository-root-relative. No production config, secret, deployment manifest or legacy contract changes. The list includes this manifest.
+All paths are repository-root-relative. No production config, secret, deployment manifest or legacy contract changes. The list includes this manifest. The review-only CI workflow change preserves local diagnostics, not deployment.
 
+- `.github/workflows/virtual-trading-review.yml`
 - `TacPredict/protocol/test/live-chart-sports.test.mjs`
 - `TacPredict/protocol/test/portfolio-cancellation.test.mjs`
 - `TacPredict/protocol/test/prediction-experience.test.mjs`
@@ -13,6 +14,7 @@ All paths are repository-root-relative. No production config, secret, deployment
 - `TacPredict/protocol/virtual/contracts/VirtualPriceAMM.sol`
 - `TacPredict/protocol/virtual/launch/final-review/CAMPAIGNS.md`
 - `TacPredict/protocol/virtual/launch/final-review/CHANGED-FILES.md`
+- `TacPredict/protocol/virtual/launch/final-review/CONTINUATION.md`
 - `TacPredict/protocol/virtual/launch/final-review/FINAL-REVIEW.md`
 - `TacPredict/protocol/virtual/launch/final-review/PRICING.md`
 - `TacPredict/protocol/virtual/launch/final-review/RUNBOOK.md`
@@ -26,6 +28,7 @@ All paths are repository-root-relative. No production config, secret, deployment
 - `TacPredict/protocol/virtual/scripts/compile.mjs`
 - `TacPredict/protocol/virtual/scripts/prepare-price-sepolia.mjs`
 - `TacPredict/protocol/virtual/test/campaign-price-backend.test.mjs`
+- `TacPredict/protocol/virtual/test/catalogue-coalescer.test.mjs`
 - `TacPredict/protocol/virtual/test/price-contract.test.mjs`
 - `TacPredict/protocol/virtual/test/safety.test.mjs`
 - `TacPredict/src/components/admin/views/virtual.tsx`
@@ -55,6 +58,7 @@ All paths are repository-root-relative. No production config, secret, deployment
 - `TacPredict/src/lib/updown/window.d.mts`
 - `TacPredict/src/lib/updown/window.mjs`
 - `TacPredict/src/lib/virtual/campaign.ts`
+- `TacPredict/src/lib/virtual/catalogue-coalescer.server.ts`
 - `TacPredict/src/lib/virtual/functions.ts`
 - `TacPredict/src/lib/virtual/lifecycle.ts`
 - `TacPredict/src/lib/virtual/market-data.ts`
