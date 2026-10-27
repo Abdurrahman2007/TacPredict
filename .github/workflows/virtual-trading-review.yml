@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
+        shell: bash
         working-directory: TacPredict
     env:
       SUPABASE_URL: https://local-test.invalid
