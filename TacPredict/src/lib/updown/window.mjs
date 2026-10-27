@@ -7,12 +7,13 @@ export const ASSETS = {
   bitcoin: { product: "BTC-USD", name: "Bitcoin", short: "BTC", logo: "btc" },
   ethereum: { product: "ETH-USD", name: "Ethereum", short: "ETH", logo: "eth" },
   solana: { product: "SOL-USD", name: "Solana", short: "SOL", logo: "sol" },
+  xrp: { product: "XRP-USD", name: "XRP", short: "XRP", logo: "xrp" },
   bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
-export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
+export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "xrp", "bnb"];
 export const DURATIONS = [5, 15, 720, 1440];
 export const DISPLAY_DURATIONS = [5, 15, 60, 720, 1440];
-const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
+const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", xrp: "xrp", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
 const GRANULARITIES = [60, 300, 900, 3600, 21600, 86400];
@@ -130,7 +131,12 @@ export function matchNativeMarket(markets, asset, w) {
   const re = new RegExp(`\\b(${info.name}|${info.short})\\b`, "i");
   return (
     (markets ?? []).find((m) => {
-      if (!m.native || m.category !== "Crypto" || !/up or down/i.test(m.title) || !re.test(m.title))
+      if (
+        (!m.virtual && !m.native) ||
+        m.category !== "Crypto" ||
+        !/up or down/i.test(m.title) ||
+        !re.test(m.title)
+      )
         return false;
       const start = Date.parse(m.startsAt ?? ""),
         end = Date.parse(m.endsAt ?? "");

@@ -45,14 +45,28 @@ test("window list is ordered and includes the live one", () => {
   assert.equal(list[2].start, START);
   assert.ok(list.every((w, i) => i === 0 || w.start - list[i - 1].start === 300000));
 });
-const candle = (t, o, c) => ({ time: t, open: o, high: Math.max(o, c), low: Math.min(o, c), close: c });
+const candle = (t, o, c) => ({
+  time: t,
+  open: o,
+  high: Math.max(o, c),
+  low: Math.min(o, c),
+  close: c,
+});
 test("price to beat and result come only from real candles", () => {
-  const candles = [candle(START, 100, 101), candle(START + 60000, 101, 102), candle(START + 240000, 103, 99)];
+  const candles = [
+    candle(START, 100, 101),
+    candle(START + 60000, 101, 102),
+    candle(START + 240000, 103, 99),
+  ];
   assert.equal(priceToBeat(candles, START), 100);
   assert.equal(priceToBeat(candles, START + 60000), 101);
   assert.equal(priceToBeat([], START), null);
   assert.equal(priceToBeat(candles, START - 300000), null);
-  assert.deepEqual(windowResult(candles, makeWindow(START, 5)), { open: 100, close: 99, outcome: "Down" });
+  assert.deepEqual(windowResult(candles, makeWindow(START, 5)), {
+    open: 100,
+    close: 99,
+    outcome: "Down",
+  });
   assert.equal(windowResult([candle(START, 100, 101)], makeWindow(START, 5)), null);
   const up = [candle(START, 100, 100), candle(START + 240000, 100, 100)];
   assert.equal(windowResult(up, makeWindow(START, 5)).outcome, "Up"); // equal counts as Up
@@ -85,7 +99,10 @@ test("native market is matched by asset, title and exact window", () => {
     m("Bitcoin Up or Down", START, START + 300000, false),
     m("Bitcoin Up or Down - 5 min", START + 500, START + 300500),
   ];
-  assert.equal(matchNativeMarket(list, "bitcoin", w).id, "Bitcoin Up or Down - 5 min" + (START + 500));
+  assert.equal(
+    matchNativeMarket(list, "bitcoin", w).id,
+    "Bitcoin Up or Down - 5 min" + (START + 500),
+  );
   assert.equal(matchNativeMarket(list, "ethereum", w).title, "Ethereum Up or Down");
   assert.equal(matchNativeMarket(list, "solana", w), null);
 });
@@ -93,11 +110,21 @@ test("series prefers candles, then trades, then live ticks, clipped to the windo
   const w = makeWindow(START, 5);
   const now = START + 150000;
   const candles = [candle(START, 100, 101), candle(START + 60000, 101, 102)];
-  const trades = [{ time: START + 70000, price: 102.5 }, { time: START + 80000, price: 103 }];
-  const ticks = [{ time: START + 75000, price: 999 }, { time: START + 100000, price: 104 }, { time: START + 400000, price: 1 }];
+  const trades = [
+    { time: START + 70000, price: 102.5 },
+    { time: START + 80000, price: 103 },
+  ];
+  const ticks = [
+    { time: START + 75000, price: 999 },
+    { time: START + 100000, price: 104 },
+    { time: START + 400000, price: 1 },
+  ];
   const series = seriesForWindow({ candles, trades, ticks, w, nowMs: now });
   const times = series.map((p) => p.time);
-  assert.deepEqual(times, [...times].sort((a, b) => a - b));
+  assert.deepEqual(
+    times,
+    [...times].sort((a, b) => a - b),
+  );
   assert.ok(series.every((p) => p.time >= w.start && p.time <= now));
   assert.ok(!series.some((p) => p.price === 999 || p.price === 1));
   assert.equal(series.at(-1).price, 104);
@@ -114,7 +141,8 @@ test("thin keeps ends; formatting; slugs", () => {
   assert.equal(formatUsd(67123.456, "bitcoin"), "$67,123.46");
   assert.equal(formatUsd(0), "$0");
   assert.equal(assetFromSlug("BTC"), "bitcoin");
-  assert.equal(assetFromSlug("xrp"), null);
+  assert.equal(assetFromSlug("xrp"), "xrp");
+  assert.equal(assetFromSlug("unknown"), null);
   assert.equal(parseDuration("15"), 15);
   assert.equal(parseDuration("7"), 5);
   assert.equal(durationLabel(60), "1 hour");
@@ -130,8 +158,8 @@ import {
   windowResult as result,
 } from "../../src/lib/updown/window.mjs";
 
-test("four assets and four window lengths", () => {
-  assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "bnb"]);
+test("five assets and four existing window lengths", () => {
+  assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "xrp", "bnb"]);
   assert.equal(assetFromSlug("BNB"), "bnb");
   assert.deepEqual([...DURATIONS], [5, 15, 720, 1440]);
   assert.deepEqual(DURATIONS.map(durationLabel), ["5 min", "15 min", "12 hours", "24 hours"]);
@@ -169,6 +197,10 @@ test("a coarse candle never stands in for a shorter window", () => {
   const H = 3600000;
   const hourly = [{ time: Date.UTC(2026, 9, 17, 9), open: 100, high: 101, low: 99, close: 100 }];
   assert.equal(beat(hourly, Date.UTC(2026, 9, 17, 9, 15), H), null);
-  const five = { start: Date.UTC(2026, 9, 17, 9, 15), end: Date.UTC(2026, 9, 17, 9, 20), minutes: 5 };
+  const five = {
+    start: Date.UTC(2026, 9, 17, 9, 15),
+    end: Date.UTC(2026, 9, 17, 9, 20),
+    minutes: 5,
+  };
   assert.equal(result(hourly, five, H), null);
 });

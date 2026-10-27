@@ -1,5 +1,5 @@
 import type { Market } from "@/domain/markets/types";
-export type UpDownAsset = "bitcoin" | "ethereum" | "solana" | "bnb";
+export type UpDownAsset = "bitcoin" | "ethereum" | "solana" | "xrp" | "bnb";
 export const ASSETS: Record<
   UpDownAsset,
   { product: string; name: string; short: string; logo: string }

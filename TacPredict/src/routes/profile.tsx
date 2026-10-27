@@ -21,7 +21,6 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { VirtualPortfolio } from "@/components/virtual/virtual-portfolio";
 import { useVirtualAccount } from "@/lib/virtual/hooks";
-import { NativePortfolio } from "@/components/native-portfolio";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useOwnProtocolOrders } from "@/lib/protocol/portfolio-orders";
@@ -61,11 +60,11 @@ function PortfolioPage() {
 }
 function PortfolioClient() {
   const feed = useQuery(nativeMarketFeedQueryOptions);
-  const virtualMode = Boolean(feed.data?.virtualMode);
+  const virtualMode = true;
   const virtualAccount = useVirtualAccount(feed.data?.virtualDeployment);
   const wallet = useBaseWallet(),
     q = useNativePortfolio(feed.isSuccess && !virtualMode),
-    orders = useOwnProtocolOrders(),
+    orders = useOwnProtocolOrders(false),
     auth = useProtocolUser(),
     login = useLoginDialog();
   const [sortOpen, setSortOpen] = useState(false);
@@ -148,7 +147,7 @@ function PortfolioClient() {
     <main className="tp-portfolio">
       <header className="tp-portfolio-heading">
         <div>
-          <p className="tp-eyebrow">YOUR OVERVIEW</p>
+          <p className="tp-eyebrow">VIRTUAL USDC OVERVIEW</p>
           <h1>Portfolio</h1>
         </div>
         <div className="tp-heading-actions">
@@ -165,7 +164,6 @@ function PortfolioClient() {
             onClick={() => {
               void wallet.refresh();
               if (auth.user) {
-                void q.refetch();
                 if (virtualMode) void virtualAccount.refetch();
                 else void orders.refetch();
               }
@@ -191,7 +189,7 @@ function PortfolioClient() {
           </div>
           <div
             className="tp-hero-value"
-            title="Last-trade marked holdings, not a guaranteed sale price"
+            title="Virtual USDC marked holdings, not a guaranteed sale price or real-money balance"
           >
             {show(total)}
           </div>
@@ -224,9 +222,9 @@ function PortfolioClient() {
           <div className="tp-card-top">
             <span>
               <CircleDollarSign size={16} />
-              {virtualMode ? "Virtual USDC" : "Wallet USDC"}
+              {virtualMode ? "Virtual USDC" : "Virtual USDC"}
             </span>
-            <span className="tp-currency">{virtualMode ? "VIRTUAL" : "USDC"}</span>
+            <span className="tp-currency">{virtualMode ? "VIRTUAL" : "VIRTUAL"}</span>
           </div>
           <strong className="tp-cash-value">{show(cash)}</strong>
           <div className="tp-claim-row">
@@ -246,7 +244,7 @@ function PortfolioClient() {
                   ? "Unsupported network · switch to Base"
                   : wallet.error
                     ? "Balance could not load · refresh to retry"
-                    : "USDC stays in your wallet"}
+                    : "Virtual units only · Not redeemable"}
             </p>
           )}
         </div>
@@ -260,7 +258,7 @@ function PortfolioClient() {
         <div className="tp-pl-head">
           <div>
             <p className="tp-eyebrow">PERFORMANCE</p>
-            <h2>Profit & loss</h2>
+            <h2>Profit & loss · Virtual USDC</h2>
           </div>
           <button
             aria-label="Share portfolio link"
@@ -479,16 +477,7 @@ function PortfolioClient() {
               <p role="alert">Virtual trading data unavailable. No real-USDC fallback.</p>
             )
           ) : (
-            <NativePortfolio
-              tab={tab === "History" ? "Activity" : tab === "Orders" ? "Open" : tab}
-              search={search}
-              sort={sort}
-              descending={descending}
-              activeOnly={activeOnly}
-              category={category}
-              state={state}
-              since=""
-            />
+            <p role="alert">Virtual trading unavailable. Real-USDC trading is disabled.</p>
           )}
         </div>
       </section>

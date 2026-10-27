@@ -26,6 +26,7 @@ const state: Record<UpDownAsset, LiveAsset> = {
   ethereum: EMPTY,
   solana: EMPTY,
   bnb: EMPTY,
+  xrp: EMPTY,
 };
 const listeners = new Set<() => void>();
 let socket: WebSocket | null = null;
@@ -93,9 +94,18 @@ function connect() {
       if (msg.type !== "ticker" || !msg.product_id || !msg.price) return;
       const asset = productToAsset.get(msg.product_id);
       const price = Number(msg.price);
-      const time = msg.time ? Date.parse(msg.time) : Date.now();
-      if (!asset || !(price > 0)) return;
-      onTick(asset, price, Number.isFinite(time) ? time : Date.now());
+      const time = msg.time ? Date.parse(msg.time) : NaN;
+      if (
+        !asset ||
+        !Number.isFinite(price) ||
+        !(price > 0) ||
+        !Number.isFinite(time) ||
+        time > Date.now() + 5000 ||
+        Date.now() - time > 15000 ||
+        (state[asset].time !== null && time < state[asset].time!)
+      )
+        return;
+      onTick(asset, price, time);
       emit();
     } catch {
       /* ignore malformed frames */
@@ -117,6 +127,14 @@ function connect() {
 function startWatchdog() {
   clearInterval(watchdog);
   watchdog = setInterval(() => {
+    // Freshness is per asset, not merely any message on the socket.
+    for (const a of ASSET_KEYS)
+      if (
+        state[a].status === "live" &&
+        (state[a].time === null || Date.now() - state[a].time! > 15000)
+      )
+        state[a] = { ...state[a], status: "offline" };
+    emit();
     // The ticker sends several messages per second; silence means a dead connection.
     if (socket && socket.readyState === WebSocket.OPEN && Date.now() - lastMessage > 12_000)
       socket.close();
@@ -156,12 +174,16 @@ export function useLivePrice(asset: UpDownAsset, enabled = true) {
     enabled: enabled && live.status !== "live",
     refetchInterval: live.status !== "live" ? 5000 : false,
   });
-  const fallback = live.status !== "live" ? (polling.data?.prices[asset] ?? null) : null;
+  const candidate = live.status !== "live" ? (polling.data?.prices[asset] ?? null) : null;
+  const fallback =
+    candidate && candidate.time <= Date.now() + 5000 && Date.now() - candidate.time <= 15000
+      ? candidate
+      : null;
   return {
-    price: fallback ? fallback.price : live.price,
+    price: fallback ? fallback.price : live.status === "live" ? live.price : null,
     time: fallback ? fallback.time : live.time,
     ticks: live.ticks,
     status: live.status,
-    source: fallback || live.price !== null ? "Coinbase" : null,
+    source: fallback || live.status === "live" ? "Coinbase" : null,
   };
 }

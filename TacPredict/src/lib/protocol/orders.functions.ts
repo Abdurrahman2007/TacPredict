@@ -15,6 +15,8 @@ export const submitProtocolOrder = createServerFn({ method: "POST" })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
+    const { rejectRealAssetTrading } = await import("@/lib/virtual/product-policy");
+    rejectRealAssetTrading();
     const { saveVerifiedOrder } = await import("./orders.server");
     return saveVerifiedOrder(data, context.userId);
   });

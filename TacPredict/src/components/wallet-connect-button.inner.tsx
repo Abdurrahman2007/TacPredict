@@ -1,26 +1,18 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useBalance } from "wagmi";
-import { money } from "@/lib/protocol/portfolio-view.mjs";
-import { BASE_USDC_ADDRESS, PRIMARY_CHAIN_ID } from "@/lib/web3/constants";
+import { useQuery } from "@tanstack/react-query";
+import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
+import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
 import { cn } from "@/lib/utils";
 
 function shortenAddress(address: string): string {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
 
-function formatUsdc(value: bigint | undefined): string {
-  return value === undefined ? "Unavailable" : money(value).slice(1);
-}
-
 /** Wagmi/RainbowKit-backed control — only mount inside Web3Provider. */
 export function WalletConnectButtonInner({ className }: { className?: string }) {
-  const { address, isConnected } = useAccount();
-  const { data: usdc } = useBalance({
-    address,
-    token: BASE_USDC_ADDRESS,
-    chainId: PRIMARY_CHAIN_ID,
-    query: { enabled: Boolean(address) && isConnected },
-  });
+  const feed = useQuery(nativeMarketFeedQueryOptions);
+  const virtual = useVirtualAccount(feed.data?.virtualDeployment);
+  const balance = virtualMoney(virtual.data?.balance);
 
   return (
     <ConnectButton.Custom>
@@ -102,14 +94,14 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                     type="button"
                     onClick={openAccountModal}
                     className="app-account-button inline-flex h-11 max-w-[180px] items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary"
-                    aria-label={`Wallet ${account.address}, ${formatUsdc(usdc?.value)} USDC`}
+                    aria-label={`Wallet ${account.address}, ${balance} Virtual USDC`}
                   >
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
                       {account.address.slice(2, 3).toUpperCase()}
                     </span>
                     <span className="min-w-0 text-left">
                       <span className="block truncate text-xs font-semibold tabular-nums">
-                        {formatUsdc(usdc?.value)} USDC
+                        {balance} Virtual USDC
                       </span>
                       <span className="block truncate font-mono text-[10px] font-normal text-muted-foreground">
                         {shortenAddress(account.address)}

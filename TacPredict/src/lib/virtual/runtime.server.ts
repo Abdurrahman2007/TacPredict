@@ -14,6 +14,7 @@ export const metadataSchema = z
     source: z.string().min(1).max(200),
     sourceUrl: z.string().url().startsWith("https://"),
     rules: z.string().min(1).max(12000),
+    pricePolicyHash: hash.optional(),
     resolutionSpec: z
       .discriminatedUnion("kind", [
         z
@@ -21,7 +22,7 @@ export const metadataSchema = z
             kind: z.literal("crypto"),
             sourceId: z.string().min(1),
             maxFetchAgeSeconds: z.number().int().min(1).max(86400),
-            asset: z.enum(["BTC", "ETH", "SOL", "BNB"]),
+            asset: z.enum(["BTC", "ETH", "SOL", "XRP", "BNB"]),
             intervalSeconds: z.union([
               z.literal(300),
               z.literal(900),
@@ -55,6 +56,7 @@ const schema = z
     codeHash: hash,
     startBlock: z.string().regex(/^\d+$/),
     enabled: z.boolean(),
+    model: z.enum(["fpmm-v1", "feed-v1"]).default("fpmm-v1"),
     markets: z.array(metadataSchema).max(200),
     maxProjectionAgeSeconds: z.number().int().min(1).max(3600).default(120),
   })
@@ -88,6 +90,7 @@ export function virtualConfig() {
     codeHash: parsed.codeHash as Hex,
     startBlock: parsed.startBlock,
     enabled: parsed.enabled,
+    model: parsed.model,
   };
   return {
     deployment,

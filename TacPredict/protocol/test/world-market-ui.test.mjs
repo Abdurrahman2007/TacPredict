@@ -23,11 +23,11 @@ test("Preview cards and detail have no invented financial observations", () => {
   assert(shared.includes("Displayed zeros mean no native trading data"));
   assert(shared.includes("MobileOutcomeDock"));
   const trade = read("components/prediction-amount-card.tsx");
-  assert(trade.includes("market.native?.status === \"OPEN\""));
-  assert(trade.includes("deployment?.tradingEnabled"));
-  assert(trade.includes("!market.native"));
-  assert(trade.includes("!canTrade"));
-  assert(trade.includes("never a free executable quote"));
+  assert(trade.includes("props.market.virtual"));
+  assert(trade.includes("VirtualAmountCard"));
+  assert(trade.includes("Virtual USDC trading unavailable"));
+  assert(trade.includes("No real-USDC trading or funding"));
+  assert(!trade.includes("placeLimitBuy"));
   assert(!detail.includes("placeLimitBuy"));
   assert(!detail.includes("sendTransaction"));
 });

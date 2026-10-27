@@ -20,7 +20,7 @@ export const Route = createFileRoute("/markets/$marketId")({
       {
         name: "description",
         content:
-          "Explore market outcomes and resolution rules. Base USDC trading integration is pending.",
+          "Explore market outcomes and resolution rules. Base Virtual USDC trading integration is pending.",
       },
     ],
   }),

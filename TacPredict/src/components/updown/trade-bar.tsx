@@ -86,7 +86,7 @@ export function UpDownTradeBar({
             Choose Buy or Sell and review your order. Reference prices are not executable quotes.
             {view.virtual
               ? "Virtual USDC only. Each trade requires its own transaction."
-              : "Wallet approval is required for a real trade."}
+              : "No verified Virtual USDC market is available for this reference window."}
           </DialogDescription>
           <div className="pd-trade-top">
             <div className="pd-handle" />

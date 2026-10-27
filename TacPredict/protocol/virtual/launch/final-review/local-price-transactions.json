@@ -1,0 +1,3167 @@
+{
+  "network": "local Cancun only",
+  "chainId": 31337,
+  "transactions": [
+    {
+      "functionName": "grantRole",
+      "hash": "0x276c82dde373e59b1daabdbc61300898e2efc0099224a67f0ec0ea933900c4d6",
+      "status": "success",
+      "block": "5",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xcb9690b7a80201f8d7d43657dd64df8099d6fdd4201836012def73257557d325",
+      "status": "success",
+      "block": "6",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x1feae4f201b170092850d73f319afb06d776b555a27323edc73cfc0429a3b786",
+      "status": "success",
+      "block": "7",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xb45beed529f2e99a2e3fc7591e8988e823b5a5241ca2b912e73a66e5b37dce6c",
+      "status": "success",
+      "block": "8",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x9f7aecb8316c483fd9b6f7adee975ff26141f2f13b9af5c55f9f59852a2e7fa7",
+      "status": "success",
+      "block": "9",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x383fed224e55f463db8d244417b79b81db9842ea2bd77857eecf7d137dd78c36",
+      "status": "success",
+      "block": "10",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0xb232b7421a14f2e609887ba7301fb825d74f0b2d8801908a261d4d18b0825b69",
+      "status": "success",
+      "block": "11",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793036253",
+              "closeAt": "1793036553",
+              "resolveAfter": "1793036553",
+              "resolutionDeadline": "1793036853",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xb4a9da8403bf499ec6bc8948e09e3b2c60b2b3d0ac1fd1a4990b914d724a6f3e",
+      "status": "success",
+      "block": "12",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "sequencer": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x28148c38e9a3df19d52d404b4e0e5346cd29f35f52e236f146dc6a20e2003413",
+      "status": "success",
+      "block": "13",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x1e279f0f8d688395a5fe34ca5cba3a2a53597f77c2100ce8422705e37f3462fe",
+            "budget": "100000000",
+            "endsAt": "1793037553"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793036173",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xa1c69ef2346dfab11087c412e76629d8cce7c248143c8153f815f0f08d53dfee",
+      "status": "success",
+      "block": "14",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x6cf568fc34de3b08bd61d333faf89c4cc51bba456fbd4697a56994787c163811",
+      "status": "success",
+      "block": "16",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x496630cc01571747837c7e7069e53e10ce1432b39710bb5e7777c04c6c319230",
+      "status": "success",
+      "block": "17",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0xad3393cb1b742ba6f7de72b0edc319d7a4a31dba4b6ce8658f9f58cef28f0fab",
+      "status": "success",
+      "block": "18",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "buy",
+      "hash": "0x569a97e6ef8c32992b2521f055247f710320e30fc4a85d393f649177f7cc9e44",
+      "status": "success",
+      "block": "19",
+      "gas": "161323",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1960780",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1960780",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "sell",
+      "hash": "0x727507f3aaef7270d692ab948ad98882b1ff0299fad4747ff13cc7c51717dcd6",
+      "status": "success",
+      "block": "20",
+      "gas": "148888",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "1",
+            "outcome": 0,
+            "isBuy": false,
+            "input": "980390",
+            "output": "480391",
+            "fee": "0",
+            "revision": "3",
+            "remainingShares": "980390",
+            "remainingBasis": "500000",
+            "realizedPnlDelta": "-19609",
+            "cashAfter": "99480391"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "sell",
+      "hash": "0xef1dc99af4f151a0fe80c5025554d12947f894291060d3350f1866cc23dd1afe",
+      "status": "success",
+      "block": "21",
+      "gas": "126837",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "2",
+            "outcome": 0,
+            "isBuy": false,
+            "input": "980390",
+            "output": "480391",
+            "fee": "0",
+            "revision": "4",
+            "remainingShares": "0",
+            "remainingBasis": "0",
+            "realizedPnlDelta": "-19609",
+            "cashAfter": "99960782"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x00e90a54b394c7d28ab654bbdb0d677dd7aa61c4786dd78b81020cf736817778",
+      "status": "success",
+      "block": "25",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xcccb1ec95f879ddaf4361c7de39e73735895dc76a06b3a7299fd6bdf7208bd7c",
+      "status": "success",
+      "block": "26",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xd97df32cfe1e384a441e32dbab20f25387a081afb716d98724614728ee018d83",
+      "status": "success",
+      "block": "27",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x77406c34d18d58dba6faa07dcfdf6f88d2e9300d5535b556b63e2576709748e0",
+      "status": "success",
+      "block": "28",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x0ec361041f57e253bcc1ad4b4d6e82713e76d498e5c562e52f61c927cc9551b1",
+      "status": "success",
+      "block": "29",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xc5deffd2cf1c499b78e14a9c36c6fa27d1a2655b29562264418826d9a6f2e345",
+      "status": "success",
+      "block": "30",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0xfa2c5d92f11f07de081578b12ee7575c8b9f8d35e87dd67781f47121cf2dc068",
+      "status": "success",
+      "block": "31",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793036367",
+              "closeAt": "1793036667",
+              "resolveAfter": "1793036667",
+              "resolutionDeadline": "1793036967",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xe384f9ec90f9b9e77100b5c14a1c367c830a3fa127d58872259caea35548033e",
+      "status": "success",
+      "block": "32",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+              "sequencer": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0xe4ff7922f5808af95b196421637fc639cb1137c8664ea138a6870e99bf4bdc5a",
+      "status": "success",
+      "block": "33",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x61428ab7565190d6b789c3637c89e672158e3154b4b98b7812a5b658bf45e664",
+            "budget": "100000000",
+            "endsAt": "1793037667"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793036287",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xa98d5ca1374e9ee7c6f2295212f9b5a85fffeac27a0a7eed588d704c68c1daa1",
+      "status": "success",
+      "block": "34",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xca67bd5de57c5d11a21198740db3ec7ad74af805dde3e6899927ca0341ed549f",
+      "status": "success",
+      "block": "36",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x75d3d6037f36c56f53829554bc93785321e9c6bdc16130c92048ba3e7c0d4ce3",
+      "status": "success",
+      "block": "37",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0xad3c112ba30fd01d8f574af575db23cee7c9034cb1537d9081cddbec79370faf",
+      "status": "success",
+      "block": "38",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xe362d77e98fbb7e206f9069c050fce68048503aa6689f3219eaddd8aa351eb9d",
+      "status": "success",
+      "block": "39",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x8acc3a0f8af181672772b8b0dc1bd601f98241fa8f2466c7676d758d16e59449",
+      "status": "success",
+      "block": "41",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xc519f4d24cd8b6e79f857d174ae84e5186acf06bae40cee20a52f01666724827",
+      "status": "success",
+      "block": "45",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xc42b106f6c6c8b64fdfcac24acf5e58490931c69366bd5fe54c7a83e344c953c",
+      "status": "success",
+      "block": "46",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x955a4fcc2f83d094f19b666619dc8bd28d03d057556002a99d4d10602c687e75",
+      "status": "success",
+      "block": "47",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xeec903d1fddfd7331593c245a50e9860782f8a0eceb7686dc577eac9c6cbe42d",
+      "status": "success",
+      "block": "48",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x5caa3db60a66d1f320f0ea9fddc9210c1ad6b1c0dab8be19949360c6ceb0bb0d",
+      "status": "success",
+      "block": "49",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x698b8b049e3c0b7fb2d6ebccd24373ab2efb36760ed27223ad28eebb0bd37e76",
+      "status": "success",
+      "block": "50",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x187bd6400d4f0dcc3102a890b6123e047619b3d6f418d397156d4db199d07540",
+      "status": "success",
+      "block": "51",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793036766",
+              "closeAt": "1793037066",
+              "resolveAfter": "1793037066",
+              "resolutionDeadline": "1793037366",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x481724f1e6a8a03c8c842e926cf723c82f9452027889a3c24019ac6c730359e5",
+      "status": "success",
+      "block": "52",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+              "sequencer": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x28c15e1766faa9c86c6fafc818ed0c34419d0ce9dd3d172adc339d1347d7966e",
+      "status": "success",
+      "block": "53",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0xf05ff5de96b638932b0114123f3d7f682e91bc9817ef93eb7edcfa46801bc4b8",
+            "budget": "100000000",
+            "endsAt": "1793038066"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793036686",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x30ddf24f1969e6e55051ec7fea4a93fdb5aa05053487e572feb10d45d97c462f",
+      "status": "success",
+      "block": "54",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x6332306c75ff7bccb7995b3a2ec544f704dd42d8eda3dc5922637baee6074535",
+      "status": "success",
+      "block": "56",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x13f8681c1886ca7839709756d733385463f2a5ebc1e3acaabb58c6193f19b0c3",
+      "status": "success",
+      "block": "57",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0xb56911cc0d34e88a4a8eaf8c1f8cd81678ba93fced23dc914d35fb6ec71f5aec",
+      "status": "success",
+      "block": "58",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "buy",
+      "hash": "0xcbc635c785b1e54c735947739197713f66270aa3272632298184010918ce82d1",
+      "status": "success",
+      "block": "59",
+      "gas": "161323",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1960780",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1960780",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setPaused",
+      "hash": "0xb2d5c04597dfd4af48805ea66e743189fe85949dda01a3971146938b52b8d0ee",
+      "status": "success",
+      "block": "60",
+      "gas": "48449",
+      "events": [
+        {
+          "eventName": "TradingPauseChanged",
+          "args": {
+            "marketId": "0",
+            "paused": true
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setPaused",
+      "hash": "0xc3f31964e1263b88da9fb5ed5511e69c95570c97cfc78fdad912437f4927d121",
+      "status": "success",
+      "block": "61",
+      "gas": "26573",
+      "events": [
+        {
+          "eventName": "TradingPauseChanged",
+          "args": {
+            "marketId": "0",
+            "paused": false
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x79d5be0d98151c7198e407f244b7990ab9a2ecfdce1815f139840c03a9b0b749",
+      "status": "success",
+      "block": "65",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x0db2e8da638100ee47a635f687998c2c1f6fd9724399fa3161aad164f27ca0aa",
+      "status": "success",
+      "block": "66",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x581ed34514a0d234dc9785456397528e0f9eeadc25c3074e9973304e9c377838",
+      "status": "success",
+      "block": "67",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xa91017de6b1e23eed422007ca34d56fa935f2e58021fc0c00afc90aa2338991b",
+      "status": "success",
+      "block": "68",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xce87b4b36b1008471faabb17f6aabc3d71f891a417d5b42fff657c073feffab0",
+      "status": "success",
+      "block": "69",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x3304b88421bbf60272d2fe5ca3eb511bbf646d50fee33c4b93728ef3e87e0d33",
+      "status": "success",
+      "block": "70",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x26a4e8b9e4e52b46828ffbb6479484a986d2a2ade23efcdb588b2b81429a7be0",
+      "status": "success",
+      "block": "71",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793036880",
+              "closeAt": "1793037180",
+              "resolveAfter": "1793037180",
+              "resolutionDeadline": "1793037480",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x521c920af2f687469928ccac915f3edde5198eda83fbd0f944883560ab4ada11",
+      "status": "success",
+      "block": "72",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+              "sequencer": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x65ba61e32232ce9b8fa3e67e4fcfa396c907306399aefa28b5ad71274e6d88b7",
+      "status": "success",
+      "block": "73",
+      "gas": "167832",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x6eb6f9c5a20a62ccbd20514521eda7ab69bcef6d116962b38be1c4e6d604deb9",
+            "budget": "100000000",
+            "endsAt": "1793038180"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793036800",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x8759f6d0ccec11b0480aaab5e3e31d132926e7c1343c04806ca2af3b77a384b2",
+      "status": "success",
+      "block": "74",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x34e794a3234f097ec52d534926d548c6a19190e356b1aab228c322361bb1fee9",
+      "status": "success",
+      "block": "76",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0xe3365e4a35829574f2da56614375d2cda6bf7186900b63a41a3433db52d29ab7",
+      "status": "success",
+      "block": "77",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x732197b78087a50def6ccba8f421bc145b94a55259a324cf3c380403b69f9ec1",
+      "status": "success",
+      "block": "78",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x8a07c77fafcc4de15fa3a89808822f6af0cac4efa6d3c748787c552bb655eb0e",
+      "status": "success",
+      "block": "80",
+      "gas": "71479",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x0b7d5f7d58a31cf9be7a243cb5357d1538c285388520a96b007d3a17caf17300",
+      "status": "success",
+      "block": "81",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xf30d247a334be924b350662c9899c46acd9a90100e18115329e7aa1ade330069",
+      "status": "success",
+      "block": "82",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x39d7f0a60f0b6b05123e1b068cc59911507769c1ebe7b39c42681d0e6a7bcc85",
+      "status": "success",
+      "block": "83",
+      "gas": "71107",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xf5b9738037f1aee713a98fcc09694bc0c4c187474ca159e64f85011dee251ccf",
+      "status": "success",
+      "block": "84",
+      "gas": "51195",
+      "events": []
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xf52ab303761a2a7ae6656af6207774d7b6385ec4afb0eb23418594059e330384",
+      "status": "success",
+      "block": "88",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x514e370744e8bf832b932badda75cec45fbd5e778268ae89df108e5fcd3710f6",
+      "status": "success",
+      "block": "89",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x78e52b00cf5ddf09d2f6eb765bb4fe39af1ed48071f8a7fb078d10da66e0f4cb",
+      "status": "success",
+      "block": "90",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x9a6a59b0e60902dbe3ba3dde20d04b204a2bf9bf14c4749d31702b113f3732e1",
+      "status": "success",
+      "block": "91",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x9ed3d68a7872bcc4d346bac6a7a0831fce1eb82d25cbd9f92303a4e5d7e2a008",
+      "status": "success",
+      "block": "92",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x293498f165432be183d2bbcc4d408b6f51afe4b9b16113ed3de5b48574e198be",
+      "status": "success",
+      "block": "93",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x2c1826f0a489c0d0d1761e3bde35defdfd02ce7571ee5b4d5f048295cb97b65f",
+      "status": "success",
+      "block": "94",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037027",
+              "closeAt": "1793037327",
+              "resolveAfter": "1793037327",
+              "resolutionDeadline": "1793037627",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x74c791c28a3ae2c24124278efff0b85f3aca284da37335b43906ad0580b8b875",
+      "status": "success",
+      "block": "95",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0xb66dd956010030c979c7d6ddec1a5987e4e197a7fb9aac54a1e037ed2dfa9ee7",
+      "status": "success",
+      "block": "96",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x43f28f53cec4defad34260d0581299f7d1be21b838b6eed7eb5d38789d180fd7",
+            "budget": "100000000",
+            "endsAt": "1793038327"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793036947",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xad243c24ddba14fd2d7632a58146c031f5d3f68c3bb1fa7cc90f57e8a9c0774a",
+      "status": "success",
+      "block": "97",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x1d6961723cdb216644c52d9d4b5dab849114a197e37ea4126bb9f314660827c5",
+      "status": "success",
+      "block": "99",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0xeef2a42e5e7bc7553d70c16cc8212f6508853434023a61e664addeedf4f70146",
+      "status": "success",
+      "block": "100",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0xd4db1ed531d97e1d67b7d023d6e7d3d85e0df6c4014ce60236e7e897daa09d02",
+      "status": "success",
+      "block": "101",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x1af4ab2e0265c3faf4d5b446259144a72ff3cce77a5aac52e4266a35e7282390",
+      "status": "success",
+      "block": "102",
+      "gas": "186535",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "2",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037130",
+              "closeAt": "1793037430",
+              "resolveAfter": "1793037430",
+              "resolutionDeadline": "1793037830",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x8b7b2fdb81b34c510060ac9aa0b501771ec198ab24cbd25ce302de1fd1f3663d",
+      "status": "success",
+      "block": "103",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "2",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0xf91e4216016af3046c0dc0a459686c9c79f9f9e94e0113911b2adb3cd63398de",
+      "status": "success",
+      "block": "104",
+      "gas": "186535",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "3",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037132",
+              "closeAt": "1793037432",
+              "resolveAfter": "1793037432",
+              "resolutionDeadline": "1793037832",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xa7269686a61057334f1346ce04ee37285e9c2a1ff5edf1ffe568eacd600ae7b6",
+      "status": "success",
+      "block": "105",
+      "gas": "186877",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "3",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x4554480000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0xd62fe786dd971115dac14aeb55e1bd6bb7c54fa2935d7400d429676873ac6a95",
+      "status": "success",
+      "block": "106",
+      "gas": "186535",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "4",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037134",
+              "closeAt": "1793037434",
+              "resolveAfter": "1793037434",
+              "resolutionDeadline": "1793037834",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xa618ad69f9978ae3d1eedc98516b5704512fab3ad97326fbeb2b5df9f92ca40e",
+      "status": "success",
+      "block": "107",
+      "gas": "186909",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "4",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x534f4c0000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x1136b2674bf72342a8dd0e37aec2f167cda7f16c3c0dc0cf439a5388ee3e6494",
+      "status": "success",
+      "block": "108",
+      "gas": "186535",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "5",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037136",
+              "closeAt": "1793037436",
+              "resolveAfter": "1793037436",
+              "resolutionDeadline": "1793037836",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x97ff58404f91cd3a368eee6dc9b633bf2e7218e4347999ce42b956019fbb25d9",
+      "status": "success",
+      "block": "109",
+      "gas": "186941",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "5",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x5852500000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0xca277f31cff3b45cb1d7ad35e24b53e8db9015434c42da32f0d7df9eb28733c2",
+      "status": "success",
+      "block": "110",
+      "gas": "186535",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "6",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037138",
+              "closeAt": "1793037438",
+              "resolveAfter": "1793037438",
+              "resolutionDeadline": "1793037838",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xae7513370b71a30be0e18ea4746a49a9341fc5b604e085b5c0da3118b2ea427b",
+      "status": "success",
+      "block": "111",
+      "gas": "186973",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "6",
+            "policy": {
+              "feed": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+              "sequencer": "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43",
+              "asset": "0x424e420000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xfb9093d727aa534a61e68b70db02791a1970ae860be45e7d581f521b4e90cbfe",
+      "status": "success",
+      "block": "115",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x07e9944de9636edb34181ff08e5e34b09147ef96a05ad6db6f1814e3f3a9d62e",
+      "status": "success",
+      "block": "116",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xe5cb49085c31a6c2e0bef4fb5ab5e84f5a8f9a4fbed733c93ecedf15201d0f2a",
+      "status": "success",
+      "block": "117",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x3fb322e9f6bb2e2588e6876d23d0827bbb8b894cfd1f9ca29ce456347bfe2332",
+      "status": "success",
+      "block": "118",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x02aa974a0d4cf043e7d6bbc7cca6d9e8e7b57b59bad535af4134d9ea3acd43b8",
+      "status": "success",
+      "block": "119",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x1c4cb7a432416a97088732f9bb3e53b732ae85fa43d1f22a09fb08f16e304622",
+      "status": "success",
+      "block": "120",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x888e9c598dc2eefee4be79f5baee7078b66805c4e4d7624794616bc760c6b9ea",
+      "status": "success",
+      "block": "121",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037148",
+              "closeAt": "1793037448",
+              "resolveAfter": "1793037448",
+              "resolutionDeadline": "1793037748",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0xdc14b076805ea59e3cd8cb7d0af9d259f4fc52bd07993f039e01a3c5632abb93",
+      "status": "success",
+      "block": "122",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0xf953b3A269d80e3eB0F2947630Da976B896A8C5b",
+              "sequencer": "0xAA292E8611aDF267e563f334Ee42320aC96D0463",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x77a7b3d13fa976ce5c74616c70bfb7831e876f377ebc9afe71f671b1274497fe",
+      "status": "success",
+      "block": "123",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0xde19129c63ec66cb11c9094b558ab6105f8e938856b4ecdae280a447e89ba85f",
+            "budget": "100000000",
+            "endsAt": "1793038448"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793037068",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xb29a9a6cfad76e50605e972d2961cc35493dd639a7766dfb4a0a5dc25bfc612e",
+      "status": "success",
+      "block": "124",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xff28736d5761e98ac5a9ce53ae82be863a33ee3c11b603a7c0bbdb2888d63678",
+      "status": "success",
+      "block": "126",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0xa42910385f4c05826a438db0b0016a9e13f57e14234f2e270ce222d26f13c023",
+      "status": "success",
+      "block": "127",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x169ff3a308945d2bd7bc4c01e4354739f4ef47ae00e8d60e9922f9a5eb6b906e",
+      "status": "success",
+      "block": "128",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "buy",
+      "hash": "0x83c1c5ab88127a612fa493d862ddc00461e38f23e115a479baa93763c13c1fc0",
+      "status": "success",
+      "block": "129",
+      "gas": "161323",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1960780",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1960780",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x1804a3fb63b3cb1edce1d92940e8e90f799bad3b73a3e51f8f70d2a75340e245",
+      "status": "success",
+      "block": "131",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xa66c5ace7312543289fbd532e3c0a30c4c3e13fb3ba894c4bc78471402088899",
+      "status": "success",
+      "block": "133",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "proposeFromFeed",
+      "hash": "0x92bc23432b4ba8936f963b54baf4a695a45e673a6cdb72f56765a7f00e7d4f40",
+      "status": "success",
+      "block": "134",
+      "gas": "128935",
+      "events": [
+        {
+          "eventName": "ResultProposed",
+          "args": {
+            "marketId": "1",
+            "winner": 0,
+            "voided": false,
+            "evidenceHash": "0x9f62cb79cb4d4a54c32a94adbbd71606c47dbc92bba55bc92074206b41028e9b",
+            "challengeUntil": "1793037481"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "finalize",
+      "hash": "0x59b1c874f6285ce9e3ff85e7da81fac63b03e79a2ad105f088e2fec6bb96e956",
+      "status": "success",
+      "block": "136",
+      "gas": "74539",
+      "events": [
+        {
+          "eventName": "ResultFinalized",
+          "args": {
+            "marketId": "1",
+            "winner": 0,
+            "voided": false,
+            "evidenceHash": "0x9f62cb79cb4d4a54c32a94adbbd71606c47dbc92bba55bc92074206b41028e9b"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "settleFor",
+      "hash": "0x11bfc45c17fbd83f4c83e33316238cc225d046d694f408b797df1f98b88f7b1c",
+      "status": "success",
+      "block": "137",
+      "gas": "105751",
+      "events": [
+        {
+          "eventName": "PositionSettled",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "payout": "1960780",
+            "realizedPnlDelta": "960780",
+            "cashAfter": "100960780"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x5da90f2b3837c0ed62c6230327deafcf76216912ba6065fcd1cdfbec72548b23",
+      "status": "success",
+      "block": "141",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x3835124c6d38dd75f6245764db0cbdbdd3b9d372e6604347596fd2a8bdcef4e0",
+      "status": "success",
+      "block": "142",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x58cfeec2d1640e1263d143c3d51f304be5e27967c336f689ec8b4477187af444",
+      "status": "success",
+      "block": "143",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xdbc94b89a99218a6e382950a564ae17aee7ac144e01a406f465b94770ff1bd99",
+      "status": "success",
+      "block": "144",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x1ab8c200fd7e0691f29712de84f9279be0977b158f60b9d11ca66d1feddda90b",
+      "status": "success",
+      "block": "145",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xf9dc089799869d7b9ea673143293c1a84251bd5bac0c01b7cb7aaa7b457b3491",
+      "status": "success",
+      "block": "146",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x847987da767a300586436b193027a436b745f3b6a5dc9a913ec0fe5d2723abd5",
+      "status": "success",
+      "block": "147",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793037591",
+              "closeAt": "1793037891",
+              "resolveAfter": "1793037891",
+              "resolutionDeadline": "1793038191",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x7fc3c83ef17118dbf60c6ae6d51804adddbaf8092eded316ee9c3fdeb28e415b",
+      "status": "success",
+      "block": "148",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x3347B4d90ebe72BeFb30444C9966B2B990aE9FcB",
+              "sequencer": "0x3155755b79aA083bd953911C92705B7aA82a18F9",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x4d1f30fb3bd021782c052d090f08e7c0334b0e65ffe5cf4350f1f0c8352eb7eb",
+      "status": "success",
+      "block": "149",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x1a31f2dab15942a6ec8c5b76894c1a62eb370e30e02804f7434d1b5cf85150dd",
+            "budget": "100000000",
+            "endsAt": "1793038891"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793037511",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x75e77d8f32447f949a2ec968e7991c1b6c3e678095f9d488dec392481cee6995",
+      "status": "success",
+      "block": "150",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xe710fa542a7de25e8268a15b4f08801407346b7c04389127f8c02ab5af9ef66b",
+      "status": "success",
+      "block": "152",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x57ebd8fb5d5bb4114f84f2c157a835f6e4e4ac9a2585343578bae8f59b325cc4",
+      "status": "success",
+      "block": "153",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x6c19357de4d34a8132a0991ad7053476dbc8cc81dd6d0b5d1043d0deb8a4aa41",
+      "status": "success",
+      "block": "154",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "buy",
+      "hash": "0x7418c854697ea2483e6cb90d3bf8f29caac9e2fc76979fa00ccae54df6549a57",
+      "status": "success",
+      "block": "155",
+      "gas": "161323",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1960780",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1960780",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x8f446d3377ab463f8030348786aa94caf47670b65d62f77e743b7b86422813b4",
+      "status": "success",
+      "block": "157",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "timeoutVoid",
+      "hash": "0x1d2bb2154e65bf106e8de081680ac71d8b67201bac9e5c18ec4172b6d94ee5a9",
+      "status": "success",
+      "block": "159",
+      "gas": "71311",
+      "events": [
+        {
+          "eventName": "ResultFinalized",
+          "args": {
+            "marketId": "1",
+            "winner": 0,
+            "voided": true,
+            "evidenceHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "settleFor",
+      "hash": "0xda7d4ababc8cf4006bfa7d48cc7a73272f300b2a479df689b767b65f885c3beb",
+      "status": "success",
+      "block": "160",
+      "gas": "106745",
+      "events": [
+        {
+          "eventName": "PositionSettled",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "payout": "980390",
+            "realizedPnlDelta": "-19610",
+            "cashAfter": "99980390"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x56c9bb2ff308bdc62a626b881516e23a7de270775d878a9db2fc7277621fec8d",
+      "status": "success",
+      "block": "164",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x51021d1c47ced1c41cf9948664ea6b51454d707510bf2f323c2872bb04721363",
+      "status": "success",
+      "block": "165",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xe2d09cf5c5e9c9ca619cc0d1df6ec9f3fdd6398d1c17a91369015c30d84f5883",
+      "status": "success",
+      "block": "166",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x6b4b9e077e2a0323534f3477e5be29831f938b77ae814c7cd90c5618b47ac8f1",
+      "status": "success",
+      "block": "167",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xcb90f8600c514c7cd63c0efc757a1370459db3256721e39a2f01c986cb4dcc89",
+      "status": "success",
+      "block": "168",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xe8ce77212b289a805473b62c14ef4d19b4bff7e279cb14ecd83671a0f4654cf2",
+      "status": "success",
+      "block": "169",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x63bccdede4a3da3443033a65c3c175797f45d05e115be3bc8641a988a2a616be",
+      "status": "success",
+      "block": "170",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793038301",
+              "closeAt": "1793038601",
+              "resolveAfter": "1793038601",
+              "resolutionDeadline": "1793038901",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x09dbbf3e06aed5fe07bd0aa2b86f440e698eeb82929ed18d54172a251caf8802",
+      "status": "success",
+      "block": "171",
+      "gas": "186833",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x40918Ba7f132E0aCba2CE4de4c4baF9BD2D7D849",
+              "sequencer": "0xF32D39ff9f6Aa7a7A64d7a4F00a54826Ef791a55",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0xf8238be77e7df3e613cf06736c0e59f31861c8bf8cf50e8db845cac201c20606",
+      "status": "success",
+      "block": "172",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x920b0217bb5fc79ce43afa8db59af722206409e93a036112eea7e0e55c0a4376",
+            "budget": "100000000",
+            "endsAt": "1793039601"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793038221",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x6b2da9207dbdb6d8ab72e8aa968ad65bd3453994fb158d59cbc74d5308a4f1b3",
+      "status": "success",
+      "block": "173",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0xa71eef620c7cf984a207028d96060f0eef4a8b9badcf7f7a86af6c32b0c03332",
+      "status": "success",
+      "block": "175",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x47365f73cfe14cbd1b373e823dbb033c4013d2a0ab189bbd8edc67c5abc94b41",
+      "status": "success",
+      "block": "176",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x81e5956551165234e9dbcfb3df79834d771b443e61cb8623019f2981fc2821bd",
+      "status": "success",
+      "block": "177",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setCampaignState",
+      "hash": "0x6d38851f649637da527f78d78b1a87050f7ed8d33bdd4a3391e96d209a56ec10",
+      "status": "success",
+      "block": "178",
+      "gas": "51106",
+      "events": [
+        {
+          "eventName": "CampaignState",
+          "args": {
+            "campaignId": "1",
+            "paused": true,
+            "cancelled": false
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setCampaignState",
+      "hash": "0xb9b2079f69cacc1a77913abf7acfd5dbb10be0e2b09e80fafe085561ff7ee367",
+      "status": "success",
+      "block": "179",
+      "gas": "38844",
+      "events": [
+        {
+          "eventName": "CampaignState",
+          "args": {
+            "campaignId": "1",
+            "paused": false,
+            "cancelled": true
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x68247507f7c9d9964bd1f938d9a2ba92c6d926777dbb5ff2e184b8b2a3462e29",
+      "status": "success",
+      "block": "183",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x266554103d743fce425223a14d6ebaef25f19cc454d6a4cf305ba5c1ddf851d9",
+      "status": "success",
+      "block": "184",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x7d4df9c2c462d70cdb31ceb5a369f0b2cb878becf9074024f2943ebaf1726854",
+      "status": "success",
+      "block": "185",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xf951b7c58bf128186afe28121882b16044be33d9ea39d6fe9fe2c4158d95b9d3",
+      "status": "success",
+      "block": "186",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xec64f9792f74f27aade47b3dbc125044acd2977c03b02dabb7d2532fdaf48871",
+      "status": "success",
+      "block": "187",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0xe73c3060938414c7aeee5689bd35f0dd0aee6d4478e0a33c1290f355af26975c",
+      "status": "success",
+      "block": "188",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x3c7a932634ba98faffa42bef89940a28a2cfbcdaa492ace2ee0f48cf3a410f51",
+      "status": "success",
+      "block": "189",
+      "gas": "237859",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793038414",
+              "closeAt": "1793038714",
+              "resolveAfter": "1793038714",
+              "resolutionDeadline": "1793039014",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "9999000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x6cb184b41cccc67b9a05071857f46b9e33778d54504eaf8cf1a4adc18d245232",
+      "status": "success",
+      "block": "190",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0x6C2d83262fF84cBaDb3e416D527403135D757892",
+              "sequencer": "0xFD6F7A6a5c21A3f503EBaE7a473639974379c351",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0xccb593d2a1232558eefe14fec39649e88d6ccb40f2ba58c0b1b16242e5f71ffa",
+      "status": "success",
+      "block": "191",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0x726a5fe7b14470aaff04c7794341cbcc2c86b393d2a68d1942de58b172690f8b",
+            "budget": "100000000",
+            "endsAt": "1793039714"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793038334",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x7a44315035ce523f9c60eb8a2f3ea885fa43aedc2f34078bd86e0ef4478261f9",
+      "status": "success",
+      "block": "192",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x6598936bdb87d02a9951c0d341d63efee35d9e23c0ed8413167c26c8fe2ce805",
+      "status": "success",
+      "block": "194",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0x973a7bdc9e9ed3db6192d8217f1cd83f92071614fa5acbc5fb9d84c717b8236e",
+      "status": "success",
+      "block": "195",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x9536d566395bb89c57bc0819f146af1f69f757770577e2937c3bae75a5a67d89",
+      "status": "success",
+      "block": "196",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0x238921197a16252f9a77672554aaeb56979a2abcc1f3611b931264933fbaa424",
+      "status": "success",
+      "block": "198",
+      "gas": "167832",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0xd2b21ee3fd619d8f32af2f1606ed003758faaa19b43eb822907b712a2a2d8af6",
+            "budget": "200000000",
+            "endsAt": "1793038618"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0xee11fb4ddd100f2a9fa2d2a0091d9cacb72255d42cfa7de18ba8a82fa09c941c",
+            "campaignId": "1",
+            "eligibilityHash": "0xdcea85269718d577fff994888069cacbea7e5ebf53509cdd59ad728f18dc194d",
+            "startsAt": "1793038438",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setCampaignState",
+      "hash": "0xda432eefbd72b8cf82bbb5e94a9f448fc7568877e03b29523aab4efd3ad417eb",
+      "status": "success",
+      "block": "199",
+      "gas": "51106",
+      "events": [
+        {
+          "eventName": "CampaignState",
+          "args": {
+            "campaignId": "1",
+            "paused": true,
+            "cancelled": false
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setCampaignState",
+      "hash": "0x63efd538b119c8e395008980aa505a3b9dd0198d2bfdad83116f7a40312047d3",
+      "status": "success",
+      "block": "201",
+      "gas": "29194",
+      "events": [
+        {
+          "eventName": "CampaignState",
+          "args": {
+            "campaignId": "1",
+            "paused": false,
+            "cancelled": false
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x49073bde2343a6d07f9061c0227b8fc04d3889b821090a1f1527db6c0fbf9249",
+      "status": "success",
+      "block": "202",
+      "gas": "127398",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "setCampaignState",
+      "hash": "0x19f367035b0e6721901d6f037a5435d7be707f21c760e9cc80a28d3b7bcc6a90",
+      "status": "success",
+      "block": "203",
+      "gas": "58744",
+      "events": [
+        {
+          "eventName": "CampaignState",
+          "args": {
+            "campaignId": "1",
+            "paused": false,
+            "cancelled": true
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xf32843e7833e648257d8b4180828f6d12e1379acd86f8107e48e7541fb594e3c",
+      "status": "success",
+      "block": "207",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x828634d95e775031b9ff576b159a8509d3053581a8c9c4d7d86899e0afcd882f",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xf0f8c8cf1a60a029592fc8b9b75053df0d26e6d969e66a0d450d494a89f582e6",
+      "status": "success",
+      "block": "208",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x55435dd261a4b9b3364963f7738a7a662ad9c84396d64be3365284bb7f0a5041",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xc05cf7ce9ab7a2d85be40e41004c47b620638a66903e2b3616cc32fd908e5295",
+      "status": "success",
+      "block": "209",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0x0d128f1b340bb3b499668c0159a7194f39382e81621cb23b6f30d958c2f800d5",
+      "status": "success",
+      "block": "210",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0x2125d1e225cadc5c8296e2cc1f96ee607770bf4a4a16131e62f6819937437c89",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "grantRole",
+      "hash": "0xb12c68caeabde9c5bbb60b4447ea07e60f5756780463ad18333df1b301f430df",
+      "status": "success",
+      "block": "211",
+      "gas": "51306",
+      "events": [
+        {
+          "eventName": "RoleGranted",
+          "args": {
+            "role": "0xbb08418a67729a078f87bbc8d02a770929bb68f5bfdf134ae2ead6ed38e2f4ae",
+            "account": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x3d722e8d3c82343198002a92b48954aa4161af9dced04839d510b1c889b086f7",
+      "status": "success",
+      "block": "212",
+      "gas": "68295",
+      "events": []
+    },
+    {
+      "functionName": "createPool",
+      "hash": "0x3688bd1c308f48e3246eaea22861ed73a87dc4633371c9a00232affb6e541dfe",
+      "status": "success",
+      "block": "213",
+      "gas": "237835",
+      "events": [
+        {
+          "eventName": "PoolCreated",
+          "args": {
+            "marketId": "1",
+            "terms": {
+              "rulesHash": "0xb289b58477ac456fdfd7a1fcdafee06379f7201e3642f6622aee89800379faba",
+              "openAt": "1793038550",
+              "closeAt": "1793038850",
+              "resolveAfter": "1793038850",
+              "resolutionDeadline": "1793039150",
+              "challengePeriod": 30,
+              "seed": "10000000000",
+              "reserveFloor": "100000000",
+              "maxCashIn": "100000000",
+              "maxSharesIn": "500000000",
+              "maxPosition": "1000000000",
+              "feeBps": 0,
+              "outcomes": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configurePricePolicy",
+      "hash": "0x6991644866ff5abc0641f5b5448e83efa90daeab96c8bab125cff999d324e9e6",
+      "status": "success",
+      "block": "214",
+      "gas": "186845",
+      "events": [
+        {
+          "eventName": "PricePolicyFrozen",
+          "args": {
+            "marketId": "1",
+            "policy": {
+              "feed": "0xefAB0Beb0A557E452b398035eA964948c750b2Fd",
+              "sequencer": "0xaca81583840B1bf2dDF6CDe824ada250C1936B4D",
+              "asset": "0x4254430000000000000000000000000000000000000000000000000000000000",
+              "maxAge": 30,
+              "boundaryTolerance": 30,
+              "sigmaPpm": 1000,
+              "spreadPpm": 10000,
+              "impactPpm": 10000,
+              "skewPpm": 1000,
+              "minProbabilityPpm": 10000,
+              "minSpot": "1",
+              "maxSpot": "1000000000000000",
+              "tieVoids": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "configureMonthlyCampaign",
+      "hash": "0xb4eeddaa9ddc4f297cd090de5dc23f77dd2e487843cbe49df23885d04f5cf9ac",
+      "status": "success",
+      "block": "215",
+      "gas": "167844",
+      "events": [
+        {
+          "eventName": "CampaignConfigured",
+          "args": {
+            "campaignId": "1",
+            "root": "0xf077440fc9c50e44b9b43d57ac35ca035709e18c773bce47c4015e122b90011d",
+            "budget": "100000000",
+            "endsAt": "1793039850"
+          }
+        },
+        {
+          "eventName": "MonthlyCampaign",
+          "args": {
+            "month": "0x28924e6e5fdc41758f3b8b720146bb2044fa9c48da6690642cae968befbcd0dd",
+            "campaignId": "1",
+            "eligibilityHash": "0x056ad958902b60b6e2903a66a48f860e87463ce1ca37dde660811e557d5af32c",
+            "startsAt": "1793038470",
+            "maxPerWallet": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "push",
+      "hash": "0x801e6a638fe2bd9b9148b4cdf6fab7b84f8a1de529bb919ef5a806dd380f671e",
+      "status": "success",
+      "block": "216",
+      "gas": "88255",
+      "events": []
+    },
+    {
+      "functionName": "push",
+      "hash": "0x95e83d541f49405f3eb17351e89cab91b78988867ea6c78ad519d6eb1ea0b04d",
+      "status": "success",
+      "block": "218",
+      "gas": "71155",
+      "events": []
+    },
+    {
+      "functionName": "captureStart",
+      "hash": "0xc6df02d54742dde1a5362c168ffb220929ad123990b827f478b57b96bcb0882e",
+      "status": "success",
+      "block": "219",
+      "gas": "122563",
+      "events": [
+        {
+          "eventName": "StartPriceCaptured",
+          "args": {
+            "marketId": "1",
+            "round": "2",
+            "price": "10000000000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "claimGrant",
+      "hash": "0x422226370d9bfe8ff0b572d8365fd2100a6c54b619a163144fd537b023b89a18",
+      "status": "success",
+      "block": "220",
+      "gas": "93198",
+      "events": [
+        {
+          "eventName": "VirtualGrant",
+          "args": {
+            "campaignId": "1",
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "amount": "100000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "buy",
+      "hash": "0x1165dd75ddc654f1853b718a8a02bc1bf088f2b5392d164110cf27c0ebea8199",
+      "status": "success",
+      "block": "221",
+      "gas": "161323",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "0",
+            "outcome": 0,
+            "isBuy": true,
+            "input": "1000000",
+            "output": "1960780",
+            "fee": "0",
+            "revision": "2",
+            "remainingShares": "1960780",
+            "remainingBasis": "1000000",
+            "realizedPnlDelta": "0",
+            "cashAfter": "99000000"
+          }
+        }
+      ]
+    },
+    {
+      "functionName": "sell",
+      "hash": "0x018baed9454c0f42fe216be838133fa022f42d189e028f55c1c942f6c4a58643",
+      "status": "success",
+      "block": "222",
+      "gas": "143937",
+      "events": [
+        {
+          "eventName": "TradeExecuted",
+          "args": {
+            "wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "marketId": "1",
+            "nonce": "1",
+            "outcome": 0,
+            "isBuy": false,
+            "input": "1960780",
+            "output": "960780",
+            "fee": "0",
+            "revision": "3",
+            "remainingShares": "0",
+            "remainingBasis": "0",
+            "realizedPnlDelta": "-39220",
+            "cashAfter": "99960780"
+          }
+        }
+      ]
+    }
+  ]
+}

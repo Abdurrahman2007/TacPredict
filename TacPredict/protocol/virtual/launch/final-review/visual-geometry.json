@@ -1,0 +1,202 @@
+[
+  {
+    "label": "before",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "geometry": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 61
+      },
+      ".tp-portfolio": {
+        "x": 16,
+        "y": 85,
+        "width": 358,
+        "height": 1490.953125
+      },
+      ".tp-summary": null,
+      ".tp-hero-card": null,
+      ".tp-wallet-card": {
+        "x": 32,
+        "y": 447.078125,
+        "width": 326,
+        "height": 173.5
+      },
+      ".tp-pl": {
+        "x": 32,
+        "y": 636.578125,
+        "width": 326,
+        "height": 411.6875
+      },
+      ".tp-results": {
+        "x": 49,
+        "y": 1203.265625,
+        "width": 292,
+        "height": 309.6875
+      },
+      "nav[aria-label=\"Mobile navigation\"]": {
+        "x": 0,
+        "y": 765.40625,
+        "width": 390,
+        "height": 78.59375
+      }
+    },
+    "errors": [],
+    "title": "Portfolio — TacPredict",
+    "horizontalOverflow": false
+  },
+  {
+    "label": "before",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "geometry": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 61
+      },
+      ".tp-portfolio": {
+        "x": 100,
+        "y": 93,
+        "width": 1080,
+        "height": 1446.96875
+      },
+      ".tp-summary": null,
+      ".tp-hero-card": null,
+      ".tp-wallet-card": {
+        "x": 750.390625,
+        "y": 220.796875,
+        "width": 405.609375,
+        "height": 262.78125
+      },
+      ".tp-pl": {
+        "x": 124,
+        "y": 507.578125,
+        "width": 1032,
+        "height": 445.296875
+      },
+      ".tp-results": {
+        "x": 149,
+        "y": 1123.375,
+        "width": 982,
+        "height": 327.59375
+      },
+      "nav[aria-label=\"Mobile navigation\"]": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "errors": [],
+    "title": "Portfolio — TacPredict",
+    "horizontalOverflow": false
+  },
+  {
+    "label": "after",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "geometry": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 61
+      },
+      ".tp-portfolio": {
+        "x": 16,
+        "y": 85,
+        "width": 358,
+        "height": 1490.953125
+      },
+      ".tp-summary": null,
+      ".tp-hero-card": null,
+      ".tp-wallet-card": {
+        "x": 32,
+        "y": 447.078125,
+        "width": 326,
+        "height": 173.5
+      },
+      ".tp-pl": {
+        "x": 32,
+        "y": 636.578125,
+        "width": 326,
+        "height": 411.6875
+      },
+      ".tp-results": {
+        "x": 49,
+        "y": 1203.265625,
+        "width": 292,
+        "height": 309.6875
+      },
+      "nav[aria-label=\"Mobile navigation\"]": {
+        "x": 0,
+        "y": 765.40625,
+        "width": 390,
+        "height": 78.59375
+      }
+    },
+    "errors": [],
+    "title": "Portfolio — TacPredict",
+    "horizontalOverflow": false
+  },
+  {
+    "label": "after",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "geometry": {
+      "header": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 61
+      },
+      ".tp-portfolio": {
+        "x": 100,
+        "y": 93,
+        "width": 1080,
+        "height": 1446.96875
+      },
+      ".tp-summary": null,
+      ".tp-hero-card": null,
+      ".tp-wallet-card": {
+        "x": 750.390625,
+        "y": 220.796875,
+        "width": 405.609375,
+        "height": 262.78125
+      },
+      ".tp-pl": {
+        "x": 124,
+        "y": 507.578125,
+        "width": 1032,
+        "height": 445.296875
+      },
+      ".tp-results": {
+        "x": 149,
+        "y": 1123.375,
+        "width": 982,
+        "height": 327.59375
+      },
+      "nav[aria-label=\"Mobile navigation\"]": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "errors": [],
+    "title": "Portfolio — TacPredict",
+    "horizontalOverflow": false
+  }
+]

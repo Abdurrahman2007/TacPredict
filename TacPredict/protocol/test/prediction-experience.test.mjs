@@ -17,15 +17,18 @@ test("all market types share the reference detail and trade screen", () => {
   assert.ok(page.includes("p.marketId === market.native?.marketId")); // portfolio RPC returns the chain-aware API market ID
   assert.ok(page.includes("p.chainId === market.native?.chainId"));
 });
-test("Sell retains owned-share execution and explicit approval acknowledgement", () => {
+test("virtual-only trade adapter replaces real asset approvals and native Sell", () => {
   const ui = src("components/prediction-amount-card.tsx"),
-    execution = src("lib/protocol/execution.ts");
-  assert.ok(ui.includes("placeLimitSell"));
-  assert.ok(ui.includes("!validSell || !ack"));
-  assert.ok(ui.includes("Limit price per share"));
-  assert.ok(ui.includes("No short selling"));
-  assert.ok(execution.includes("Insufficient owned outcome shares"));
-  assert.ok(execution.includes("Verified runtime bytecode mismatch"));
+    execution = src("lib/protocol/execution.ts"),
+    virtual = src("components/virtual/virtual-amount-card.tsx");
+  assert.ok(ui.includes("VirtualAmountCard"));
+  assert.ok(ui.includes("No real-USDC trading or funding"));
+  assert.ok(!ui.includes("placeLimitSell"));
+  assert.ok(execution.includes("rejectRealAssetTrading()"));
+  assert.ok(virtual.includes('"sell"'));
+  assert.ok(virtual.includes("prepareVirtual"));
+  assert.ok(virtual.includes("observeVirtual"));
+  assert.ok(virtual.includes("No real-money value"));
 });
 test("opening the app is direct and has no decorative intro overlay", () => {
   const shell = src("components/app-shell.tsx");

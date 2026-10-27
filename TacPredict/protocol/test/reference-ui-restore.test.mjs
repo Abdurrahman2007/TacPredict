@@ -17,9 +17,9 @@ test("price-only windows open a clearly non-native preview without executable od
   assert.ok(reference.includes("probabilityKnown: false"));
   assert.ok(!reference.includes("native:"));
   assert.ok(reference.includes("No executable quote or settlement contract"));
-  assert.ok(card.includes("deployment?.tradingEnabled"));
-  assert.ok(card.includes('market.native?.status === "OPEN"'));
-  assert.ok(card.includes("Date.parse(market.native.closeAt) > Date.now()"));
+  assert.ok(card.includes("props.market.virtual"));
+  assert.ok(card.includes("Virtual USDC trading unavailable"));
+  assert.ok(!card.includes("placeLimitBuy"));
 });
 test("all engine durations route correctly and hydration uses a stable placeholder", () => {
   assert.ok(src("routes/up-down_.$asset.tsx").includes("DURATIONS.includes(d)"));

@@ -1,3 +1,4 @@
+import { rejectRealAssetTrading } from "@/lib/virtual/product-policy";
 import {
   createPublicClient,
   createWalletClient,
@@ -25,6 +26,7 @@ import {
 import type { BookOrder } from "./read.functions";
 import { submitProtocolOrder } from "./orders.functions";
 export async function protocolClients(w: WalletState, d: ProtocolDeployment, newRisk = true) {
+  rejectRealAssetTrading();
   if ((newRisk && !d.tradingEnabled) || !w.provider || !w.address)
     throw Error("Verified trading deployment and connected wallet required.");
   const chain = d.chainId === 8453 ? base : baseSepolia;

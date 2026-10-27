@@ -1,6 +1,8 @@
-import { keccak256, toHex, type Address } from "viem";
+import { encodeAbiParameters, keccak256, toHex, type Address } from "viem";
 import type { Market } from "@/domain/markets/types";
 import { virtualAmmAbi } from "./abi";
+import { virtualPriceAmmAbi } from "./price-abi";
+import { assertFreshChainTime, assertFreshProjection } from "./guards";
 import { virtualRuntime, virtualConfig } from "./runtime.server";
 import { checkpoint, walletEvents, marketEvents } from "./database.server";
 import { projectWalletEvents } from "./receipt";
@@ -30,6 +32,13 @@ export async function readVirtualCatalogue(): Promise<{
   const block = await r.client.getBlock({ blockNumber: c.number });
   if (block.hash.toLowerCase() !== c.hash?.toLowerCase())
     throw Error("Virtual projection reorged; indexer reconciliation required");
+  const head = await r.client.getBlock({ blockTag: "latest" });
+  assertFreshChainTime(
+    head.timestamp,
+    BigInt(Math.floor(Date.now() / 1000)),
+    r.maxProjectionAgeSeconds,
+  );
+  assertFreshProjection(block.timestamp, head.timestamp, r.maxProjectionAgeSeconds);
   const markets: Market[] = [];
   for (const meta of r.markets) {
     const p = await r.client.readContract({
@@ -48,6 +57,42 @@ export async function readVirtualCatalogue(): Promise<{
       p.reserves.slice(0, p.terms.outcomes).reduce((a, v, j) => (j === i ? a : a * v), 1n),
     );
     const sum = weights.reduce((a, v) => a + v, 0n);
+    let up: bigint | null = null;
+    let pricingKnown = true;
+    if (r.deployment.model === "feed-v1") {
+      const { assertPricePolicy } = await import("./price-policy.server");
+      await assertPricePolicy(r, meta);
+      const policy = await r.client.readContract({
+        address: r.deployment.engine,
+        abi: virtualPriceAmmAbi,
+        functionName: "pricePolicies",
+        args: [BigInt(meta.id)],
+        blockNumber: head.number,
+      });
+      const getter = virtualPriceAmmAbi.find(
+        (a) => a.type === "function" && a.name === "pricePolicies",
+      )!;
+      if (
+        !meta.pricePolicyHash ||
+        keccak256(encodeAbiParameters(getter.outputs, policy)) !== meta.pricePolicyHash
+      )
+        throw Error("Frozen price policy does not match published rules");
+      if (!p.final_) {
+        if (head.timestamp >= p.terms.closeAt) pricingKnown = false;
+        else
+          try {
+            up = await r.client.readContract({
+              address: r.deployment.engine,
+              abi: virtualPriceAmmAbi,
+              functionName: "probability",
+              args: [BigInt(meta.id)],
+              blockNumber: head.number,
+            });
+          } catch {
+            pricingKnown = false;
+          } // Stale feed/unopened market: never invent an executable price.
+      }
+    }
     const history = await marketEvents(r.deployment.id, meta.id, c.number);
     if (!history.some((e) => e.name === "PoolCreated"))
       throw Error("Missing indexed virtual market creation");
@@ -79,8 +124,12 @@ export async function readVirtualCatalogue(): Promise<{
             : p.winner === i
               ? 100
               : 0
-          : Number((weights[i]! * 1000000n) / sum) / 10000,
-        probabilityKnown: true,
+          : up !== null
+            ? Number(i === 0 ? up : 1000000n - up) / 10000
+            : pricingKnown
+              ? Number((weights[i]! * 1000000n) / sum) / 10000
+              : 0,
+        probabilityKnown: p.final_ || pricingKnown,
       })),
       virtual: { deployment: r.deployment, onchainId: meta.id },
     });

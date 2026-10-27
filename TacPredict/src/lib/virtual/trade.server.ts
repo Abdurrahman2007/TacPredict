@@ -1,5 +1,6 @@
 import { TransactionReceiptNotFoundError, formatEther, type Address, type Hex } from "viem";
 import { virtualAmmAbi } from "./abi";
+import { assertPricePolicy } from "./price-policy.server";
 import { virtualRuntime } from "./runtime.server";
 import { virtualDb } from "./database.server";
 import { verifyTradeReceipt } from "./receipt";
@@ -21,6 +22,7 @@ export async function prepareVirtualTrade(
   if (!meta) throw Error("Unknown virtual market/outcome");
   if (!meta.resolutionSpec) throw Error("Market source policy not verified; trading blocked");
   validateResolutionSpec(meta.resolutionSpec, meta.category, meta.outcomes.length);
+  if (r.deployment.model === "feed-v1") await assertPricePolicy(r, meta);
   const { readVirtualAccount } = await import("./read.server");
   const projected = await readVirtualAccount(wallet);
   const amount = BigInt(input);

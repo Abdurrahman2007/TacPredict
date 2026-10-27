@@ -1,0 +1,13 @@
+{
+  "current": {
+    "errors": 469,
+    "warnings": 19,
+    "affectedFiles": 67
+  },
+  "baseline": {
+    "errors": 496,
+    "warnings": 19,
+    "affectedFiles": 70
+  },
+  "scope": "Full repository ESLint; not a clean lint gate. Baseline is unchanged prior review worktree."
+}

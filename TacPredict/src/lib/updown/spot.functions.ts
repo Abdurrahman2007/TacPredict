@@ -3,7 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import type { UpDownAsset } from "./window.mjs";
 
-const assetSchema = z.enum(["bitcoin", "ethereum", "solana", "bnb"]);
+const assetSchema = z.enum(["bitcoin", "ethereum", "solana", "bnb", "xrp"]);
 
 /** Real Coinbase one-minute candles and recent trades for the chart and price-to-beat. */
 export const getSpotWindowData = createServerFn({ method: "GET" })

@@ -7,6 +7,9 @@ export function compile(extra = {}) {
   const name = "VirtualAMM.sol";
   const sources = {
     [name]: { content: fs.readFileSync(path.join(root, "contracts", name), "utf8") },
+    "VirtualPriceAMM.sol": {
+      content: fs.readFileSync(path.join(root, "contracts", "VirtualPriceAMM.sol"), "utf8"),
+    },
     ...extra,
   };
   const result = JSON.parse(
@@ -46,14 +49,16 @@ export function compile(extra = {}) {
   return result.contracts;
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const artifact = compile()["VirtualAMM.sol"].VirtualAMM;
+  const contracts = compile();
   fs.mkdirSync(path.join(root, "artifacts"), { recursive: true });
-  fs.writeFileSync(
-    path.join(root, "artifacts/VirtualAMM.json"),
-    JSON.stringify(artifact, null, 2) + "\n",
-  );
-  console.log(
-    "VirtualAMM compiled (Cancun); runtime bytes:",
-    artifact.evm.deployedBytecode.object.length / 2,
-  );
+  for (const name of ["VirtualAMM", "VirtualPriceAMM"]) {
+    const artifact = contracts[name + ".sol"][name];
+    fs.writeFileSync(
+      path.join(root, "artifacts", name + ".json"),
+      JSON.stringify(artifact, null, 2) + "\n",
+    );
+    const bytes = artifact.evm.deployedBytecode.object.length / 2;
+    if (bytes > 24576) throw Error(name + " exceeds EIP-170");
+    console.log(name + " compiled (Cancun); runtime bytes:", bytes);
+  }
 }

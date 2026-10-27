@@ -112,3 +112,87 @@ export const getVirtualOperations = createServerFn({ method: "GET" })
       return virtualOperations();
     });
   });
+
+// Review-only campaign preview/save. Never signs, configures an onchain campaign or grants balances.
+export const previewVirtualCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        saveDraft: z.boolean().default(false),
+        version: z.number().int().min(1),
+        draft: z
+          .object({
+            month: z.string(),
+            startsAt: z.number().int(),
+            endsAt: z.number().int(),
+            eligibility: z.string().min(1).max(4000),
+            budget: atomic,
+            maxPerWallet: atomic,
+            allocations: z
+              .array(z.object({ wallet, amount: atomic }).strict())
+              .min(1)
+              .max(10000),
+          })
+          .strict(),
+      })
+      .strict()
+      .parse(v),
+  )
+  .handler(async ({ data, context }) =>
+    publicVirtualBoundary(async () => {
+      if (context.claims.aal !== "aal2") throw Error("Administrator MFA required");
+      const role = await context.supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", context.userId)
+        .eq("role", "admin");
+      if (role.error || !role.data?.length) throw Error("Administrator required");
+      const { virtualRuntime } = await import("./runtime.server");
+      const r = await virtualRuntime();
+      if (r.deployment.model !== "feed-v1")
+        throw Error("This deployment does not support scheduled, pausable monthly campaigns");
+      const { virtualPriceAmmAbi } = await import("./price-abi");
+      const [count, budget, reserved] = await Promise.all(
+        ["campaignCount", "grantBudget", "campaignBudgetReserved"].map((functionName) =>
+          r.client.readContract({
+            address: r.deployment.engine,
+            abi: virtualPriceAmmAbi,
+            functionName: functionName as
+              "campaignCount" | "grantBudget" | "campaignBudgetReserved",
+          }),
+        ),
+      );
+      if (count === undefined || budget === undefined || reserved === undefined)
+        throw Error("Campaign capacity unavailable");
+      const { previewCampaign } = await import("./campaign");
+      const preview = previewCampaign(
+        data.draft,
+        r.deployment.engine,
+        r.deployment.chainId,
+        (count + 1n).toString(),
+        Math.floor(Date.now() / 1000),
+      );
+      if (BigInt(preview.budget) > budget - reserved)
+        throw Error("Insufficient immutable contract grant capacity");
+      let draftId: string | null = null;
+      if (data.saveDraft) {
+        const { virtualDb } = await import("./database.server");
+        const saved = await virtualDb.rpc("virtual_save_campaign_draft", {
+          _deployment: r.deployment.id,
+          _month: data.draft.month + "-01",
+          _version: data.version,
+          _config: { ...preview, eligibility: data.draft.eligibility },
+          _actor: context.userId,
+        });
+        if (saved.error) throw Error("Campaign draft/audit could not be saved");
+        draftId = String(saved.data);
+      }
+      return {
+        preview,
+        draftId,
+        notice:
+          "Draft only. Rebuild against current campaign ID before any approved onchain publication.",
+      };
+    }),
+  );

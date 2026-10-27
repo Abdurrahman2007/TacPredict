@@ -74,7 +74,7 @@ test("1H is a display duration, not a silently enabled contract series", () => {
   assert.ok(!DURATIONS.includes(60));
   assert.ok(!POOL_DURATIONS.includes(60));
   assert.ok(src("components/up-down-section.tsx").includes("dense={!poolOn}"));
-  assert.ok(src("components/up-down-section.tsx").includes("POOL_DURATIONS.includes(minutes)"));
+  assert.ok(src("components/up-down-section.tsx").includes("const poolOn = false"));
   assert.ok(
     src("components/updown/updown-detail.tsx").includes("usePriceWindow(asset, w, nowMs, !poolOn)"),
   );

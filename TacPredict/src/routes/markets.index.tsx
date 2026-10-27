@@ -32,13 +32,14 @@ export const Route = createFileRoute("/markets/")({
       { title: "Markets — TacPredict" },
       {
         name: "description",
-        content: "Explore Football and Cricket prediction markets on Base with USDC.",
+        content:
+          "Explore Football and Cricket prediction markets on Base with non-redeemable Virtual USDC.",
       },
       { property: "og:title", content: "Markets — TacPredict" },
       {
         property: "og:description",
         content:
-          "Explore active prediction markets and explore outcomes in the Base USDC interface.",
+          "Explore active prediction markets and explore outcomes in the Base Virtual USDC interface.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -172,7 +173,7 @@ function MarketsPage() {
         </>
       )}
       <p className="mt-5 text-center text-[0.65rem] font-semibold text-muted-foreground">
-        Base Mainnet · Native USDC · Financial state from TacPredict contracts
+        Base · Virtual USDC · Non-redeemable on-chain accounting
       </p>
     </div>
   );
