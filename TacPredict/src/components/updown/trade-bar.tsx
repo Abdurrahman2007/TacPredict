@@ -20,11 +20,15 @@ export function UpDownTradeBar({
   reference,
   context,
   initialSide,
+  tradingAllowed = true,
+  settlementNote,
 }: {
   market: Market | null;
   reference: Market;
   context: IslandContext;
   initialSide?: "up" | "down" | undefined;
+  tradingAllowed?: boolean;
+  settlementNote?: string;
 }) {
   const [ready, setReady] = useState(false);
   const [navHeight, setNavHeight] = useState(80);
@@ -103,6 +107,8 @@ export function UpDownTradeBar({
               market={view}
               selected={selected}
               onSelect={setSelected}
+              tradingAllowed={tradingAllowed}
+              settlementNote={settlementNote}
             />
           </div>
         </DialogContent>

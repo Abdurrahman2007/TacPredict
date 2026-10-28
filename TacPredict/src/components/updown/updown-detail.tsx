@@ -39,6 +39,7 @@ import { spotShareOdds } from "@/lib/paper/spot-odds";
 import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, settlePaperMarket, usePaperLedger } from "@/lib/paper/ledger";
 import { paperOutcome } from "@/lib/paper/feed-v1-quote";
+import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
 function lookbackFor(needed: number) {
@@ -188,6 +189,7 @@ export function UpDownDetail({
   // Live share prices: feed-v1 (spot, strike, time remaining) — never stale feed ¢.
   const remainingSec = state === "live" ? Math.max(0, (w.end - nowMs) / 1000) : 0;
   const odds = spotShareOdds(shownCurrent, shownBeat, minutes, remainingSec);
+  const settlement = assetSettlementPolicy(asset, minutes);
   const paper = usePaperLedger();
   const referenceId = `reference-${asset}-${w.start}-${minutes}`;
   const paperVol = paperVolumeFor(referenceId, paper.trades);
@@ -400,6 +402,8 @@ export function UpDownDetail({
           reference={reference}
           context={island}
           initialSide={initialSide}
+          tradingAllowed={settlement.paperTradingAllowed && state === "live"}
+          settlementNote={settlement.label}
         />
       )}
     </div>

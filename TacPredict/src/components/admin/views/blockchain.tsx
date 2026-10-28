@@ -7,6 +7,7 @@ import {
   parseBlockchainRows,
   shortHash,
 } from "@/lib/protocol/admin-rows.mjs";
+import { VERIFIED_MAINNET_DEPLOYMENT } from "@/lib/protocol/verified-mainnet-contracts";
 import { useAdminSnapshot, useLiveChain } from "../admin-data";
 import { AddressLink, Badge, BASESCAN, Card, Loaded, Notice, PageHeader, Tile } from "../admin-ui";
 
@@ -29,6 +30,63 @@ export function BlockchainView({ view }: { view: string }) {
   }
 }
 
+function VerifiedSixContractsCard() {
+  const d = VERIFIED_MAINNET_DEPLOYMENT;
+  return (
+    <Card title="Verified Base Mainnet contracts (6)">
+      <p className="adm-caption">
+        Exact-match verified on BaseScan + Sourcify · deploy tx{" "}
+        <a
+          className="adm-link"
+          href={`${BASESCAN}/tx/${d.txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {d.txHash.slice(0, 10)}…
+        </a>
+        · block {d.deploymentBlock} · trading_enabled={String(d.tradingEnabled)} · Virtual paper
+        engine is separate and does not replace these.
+      </p>
+      <div className="adm-table-wrap">
+        <table className="adm-table">
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Address</th>
+              <th>BaseScan</th>
+              <th>Sourcify</th>
+              <th>Verified</th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.contracts.map((c) => (
+              <tr key={c.name}>
+                <td style={{ fontWeight: 650 }}>{c.name}</td>
+                <td>
+                  <AddressLink address={c.address} />
+                </td>
+                <td>
+                  <a className="adm-link" href={c.basescanUrl} target="_blank" rel="noopener noreferrer">
+                    Source
+                  </a>
+                </td>
+                <td>
+                  <a className="adm-link" href={c.sourcifyUrl} target="_blank" rel="noopener noreferrer">
+                    Exact match
+                  </a>
+                </td>
+                <td>
+                  <Badge tone="ok">{c.verifiedAt.slice(0, 10)}</Badge>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
 function ContractsView() {
   const snapshot = useAdminSnapshot("Blockchain");
   const live = useLiveChain();
@@ -39,11 +97,17 @@ function ContractsView() {
         subtitle="TacPredict contracts on Base."
         actions={<RefreshButton onClick={() => void live.refetch()} busy={live.isFetching} />}
       />
+      <VerifiedSixContractsCard />
       <Loaded query={snapshot} label="deployment">
         {(data) => {
           const { deployment } = parseBlockchainRows(data.rows);
           if (!deployment)
-            return <Notice tone="warn">No verified deployment is recorded yet.</Notice>;
+            return (
+              <Notice tone="info">
+                Database deployment row not loaded yet. The six verified contracts above remain the
+                canonical Mainnet addresses.
+              </Notice>
+            );
           return (
             <>
               <div className="adm-grid-tiles">
@@ -90,39 +154,6 @@ function ContractsView() {
                 operational/legal sign-off. Up/Down Pool is a separate protocol and needs its own
                 verified deployment and funded reporter.
               </Notice>
-              <Card flush>
-                <div className="adm-table-wrap">
-                  <table className="adm-table">
-                    <thead>
-                      <tr>
-                        <th>Contract</th>
-                        <th>Address</th>
-                        <th>Explorer</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {deployment.contracts.map((c) => (
-                        <tr key={c.name}>
-                          <td style={{ fontWeight: 650 }}>{c.name}</td>
-                          <td>
-                            <AddressLink address={c.address} />
-                          </td>
-                          <td>
-                            <a
-                              className="adm-link"
-                              href={`${BASESCAN}/address/${c.address}#code`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Verified source
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
             </>
           );
         }}

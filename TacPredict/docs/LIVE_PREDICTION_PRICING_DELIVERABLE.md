@@ -1,7 +1,8 @@
 # Live prediction pricing — deliverable (Draft PR)
 
-**Branch:** `feature/live-prediction-pricing-expiry`  
-**Status:** Safe coding + paper/local validation. **No Base Mainnet deploy. No campaign activation.** Stop before production; explicit approval required.
+**Branch:** `feature/live-prediction-pricing-expiry` · **PR:** #27 (Draft)  
+**Status:** Safe coding + paper/local + Hardhat contract validation. **No Base Mainnet deploy. No campaign activation.**  
+See also `ORACLE_AND_KEEPER.md`. Sepolia broadcast E2E still blocked until operator wallet is faucet-funded + signer adapter approved.
 
 ## 1. Implementation summary
 

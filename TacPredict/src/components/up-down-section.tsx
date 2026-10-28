@@ -24,6 +24,7 @@ import { useLivePrice } from "@/lib/updown/live-prices";
 import { spotShareOdds } from "@/lib/paper/spot-odds";
 import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
+import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
@@ -65,6 +66,7 @@ function AssetCard({
   const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
   const upCents = odds ? `${Math.round(odds.up)}¢` : "—";
   const downCents = odds ? `${Math.round(odds.down)}¢` : "—";
+  const settlement = assetSettlementPolicy(asset, minutes);
 
   return (
     <article className="ud-home-card tp-card" aria-label={`${info.name} Up or Down`}>
@@ -115,14 +117,18 @@ function AssetCard({
       </div>
       <div className="tp-crypto-footer">
         <span>Vol {formatLiq(vol)}</span>
-        <span>
-          {odds
-            ? spot != null && beat != null
-              ? `${spot >= beat ? "▲" : "▼"} vs open`
-              : "Live ¢"
-            : pw.pending
-              ? "Loading…"
-              : "Paper market"}
+        <span title={settlement.reasons.join(" · ")}>
+          {settlement.tier === "unavailable"
+            ? "Charts only"
+            : settlement.tier === "paper_only"
+              ? "Paper · no on-chain settle"
+              : odds
+                ? spot != null && beat != null
+                  ? `${spot >= beat ? "▲" : "▼"} vs open`
+                  : "Live ¢"
+                : pw.pending
+                  ? "Loading…"
+                  : "Paper market"}
         </span>
       </div>
     </article>

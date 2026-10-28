@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   advanceVirtualIndexer,
   getVirtualOperations,
+  planVirtualOperator,
   previewVirtualCampaign,
 } from "@/lib/virtual/functions";
 import { virtualMoney } from "@/lib/virtual/hooks";
@@ -15,6 +16,30 @@ export function VirtualView() {
   });
   const [busy, setBusy] = useState(false),
     [notice, setNotice] = useState("");
+  const [operatorPlan, setOperatorPlan] = useState("");
+  async function loadOperatorPlan() {
+    setBusy(true);
+    try {
+      const r = await planVirtualOperator();
+      setOperatorPlan(
+        JSON.stringify(
+          {
+            engine: r.engine,
+            actions: r.actions.map(({ data, ...rest }) => ({
+              ...rest,
+              dataBytes: (data.length - 2) / 2,
+            })),
+          },
+          null,
+          2,
+        ),
+      );
+    } catch (e) {
+      setOperatorPlan(e instanceof Error ? e.message : "Operator plan unavailable");
+    } finally {
+      setBusy(false);
+    }
+  }
   async function advance() {
     setBusy(true);
     try {
@@ -85,6 +110,20 @@ export function VirtualView() {
             <button className="adm-btn" disabled={busy} onClick={() => void advance()}>
               {busy ? "Indexing…" : "Index next 16 blocks"}
             </button>
+          </Card>
+          <Card title="Operator plan (unsigned)">
+            <p className="adm-caption">
+              captureStart / proposeFromFeed / finalize calldata for BTC·ETH·SOL·BNB feed markets.
+              Does not sign or broadcast.
+            </p>
+            <button className="adm-btn" disabled={busy} onClick={() => void loadOperatorPlan()}>
+              {busy ? "Planning…" : "Build lifecycle plan"}
+            </button>
+            {operatorPlan ? (
+              <pre className="overflow-auto text-xs" role="status">
+                {operatorPlan}
+              </pre>
+            ) : null}
           </Card>
           <Notice>
             Grant campaigns require an explicit onchain allowlist and budget. No balance editing,
