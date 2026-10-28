@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 /** Wall clock that ticks every second. Starts from a server-provided time so hydration matches. */
 export function useNow(initial: number, everyMs = 1000) {
@@ -8,10 +8,7 @@ export function useNow(initial: number, everyMs = 1000) {
     const timer = setInterval(() => setNow(Date.now()), everyMs);
     return () => clearInterval(timer);
   }, [everyMs]);
-  // A stable server snapshot avoids streamed-query clock differences during hydration.
-  const snapshot = useCallback(() => now, [now]);
-  const subscribe = useCallback(() => () => {}, []);
-  return useSyncExternalStore(subscribe, snapshot, () => 0);
+  return now;
 }
 
 /** Viewer's time zone, resolved after mount (UTC while rendering on the server). */

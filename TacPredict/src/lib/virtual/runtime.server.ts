@@ -22,7 +22,7 @@ export const metadataSchema = z
             kind: z.literal("crypto"),
             sourceId: z.string().min(1),
             maxFetchAgeSeconds: z.number().int().min(1).max(86400),
-            asset: z.enum(["BTC", "ETH", "SOL", "XRP", "BNB"]),
+            asset: z.enum(["BTC", "ETH", "SOL", "BNB"]),
             intervalSeconds: z.union([
               z.literal(300),
               z.literal(900),

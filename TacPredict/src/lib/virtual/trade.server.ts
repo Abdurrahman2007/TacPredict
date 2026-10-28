@@ -35,6 +35,11 @@ export async function prepareVirtualTrade(
   );
   const indexed = await r.client.getBlock({ blockNumber: BigInt(projected.blockNumber) });
   assertFreshProjection(indexed.timestamp, b.timestamp, r.maxProjectionAgeSeconds);
+  // Fail closed on stale Chainlink before simulation; never invent an executable quote.
+  if (r.deployment.model === "feed-v1") {
+    const { assertMarketOracleFresh } = await import("./chainlink-price.server");
+    await assertMarketOracleFresh(r.client, meta, b.timestamp);
+  }
   const q = await r.client.readContract({
     address: r.deployment.engine,
     abi: virtualAmmAbi,

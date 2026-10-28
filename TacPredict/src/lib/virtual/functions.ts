@@ -113,6 +113,23 @@ export const getVirtualOperations = createServerFn({ method: "GET" })
     });
   });
 
+/** Unsigned captureStart / proposeFromFeed / finalize plan. Never signs. */
+export const planVirtualOperator = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    return publicVirtualBoundary(async () => {
+      if (context.claims.aal !== "aal2") throw Error("Administrator MFA required");
+      const role = await context.supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", context.userId)
+        .eq("role", "admin");
+      if (role.error || !role.data?.length) throw Error("Administrator required");
+      const { planVirtualOperatorActions } = await import("./operator.server");
+      return planVirtualOperatorActions();
+    });
+  });
+
 // Review-only campaign preview/save. Never signs, configures an onchain campaign or grants balances.
 export const previewVirtualCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

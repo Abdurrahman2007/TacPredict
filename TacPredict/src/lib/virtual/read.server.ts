@@ -81,6 +81,9 @@ export async function readVirtualCatalogue(): Promise<{
         if (head.timestamp >= p.terms.closeAt) pricingKnown = false;
         else
           try {
+            // Pre-check Chainlink freshness via Ankr/VIRTUAL_RPC; then read on-chain probability.
+            const { assertMarketOracleFresh } = await import("./chainlink-price.server");
+            await assertMarketOracleFresh(r.client, meta, head.timestamp);
             up = await r.client.readContract({
               address: r.deployment.engine,
               abi: virtualPriceAmmAbi,

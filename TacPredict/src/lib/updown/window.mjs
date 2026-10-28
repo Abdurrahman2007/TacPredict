@@ -11,8 +11,9 @@ export const ASSETS = {
   bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "xrp", "bnb"];
-export const DURATIONS = [5, 15, 720, 1440];
-export const DISPLAY_DURATIONS = [5, 15, 60, 720, 1440];
+/** Supported paper / UI durations (minutes). Matches VirtualPriceAMM scheduling set. */
+export const DURATIONS = [5, 15, 30, 60, 720, 1440];
+export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", xrp: "xrp", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */

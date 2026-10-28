@@ -1,0 +1,299 @@
+.tp-rewards {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 8px 0 40px;
+  color: #eef3f5;
+}
+.tp-rewards-hero {
+  display: grid;
+  gap: 6px;
+  padding: 28px 24px;
+  border: 1px solid #2c3a42;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 100% 0%, #2775ca44 0%, transparent 55%),
+    linear-gradient(155deg, #1a2622, #141c20 72%);
+}
+.tp-rewards-hero-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9bb5a6;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tp-usdc-logo {
+  border-radius: 999px;
+  background: #fff;
+}
+.tp-rewards-balance {
+  font-size: clamp(36px, 8vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.tp-rewards-unit {
+  color: #8fa0aa;
+  font-size: 13px;
+}
+.tp-chest {
+  margin-top: 18px;
+  padding: 28px 20px 24px;
+  border: 1px solid #2c3a42;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 50% 18%, #3d6adf33 0%, transparent 55%),
+    linear-gradient(180deg, #1a242c, #141c22);
+  text-align: center;
+  overflow: hidden;
+}
+.tp-chest h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.tp-chest p {
+  margin: 0 auto 22px;
+  max-width: 36ch;
+  color: #9aabb6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tp-chest-box {
+  position: relative;
+  width: 160px;
+  height: 140px;
+  margin: 0 auto 20px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tp-chest-box.priority .tp-chest-body {
+  border-color: #5b8cff;
+  box-shadow: 0 0 0 1px #5b8cff44, 0 18px 40px #0006;
+}
+.tp-chest-lid {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 18px;
+  height: 36px;
+  border-radius: 14px 14px 6px 6px;
+  background: linear-gradient(180deg, #3d6adf, #2a4a9a);
+  transform-origin: 50% 100%;
+  transition: transform 0.45s ease;
+  z-index: 2;
+}
+.tp-chest-box.opening .tp-chest-lid {
+  transform: rotateX(-118deg) translateY(-8px);
+}
+.tp-chest-body {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  border: 1px solid #3a4f5c;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #243240, #161e24);
+  color: #d7e8ff;
+  z-index: 1;
+}
+.tp-chest-glow {
+  position: absolute;
+  inset: 20% 10% auto;
+  height: 40%;
+  border-radius: 999px;
+  background: radial-gradient(circle, #5b8cff66, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.tp-chest-box.opening .tp-chest-glow {
+  opacity: 1;
+  animation: chest-pulse 0.9s ease;
+}
+@keyframes chest-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+}
+.tp-chest-won {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid #3f6b4f;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1c2c24, #172028);
+}
+.tp-chest-won div {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  text-align: left;
+}
+.tp-chest-won strong {
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+.tp-chest-won span {
+  color: #8fa0aa;
+  font-size: 12px;
+}
+.tp-checkin {
+  margin-top: 18px;
+  padding: 22px 20px 24px;
+  border: 1px solid #2c3a42;
+  border-radius: 28px;
+  background: #172028;
+}
+.tp-checkin-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.tp-checkin-head h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+.tp-checkin-head span {
+  color: #8fa0aa;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.tp-checkin-note {
+  margin: 0 0 16px;
+  color: #8fa0aa;
+  font-size: 12px;
+}
+.tp-checkin-days {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.tp-checkin-days li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px;
+  border: 1px solid #314049;
+  border-radius: 16px;
+  background: #1a2329;
+  min-height: 84px;
+}
+.tp-checkin-days li.done {
+  border-color: #3f6b4f;
+  background: #1c2c24;
+}
+.tp-checkin-days li.active {
+  border-color: #4d7cff99;
+  background: #1e2c3c;
+  box-shadow: 0 0 0 1px #4d7cff33 inset;
+}
+.tp-day-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #243038;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c5d0d7;
+}
+.tp-checkin-days li.done .tp-day-num {
+  background: #2f6b45;
+  color: #fff;
+}
+.tp-checkin-days li.active .tp-day-num {
+  background: #3d6adf;
+  color: #fff;
+}
+.tp-day-amt {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: #d7e0e6;
+}
+.tp-checkin-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2775ca, #2f5f6f);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.tp-checkin-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.tp-checkin-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.tp-checkin-btn.cool {
+  background: #243038;
+  color: #c5d0d7;
+}
+.tp-checkin-msg {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #ff8b93;
+}
+.tp-checkin-msg.ok {
+  color: #6dce95;
+}
+@media (max-width: 520px) {
+  .tp-checkin-days {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .tp-day-amt {
+    font-size: 12px;
+  }
+  .tp-checkin-days li {
+    padding: 12px 4px;
+    min-height: 80px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-chest-lid,
+  .tp-chest-glow {
+    transition: none;
+    animation: none;
+  }
+}

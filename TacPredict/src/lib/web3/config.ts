@@ -1,7 +1,6 @@
 import { BRAND_WALLET_ICON_URL } from "@/lib/brand";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
-  coinbaseWallet,
   injectedWallet,
   metaMaskWallet,
   rabbyWallet,
@@ -9,21 +8,27 @@ import {
   trustWallet,
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { createConfig, http } from "wagmi";
 import { PRIMARY_CHAIN, WALLETCONNECT_PROJECT_ID } from "./constants";
+import { farcasterWallet } from "./farcaster-wallet";
+import { preferredWallet } from "./preferred-wallet";
 
 /**
- * Pure non-custodial wallets only.
- * No email / Gmail / Google / Apple / Twitter / embedded social login.
+ * Connect modal order:
+ * 1) Wallet (Coinbase connector, short name "Wallet")
+ * 2) Farcaster
+ * 3) Other wallets (MetaMask, Rainbow, …)
  */
 const walletConnectors = connectorsForWallets(
   [
     {
-      groupName: "Wallets",
+      groupName: "Recommended",
+      wallets: [preferredWallet(), () => farcasterWallet()],
+    },
+    {
+      groupName: "Other wallets",
       wallets: [
         metaMaskWallet,
-        coinbaseWallet,
         rainbowWallet,
         rabbyWallet,
         trustWallet,
@@ -41,7 +46,7 @@ const walletConnectors = connectorsForWallets(
 
 export const wagmiConfig = createConfig({
   chains: [PRIMARY_CHAIN],
-  connectors: [...walletConnectors, farcasterMiniApp()] as typeof walletConnectors,
+  connectors: walletConnectors,
   transports: {
     [PRIMARY_CHAIN.id]: http(),
   },

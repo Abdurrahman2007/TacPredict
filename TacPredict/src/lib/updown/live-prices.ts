@@ -16,17 +16,27 @@ export type LiveAsset = {
   status: LiveStatus;
 };
 
-const EMPTY: LiveAsset = { price: null, time: null, ticks: [], status: "connecting" };
+function emptyLive(): LiveAsset {
+  return { price: null, time: null, ticks: [], status: "connecting" };
+}
+/** Stable per-asset placeholders — never share one object across assets. */
+const IDLE: Record<UpDownAsset, LiveAsset> = {
+  bitcoin: Object.freeze(emptyLive()) as LiveAsset,
+  ethereum: Object.freeze(emptyLive()) as LiveAsset,
+  solana: Object.freeze(emptyLive()) as LiveAsset,
+  bnb: Object.freeze(emptyLive()) as LiveAsset,
+  xrp: Object.freeze(emptyLive()) as LiveAsset,
+};
 const KEEP_MS = 20 * 60_000;
 const WS_URL = "wss://ws-feed.exchange.coinbase.com";
 const productToAsset = new Map(ASSET_KEYS.map((a) => [ASSETS[a].product, a] as const));
 
 const state: Record<UpDownAsset, LiveAsset> = {
-  bitcoin: EMPTY,
-  ethereum: EMPTY,
-  solana: EMPTY,
-  bnb: EMPTY,
-  xrp: EMPTY,
+  bitcoin: IDLE.bitcoin,
+  ethereum: IDLE.ethereum,
+  solana: IDLE.solana,
+  bnb: IDLE.bnb,
+  xrp: IDLE.xrp,
 };
 const listeners = new Set<() => void>();
 let socket: WebSocket | null = null;
@@ -166,8 +176,8 @@ const noSubscription = () => () => {};
 export function useLivePrice(asset: UpDownAsset, enabled = true) {
   const live = useSyncExternalStore(
     enabled ? subscribe : noSubscription,
-    () => (enabled ? state[asset] : EMPTY),
-    () => EMPTY,
+    () => (enabled ? state[asset] : IDLE[asset]),
+    () => IDLE[asset],
   );
   const polling = useQuery({
     ...spotTickersQueryOptions,

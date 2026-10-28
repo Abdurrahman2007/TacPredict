@@ -83,10 +83,10 @@ export function UpDownTradeBar({
         <DialogContent className="pd-trade-screen ud-trade-screen translate-x-0 translate-y-0 lg:-translate-x-1/2">
           <DialogTitle className="sr-only">Trade {context.label}</DialogTitle>
           <DialogDescription className="sr-only">
-            Choose Buy or Sell and review your order. Reference prices are not executable quotes.
+            Choose Buy or Sell and review your order.
             {view.virtual
               ? "Virtual USDC only. Each trade requires its own transaction."
-              : "No verified Virtual USDC market is available for this reference window."}
+              : "Paper Virtual USDC. Share prices follow live spot versus the open."}
           </DialogDescription>
           <div className="pd-trade-top">
             <div className="pd-handle" />

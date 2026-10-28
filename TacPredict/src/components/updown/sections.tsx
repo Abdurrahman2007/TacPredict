@@ -24,6 +24,7 @@ import {
 } from "@/lib/updown/window.mjs";
 import { VirtualPortfolio } from "@/components/virtual/virtual-portfolio";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
+import { usePaperLedger } from "@/lib/paper/ledger";
 
 function MyPositions({ market }: { market: Market }) {
   const [tab, setTab] = useState<"positions" | "history">("positions");
@@ -92,8 +93,121 @@ function MyPositions({ market }: { market: Market }) {
   );
 }
 
-export function PositionsCard({ market }: { market: Market | null }) {
+function PaperPositionsBlock({
+  marketId,
+  upCents,
+  downCents,
+}: {
+  marketId: string;
+  upCents: number | null;
+  downCents: number | null;
+}) {
+  const [tab, setTab] = useState<"positions" | "history">("positions");
+  const ledger = usePaperLedger();
+  const open = ledger.positions.filter((p) => p.marketId === marketId);
+  const history = ledger.trades.filter((t) => t.marketId === marketId).slice(0, 20);
+  const markOf = (side: "Up" | "Down") => (side === "Up" ? upCents : downCents);
+  const total = open.reduce((sum, p) => {
+    const c = markOf(p.side);
+    return sum + (c != null ? p.shares * (c / 100) : p.shares * p.avgCost);
+  }, 0);
+  const uPnL = open.reduce((sum, p) => {
+    const c = markOf(p.side);
+    if (c == null) return sum;
+    return sum + (p.shares * (c / 100) - p.shares * p.avgCost);
+  }, 0);
+
+  return (
+    <section className="ud-card" aria-label="Your positions">
+      <div className="ud-tabs" role="group">
+        {(["positions", "history"] as const).map((t) => (
+          <button key={t} type="button" aria-pressed={tab === t} onClick={() => setTab(t)}>
+            {t === "positions" ? "Positions" : "History"}
+          </button>
+        ))}
+      </div>
+      {tab === "positions" ? (
+        open.length === 0 ? (
+          <p className="ud-muted">No positions</p>
+        ) : (
+          open.map((p) => {
+            const c = markOf(p.side);
+            const mark = c != null ? p.shares * (c / 100) : p.shares * p.avgCost;
+            const pnl = c != null ? mark - p.shares * p.avgCost : null;
+            return (
+              <div className="ud-row" key={p.id}>
+                <span>
+                  {p.side} · {p.shares.toFixed(2)} sh
+                  {pnl != null ? (
+                    <small style={{ display: "block", color: pnl >= 0 ? "#6dce95" : "#ff7b7b" }}>
+                      PnL {pnl >= 0 ? "+" : "−"}${Math.abs(pnl).toFixed(2)}
+                    </small>
+                  ) : null}
+                </span>
+                <i />
+                <span className="tabular-nums">${mark.toFixed(2)}</span>
+              </div>
+            );
+          })
+        )
+      ) : history.length === 0 ? (
+        <p className="ud-muted">No history</p>
+      ) : (
+        history.map((t) => (
+          <div className="ud-row" key={t.id}>
+            <span>
+              {t.kind} {t.side}
+              {t.realizedPnl != null ? (
+                <small
+                  style={{
+                    display: "block",
+                    color: t.realizedPnl >= 0 ? "#6dce95" : "#ff7b7b",
+                  }}
+                >
+                  PnL {t.realizedPnl >= 0 ? "+" : "−"}${Math.abs(t.realizedPnl).toFixed(2)}
+                </small>
+              ) : null}
+            </span>
+            <i />
+            <span className="tabular-nums">${t.usdc.toFixed(2)}</span>
+          </div>
+        ))
+      )}
+      <div className="ud-row" style={{ borderTop: "1px solid var(--ud-line)", marginTop: 8 }}>
+        <span>
+          Total
+          {open.length > 0 && (upCents != null || downCents != null) ? (
+            <small style={{ display: "block", color: uPnL >= 0 ? "#6dce95" : "#ff7b7b" }}>
+              Unrealized {uPnL >= 0 ? "+" : "−"}${Math.abs(uPnL).toFixed(2)}
+            </small>
+          ) : null}
+        </span>
+        <i />
+        <b className="tabular-nums">${total.toFixed(2)}</b>
+        <Link to="/profile" className="ud-muted">
+          View All ↗
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export function PositionsCard({
+  market,
+  paperMarketId,
+  upCents = null,
+  downCents = null,
+}: {
+  market: Market | null;
+  paperMarketId?: string;
+  upCents?: number | null;
+  downCents?: number | null;
+}) {
   const [tab, setTab] = useState("positions");
+  if (paperMarketId)
+    return (
+      <PaperPositionsBlock marketId={paperMarketId} upCents={upCents} downCents={downCents} />
+    );
   if (market?.virtual)
     return (
       <section className="ud-card">
@@ -140,11 +254,17 @@ export function PositionsCard({ market }: { market: Market | null }) {
   );
 }
 
-export function StatsCard({ market }: { market: Market | null }) {
+export function StatsCard({
+  market,
+  paperVolume,
+}: {
+  market: Market | null;
+  /** Real paper volume only — never fake liquidity. */
+  paperVolume?: string | null;
+}) {
   const rows: [string, string][] = [
-    ["Open interest", market?.native ? usdcShort(market.native.openInterestAtomic) : "—"],
-    ["Total volume", market ? volumeText(market.volume) : "—"],
-    ["Traders", market ? String(market.participants) : "—"],
+    ["Volume", paperVolume ?? (market ? volumeText(market.volume) : "$0")],
+    ["Traders", market ? String(market.participants ?? 0) : "0"],
   ];
   return (
     <section className="ud-card ud-statistics" aria-label="Statistics">

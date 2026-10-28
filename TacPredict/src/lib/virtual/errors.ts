@@ -33,6 +33,16 @@ const safeMessages = new Set([
   "Indexer ran; completion audit needs reconciliation",
   "Transaction observation storage unavailable; trade state must be reconciled",
   "Prior transaction evidence unavailable",
+  "Feed-priced binary market policy required",
+  "Chainlink price is stale or invalid; quote rejected.",
+  "Chainlink sequencer feed is down or still in recovery; trading blocked.",
+  "Chainlink feed is not configured for this asset; trading blocked.",
+  "Invalid oracle freshness policy",
+  "Onchain price policy does not use the approved Base Chainlink feeds.",
+  "Asset or tie rule disagrees with frozen onchain policy",
+  "Price policy hash mismatch",
+  "Frozen price policy does not match published rules",
+  "Operator lifecycle requires feed-v1 VirtualPriceAMM",
 ]);
 // Provider errors may contain credential-bearing RPC URLs or Supabase details.
 // Only deliberately enumerated user messages may cross the server-function boundary.
