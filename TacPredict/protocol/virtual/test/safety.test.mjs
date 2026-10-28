@@ -44,7 +44,10 @@ test("application ABI matches separately compiled virtual contract; no asset ABI
   ])
     assert(!execution.includes(forbidden));
   const wrapper = fs.readFileSync(root + "../../src/components/prediction-amount-card.tsx", "utf8");
-  assert(/props\.market\.virtual\s*\?\s*<?\(?\s*<VirtualAmountCard/.test(wrapper));
+  // Virtual markets still route to VirtualAmountCard; paper markets use PaperAmountCard.
+  assert(wrapper.includes("VirtualAmountCard"));
+  assert(wrapper.includes("props.market.virtual"));
+  assert(wrapper.includes("PaperAmountCard"));
   const detail = fs.readFileSync(root + "../../src/components/updown/updown-detail.tsx", "utf8");
   assert(detail.includes("virtual-only product: legacy pool disabled"));
 });

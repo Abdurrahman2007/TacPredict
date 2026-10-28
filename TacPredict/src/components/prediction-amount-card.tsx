@@ -22,8 +22,8 @@ export function PredictionAmountCard(props: {
         market={props.market}
         selected={props.selected}
         onSelect={props.onSelect}
-        tradingAllowed={props.tradingAllowed}
-        settlementNote={props.settlementNote}
+        {...(props.tradingAllowed !== undefined ? { tradingAllowed: props.tradingAllowed } : {})}
+        {...(props.settlementNote !== undefined ? { settlementNote: props.settlementNote } : {})}
       />
     );
   return (

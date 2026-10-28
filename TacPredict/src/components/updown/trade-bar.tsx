@@ -105,10 +105,10 @@ export function UpDownTradeBar({
             <PredictionAmountCard
               key={view.id}
               market={view}
-              selected={selected}
+              {...(selected !== undefined ? { selected } : {})}
               onSelect={setSelected}
               tradingAllowed={tradingAllowed}
-              settlementNote={settlementNote}
+              {...(settlementNote !== undefined ? { settlementNote } : {})}
             />
           </div>
         </DialogContent>
