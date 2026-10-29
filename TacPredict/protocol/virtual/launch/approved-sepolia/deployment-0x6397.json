@@ -1,0 +1,26 @@
+{
+  "scope": "Base Sepolia private VirtualPriceAMM only",
+  "chainId": 84532,
+  "status": "DEPLOYED",
+  "admin": "0x6397a026560e7b66584f087739b15ae2bda8610f",
+  "engine": "0xCF59F3Ff524cC1bD4e11177937D3BCBE62860E46",
+  "deploymentTx": "0x180877487de5e87733e67025f4f70ef64f43bd68668cc51bdaac5226ed48530d",
+  "blockNumber": 51715578,
+  "verifiedAtUtc": "2026-10-29T09:12:00.000Z",
+  "verification": {
+    "receiptStatus": "success",
+    "contractAddressMatches": true,
+    "codeBytes": 22450,
+    "rpc": "https://sepolia.base.org"
+  },
+  "campaignsEnabled": false,
+  "tradingEnabled": false,
+  "publicTrading": false,
+  "mainnet": false,
+  "nextSteps": [
+    "Grant CREATOR_ROLE + PROPOSER_ROLE to admin (admin already DEFAULT_ADMIN_ROLE via constructor)",
+    "createPool + configurePricePolicy for one BTC long window (Chainlink-safe duration)",
+    "captureStart, private Buy, separate Sell, proposeFromFeed, finalize/settle",
+    "Keep XRP trading disabled"
+  ]
+}
