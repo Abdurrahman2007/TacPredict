@@ -68,3 +68,49 @@ export function futureWindows(asset: string, intervalSeconds: number, now: numbe
     key: `${asset}:${intervalSeconds}:${first + i * intervalSeconds}`,
   }));
 }
+
+/**
+ * Plan createWindow jobs for upcoming series slots that are not yet in the catalogue.
+ * Pure planner — does not sign or broadcast. Existing keys use `${asset}:${interval}:${startsAt}`.
+ */
+export function planWindowCreations(input: {
+  assets: string[];
+  intervalsSeconds: number[];
+  now: number;
+  count: number;
+  existingKeys: ReadonlySet<string>;
+}): {
+  key: string;
+  asset: string;
+  startsAt: number;
+  closesAt: number;
+  action: "createWindow";
+  idempotencyKey: string;
+}[] {
+  if (input.assets.length > 8 || input.intervalsSeconds.length > 8 || input.count > 24)
+    throw Error("Bounded createWindow plan required");
+  const out: {
+    key: string;
+    asset: string;
+    startsAt: number;
+    closesAt: number;
+    action: "createWindow";
+    idempotencyKey: string;
+  }[] = [];
+  for (const asset of input.assets) {
+    for (const interval of input.intervalsSeconds) {
+      for (const w of futureWindows(asset, interval, input.now, input.count)) {
+        if (input.existingKeys.has(w.key)) continue;
+        out.push({
+          key: w.key,
+          asset: w.asset,
+          startsAt: w.startsAt,
+          closesAt: w.closesAt,
+          action: "createWindow",
+          idempotencyKey: `createWindow:${w.key}`,
+        });
+      }
+    }
+  }
+  return out;
+}

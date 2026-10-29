@@ -40,6 +40,10 @@ import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { runPaperResultRobot } from "@/lib/paper/settle-robot";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
+import {
+  matchVirtualUpDownMarket,
+  resolveUpDownTradeMarket,
+} from "@/lib/virtual/updown-virtual-bind";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
 function lookbackFor(needed: number) {
@@ -84,14 +88,7 @@ export function UpDownDetail({
   });
   const feed = useQuery(nativeMarketFeedQueryOptions);
   const live = useLivePrice(asset);
-  const virtualMarket = feed.data?.markets.find(
-    (m) =>
-      m.virtual &&
-      m.category === "Crypto" &&
-      new RegExp(`\\b(${info.name}|${info.short})\\b`, "i").test(m.title) &&
-      Math.abs(Date.parse(m.startsAt ?? "") - w.start) <= 1500 &&
-      Math.abs(Date.parse(m.endsAt ?? "") - w.end) <= 1500,
-  );
+  const virtualMarket = matchVirtualUpDownMarket(feed.data?.markets, asset, w);
   const market =
     virtualMarket ??
     (feed.data?.virtualMode ? null : matchNativeMarket(feed.data?.markets, asset, w));
@@ -222,8 +219,7 @@ export function UpDownDetail({
     resolutionCriteria:
       "Paper Virtual USDC only. Up/Down share prices follow live spot versus the window open price.",
   };
-  // Always paper-reference id so home vol + portfolio stay in sync.
-  const tradeMarket = odds
+  const paperTradeMarket = odds
     ? {
         ...reference,
         outcomes: [
@@ -232,9 +228,16 @@ export function UpDownDetail({
         ],
       }
     : reference;
+  const resolved = resolveUpDownTradeMarket({
+    virtualMarket,
+    paperMarket: paperTradeMarket,
+  });
+  const tradeMarket = resolved.market;
+  const onchain = resolved.mode === "onchain";
 
   // 5m+ paper result robot: settle once when past + verified start/end spots exist.
   useEffect(() => {
+    if (onchain) return;
     if (state !== "past" || shownBeat == null || shownCurrent == null) return;
     runPaperResultRobot({
       marketId: referenceId,
@@ -242,7 +245,7 @@ export function UpDownDetail({
       endPrice: shownCurrent,
       closedAtIso: new Date(w.end).toISOString(),
     });
-  }, [state, shownBeat, shownCurrent, referenceId, w.end]);
+  }, [onchain, state, shownBeat, shownCurrent, referenceId, w.end]);
 
   if (!nowMs)
     return (
@@ -363,15 +366,22 @@ export function UpDownDetail({
       ) : (
         <>
           <PositionsCard
-            market={null}
-            paperMarketId={tradeMarket.id}
-            upCents={odds?.up ?? null}
-            downCents={odds?.down ?? null}
+            market={onchain ? tradeMarket : null}
+            {...(onchain
+              ? {}
+              : {
+                  paperMarketId: paperTradeMarket.id,
+                  upCents: odds?.up ?? null,
+                  downCents: odds?.down ?? null,
+                })}
           />
-          <StatsCard market={tradeMarket} paperVolume={formatLiq(paperVol)} />
+          <StatsCard
+            market={tradeMarket}
+            {...(onchain ? {} : { paperVolume: formatLiq(paperVol) })}
+          />
           <RulesCard asset={asset} minutes={minutes} market={tradeMarket} />
           <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
-          <ActivityCard market={null} />
+          <ActivityCard market={onchain ? tradeMarket : null} />
         </>
       )}
 
@@ -398,11 +408,19 @@ export function UpDownDetail({
       ) : (
         <UpDownTradeBar
           market={tradeMarket}
-          reference={reference}
+          reference={paperTradeMarket}
           context={island}
           initialSide={initialSide}
-          tradingAllowed={settlement.paperTradingAllowed && state === "live"}
-          settlementNote={settlement.label}
+          tradingAllowed={
+            onchain
+              ? state === "live"
+              : settlement.paperTradingAllowed && state === "live"
+          }
+          settlementNote={
+            onchain
+              ? `On-chain Virtual USDC · ${settlement.label}`
+              : settlement.label
+          }
         />
       )}
     </div>

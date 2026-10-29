@@ -14,6 +14,8 @@ export function PredictionAmountCard(props: {
         market={props.market}
         selected={props.selected}
         onSelect={props.onSelect}
+        {...(props.tradingAllowed !== undefined ? { tradingAllowed: props.tradingAllowed } : {})}
+        {...(props.settlementNote !== undefined ? { settlementNote: props.settlementNote } : {})}
       />
     );
   if (props.market.outcomes.some((o) => o.probabilityKnown !== false))

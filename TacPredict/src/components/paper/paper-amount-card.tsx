@@ -148,7 +148,7 @@ export function PaperAmountCard({
           <div className="pd-amount-panel">
             <div className="pd-balance">
               <span>${ledger.balance.toFixed(2)}</span>
-              <small>Virtual USDC · paper · non-redeemable</small>
+              <small>Virtual USDC · paper ledger · not an on-chain tx · non-redeemable</small>
             </div>
             <label htmlFor={id} className="pd-amount-input">
               <span>$</span>

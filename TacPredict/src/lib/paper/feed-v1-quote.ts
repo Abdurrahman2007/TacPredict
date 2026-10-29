@@ -22,14 +22,27 @@ export type FeedV1Policy = {
   reserveDown: number;
 };
 
-/** Default policy tuned for short crypto windows (matches contract bounds). */
-export function defaultFeedV1Policy(minutes: number): FeedV1Policy {
+/**
+ * Default policy tuned for short crypto windows (contract-compatible bounds).
+ * Optional remainingSec: late in a short window, lower effective σ so a strongly
+ * favoured side can reach ~90–95¢ when spot/strike data justify it — never hardcoded.
+ */
+export function defaultFeedV1Policy(minutes: number, remainingSec?: number): FeedV1Policy {
   // Higher sigma → slower move to extremes (more time-value left).
-  const sigmaPpm =
+  let sigmaPpm =
     minutes <= 5 ? 900 : minutes <= 15 ? 700 : minutes <= 30 ? 550 : minutes <= 60 ? 400 : 220;
+  if (typeof remainingSec === "number" && remainingSec > 0 && minutes <= 30) {
+    const windowSec = minutes * 60;
+    // Last ~15% of the window: compress σ toward a late-market floor (still ≥300).
+    const late = remainingSec / windowSec;
+    if (late <= 0.15) {
+      const floor = minutes <= 5 ? 380 : 420;
+      sigmaPpm = Math.max(floor, Math.floor(sigmaPpm * (0.35 + late * 2)));
+    }
+  }
   return {
     sigmaPpm,
-    minProbabilityPpm: 10_000, // 1¢ floor
+    minProbabilityPpm: 10_000, // 1¢ floor / 99¢ cap
     skewPpm: 5_000,
     spreadPpm: 5_000,
     impactPpm: 2_000,
@@ -96,7 +109,7 @@ export function feedV1ShareOdds(
   policy?: Partial<FeedV1Policy>,
 ): { up: number; down: number; upPpm: number; updatedAt: number } | null {
   if (typeof spot !== "number" || typeof strike !== "number") return null;
-  const p = { ...defaultFeedV1Policy(minutes), ...policy };
+  const p = { ...defaultFeedV1Policy(minutes, remainingSec), ...policy };
   const upPpm = feedV1UpPpm(spot, strike, remainingSec, p);
   if (upPpm == null) return null;
   const up = Math.round(upPpm / 10_000); // ¢
