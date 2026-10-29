@@ -1,0 +1,48 @@
+{
+  "updatedAt": "2026-10-27T11:53:00Z",
+  "branch": "review/virtual-price-campaign",
+  "paperAssets": ["BTC", "ETH", "SOL", "BNB"],
+  "removed": ["XRP"],
+  "doneInThisChat": [
+    "Ankr Base RPC wired into local .env (VIRTUAL_RPC_URL / BASE_PROTOCOL_RPC_URL)",
+    "Chainlink registry + fail-closed freshness (chainlink-feeds.ts, chainlink-price.server.ts)",
+    "Quote/catalogue path rejects stale oracle before trade",
+    "On-chain price policy must match approved feeds + sequencer",
+    "BNB feed added; XRP fully removed from paper path",
+    "Admin Contracts: always shows 6 verified legacy contracts (BaseScan + Sourcify)",
+    "Admin Virtual: unsigned operator plan (captureStart / proposeFromFeed / finalize)",
+    "operator.server.ts + feed-rounds.server.ts + operations.mts plan mode",
+    "prepare-price-mainnet.mjs CREATE2 unsigned plan for VirtualPriceAMM",
+    "BOOTSTRAP.json checklist + predicted engine 0xB124Fc06b3E5955A306e83E21B049d0863a0fCAb",
+    "build-virtual-config.mjs for VIRTUAL_TRADING_CONFIG draft after deploy",
+    "Chainlink unit tests (live probe may fail-closed when SOL/BNB age > 1h)"
+  ],
+  "blockedNow": [
+    {
+      "item": "Broadcast VirtualPriceAMM deploy on Base",
+      "why": "Admin has ~0.0000176 ETH (need ~0.000035+); VIRTUAL_DEPLOYER_PRIVATE_KEY unset"
+    },
+    {
+      "item": "VIRTUAL_TRADING_CONFIG enabled:true",
+      "why": "Needs live engine address, runtime codeHash, startBlock, pools, pricePolicyHash"
+    },
+    {
+      "item": "createPool + configurePricePolicy for 4 markets",
+      "why": "Requires CREATOR_ROLE on deployed engine + admin signature"
+    },
+    {
+      "item": "Apply virtual-v1.sql + indexer + grants",
+      "why": "Staging/production Supabase migration not applied; needs explicit approval"
+    },
+    {
+      "item": "Live operator submissions",
+      "why": "Plan builds calldata only; proposeFromFeed needs PROPOSER_ROLE wallet"
+    }
+  ],
+  "notChanged": [
+    "User-facing trading UI layout/CSS",
+    "Six verified legacy contracts (registry/factory/positions/exchange/oracle/settlement)",
+    "No Mainnet tx broadcast from this session",
+    "No real USDC deposit/withdraw"
+  ]
+}

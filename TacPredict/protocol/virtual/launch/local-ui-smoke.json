@@ -1,0 +1,25 @@
+{
+  "scope": "Local HTTP/SSR only, disabled dummy virtual deployment and no real credentials",
+  "results": [
+    {
+      "path": "/terms",
+      "status": 200,
+      "htmlDocument": true,
+      "containsVirtualDisclosure": true
+    },
+    {
+      "path": "/markets",
+      "status": 200,
+      "htmlDocument": true,
+      "containsVirtualDisclosure": false
+    },
+    {
+      "path": "/profile",
+      "status": 200,
+      "htmlDocument": true,
+      "containsVirtualDisclosure": false
+    }
+  ],
+  "interactiveBrowserVerified": false,
+  "reason": "Playwright missing; attempted local Chromium harness did not produce a valid result. No browser/wallet E2E claim."
+}

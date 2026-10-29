@@ -1,0 +1,29 @@
+{
+  "chainId": 84532,
+  "verdict": "PASS",
+  "engine": "0xCF59F3Ff524cC1bD4e11177937D3BCBE62860E46",
+  "marketId": 1,
+  "txs": {
+    "createPool": "0xf2f5f6783062c0a6ea0d9cac44e66680a4900ae761f99c4def6e633328e42519",
+    "configurePricePolicy": "0x3bfc160c44b81d261f694d78713988ca596c7c20a3bc3b460faba14799be38d5",
+    "configureMonthlyCampaign": "0x973c15d8f0bafc23c6580aafade0dfcebb51487b2e7d7deb5356e39d5247a21f",
+    "claimGrant": "0x4b44354ac1085a99c5776c19ae6efc1f1529c03afdc626c1b4d119bbc44cc972",
+    "captureStart": "0xe4d0217ed294507049464c6b2e0287e580b655556f11a029b30eeabc79422d69",
+    "buy": "0x597ac55abbc1ffd12daa19d97f88f695fff93188b5caf63d880fef1e360b374d",
+    "sell": "0x174f55fe940332c43e3516e214cc89be2687591c05863d62d96e924b64eb251c"
+  },
+  "observed": {
+    "startPrice": "10000000000000",
+    "startRound": 2,
+    "grantedAtoms": "100000000",
+    "buyInputAtoms": "5000000",
+    "buyShares": "9807056",
+    "sellProceedsAtoms": "4802577",
+    "realizedPnlAtoms": "-197423",
+    "cashAfterAtoms": "99802577",
+    "actionNonce": 2,
+    "buySellDistinctTxs": true,
+    "feeBps": 0,
+    "note": "PnL is spread/impact round-trip cost on MockFeed flat spot; fees=0"
+  }
+}

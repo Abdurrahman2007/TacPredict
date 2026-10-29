@@ -1,0 +1,23 @@
+{
+  "readOnly": true,
+  "observedAt": "2026-10-24T05:36:57.569Z",
+  "transactionSubmission": false,
+  "networks": [
+    {
+      "chainId": 8453,
+      "block": "53015435",
+      "gasPriceWei": "6000000",
+      "illustrativeBuyExecutionEth": "0.000000693048",
+      "illustrativeSellExecutionEth": "0.000000818844",
+      "excludes": "L1 data fee; local gas units are examples, not a complete wallet fee quote"
+    },
+    {
+      "chainId": 84532,
+      "block": "49491744",
+      "gasPriceWei": "6000000",
+      "illustrativeBuyExecutionEth": "0.000000693048",
+      "illustrativeSellExecutionEth": "0.000000818844",
+      "excludes": "L1 data fee; local gas units are examples, not a complete wallet fee quote"
+    }
+  ]
+}

@@ -1,11 +1,20 @@
-import { ASSETS, granularityFor, type Candle, type PricePoint, type UpDownAsset } from "./window.mjs";
+import {
+  ASSETS,
+  granularityFor,
+  type Candle,
+  type PricePoint,
+  type UpDownAsset,
+} from "./window.mjs";
 
 const BASE = "https://api.exchange.coinbase.com";
 const SOURCE = "Coinbase";
 
 async function get(path: string): Promise<unknown> {
   const response = await fetch(BASE + path, {
-    headers: { accept: "application/json", "user-agent": "TacPredict/1.0 (https://tacpredict.fun)" },
+    headers: {
+      accept: "application/json",
+      "user-agent": "TacPredict/1.0 (https://tacpredict.fun)",
+    },
     signal: AbortSignal.timeout(6000),
   });
   if (!response.ok) throw new Error(`Price source returned ${response.status}`);
@@ -39,7 +48,11 @@ const num = (value: unknown) => {
  * look-backs use one-minute candles; longer ones use the smallest Coinbase candle size that
  * still fits the 300-candle limit.
  */
-async function loadCandles(asset: UpDownAsset, minutes: number, granularity: number): Promise<Candle[]> {
+async function loadCandles(
+  asset: UpDownAsset,
+  minutes: number,
+  granularity: number,
+): Promise<Candle[]> {
   const end = new Date();
   const start = new Date(end.getTime() - minutes * 60000);
   const rows = await get(
@@ -49,7 +62,13 @@ async function loadCandles(asset: UpDownAsset, minutes: number, granularity: num
   return rows
     .flatMap((row: unknown): Candle[] => {
       if (!Array.isArray(row)) return [];
-      const [time, low, high, open, close] = row.map(num) as [number, number, number, number, number];
+      const [time, low, high, open, close] = row.map(num) as [
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
       return time > 0 && open > 0 && close > 0
         ? [{ time: time * 1000, low, high, open, close }]
         : [];
@@ -93,12 +112,23 @@ export async function spotTickers() {
           get(`/products/${ASSETS[asset].product}/ticker`),
         )) as { price?: unknown; time?: unknown };
         const price = num(data.price);
-        const time = typeof data.time === "string" ? Date.parse(data.time) : Date.now();
-        return [asset, price > 0 ? { price, time: Number.isFinite(time) ? time : Date.now() } : null] as const;
+        const time = typeof data.time === "string" ? Date.parse(data.time) : NaN;
+        return [
+          asset,
+          price > 0 &&
+          Number.isFinite(time) &&
+          time <= Date.now() + 5000 &&
+          Date.now() - time <= 15000
+            ? { price, time }
+            : null,
+        ] as const;
       } catch {
         return [asset, null] as const;
       }
     }),
   );
-  return { prices: Object.fromEntries(entries) as Record<UpDownAsset, PricePoint | null>, source: SOURCE };
+  return {
+    prices: Object.fromEntries(entries) as Record<UpDownAsset, PricePoint | null>,
+    source: SOURCE,
+  };
 }

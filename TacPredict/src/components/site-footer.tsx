@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUp, Mail } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import "@/styles/site-footer.css";
 
@@ -21,58 +21,46 @@ function TelegramIcon() {
 export function SiteFooter() {
   return (
     <footer className="tp-site-footer" aria-label="TacPredict footer">
-      <Link to="/" className="footer-brand" aria-label="TacPredict home">
-        <BrandMark className="size-16" />
+      <div className="footer-hero">
+        <span className="footer-logo-3d" aria-hidden="true">
+          <span className="footer-logo-orb">
+            <BrandMark className="size-16" />
+          </span>
+        </span>
         <strong>TacPredict</strong>
-      </Link>
-      <div className="footer-columns">
-        <nav aria-label="Footer navigation">
-          <h2>Explore</h2>
-          <Link to="/">Home</Link>
-          <Link to="/up-down">Up or Down</Link>
-          <Link to="/markets" search={{ category: "Football" }}>
-            Football
-          </Link>
-          <Link to="/markets" search={{ category: "Cricket" }}>
-            Cricket
-          </Link>
-          <Link to="/ranking">Ranking</Link>
-          <Link to="/profile">Portfolio</Link>
-        </nav>
-        <nav className="footer-support" aria-label="Support">
-          <h2>Support</h2>
-          <a href="mailto:support@tacpredict.fun">
-            <Mail size={18} aria-hidden="true" />
-            <span>Email support</span>
-          </a>
-        </nav>
-        <div className="footer-socials">
-          <h2>Socials</h2>
-          <a
-            href="https://x.com/TacPredict"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="TacPredict on X (opens in a new tab)"
-          >
-            <XIcon />
-            <span>X / Twitter</span>
-          </a>
-          <a
-            href="https://t.me/TacPredict"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="TacPredict on Telegram (opens in a new tab)"
-          >
-            <TelegramIcon />
-            <span>Telegram</span>
-          </a>
-        </div>
-
-        <nav aria-label="Legal">
-          <h2>Legal</h2>
-          <Link to="/terms">Terms of Service</Link>
-        </nav>
+        <p>Virtual USDC prediction markets on Base</p>
       </div>
+
+      <nav className="footer-links" aria-label="Footer navigation">
+        <Link to="/">Home</Link>
+        <Link to="/up-down">Up or Down</Link>
+        <Link to="/rewards">Rewards</Link>
+        <Link to="/ranking">Ranking</Link>
+        <Link to="/profile">Portfolio</Link>
+        <Link to="/referrals">Refer</Link>
+        <Link to="/terms">Terms</Link>
+        <a href="mailto:support@tacpredict.fun">Support</a>
+      </nav>
+
+      <div className="footer-socials" aria-label="Social links">
+        <a
+          href="https://x.com/TacPredict"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TacPredict on X"
+        >
+          <XIcon />
+        </a>
+        <a
+          href="https://t.me/TacPredict"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TacPredict on Telegram"
+        >
+          <TelegramIcon />
+        </a>
+      </div>
+
       <div className="footer-bottom">
         <small>© {new Date().getUTCFullYear()} TacPredict</small>
         <button
@@ -86,7 +74,7 @@ export function SiteFooter() {
             })
           }
         >
-          Back to top <ArrowUp size={15} />
+          Top <ArrowUp size={14} />
         </button>
       </div>
     </footer>

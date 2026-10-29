@@ -1,0 +1,43 @@
+{
+  "chainId": 8453,
+  "verified": true,
+  "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "hash": "0x47ecfa56c8fa5ab616fa4be0822007b5d4074612df89fc3359f906c4fa96bce5",
+  "blockNumber": "53121139",
+  "blockHash": "0x983053b21edb253965983e0d466e0a2ae5a4ac9cbd054bcacbef4d6937d68339",
+  "poolId": "1",
+  "rulesHash": "0xbb4c53bec1d9faca27820f3e4687dbc8a340b0604e2c26e87013b358267ddeaa",
+  "terms": {
+    "rulesHash": "0xbb4c53bec1d9faca27820f3e4687dbc8a340b0604e2c26e87013b358267ddeaa",
+    "openAt": "1793031907",
+    "closeAt": "1793035507",
+    "resolveAfter": "1793035507",
+    "resolutionDeadline": "1793036107",
+    "challengePeriod": 60,
+    "seed": "10000000000",
+    "reserveFloor": "100000000",
+    "maxCashIn": "10000000",
+    "maxSharesIn": "100000000",
+    "maxPosition": "100000000",
+    "feeBps": 0,
+    "outcomes": 2
+  },
+  "initialReserves": [
+    "10000000000",
+    "10000000000",
+    "0"
+  ],
+  "initialCollateral": "10000000000",
+  "virtualBalanceAtoms": "100000000",
+  "actionNonce": "0",
+  "operationActualGasCostWei": "2297743500000",
+  "operationActualGasCostEth": "0.0000022977435",
+  "cumulativeOperationActualGasCostWei": "31630989000000",
+  "cumulativeOperationActualGasCostEth": "0.000031630989",
+  "nativeBalanceEth": "0.000017605676462059",
+  "entryPointDepositEth": "0.000007484916187898",
+  "secondsUntilOpen": 186,
+  "privateQAOnly": true,
+  "publicTradingActivated": false
+}

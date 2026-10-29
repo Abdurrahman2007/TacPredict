@@ -20,7 +20,7 @@ async function history(asset: string): Promise<PricePoint[]> {
   if (saved && saved.expires > Date.now()) return saved.points;
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-    const cacheKey = `https://tacpredict.fun/__cache/coingecko/history-v4/${asset}`;
+    const cacheKey = `https://tacpredict.fun/__cache/coingecko/history-v5/${asset}`;
     const hit = await edge?.match(cacheKey).catch(() => undefined);
     if (hit) {
       const points = (await hit.json()) as PricePoint[];
@@ -66,15 +66,13 @@ async function history(asset: string): Promise<PricePoint[]> {
   }
 }
 async function snapshot(): Promise<CryptoMarketSnapshot> {
-  // One request obtains all four current prices. Never expose the key to clients.
   const raw = await request(
     "/simple/price?vs_currencies=usd&ids=bitcoin,ethereum,solana,binancecoin&include_24hr_change=true&include_last_updated_at=true&include_market_cap=true",
   );
   const now = Date.now();
   const rows = await Promise.all(
     assets.map(async (asset) => {
-      const item = raw[asset === "bnb" ? "binancecoin" : asset] as
-        Record<string, unknown> | undefined;
+      const item = raw[asset === "bnb" ? "binancecoin" : asset] as Record<string, unknown> | undefined;
       const price = num(item?.["usd"]),
         time = num(item?.["last_updated_at"]) * 1000;
       if (price <= 0 || time <= 0 || time > now + 5000 || now - time > 900_000)
@@ -123,7 +121,7 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
 async function edgeSnapshot(): Promise<CryptoMarketSnapshot | null> {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v3");
+    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v5");
     if (!response) return null;
     const value = (await response.json()) as CryptoMarketSnapshot;
     return value.source === "CoinGecko" && Date.now() - Date.parse(value.updatedAt) < 900_000
@@ -137,7 +135,7 @@ async function saveEdge(value: CryptoMarketSnapshot) {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
     await edge?.put(
-      "https://tacpredict.fun/__cache/coingecko/snapshot-v3",
+      "https://tacpredict.fun/__cache/coingecko/snapshot-v5",
       new Response(JSON.stringify(value), {
         headers: { "Content-Type": "application/json", "Cache-Control": "public,max-age=60" },
       }),

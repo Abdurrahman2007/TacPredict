@@ -1,0 +1,125 @@
+{
+  "decision": "NO-GO / review-only / not live",
+  "basePR": 23,
+  "baseCommit": "80be72ebe20e87662dd0f0e9a513da6fd3e45e00",
+  "branch": "review/virtual-launch-hardening",
+  "checks": {
+    "virtualTests": {
+      "passed": 40,
+      "failed": 0,
+      "durationMs": 24665.484877,
+      "command": "VIRTUAL_LOCAL_EVIDENCE_PATH=/tmp/receipts.json npm --prefix protocol/virtual test"
+    },
+    "initialRegressionReproduction": {
+      "passed": 165,
+      "failed": 1,
+      "durationMs": 534813.978684,
+      "failure": "stale six-entry admin nav assertion; PR #23 added seventh isolated Virtual Trading entry"
+    },
+    "targetedRegressionFix": {
+      "passed": 7,
+      "failed": 0,
+      "command": "node --test protocol/test/admin-minimal.test.mjs"
+    },
+    "finalFullRegression": {
+      "status": "passed",
+      "passed": 166,
+      "failed": 0,
+      "durationMs": 531260.868516,
+      "command": "npm --prefix protocol test"
+    },
+    "typecheck": "passed",
+    "compile": {
+      "status": "passed",
+      "runtimeBytes": 15998,
+      "solc": "0.8.38",
+      "note": "Solidity source and bytecode unchanged; immutable reference output added for read-only verification"
+    },
+    "build": "passed using non-secret local placeholders; no deploy",
+    "scopedLint": {
+      "errors": 0,
+      "warnings": 0,
+      "scope": "src/lib/virtual, src/components/virtual, admin virtual view, terms route"
+    },
+    "fullRepositoryLint": {
+      "errors": 496,
+      "warnings": 19,
+      "status": "failed; existing formatting baseline, no global suppression"
+    },
+    "unsignedPoolTool": "valid fixture produced calldata; missing args fail; no broadcast",
+    "operationsWithoutConfiguration": "fails closed; health/index return exit 1 without raw secret/error data",
+    "dependencies": {
+      "app": {
+        "info": 0,
+        "low": 0,
+        "moderate": 22,
+        "high": 18,
+        "critical": 0,
+        "total": 40
+      },
+      "legacyProtocolDev": {
+        "info": 0,
+        "low": 2,
+        "moderate": 6,
+        "high": 23,
+        "critical": 5,
+        "total": 36
+      },
+      "isolatedVirtualToolchain": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    }
+  },
+  "evidence": {
+    "productionReadOnly": [
+      "six Mainnet hashes match deployment manifest at block 53014967",
+      "Cloudflare routes, version, binding names and schedule metadata only",
+      "Base/Sepolia chain/head/gasPrice reads; no transaction sent"
+    ],
+    "locallyTested": [
+      "actual contract receipts projected through PostgreSQL indexer",
+      "117 local successful operation receipts, including 64 Buy and 28 Sell receipts, chain 31337 only",
+      "randomized 2/3-outcome and contention/extreme-input accounting invariants",
+      "RLS/fencing/receipt/finality/intent and market-evidence validation",
+      "compile/typecheck/build and limited local HTTP/SSR checks"
+    ],
+    "unverified": [
+      "Sepolia deployment and transactions",
+      "independent security audit",
+      "current production DB policy/migration state",
+      "real data-provider capture/authentication and market/source readiness",
+      "interactive deployed browser/wallet/pending-reload recovery",
+      "production monitoring/alerting and geo-policy enforcement",
+      "public launch eligibility and allocation policy"
+    ]
+  },
+  "strictBoundaries": {
+    "mainnetDeployments": 0,
+    "mainnetTransactions": 0,
+    "sepoliaDeployments": 0,
+    "sepoliaTransactions": 0,
+    "productionMigrations": 0,
+    "productionEnvironmentChanges": 0,
+    "productionMerges": 0,
+    "publicGrants": 0,
+    "walletPrivateKeysAccessed": false,
+    "oldContractsChanged": false,
+    "tradingEnabled": false
+  },
+  "migration": {
+    "path": "TacPredict/supabase/migration-drafts/virtual-v1.sql",
+    "appliedToProduction": false,
+    "localDisposablePostgresOnly": true,
+    "sha256": "c6d5f6675a0dc25f5c0d74852985b30055023c637c005ff1ed34af9eb4df83c6",
+    "changes": [
+      "fail closed on null/fractional cursors/timestamps/event array",
+      "intent-exact confirmation status from canonical trusted events",
+      "no existing table or RLS alteration"
+    ]
+  }
+}

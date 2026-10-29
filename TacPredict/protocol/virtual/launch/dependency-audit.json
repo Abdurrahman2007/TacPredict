@@ -1,0 +1,629 @@
+{
+  "app": {
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 22,
+      "high": 18,
+      "critical": 0,
+      "total": 40
+    },
+    "packages": [
+      {
+        "name": "@coinbase/cdp-sdk",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@esbuild-kit/core-utils",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "drizzle-kit",
+          "version": "0.18.1",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@esbuild-kit/esm-loader",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "drizzle-kit",
+          "version": "0.18.1",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@farcaster/miniapp-core",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@farcaster/miniapp-sdk",
+        "severity": "high",
+        "direct": true,
+        "fixAvailable": false
+      },
+      {
+        "name": "@farcaster/miniapp-wagmi-connector",
+        "severity": "high",
+        "direct": true,
+        "fixAvailable": false
+      },
+      {
+        "name": "@farcaster/quick-auth",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": false
+      },
+      {
+        "name": "@gemini-wallet/core",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@metamask/rpc-errors",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@metamask/sdk",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@metamask/sdk-communication-layer",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@metamask/utils",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@rainbow-me/rainbowkit",
+        "severity": "moderate",
+        "direct": true,
+        "fixAvailable": {
+          "name": "@rainbow-me/rainbowkit",
+          "version": "2.0.8",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@reown/appkit",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@reown/appkit-controllers",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@reown/appkit-pay",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@reown/appkit-scaffold-ui",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@reown/appkit-ui",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@reown/appkit-utils",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@reown/appkit-wallet",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@solana/web3.js",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@wagmi/connectors",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@walletconnect/core",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@walletconnect/ethereum-provider",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@walletconnect/sign-client",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@walletconnect/universal-provider",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "@walletconnect/utils",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "abitype",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "decode-uri-component",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "drizzle-kit",
+        "severity": "moderate",
+        "direct": true,
+        "fixAvailable": {
+          "name": "drizzle-kit",
+          "version": "0.18.1",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "esbuild",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "drizzle-kit",
+          "version": "0.18.1",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "jayson",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "query-string",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "stream-json",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "uuid",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "viem",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "vite",
+        "severity": "high",
+        "direct": true,
+        "fixAvailable": {
+          "name": "vite",
+          "version": "8.3.5",
+          "isSemVerMajor": false
+        }
+      },
+      {
+        "name": "wagmi",
+        "severity": "moderate",
+        "direct": true,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "ws",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "zod",
+        "severity": "high",
+        "direct": true,
+        "fixAvailable": {
+          "name": "wagmi",
+          "version": "3.7.9",
+          "isSemVerMajor": true
+        }
+      }
+    ]
+  },
+  "old": {
+    "counts": {
+      "info": 0,
+      "low": 2,
+      "moderate": 6,
+      "high": 23,
+      "critical": 5,
+      "total": 36
+    },
+    "packages": [
+      {
+        "name": "@microsoft/api-extractor",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@microsoft/api-extractor-model",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@microsoft/tsdoc-config",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@openzeppelin/contracts",
+        "severity": "moderate",
+        "direct": true,
+        "fixAvailable": {
+          "name": "@openzeppelin/contracts",
+          "version": "5.6.1",
+          "isSemVerMajor": false
+        }
+      },
+      {
+        "name": "@rushstack/node-core-library",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "@trufflesuite/uws-js-unofficial",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "ganache",
+          "version": "6.4.5",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "ajv",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "bn.js",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "brace-expansion",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "braces",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "browserify-sign",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "browserslist",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "cipher-base",
+        "severity": "critical",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "cross-spawn",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "diff",
+        "severity": "low",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "elliptic",
+        "severity": "critical",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "ganache",
+        "severity": "high",
+        "direct": true,
+        "fixAvailable": {
+          "name": "ganache",
+          "version": "6.4.5",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "js-yaml",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "json5",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "lodash",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "micromatch",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "minimatch",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "mocha",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "nanoid",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "pbkdf2",
+        "severity": "critical",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "picomatch",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "secp256k1",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "ganache",
+          "version": "6.4.5",
+          "isSemVerMajor": true
+        }
+      },
+      {
+        "name": "semver",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "serialize-javascript",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "sha.js",
+        "severity": "critical",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "solc",
+        "severity": "low",
+        "direct": true,
+        "fixAvailable": {
+          "name": "solc",
+          "version": "0.8.38",
+          "isSemVerMajor": false
+        }
+      },
+      {
+        "name": "terser-webpack-plugin",
+        "severity": "moderate",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "tmp",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "solc",
+          "version": "0.8.38",
+          "isSemVerMajor": false
+        }
+      },
+      {
+        "name": "validator",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "webpack",
+        "severity": "critical",
+        "direct": false,
+        "fixAvailable": true
+      },
+      {
+        "name": "ws",
+        "severity": "high",
+        "direct": false,
+        "fixAvailable": {
+          "name": "ganache",
+          "version": "6.4.5",
+          "isSemVerMajor": true
+        }
+      }
+    ]
+  },
+  "new": {
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "packages": []
+  }
+}

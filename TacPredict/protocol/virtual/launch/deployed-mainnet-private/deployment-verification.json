@@ -1,0 +1,20 @@
+{
+  "chainId": 8453,
+  "verified": true,
+  "engine": "0x424c08d85A2f80f85A0C9330888BfB54a292491B",
+  "admin": "0x57828f1aa32fd6be3988f240068df53ed94b7aef",
+  "hash": "0x955e6210f5a598e9f605ab89607e9c157e553eb234d3c366a462ea8ccca0b2f9",
+  "blockNumber": "53120634",
+  "blockHash": "0xa75b765dcf6736b94056c7c74acf6983ed0f16c7bd8c2ea4f1a448db8d503b1a",
+  "runtimeCodeHash": "0xe41c0170fdff525d39b7dbb6aa0431340e81ea541443f19616be50b5d8af7949",
+  "state": {
+    "poolCount": "0",
+    "campaignCount": "0",
+    "granted": "0",
+    "seeded": "0",
+    "totalCash": "0"
+  },
+  "wholeTransactionL2FeeWei": "22015296000000",
+  "wholeTransactionL1FeeWei": "317948341889",
+  "note": "Whole-transaction fees may be paid by a bundler and are not proof of the wallet debit. Reconcile Base Account quote/receipt, UserOperation cost if applicable and operator fees before further expenditure. This verifies deployment only, not trading/live UI."
+}

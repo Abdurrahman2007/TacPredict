@@ -55,7 +55,11 @@ export function PredictionMarketCard({
       </div>
       <footer className="tp-card-footer">
         <span>
-          {market.native ? `${usdcShort(market.native.openInterestAtomic)} OI` : "Listing pending"}
+          {market.virtual
+            ? "Virtual USDC"
+            : market.native
+              ? `${usdcShort(market.native.openInterestAtomic)} OI`
+              : "Listing pending"}
         </span>
         <span>{volumeText(market.volume)} Vol</span>
       </footer>

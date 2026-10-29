@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { buildSync } from "esbuild";
-test("spot prices never wait for four history calls; histories are cached separately", async () => {
+test("spot prices never wait for five history calls; histories are cached separately", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "tac-spot-"));
   const out = path.join(dir, "coingecko.mjs");
   buildSync({
@@ -25,7 +25,7 @@ test("spot prices never wait for four history calls; histories are cached separa
     return Response.json(
       String(url).includes("/simple/price")
         ? Object.fromEntries(
-            ["bitcoin", "ethereum", "solana", "binancecoin"].map((a) => [
+            ["bitcoin", "ethereum", "solana", "ripple", "binancecoin"].map((a) => [
               a,
               { usd: 100, last_updated_at: now, usd_24h_change: 1 },
             ]),
@@ -88,7 +88,7 @@ test("spot-only edge snapshots do not mask full history, and full history is reu
     ),
   };
   const cache = new Map([
-    ["https://tacpredict.fun/__cache/coingecko/snapshot-v3", Response.json(spot)],
+    ["https://tacpredict.fun/__cache/coingecko/snapshot-v4", Response.json(spot)],
   ]);
   Object.defineProperty(globalThis, "caches", {
     configurable: true,

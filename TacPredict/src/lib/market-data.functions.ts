@@ -17,7 +17,7 @@ export const getCryptoMarketSnapshot = createServerFn({ method: "GET" }).handler
   return coingeckoSnapshot();
 });
 export const cryptoMarketQueryOptions = queryOptions({
-  queryKey: ["crypto-market-snapshot", "coingecko-v3"],
+  queryKey: ["crypto-market-snapshot", "coingecko-v4"],
   queryFn: () => getCryptoMarketSnapshot(),
   staleTime: CACHE_MS,
   gcTime: 60 * CACHE_MS,
@@ -40,7 +40,7 @@ export const getCryptoAssetHistory = createServerFn({ method: "GET" })
   });
 export const cryptoHistoryQueryOptions = (asset: "bitcoin" | "ethereum" | "solana" | "bnb") =>
   queryOptions({
-    queryKey: ["crypto-asset-history", "coingecko-v3", asset],
+    queryKey: ["crypto-asset-history", "coingecko-v4", asset],
     queryFn: () => getCryptoAssetHistory({ data: asset }),
     staleTime: 600000,
     gcTime: 3600000,

@@ -323,6 +323,58 @@
   border-radius: 999px;
   font-size: 15px;
 }
+.tp-paper-pnl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin: 4px 0 0;
+  padding: 12px 4px 0;
+  border-top: 1px solid #ffffff12;
+}
+.tp-paper-pnl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.tp-paper-pnl dt {
+  color: #9aabb6;
+  font-weight: 500;
+}
+.tp-paper-pnl dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.tp-pnl-pos {
+  color: #6dce95;
+}
+.tp-pnl-neg {
+  color: #ff7b7b;
+}
+.tp-paper-pos {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.tp-paper-pos li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 4px;
+  border-top: 1px solid #ffffff12;
+}
+.tp-paper-pos strong {
+  display: block;
+  font-size: 15px;
+}
+.tp-paper-pos small {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
 .pd-contracts {
   text-align: center;
   color: #b2bec5;

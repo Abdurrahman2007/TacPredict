@@ -2,17 +2,18 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  MoreHorizontal,
+  Menu,
   UserRound,
   LifeBuoy,
   Settings2,
   FileText,
   MessageSquare,
   LogOut,
-  Gift,
+  Users,
   ChevronRight,
+  ChevronLeft,
   EyeOff,
-  Wallet,
+  Percent,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { PixelAvatar } from "./pixel-avatar";
@@ -21,6 +22,12 @@ import { useLoginDialog } from "./login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useOverviewPrivacy } from "@/lib/accounts/privacy";
+import {
+  SLIPPAGE_PRESETS,
+  formatSlippage,
+  useTradeSlippage,
+} from "@/lib/accounts/slippage";
+
 export function AccountMenu() {
   const [open, setOpen] = useState(false),
     [view, setView] = useState<"menu" | "settings">("menu"),
@@ -31,6 +38,8 @@ export function AccountMenu() {
     login = useLoginDialog(),
     cache = useQueryClient();
   const [hidden, setHidden] = useOverviewPrivacy();
+  const [slippage, setSlippage] = useTradeSlippage();
+
   async function logout() {
     setBusy(true);
     setError("");
@@ -54,39 +63,47 @@ export function AccountMenu() {
     setBusy(false);
     setOpen(false);
   }
+
   const username = query.data?.profile.username;
+
   return (
     <>
       <button
         className="account-menu-trigger"
-        aria-label="Open account menu"
+        aria-label="Open menu"
+        aria-haspopup="dialog"
+        aria-expanded={open}
         onClick={() => {
           setView("menu");
           setOpen(true);
         }}
       >
-        <MoreHorizontal size={21} />
+        <Menu size={20} strokeWidth={2.2} />
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="account-sheet" aria-describedby="account-menu-description">
           <DialogTitle className="sr-only">
-            {view === "settings" ? "Settings" : "Your account"}
+            {view === "settings" ? "Settings" : "Menu"}
           </DialogTitle>
           <DialogDescription id="account-menu-description" className="sr-only">
-            Profile, referrals, support and account settings
+            Profile, referrals, support and settings
           </DialogDescription>
+
           {view === "settings" ? (
-            <>
-              <button className="account-back" onClick={() => setView("menu")}>
-                ← Account menu
+            <div className="account-slide">
+              <button type="button" className="account-back" onClick={() => setView("menu")}>
+                <ChevronLeft size={18} />
+                Menu
               </button>
               <h2 className="account-section-title">Settings</h2>
+
               <div className="account-setting">
                 <span>
-                  <EyeOff size={19} />
-                  <b>Hide overview balances</b>
+                  <EyeOff size={18} />
+                  <b>Hide balances</b>
                 </span>
                 <button
+                  type="button"
                   role="switch"
                   aria-label="Hide overview balances"
                   aria-checked={hidden}
@@ -96,77 +113,95 @@ export function AccountMenu() {
                   <i />
                 </button>
               </div>
-              <p className="account-helper">Applies to your Portfolio summary on this device.</p>
-              <div className="account-setting">
+
+              <div className="account-setting account-setting-stack">
                 <span>
-                  <Wallet size={19} />
-                  <b>Network</b>
+                  <Percent size={18} />
+                  <b>Slippage</b>
                 </span>
-                <span>Base Mainnet</span>
+                <div className="account-slippage" role="group" aria-label="Slippage tolerance">
+                  {SLIPPAGE_PRESETS.map((bps) => (
+                    <button
+                      key={bps}
+                      type="button"
+                      className={slippage === bps ? "on" : undefined}
+                      aria-pressed={slippage === bps}
+                      onClick={() => setSlippage(bps)}
+                    >
+                      {formatSlippage(bps)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </>
+            </div>
           ) : (
             <>
               <div className="account-identity">
-                <PixelAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={52} />
+                <PixelAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={48} />
                 <div>
                   <b>
                     {username
                       ? "@" + username
                       : auth.user
                         ? "Your account"
-                        : "Welcome to TacPredict"}
+                        : "TacPredict"}
                   </b>
-                  <span>
-                    {auth.user ? "Your profile & rewards" : "Connect and sign in to get started"}
-                  </span>
+                  <span>{auth.user ? "Signed in" : "Guest"}</span>
                 </div>
               </div>
-              <nav className="account-menu-list" aria-label="Account options">
+
+              <nav className="account-menu-list" aria-label="Menu">
                 <Link to="/account" onClick={() => setOpen(false)}>
-                  <UserRound size={20} />
-                  Your Profile
-                  <ChevronRight size={16} />
+                  <UserRound size={19} />
+                  Profile
+                  <ChevronRight size={15} />
                 </Link>
                 <Link to="/referrals" onClick={() => setOpen(false)}>
-                  <Gift size={20} />
-                  Invite friends
-                  <ChevronRight size={16} />
+                  <Users size={19} />
+                  Refer friend
+                  <ChevronRight size={15} />
                 </Link>
+                <button type="button" onClick={() => setView("settings")}>
+                  <Settings2 size={19} />
+                  Settings
+                  <ChevronRight size={15} />
+                </button>
                 <a
                   href="mailto:support@tacpredict.fun?subject=TacPredict%20Support"
                   onClick={() => setOpen(false)}
                 >
-                  <LifeBuoy size={20} />
-                  Help & Support
-                  <ChevronRight size={16} />
+                  <LifeBuoy size={19} />
+                  Help
+                  <ChevronRight size={15} />
                 </a>
-                <button onClick={() => setView("settings")}>
-                  <Settings2 size={20} />
-                  Settings
-                  <ChevronRight size={16} />
-                </button>
                 <Link to="/terms" onClick={() => setOpen(false)}>
-                  <FileText size={20} />
-                  Terms & Conditions
-                  <ChevronRight size={16} />
+                  <FileText size={19} />
+                  Terms
+                  <ChevronRight size={15} />
                 </Link>
                 <a
                   href="mailto:support@tacpredict.fun?subject=TacPredict%20Feedback"
                   onClick={() => setOpen(false)}
                 >
-                  <MessageSquare size={20} />
-                  Give feedback
-                  <ChevronRight size={16} />
+                  <MessageSquare size={19} />
+                  Feedback
+                  <ChevronRight size={15} />
                 </a>
               </nav>
+
               {auth.user ? (
-                <button className="account-logout" disabled={busy} onClick={() => void logout()}>
-                  <LogOut size={19} />
+                <button
+                  type="button"
+                  className="account-logout"
+                  disabled={busy}
+                  onClick={() => void logout()}
+                >
+                  <LogOut size={18} />
                   {busy ? "Logging out…" : "Log out"}
                 </button>
               ) : (
                 <button
+                  type="button"
                   className="account-primary"
                   onClick={() => {
                     setOpen(false);

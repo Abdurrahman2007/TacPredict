@@ -1,0 +1,47 @@
+{
+  "classification": "production-read-only metadata observations; not runtime application/security verification",
+  "observedAt": "2026-10-24",
+  "github": {
+    "pr": 23,
+    "head": "80be72ebe20e87662dd0f0e9a513da6fd3e45e00",
+    "main": "2da5ae195cec916206e217ca71182b1baa8c39f7",
+    "draft": true,
+    "merged": false,
+    "ci": "failed at existing regression step; rerun diagnostic pool-artifact tests passed"
+  },
+  "cloudflare": {
+    "worker": "tacpredict-app",
+    "routePatterns": [
+      "tacpredict.fun/*",
+      "www.tacpredict.fun/*"
+    ],
+    "latestDeployment": "d4d6377a-be1a-4b51-b23f-99795887bcbf",
+    "latestVersion": "a638eda1-7023-4d7c-88e3-c8dc13d16dfc",
+    "modifiedAt": "2026-10-23T09:04:52.724596Z",
+    "configuredCron": [
+      "* * * * *",
+      "*/15 * * * *"
+    ],
+    "observabilitySettings": null,
+    "bindingNames": [
+      "AI",
+      "BASE_PROTOCOL_RPC_URL",
+      "COINGECKO_DEMO_API_KEY",
+      "CRICKET_DATA_API_KEY",
+      "FOOTBALL_DATA_API_KEY",
+      "MARKET_DISCOVERY_SCHEDULER_SECRET",
+      "SUPABASE_PUBLISHABLE_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_URL",
+      "TAC_ACCOUNTS"
+    ],
+    "virtualBindingsPresent": false
+  },
+  "database": {
+    "productionConnectionUsed": false,
+    "currentPoliciesAndMigrationHistoryVerified": false,
+    "reason": "No authorized read-only Supabase/SQL connection in this session; source and disposable PostgreSQL tests only"
+  },
+  "vercel": "MCP requires reauthentication; Cloudflare route verified, no browser fallback needed",
+  "writesPerformed": false
+}

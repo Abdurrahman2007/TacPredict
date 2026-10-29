@@ -20,11 +20,15 @@ export function UpDownTradeBar({
   reference,
   context,
   initialSide,
+  tradingAllowed = true,
+  settlementNote,
 }: {
   market: Market | null;
   reference: Market;
   context: IslandContext;
   initialSide?: "up" | "down" | undefined;
+  tradingAllowed?: boolean;
+  settlementNote?: string;
 }) {
   const [ready, setReady] = useState(false);
   const [navHeight, setNavHeight] = useState(80);
@@ -83,8 +87,10 @@ export function UpDownTradeBar({
         <DialogContent className="pd-trade-screen ud-trade-screen translate-x-0 translate-y-0 lg:-translate-x-1/2">
           <DialogTitle className="sr-only">Trade {context.label}</DialogTitle>
           <DialogDescription className="sr-only">
-            Choose Buy or Sell and review your order. Reference prices are not executable quotes.
-            Wallet approval is required for a real trade.
+            Choose Buy or Sell and review your order.
+            {view.virtual
+              ? "Virtual USDC only. Each trade requires its own transaction."
+              : "Paper Virtual USDC. Share prices follow live spot versus the open."}
           </DialogDescription>
           <div className="pd-trade-top">
             <div className="pd-handle" />
@@ -99,8 +105,10 @@ export function UpDownTradeBar({
             <PredictionAmountCard
               key={view.id}
               market={view}
-              selected={selected}
+              {...(selected !== undefined ? { selected } : {})}
               onSelect={setSelected}
+              tradingAllowed={tradingAllowed}
+              {...(settlementNote !== undefined ? { settlementNote } : {})}
             />
           </div>
         </DialogContent>

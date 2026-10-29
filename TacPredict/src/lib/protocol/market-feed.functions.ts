@@ -1,14 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
-import { z } from "zod";
-import {
-  nativeMarketSchema,
-  deploymentSchema,
-  atomicDecimal,
-  marketStatus,
-  type NativeMarket,
-  type ProtocolDeployment,
-} from "./types";
+import { atomicDecimal, marketStatus, type NativeMarket, type ProtocolDeployment } from "./types";
 import type { Market } from "@/domain/markets/types";
 import { usdcShort } from "./display.mjs";
 export type NativeFeed = {
@@ -18,12 +10,10 @@ export type NativeFeed = {
   updatedAt: string;
   deployments: ProtocolDeployment[];
   error?: string;
+  virtualMode?: boolean;
+  virtualDeployment?: import("@/lib/virtual/types").VirtualDeployment;
 };
-const resultSchema = z.object({
-  markets: z.array(nativeMarketSchema),
-  deployments: z.array(deploymentSchema),
-});
-let cached: { value: NativeFeed; expires: number } | undefined;
+/** Historical data conversion only; never a real-USDC execution fallback. */
 export function toMarket(m: NativeMarket): Market {
   const price = (a: string) => Number(atomicDecimal(a));
   return {
@@ -54,39 +44,51 @@ export function toMarket(m: NativeMarket): Market {
 }
 export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
   async (): Promise<NativeFeed> => {
-    if (cached && cached.expires > Date.now()) return cached.value;
     const updatedAt = new Date().toISOString();
+    // Soft deployment pointer for UI/admin even when indexer catalogue is not ready.
+    let deploymentHint: import("@/lib/virtual/types").VirtualDeployment | undefined;
     try {
-      const { readProtocolRpc } = await import("./read.server");
-      const data = resultSchema.parse(
-        await readProtocolRpc("get_protocol_market_feed", { _limit: "150" }),
+      const { virtualConfig } = await import("@/lib/virtual/runtime.server");
+      deploymentHint = virtualConfig()?.deployment;
+    } catch {
+      deploymentHint = undefined;
+    }
+    try {
+      const { readVirtualCatalogue } = await import("@/lib/virtual/read.server");
+      const { coalesceCatalogue } = await import("@/lib/virtual/catalogue-coalescer.server");
+      const virtual = await coalesceCatalogue(
+        [
+          "virtual-catalogue-v1",
+          process.env["VIRTUAL_TRADING_CONFIG"] ?? null,
+          process.env["VIRTUAL_RPC_URL"] ?? null,
+          process.env["BASE_SEPOLIA_PROTOCOL_RPC_URL"] ?? null,
+          process.env["SUPABASE_URL"] ?? null,
+        ],
+        () => readVirtualCatalogue(),
       );
-      const markets = data.markets.map(toMarket);
-      const cryptoUpDown: NativeFeed["cryptoUpDown"] = {};
-      for (const [key, re] of [
-        ["bitcoin", /\b(bitcoin|btc)\b/i],
-        ["ethereum", /\b(ethereum|eth)\b/i],
-        ["solana", /\b(solana|sol)\b/i],
-        ["bnb", /\bbnb\b/i],
-      ] as const) {
-        const m = markets.find(
-          (m) =>
-            m.category === "Crypto" &&
-            re.test(m.title) &&
-            /up or down/i.test(m.title) &&
-            m.native?.status === "OPEN",
-        );
-        if (m) cryptoUpDown[key] = m;
-      }
-      const value: NativeFeed = {
-        markets,
-        cryptoUpDown,
+      if (virtual)
+        return {
+          markets: virtual.markets,
+          cryptoUpDown: {},
+          deployments: [],
+          source: "TacPredict",
+          updatedAt,
+          virtualMode: true,
+          virtualDeployment: virtual.deployment,
+        };
+      // No indexer catalogue yet — paper Up/Down + Rewards Virtual USDC still work.
+      return {
+        markets: [],
+        cryptoUpDown: {},
+        deployments: [],
         source: "TacPredict",
         updatedAt,
-        deployments: data.deployments,
+        virtualMode: true,
+        ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
+        error: deploymentHint
+          ? "Sepolia VirtualPriceAMM configured; on-chain catalogue waits for indexer. Paper Virtual USDC trading is available."
+          : "Virtual markets are not configured. Paper Rewards Virtual USDC still works. Real-USDC trading is disabled.",
       };
-      cached = { value, expires: Date.now() + 20000 };
-      return value;
     } catch {
       return {
         markets: [],
@@ -94,8 +96,11 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         source: "TacPredict",
         updatedAt,
         deployments: [],
-        error:
-          "Native markets are not available yet. No external odds or demo balances are substituted.",
+        virtualMode: true,
+        ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
+        error: deploymentHint
+          ? "Sepolia engine linked; catalogue temporarily unavailable. Use paper Up/Down + Rewards box."
+          : "Native markets are not available yet. No external odds or demo balances are substituted.",
       };
     }
   },
@@ -103,8 +108,8 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
 export const nativeMarketFeedQueryOptions = queryOptions({
   queryKey: ["native-market-feed", "v1"],
   queryFn: () => getNativeMarketFeed(),
-  staleTime: 20000,
-  refetchInterval: 30000,
+  staleTime: 3000,
+  refetchInterval: 5000,
   retry: 0,
   refetchOnWindowFocus: false,
 });

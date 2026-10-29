@@ -1,0 +1,7 @@
+{
+  "chainId": 84532,
+  "admin": "0x6397a026560e7b66584f087739b15ae2bda8610f",
+  "seedBudgetAtoms": "10000000000",
+  "grantBudgetAtoms": "100000000",
+  "note": "Private Base Sepolia VirtualPriceAMM — admin is the funded test wallet. No Mainnet. Campaigns off."
+}

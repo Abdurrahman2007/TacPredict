@@ -9,9 +9,11 @@ export const ASSETS = {
   solana: { product: "SOL-USD", name: "Solana", short: "SOL", logo: "sol" },
   bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
+/** Product assets only — XRP permanently removed (no Base settlement path). */
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
-export const DURATIONS = [5, 15, 720, 1440];
-export const DISPLAY_DURATIONS = [5, 15, 60, 720, 1440];
+/** Supported paper / UI durations (minutes). Matches VirtualPriceAMM scheduling set. */
+export const DURATIONS = [5, 15, 30, 60, 720, 1440];
+export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
@@ -130,7 +132,12 @@ export function matchNativeMarket(markets, asset, w) {
   const re = new RegExp(`\\b(${info.name}|${info.short})\\b`, "i");
   return (
     (markets ?? []).find((m) => {
-      if (!m.native || m.category !== "Crypto" || !/up or down/i.test(m.title) || !re.test(m.title))
+      if (
+        (!m.virtual && !m.native) ||
+        m.category !== "Crypto" ||
+        !/up or down/i.test(m.title) ||
+        !re.test(m.title)
+      )
         return false;
       const start = Date.parse(m.startsAt ?? ""),
         end = Date.parse(m.endsAt ?? "");

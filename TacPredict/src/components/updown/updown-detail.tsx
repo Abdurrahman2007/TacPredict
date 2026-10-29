@@ -32,9 +32,14 @@ import { CoinGeckoChart } from "./coingecko-chart";
 import { WindowPills } from "./window-pills";
 import { UpDownIsland } from "./island";
 import { UpDownTradeBar } from "./trade-bar";
-import { PoolOffBar, PoolRoundCard, PoolRulesCard, PoolTradeBar } from "./pool-trade";
+import { PoolRoundCard, PoolRulesCard, PoolTradeBar } from "./pool-trade";
 import { ActivityCard, AlsoTrading, PositionsCard, RulesCard, StatsCard } from "./sections";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
+import { spotShareOdds } from "@/lib/paper/spot-odds";
+import { formatLiq } from "@/lib/paper/virtual-liquidity";
+import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
+import { runPaperResultRobot } from "@/lib/paper/settle-robot";
+import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
 function lookbackFor(needed: number) {
@@ -79,7 +84,17 @@ export function UpDownDetail({
   });
   const feed = useQuery(nativeMarketFeedQueryOptions);
   const live = useLivePrice(asset);
-  const market = matchNativeMarket(feed.data?.markets, asset, w);
+  const virtualMarket = feed.data?.markets.find(
+    (m) =>
+      m.virtual &&
+      m.category === "Crypto" &&
+      new RegExp(`\\b(${info.name}|${info.short})\\b`, "i").test(m.title) &&
+      Math.abs(Date.parse(m.startsAt ?? "") - w.start) <= 1500 &&
+      Math.abs(Date.parse(m.endsAt ?? "") - w.end) <= 1500,
+  );
+  const market =
+    virtualMarket ??
+    (feed.data?.virtualMode ? null : matchNativeMarket(feed.data?.markets, asset, w));
 
   const candles = spot.data?.candles;
   const gran = (spot.data?.granularity ?? 60) * 1000;
@@ -99,10 +114,7 @@ export function UpDownDetail({
   const result = state === "past" ? windowResult(candles, w, gran) : null;
   // Pool rounds (UpDownPool): the deciding price is CoinGecko, posted on-chain by the reporter.
   const poolConfig = useQuery(poolConfigQueryOptions);
-  const poolOn =
-    POOL_DURATIONS.includes(minutes) &&
-    Boolean(poolConfig.data?.address) &&
-    poolConfig.data?.series[`${asset}:${minutes}`] === true;
+  const poolOn = false; /* virtual-only product: legacy pool disabled */
   const poolRound = useQuery(poolRoundQueryOptions(asset, minutes, w.start, poolOn));
   const priceFeed = usePriceWindow(asset, w, nowMs, !poolOn);
   const poolBeat =
@@ -118,14 +130,16 @@ export function UpDownDetail({
   const savedCopy = useQuery({ ...seriesCopyQueryOptions, enabled: poolOn });
   const seriesCopy = copyFor(savedCopy.data, asset);
 
-  const shownBeat = poolOn ? poolBeat : market ? nativeBeat : priceFeed.boundary;
+  const shownBeat =
+    (poolOn ? poolBeat : market ? nativeBeat : priceFeed.boundary) ??
+    priceFeed.boundary ??
+    priceFeed.series.find((p) => p.time >= w.start)?.price ??
+    null;
   const shownCurrent = poolOn
     ? state === "past"
       ? poolEnd
-      : geckoNow
-    : market
-      ? nativeCurrent
-      : geckoNow;
+      : (live.price ?? geckoNow)
+    : (live.price ?? (market ? nativeCurrent : geckoNow));
   const delta = deltaInfo(shownCurrent, shownBeat);
 
   const remaining = state === "live" ? w.end - nowMs : state === "upcoming" ? w.start - nowMs : 0;
@@ -172,26 +186,64 @@ export function UpDownDetail({
     deltaText,
     direction: delta?.direction ?? null,
   };
-  // View metadata only. No database insert, contract ID, invented probability or execution access.
+  // Live share prices: feed-v1 (spot, strike, time remaining) — never stale feed ¢.
+  const remainingSec = state === "live" ? Math.max(0, (w.end - nowMs) / 1000) : 0;
+  const odds = spotShareOdds(shownCurrent, shownBeat, minutes, remainingSec);
+  const settlement = assetSettlementPolicy(asset, minutes);
+  const paper = usePaperLedger();
+  const referenceId = `reference-${asset}-${w.start}-${minutes}`;
+  const paperVol = paperVolumeFor(referenceId, paper.trades);
   const reference: Market = {
-    id: `reference-${asset}-${w.start}-${minutes}`,
+    id: referenceId,
     title,
     category: "Crypto",
     startsAt: new Date(w.start).toISOString(),
     endsAt: new Date(w.end).toISOString(),
     closesAt: windowText,
-    volume: "0",
-    participants: 0,
+    volume: formatLiq(paperVol),
+    participants: paper.trades.filter((t) => t.marketId === referenceId && t.kind === "buy").length,
     outcomes: [
-      { id: "0", label: "Up", probability: 0, probabilityKnown: false },
-      { id: "1", label: "Down", probability: 0, probabilityKnown: false },
+      {
+        id: "0",
+        label: "Up",
+        probability: odds?.up ?? 50,
+        probabilityKnown: Boolean(odds),
+      },
+      {
+        id: "1",
+        label: "Down",
+        probability: odds?.down ?? 50,
+        probabilityKnown: Boolean(odds),
+      },
     ],
-    description: "Coinbase price window only. No on-chain market for this window yet.",
+    description: "Virtual USDC paper window. Share prices move with live spot vs open.",
     source: `Coinbase ${info.product}`,
     sourceUrl: `https://exchange.coinbase.com/trade/${info.product}`,
     resolutionCriteria:
-      "Price tracking only. No executable quote or settlement contract exists for this reference window.",
+      "Paper Virtual USDC only. Up/Down share prices follow live spot versus the window open price.",
   };
+  // Always paper-reference id so home vol + portfolio stay in sync.
+  const tradeMarket = odds
+    ? {
+        ...reference,
+        outcomes: [
+          { id: "0", label: "Up", probability: odds.up, probabilityKnown: true },
+          { id: "1", label: "Down", probability: odds.down, probabilityKnown: true },
+        ],
+      }
+    : reference;
+
+  // 5m+ paper result robot: settle once when past + verified start/end spots exist.
+  useEffect(() => {
+    if (state !== "past" || shownBeat == null || shownCurrent == null) return;
+    runPaperResultRobot({
+      marketId: referenceId,
+      startPrice: shownBeat,
+      endPrice: shownCurrent,
+      closedAtIso: new Date(w.end).toISOString(),
+    });
+  }, [state, shownBeat, shownCurrent, referenceId, w.end]);
+
   if (!nowMs)
     return (
       <div className="ud-page ud-loading" role="status" aria-label="Loading price window">
@@ -310,11 +362,16 @@ export function UpDownDetail({
         </>
       ) : (
         <>
-          <PositionsCard market={market} />
-          <StatsCard market={market} />
-          <RulesCard asset={asset} minutes={minutes} market={market} />
+          <PositionsCard
+            market={null}
+            paperMarketId={tradeMarket.id}
+            upCents={odds?.up ?? null}
+            downCents={odds?.down ?? null}
+          />
+          <StatsCard market={tradeMarket} paperVolume={formatLiq(paperVol)} />
+          <RulesCard asset={asset} minutes={minutes} market={tradeMarket} />
           <AlsoTrading asset={asset} minutes={minutes} nowMs={nowMs} />
-          <ActivityCard market={market} />
+          <ActivityCard market={null} />
         </>
       )}
 
@@ -338,20 +395,14 @@ export function UpDownDetail({
           round={poolRound.data ?? null}
           context={island}
         />
-      ) : market ? (
+      ) : (
         <UpDownTradeBar
-          market={market}
+          market={tradeMarket}
           reference={reference}
           context={island}
           initialSide={initialSide}
-        />
-      ) : (
-        <PoolOffBar
-          message={
-            poolConfig.data?.address
-              ? "Betting for this round is not turned on yet."
-              : "Live betting opens soon. No bets can be placed yet."
-          }
+          tradingAllowed={settlement.paperTradingAllowed && state === "live"}
+          settlementNote={settlement.label}
         />
       )}
     </div>

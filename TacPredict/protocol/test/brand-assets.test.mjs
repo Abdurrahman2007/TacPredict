@@ -6,7 +6,7 @@ const root = new URL("../../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 
 test("token logos are the real upstream icons, never hand-drawn text badges", () => {
-  for (const name of ["btc", "eth", "sol", "bnb", "xrp"]) {
+  for (const name of ["btc", "eth", "sol", "bnb"]) {
     const path = `public/brand/crypto/${name}.svg`;
     assert.ok(existsSync(new URL(path, root)), `${name} logo is installed`);
     const svg = read(path);
@@ -82,5 +82,7 @@ test("scroll discovery is in-page and social links use the exact supplied destin
   assert.ok(footer.includes('href="https://t.me/TacPredict"'));
   assert.ok(footer.includes('rel="noopener noreferrer"'));
   assert.ok(read("src/components/app-shell.tsx").includes("<SiteFooter />"));
-  assert.ok(read("src/routes/index.tsx").includes("<MarketDiscovery />"));
+  // Home is crypto Up/Down first; MarketDiscovery remains available as a component.
+  assert.ok(read("src/components/market-discovery.tsx").includes("export function MarketDiscovery"));
+  assert.ok(read("src/routes/index.tsx").includes("UpDownSection"));
 });

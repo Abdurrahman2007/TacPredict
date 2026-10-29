@@ -1,0 +1,10 @@
+{
+  "status": "NOT_DEPLOYED_PERMISSION_BLOCKED",
+  "chainId": 84532,
+  "engine": null,
+  "deploymentTransaction": null,
+  "tradeTransactions": [],
+  "reason": "User expressly prohibits spending funds/signing transactions. Deployment necessarily uses test ETH and a wallet signature. No signing, key access, funding or broadcast attempted.",
+  "localEvidence": "local-receipts.json",
+  "localEvidenceIsSepolia": false
+}

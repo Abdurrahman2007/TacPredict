@@ -1,0 +1,18 @@
+{
+  "verifiedAtUtc": "2026-10-29T09:27:00.000Z",
+  "engine": "0xCF59F3Ff524cC1bD4e11177937D3BCBE62860E46",
+  "operator": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+  "roles": {
+    "DEFAULT_ADMIN_ROLE": true,
+    "CREATOR_ROLE": true,
+    "PROPOSER_ROLE": true
+  },
+  "grantTxs": {
+    "DEFAULT_ADMIN_ROLE": "0x08308a7c095e3d1b55dfde19e06bfcc4b4ed5c15bc46d206e3075c9548c6d345",
+    "CREATOR_ROLE": "0x1ef0c41bbd89615dc6eccde8ec267a694e6b6750275a21f4d2d117a42befb45b",
+    "PROPOSER_ROLE": "0x9827e49484a18f798067fd67924d5bfc347a164d02798e85f10a18aa10022eeb"
+  },
+  "operatorSepoliaEth": "0",
+  "blocker": "Operator has CREATOR/PROPOSER but 0 Sepolia ETH. Funded wallet 0x6397… has ETH but not CREATOR/PROPOSER. Mainnet Chainlink feeds have no code on Sepolia — deploy MockFeed+sequencer before configurePricePolicy/Buy.",
+  "fundedWallet": "0x6397A026560e7b66584F087739b15AE2bda8610f"
+}

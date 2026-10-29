@@ -1,17 +1,18 @@
 import { AccountProvider } from "./account-provider";
 import { AccountMenu } from "./account-menu";
-import { SiteFooter } from "./site-footer";
-import { Link, useLocation } from "@tanstack/react-router";
-import { House, Radio, Wallet, Trophy, Info } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { House, Gift, Wallet, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { LoginButton } from "./login-dialog";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
+import { PortfolioNavLabel } from "./portfolio-nav-label";
+import { SiteFooter } from "./site-footer";
+/** Crypto-first shell: Markets list removed from nav; Rewards replaces that slot. */
 const navItems = [
-  { to: "/" as const, label: "Home", icon: House },
-  { to: "/markets" as const, label: "Markets", icon: Radio },
-  { to: "/ranking" as const, label: "Ranking", icon: Trophy },
-  { to: "/profile" as const, label: "Portfolio", icon: Wallet },
+  { to: "/" as const, label: "Home", icon: House, portfolio: false },
+  { to: "/rewards" as const, label: "Rewards", icon: Gift, portfolio: false },
+  { to: "/ranking" as const, label: "Ranking", icon: Trophy, portfolio: false },
+  { to: "/profile" as const, label: "Portfolio", icon: Wallet, portfolio: true },
 ];
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -21,40 +22,40 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 function ShellContent({ children }: { children: ReactNode }) {
-  const path = useLocation().pathname;
-  const showSource = path === "/" || path.startsWith("/markets") || path === "/up-down";
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <header className="app-header sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-[3.75rem] max-w-6xl items-center gap-3 px-4 sm:px-6">
+      <header className="app-header sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/70">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
           <Link
             to="/"
-            className="app-header-brand flex min-w-0 items-center gap-2.5"
+            className="app-header-brand group flex min-w-0 items-center gap-2.5"
             aria-label="TacPredict home"
           >
-            <BrandMark className="size-9" />
+            <BrandMark className="size-9 transition-transform duration-300 group-hover:scale-[1.04]" />
             <span className="app-header-name text-base font-semibold tracking-tight">
               TacPredict
             </span>
           </Link>
-          <nav className="ml-8 hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+          <nav
+            className="ml-6 hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/30 p-1 lg:flex"
+            aria-label="Main navigation"
+          >
             {navItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                activeProps={{ className: "bg-primary/10 text-primary" }}
+                className="rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                activeProps={{
+                  className:
+                    "rounded-full bg-background px-3.5 py-2 text-sm font-semibold text-foreground shadow-sm shadow-black/20",
+                }}
                 activeOptions={{ exact: item.to === "/" }}
               >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="app-header-actions ml-auto flex shrink-0 items-center gap-3">
-            <span className="hidden items-center gap-1.5 text-xs text-muted-foreground lg:inline-flex">
-              <span className="size-1.5 rounded-full bg-[#527dff]" />
-              Base
-            </span>
+          <div className="app-header-actions ml-auto flex shrink-0 items-center gap-2.5 sm:gap-3">
             <LoginButton />
             <AccountMenu />
           </div>
@@ -62,42 +63,8 @@ function ShellContent({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
         {children}
-        {showSource && (
-          <footer className="mt-6 flex justify-center">
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Market data information"
-                  className="grid size-11 place-items-center rounded-full text-muted-foreground/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
-                >
-                  <Info size={15} aria-hidden="true" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent side="top" className="rounded-2xl text-xs leading-5">
-                <p className="font-semibold">Market data</p>
-                <p className="mt-2">
-                  Crypto spot data provided by{" "}
-                  <a
-                    href="https://www.coingecko.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline"
-                  >
-                    CoinGecko
-                  </a>
-                  . These reference prices are not prediction odds.
-                </p>
-                <p className="mt-2 text-muted-foreground">
-                  Native volume and positions come from indexed TacPredict Base transactions.
-                  Preview and discovered listings are not tradeable.
-                </p>
-              </PopoverContent>
-            </Popover>
-          </footer>
-        )}
-        <SiteFooter />
       </main>
+      <SiteFooter />
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         aria-label="Mobile navigation"
@@ -116,7 +83,7 @@ function ShellContent({ children }: { children: ReactNode }) {
                 <span className="nav-icon grid h-8 w-11 place-items-center rounded-xl">
                   <Icon className="size-5" strokeWidth={1.8} />
                 </span>
-                <span>{item.label}</span>
+                <span>{item.portfolio ? <PortfolioNavLabel /> : item.label}</span>
               </Link>
             );
           })}

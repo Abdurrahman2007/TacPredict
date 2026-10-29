@@ -1,0 +1,30 @@
+{
+  "title": "VirtualPriceAMM paper trading bootstrap (BTC ETH SOL BNB)",
+  "ui": "unchanged — backend/oracle/operator only",
+  "legacySixContracts": "untouched — see src/lib/protocol/verified-mainnet-contracts.ts + admin Contracts view",
+  "predictedEngine": "0xB124Fc06b3E5955A306e83E21B049d0863a0fCAb",
+  "blocker": {
+    "adminBalanceEth": "0.0000176",
+    "needApproxEth": "0.000035+",
+    "privateKeyPresent": false,
+    "action": "Fund admin 0x57828f1aa32fd6be3988f240068df53ed94b7aef with ~0.0001 ETH on Base, then set VIRTUAL_MAINNET_DEPLOY_APPROVED=true and VIRTUAL_DEPLOYER_PRIVATE_KEY and re-run prepare-price-mainnet.mjs"
+  },
+  "steps": [
+    "1. Deploy VirtualPriceAMM via protocol/virtual/scripts/prepare-price-mainnet.mjs (Ankr RPC)",
+    "2. Admin grants CREATOR_ROLE + PROPOSER_ROLE (+ GUARDIAN/WATCHER/ARBITER as needed)",
+    "3. createPool for BTC/ETH/SOL/BNB (hourly windows) — seed comes from seedBudget via createPool",
+    "4. configurePricePolicy per market using price-policy-hints.json (Chainlink feeds + sequencer)",
+    "5. Apply supabase/migration-drafts/virtual-v1.sql on staging (indexer/grants tables)",
+    "6. node --import tsx scripts/build-virtual-config.mjs launch/price-mainnet/deployment.json",
+    "7. Fill pricePolicyHash from on-chain; set VIRTUAL_TRADING_CONFIG; enabled:true only after indexer healthy",
+    "8. Operator: operations.mts plan → submit captureStart / proposeFromFeed / finalize with role wallet",
+    "9. Virtual USDC grants: configureMonthlyCampaign + Merkle claimGrant (no real USDC withdraw)"
+  ],
+  "feeds": {
+    "BTC": "0xCCADC697c55bbB68dc5bCdf8d3CBe83CdD4E071E",
+    "ETH": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
+    "SOL": "0x975043adBb80fc32276CbF9Bbcfd4A601a12462D",
+    "BNB": "0x4b7836916781CAAfbb7Bd1E5FDd20ED544B453b1",
+    "sequencer": "0xBCF85224fc0756B9Fa45aA7892530B47e10b6433"
+  }
+}

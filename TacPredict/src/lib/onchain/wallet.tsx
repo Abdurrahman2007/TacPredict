@@ -95,17 +95,9 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       setAddress(selected);
       setChainId(network);
       if (!selected || network !== BASE_NETWORK.id) return;
-      const [token, gas] = await Promise.all([
-        wallet.request({
-          method: "eth_call",
-          params: [{ to: BASE_NETWORK.usdc, data: balanceOfData(selected) }, "latest"],
-        }),
-        wallet.request({ method: "eth_getBalance", params: [selected, "latest"] }),
-      ]);
+      const gas = await wallet.request({ method: "eth_getBalance", params: [selected, "latest"] });
       if (version !== revision.current) return;
-      if (typeof token !== "string" || !/^0x[0-9a-f]+$/i.test(token))
-        throw new Error("Invalid token response");
-      setUsdc(BigInt(token));
+      setUsdc(null); // Real token balances are not a prediction-trading balance.
       if (typeof gas === "string" && /^0x[0-9a-f]+$/i.test(gas)) setGasBalance(BigInt(gas));
       setError("");
     } catch {

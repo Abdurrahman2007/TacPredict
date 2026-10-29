@@ -1,0 +1,21 @@
+{
+  "name": "tacpredict-virtual-protocol",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "node scripts/compile.mjs",
+    "test": "node --import tsx --test --test-concurrency=1 test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@openzeppelin/contracts": "5.6.1",
+    "hardhat": "3.21.0",
+    "solc": "0.8.38",
+    "tsx": "4.23.15",
+    "viem": "2.57.10"
+  },
+  "overrides": {
+    "tmp": "0.2.7",
+    "zod": "4.6.6"
+  }
+}
