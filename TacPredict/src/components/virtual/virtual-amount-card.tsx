@@ -15,10 +15,15 @@ export function VirtualAmountCard({
   market,
   selected,
   onSelect,
+  tradingAllowed = true,
+  settlementNote,
 }: {
   market: Market;
   selected?: string | undefined;
   onSelect: (id: string) => void;
+  /** False outside the live window — on-chain prepare still re-checks open/close. */
+  tradingAllowed?: boolean;
+  settlementNote?: string;
 }) {
   const ref = market.virtual!,
     w = useBaseWallet(),
@@ -176,6 +181,10 @@ export function VirtualAmountCard({
     }
   }
   async function submit() {
+    if (!tradingAllowed) {
+      setNotice(settlementNote ?? "Trading unavailable for this market window");
+      return;
+    }
     const q = quote.data;
     if (lock.current || busy || waiting || !q || priceError || amount !== debounced) return;
     lock.current = true;
@@ -340,6 +349,7 @@ export function VirtualAmountCard({
           type="button"
           className="pd-submit"
           disabled={
+            !tradingAllowed ||
             busy ||
             waiting ||
             !quote.data ||
@@ -354,17 +364,21 @@ export function VirtualAmountCard({
             ? "Review in wallet…"
             : waiting
               ? "Transaction pending…"
-              : !ref.deployment.enabled
-                ? "Trading unavailable"
-                : mode === "buy"
-                  ? "Buy shares"
-                  : "Sell shares"}
+              : !tradingAllowed
+                ? "Unavailable"
+                : !ref.deployment.enabled
+                  ? "Trading unavailable"
+                  : mode === "buy"
+                    ? "Buy shares"
+                    : "Sell shares"}
         </button>
       )}
       <p className="pd-order-note">
-        {w.chainId !== ref.deployment.chainId
-          ? "Switch to the market network before trading."
-          : "Each Buy/Sell requires its own transaction and native ETH gas."}
+        {!tradingAllowed
+          ? (settlementNote ?? "On-chain trading is only available while this window is live.")
+          : w.chainId !== ref.deployment.chainId
+            ? "Switch to the market network before trading."
+            : "Each Buy/Sell requires its own transaction and native ETH gas. Virtual USDC only."}
       </p>
       {(priceError || quote.isError || account.isError) && (
         <p role="alert" className="pd-order-notice">

@@ -113,7 +113,11 @@ UI odds: `spotShareOdds` → feed-v1. Contract executable prices (when wired): `
 
 ---
 
-## 7. Acceptance criteria (not met on live yet)
+## 7. Acceptance criteria
+
+**Shipped (repo):** Up/Down detail binds to `VirtualAmountCard` when an indexed VirtualPriceAMM market matches the window (asset + open/close) and `onchainVirtualExecutionAllowed` passes. Otherwise paper. `planWindowCreations` plans missing series slots for keepers.
+
+**Not met on live until continuous `createPool` + indexer catalogue for each window:**
 
 - [ ] Each Buy has Base tx hash + `TradeExecuted`
 - [ ] Each Sell is a **different** tx hash + `TradeExecuted`
