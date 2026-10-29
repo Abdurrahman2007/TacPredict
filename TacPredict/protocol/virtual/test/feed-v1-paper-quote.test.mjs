@@ -79,7 +79,7 @@ test("schedule: six durations including 30m", () => {
   assert.deepEqual([...DISPLAY_DURATIONS], [5, 15, 30, 60, 720, 1440]);
 });
 
-test("schedule: 5 assets × 6 intervals unique", () => {
+test("schedule: 4 assets × 6 intervals unique (XRP removed)", () => {
   const now = 1_700_000_000;
   const assets = ["BTC", "ETH", "SOL", "BNB"];
   const intervals = [300, 900, 1800, 3600, 43200, 86400];
@@ -93,7 +93,7 @@ test("schedule: 5 assets × 6 intervals unique", () => {
       }
     }
   }
-  assert.equal(keys.size, 5 * 6 * 3);
+  assert.equal(keys.size, 4 * 6 * 3);
 });
 
 test("lifecycle: proposeFromFeed when closed with closing round", () => {

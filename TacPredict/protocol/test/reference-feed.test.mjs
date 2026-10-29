@@ -41,10 +41,8 @@ test("public chart source stays server-side and independent from settlement evid
   );
   assert.ok(src("lib/updown/reference.server.ts").includes("cache.put"));
   assert.ok(src("lib/updown/spot.server.ts").includes("https://api.exchange.coinbase.com"));
-  assert.match(
-    src("routes/profile.tsx"),
-    /useSyncExternalStore\(\s*subscribeHydration,\s*\(\) => true,\s*\(\) => false,/,
-  );
+  assert.ok(src("routes/profile.tsx").includes("usePaperLedger"));
+  assert.ok(src("routes/profile.tsx").includes("Virtual USDC"));
 });
 
 import { referenceLabelY } from "../../src/lib/updown/chart-window.mjs";

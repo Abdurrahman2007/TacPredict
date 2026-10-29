@@ -46,12 +46,13 @@ test("reject duplicate wallets, over-budget, invalid month/times and per-user ca
   ])
     assert.throws(() => previewCampaign(d, engine, 8453, "1", start - 10));
 });
-test("series planner is UTC aligned, unique, bounded and supports all five assets", () => {
-  for (const a of ["BTC", "ETH", "SOL", "XRP", "BNB"]) {
+test("series planner is UTC aligned, unique, bounded (BTC ETH SOL BNB; no XRP)", () => {
+  for (const a of ["BTC", "ETH", "SOL", "BNB"]) {
     const p = futureWindows(a, 300, start + 1, 3);
     assert.equal(new Set(p.map((x) => x.key)).size, 3);
     assert(p.every((x) => x.startsAt % 300 === 0 && x.startsAt > start + 1));
   }
+  assert.throws(() => futureWindows("XRP", 300, start + 1, 3));
   assert.throws(() => futureWindows("BTC", 300, start, 1000));
 });
 test("keeper never silently finalizes disputed/missing evidence; timeout and immutable identity", () => {
