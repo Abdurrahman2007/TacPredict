@@ -62,9 +62,7 @@ export const BASE_CHAINLINK_FEEDS: Record<ChainlinkAsset, BaseChainlinkFeed> = {
 };
 
 /** Official Chainlink BTC/USD on Base (optional alternative to WBTC/USD above). */
-export const BTC_USD_OFFICIAL: Address = getAddress(
-  "0x32F587986D3fb47601157c19615d568BeD0BCabc",
-);
+export const BTC_USD_OFFICIAL: Address = getAddress("0x32F587986D3fb47601157c19615d568BeD0BCabc");
 
 /** Base L2 sequencer uptime status feed (AggregatorV3-compatible). */
 export const BASE_SEQUENCER_FEED: Address = getAddress(

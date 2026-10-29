@@ -82,5 +82,7 @@ test("scroll discovery is in-page and social links use the exact supplied destin
   assert.ok(footer.includes('href="https://t.me/TacPredict"'));
   assert.ok(footer.includes('rel="noopener noreferrer"'));
   assert.ok(read("src/components/app-shell.tsx").includes("<SiteFooter />"));
-  assert.ok(read("src/routes/index.tsx").includes("<MarketDiscovery />"));
+  // Home is crypto Up/Down first; MarketDiscovery remains available as a component.
+  assert.ok(read("src/components/market-discovery.tsx").includes("export function MarketDiscovery"));
+  assert.ok(read("src/routes/index.tsx").includes("UpDownSection"));
 });

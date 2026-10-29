@@ -88,9 +88,10 @@ test("removing repeated provider captions does not hide stale-data warnings", ()
   assert.ok(c.includes("Delayed prices"));
 });
 
-test("reference price windows do not masquerade as live prediction trading", () => {
+test("home Up/Down cards are paper Virtual USDC, not real-USDC CLOB trading", () => {
   const s = src("components/up-down-section.tsx");
-  assert.ok(s.includes("Reference price window only"));
-  assert.ok(s.includes("const poolOn = false"));
+  assert.ok(s.includes("usePaperLedger"));
+  assert.ok(s.includes("assetSettlementPolicy"));
+  assert.ok(s.includes("PaperSettleRobot") || s.includes("runPaperSettleTick"));
   assert.ok(!s.includes(">LIVE "));
 });

@@ -69,21 +69,11 @@ export async function planVirtualOperatorActions(
     let closingRound: string | null = null;
     try {
       if (start === 0n && now >= Number(pool.terms.openAt)) {
-        const round = await findBoundaryRound(
-          r.client,
-          feed,
-          pool.terms.openAt,
-          tolerance,
-        );
+        const round = await findBoundaryRound(r.client, feed, pool.terms.openAt, tolerance);
         startRoundStr = round.toString();
       }
       if (start > 0n && now >= Number(pool.terms.closeAt) && !proposal[2]) {
-        const round = await findBoundaryRound(
-          r.client,
-          feed,
-          pool.terms.closeAt,
-          tolerance,
-        );
+        const round = await findBoundaryRound(r.client, feed, pool.terms.closeAt, tolerance);
         closingRound = round.toString();
       }
     } catch {

@@ -1,9 +1,4 @@
-import {
-  createPublicClient,
-  http,
-  type Address,
-  type PublicClient,
-} from "viem";
+import { createPublicClient, http, type Address, type PublicClient } from "viem";
 import { base } from "viem/chains";
 import {
   BASE_CHAINLINK_FEEDS,
@@ -164,8 +159,7 @@ export async function assertMarketOracleFresh(
   observedAt = nowSeconds(),
 ): Promise<ChainlinkSpot> {
   const spec = meta.resolutionSpec;
-  if (!spec || spec.kind !== "crypto")
-    throw Error("Feed-priced binary market policy required");
+  if (!spec || spec.kind !== "crypto") throw Error("Feed-priced binary market policy required");
   if (!isChainlinkAsset(spec.asset))
     throw Error("Chainlink feed is not configured for this asset; trading blocked.");
   const maxAge = effectiveOracleMaxAgeSeconds(spec.asset, spec.maxFetchAgeSeconds);

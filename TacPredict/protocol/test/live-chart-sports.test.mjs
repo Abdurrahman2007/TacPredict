@@ -68,16 +68,13 @@ test("live candles use only later real ticks and leave empty minutes empty", () 
   ]);
   assert.equal(base[0].close, 11);
 });
-test("1H is a display duration, not a silently enabled contract series", () => {
+test("1H is a paper/UI duration, not a silently enabled UpDownPool series", () => {
   assert.ok(DISPLAY_DURATIONS.includes(60));
+  assert.ok(DURATIONS.includes(60));
   assert.equal(parseDuration(60), 60);
-  assert.ok(!DURATIONS.includes(60));
   assert.ok(!POOL_DURATIONS.includes(60));
-  assert.ok(src("components/up-down-section.tsx").includes("dense={!poolOn}"));
-  assert.ok(src("components/up-down-section.tsx").includes("const poolOn = false"));
-  assert.ok(
-    src("components/updown/updown-detail.tsx").includes("usePriceWindow(asset, w, nowMs, !poolOn)"),
-  );
+  assert.ok(src("components/up-down-section.tsx").includes("spotShareOdds"));
+  assert.ok(src("components/updown/updown-detail.tsx").includes("usePaperLedger"));
 });
 test("public sports tabs and admin tabs share definitions; crypto stays outside Markets", () => {
   assert.deepEqual(SPORTS_FILTERS, ["All", "Football", "Cricket"]);
@@ -92,15 +89,15 @@ test("public sports tabs and admin tabs share definitions; crypto stays outside 
   assert.ok(src("components/admin/views/public-pages.tsx").includes("HOME_FEEDS.map"));
   assert.ok(src("components/admin/views/public-pages.tsx").includes("MARKET_SORTS.map"));
 });
-test("sport logos are local and portfolio removes exactly the marked controls", () => {
+test("sport logos are local and paper portfolio replaces Mainnet wallet chrome", () => {
   for (const sport of ["football", "cricket"])
     assert.ok(existsSync(new URL(`../../public/logos/sports/${sport}.svg`, import.meta.url)));
   const portfolio = src("routes/profile.tsx");
   assert.ok(!portfolio.includes("How values are calculated"));
   assert.ok(!portfolio.includes("Updated since (UTC)"));
   assert.ok(!portfolio.includes("Base Mainnet"));
-  assert.ok(portfolio.includes("Unsupported network"));
-  assert.ok(portfolio.includes("Wallet USDC"));
+  assert.ok(portfolio.includes("usePaperLedger"));
+  assert.ok(portfolio.includes("Virtual USDC"));
   const chart = src("components/updown/updown-chart.tsx");
   assert.ok(chart.includes("setPointerCapture"));
   assert.ok(chart.includes("nearestObservation(series, target)"));

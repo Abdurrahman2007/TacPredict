@@ -19,8 +19,7 @@ export function createReadCoalescer(limit = 4) {
     const key = JSON.stringify(identity);
     const existing = flights.get(key);
     if (existing) return existing as Promise<T>;
-    if (flights.size >= limit)
-      return Promise.reject(Error("Virtual catalogue reads busy; retry"));
+    if (flights.size >= limit) return Promise.reject(Error("Virtual catalogue reads busy; retry"));
     const tracked: Promise<T> = Promise.resolve()
       .then(load)
       .then(

@@ -55,7 +55,7 @@ test("duration bar is removed from detail and context range is visible", () => {
 });
 test("full historical cache is separate from spot-only snapshot history", () => {
   const s = src("lib/coingecko.server.ts");
-  assert.ok(s.includes("history-v4/${asset}"));
+  assert.ok(s.includes("history-v5/${asset}"));
   assert.ok(s.includes("public,max-age=600"));
   assert.ok(!s.includes("histories.set(asset, { points: shared.histories[asset]"));
 });

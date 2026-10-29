@@ -45,7 +45,11 @@ export function assertKeeperNetworkAllowed(chainId: number, submit: boolean) {
 export async function runKeeperTick(input: {
   store: KeeperStore;
   plans: { marketId: string; action: KeeperJob["action"]; idempotencyKey: string }[];
-  execute: (plan: { marketId: string; action: KeeperJob["action"]; idempotencyKey: string }) => Promise<void>;
+  execute: (plan: {
+    marketId: string;
+    action: KeeperJob["action"];
+    idempotencyKey: string;
+  }) => Promise<void>;
   now?: number;
   maxAttempts?: number;
 }): Promise<{ processed: number; done: number; failed: number; skipped: number }> {
@@ -96,6 +100,7 @@ export async function runKeeperTick(input: {
 export const KEEPER_GAS_POLICY = {
   payer: "Authorized operator wallet (PROPOSER/CREATOR roles)",
   funding: "Sepolia faucet ETH only until Mainnet approval; alert if balance < configured floor",
-  feedUpdates: "Never send txs on price ticks — only captureStart/propose/finalize/timeoutVoid/create",
+  feedUpdates:
+    "Never send txs on price ticks — only captureStart/propose/finalize/timeoutVoid/create",
   alerts: "Emit structured JSON logs; page on consecutive failed attempts ≥ maxAttempts",
 } as const;

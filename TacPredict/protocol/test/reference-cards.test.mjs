@@ -65,14 +65,14 @@ test("elapsed time never fabricates a settled or funded round", () => {
   assert.equal(historyState({ ...empty, state: 1, result: 1 }, w, 300), "Up won");
   assert.equal(historyState({ ...empty, state: 2 }, w, 300), "Refunded");
 });
-test("cards stretch the real route link, retain direction links, and never invent cents", () => {
+test("cards stretch the real route link and use paper spot odds (never invent cents)", () => {
   const c = src("components/up-down-section.tsx"),
     css = src("styles/updown.css");
   assert.ok(c.includes("tp-card-hit"));
   assert.ok(css.includes(".tp-card-hit::after"));
-  assert.ok(c.includes('cents(outcome) !== "Unavailable"'));
-  assert.ok(c.includes("side: label.toLowerCase()"));
-  assert.ok(c.includes("makeWindow(poolOn ? nextStart : start, minutes)"));
+  assert.ok(c.includes("spotShareOdds"));
+  assert.ok(c.includes("paperVolumeFor"));
+  assert.ok(c.includes("makeWindow(start, minutes)"));
   assert.ok(!c.includes("Math.random"));
 });
 test("admin reads finalized on-chain rows without wallet signing or fabricated results", () => {
