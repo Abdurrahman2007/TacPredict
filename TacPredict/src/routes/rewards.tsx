@@ -8,8 +8,10 @@ import {
 } from "@/lib/daily-checkin";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
+import { Link } from "@tanstack/react-router";
 import { isPriorityWallet, useWelcomeChest } from "@/lib/rewards/welcome-chest";
 import { WelcomeChestBox } from "@/components/rewards/welcome-chest";
+import { usePaperLedger } from "@/lib/paper/ledger";
 import "@/styles/rewards-checkin.css";
 import "@/styles/chest-open.css";
 
@@ -52,10 +54,13 @@ function RewardsClient() {
   const login = useLoginDialog();
   const wallet = useBaseWallet();
   const chest = useWelcomeChest();
+  const paper = usePaperLedger();
   const { ready, status, remaining, canClaim, claim, nextDay } = useDailyCheckin();
   const [opening, setOpening] = useState(false);
   const [burst, setBurst] = useState<number | null>(null);
   const isConnected = Boolean(wallet.address);
+  /** Tradeable Virtual USDC = paper ledger (welcome box + check-in credits + trades). */
+  const virtualUsdc = isConnected ? paper.balance : 0;
   const priority = isPriorityWallet(
     typeof window !== "undefined"
       ? (window as { ethereum?: { isCoinbaseWallet?: boolean; isFarcaster?: boolean } }).ethereum
@@ -68,7 +73,6 @@ function RewardsClient() {
             : null
       : null,
   );
-  const balance = status.data?.balance;
   const streak = status.data?.streak ?? 0;
   const claimedThrough = Math.min(streak, 7);
   const showCheckin = chest.opened && !opening && burst == null;
@@ -101,11 +105,20 @@ function RewardsClient() {
         <strong className="tp-rewards-balance">
           {!isConnected
             ? "0"
-            : status.isPending
-              ? "…"
-              : (balance ?? 0).toLocaleString("en-US")}
+            : virtualUsdc.toLocaleString("en-US", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
         </strong>
-        <span className="tp-rewards-unit">rewards balance</span>
+        <span className="tp-rewards-unit">Virtual USDC · tradeable (paper)</span>
+        {isConnected && chest.opened ? (
+          <p className="tp-rewards-trade-hint">
+            <Link to="/up-down" search={{ d: 5 }}>
+              Trade 5m Up/Down
+            </Link>{" "}
+            with this balance · not withdrawable
+          </p>
+        ) : null}
       </header>
 
       {!chest.opened || opening || burst != null ? (

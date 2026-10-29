@@ -98,11 +98,26 @@ export function virtualConfig() {
     maxProjectionAgeSeconds: parsed.maxProjectionAgeSeconds,
   };
 }
+
+/** Sepolia engine must talk to a Sepolia RPC — never reuse Mainnet Ankr/Alchemy by mistake. */
+export function virtualRpcUrl(chainId: 8453 | 84532 | 31337): string {
+  if (chainId === 84532) {
+    const sepolia =
+      process.env["BASE_SEPOLIA_PROTOCOL_RPC_URL"] ||
+      process.env["VIRTUAL_SEPOLIA_RPC_URL"] ||
+      process.env["VIRTUAL_RPC_URL"];
+    if (!sepolia) throw Error("Sepolia Virtual RPC unavailable");
+    return sepolia;
+  }
+  const url = process.env["VIRTUAL_RPC_URL"] || process.env["BASE_PROTOCOL_RPC_URL"];
+  if (!url) throw Error("Virtual RPC unavailable");
+  return url;
+}
+
 export async function virtualRuntime() {
   const config = virtualConfig();
   if (!config) throw Error("Virtual trading is not configured");
-  const url = process.env["VIRTUAL_RPC_URL"];
-  if (!url) throw Error("Virtual RPC unavailable");
+  const url = virtualRpcUrl(config.deployment.chainId);
   const chain =
     config.deployment.chainId === 8453
       ? base

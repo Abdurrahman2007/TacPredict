@@ -11,7 +11,7 @@
       "id": "1",
       "title": "BTC Up or Down — Sepolia QA pool",
       "category": "Crypto",
-      "description": "Private Sepolia VirtualPriceAMM market #1 (MockFeed). Virtual USDC only; not withdrawable. Public UI still uses paper ledger for 5m windows.",
+      "description": "Private Sepolia VirtualPriceAMM market #1 (MockFeed). Virtual USDC only; not withdrawable. Public 5m Up/Down uses paper ledger + welcome rewards.",
       "outcomes": ["Up", "Down"],
       "source": "MockFeed BTC on Base Sepolia",
       "sourceUrl": "https://sepolia.basescan.org/address/0x657F55EdDeb1ab37F1bebF99824147B60fC47Aca",
@@ -26,11 +26,5 @@
         "tie": "void"
       }
     }
-  ],
-  "notes": [
-    "Wire via VIRTUAL_TRADING_CONFIG=<minified JSON> and VIRTUAL_RPC_URL=https://sepolia.base.org",
-    "User-facing 5m Up/Down remains paper Virtual USDC (welcome box + settle robot)",
-    "XRP permanently removed from product",
-    "No Mainnet"
   ]
 }

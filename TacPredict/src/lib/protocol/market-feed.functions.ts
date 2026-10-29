@@ -45,6 +45,14 @@ export function toMarket(m: NativeMarket): Market {
 export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
   async (): Promise<NativeFeed> => {
     const updatedAt = new Date().toISOString();
+    // Soft deployment pointer for UI/admin even when indexer catalogue is not ready.
+    let deploymentHint: import("@/lib/virtual/types").VirtualDeployment | undefined;
+    try {
+      const { virtualConfig } = await import("@/lib/virtual/runtime.server");
+      deploymentHint = virtualConfig()?.deployment;
+    } catch {
+      deploymentHint = undefined;
+    }
     try {
       const { readVirtualCatalogue } = await import("@/lib/virtual/read.server");
       const { coalesceCatalogue } = await import("@/lib/virtual/catalogue-coalescer.server");
@@ -53,6 +61,7 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
           "virtual-catalogue-v1",
           process.env["VIRTUAL_TRADING_CONFIG"] ?? null,
           process.env["VIRTUAL_RPC_URL"] ?? null,
+          process.env["BASE_SEPOLIA_PROTOCOL_RPC_URL"] ?? null,
           process.env["SUPABASE_URL"] ?? null,
         ],
         () => readVirtualCatalogue(),
@@ -67,6 +76,7 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
           virtualMode: true,
           virtualDeployment: virtual.deployment,
         };
+      // No indexer catalogue yet — paper Up/Down + Rewards Virtual USDC still work.
       return {
         markets: [],
         cryptoUpDown: {},
@@ -74,7 +84,10 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         source: "TacPredict",
         updatedAt,
         virtualMode: true,
-        error: "Virtual markets are not configured. Real-USDC trading is disabled.",
+        ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
+        error: deploymentHint
+          ? "Sepolia VirtualPriceAMM configured; on-chain catalogue waits for indexer. Paper Virtual USDC trading is available."
+          : "Virtual markets are not configured. Paper Rewards Virtual USDC still works. Real-USDC trading is disabled.",
       };
     } catch {
       return {
@@ -84,8 +97,9 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         updatedAt,
         deployments: [],
         virtualMode: true,
-        error: process.env["VIRTUAL_TRADING_CONFIG"]
-          ? "Virtual markets unavailable. No real-USDC fallback is permitted."
+        ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
+        error: deploymentHint
+          ? "Sepolia engine linked; catalogue temporarily unavailable. Use paper Up/Down + Rewards box."
           : "Native markets are not available yet. No external odds or demo balances are substituted.",
       };
     }
