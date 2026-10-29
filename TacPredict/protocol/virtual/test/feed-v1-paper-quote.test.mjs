@@ -35,6 +35,20 @@ test("feed-v1: less time increases certainty", () => {
   assert.ok(late > early);
 });
 
+test("feed-v1: late 5m strongly favoured side can reach ~90–95¢ (not hardcoded)", () => {
+  // +1% spot vs strike with ~21s left — adaptive σ; must not force a winner.
+  const late = feedV1ShareOdds(101_000, 100_000, 21, 5);
+  const flat = feedV1ShareOdds(100_000, 100_000, 21, 5);
+  assert.ok(late && flat);
+  assert.ok(late.up >= 90 && late.up <= 95, `expected ~90–95¢ got ${late.up}`);
+  assert.equal(flat.up + flat.down, 100);
+  assert.ok(flat.up >= 45 && flat.up <= 55);
+  // Mild move earlier in the window stays well below late certainty.
+  const early = feedV1ShareOdds(101_000, 100_000, 280, 5);
+  assert.ok(early);
+  assert.ok(early.up < late.up);
+});
+
 test("feed-v1: invalid / closed → null", () => {
   const policy = defaultFeedV1Policy(5);
   assert.equal(feedV1UpPpm(100, 100, 0, policy), null);
