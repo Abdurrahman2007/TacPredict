@@ -1,0 +1,36 @@
+{
+  "chainId": 84532,
+  "engine": "0xCF59F3Ff524cC1bD4e11177937D3BCBE62860E46",
+  "codeHash": "0xbcc5446f4cb392475d4c7a98bb1d3c1948b3d345e2410c84cabdc0e109113535",
+  "startBlock": "51715578",
+  "enabled": true,
+  "model": "feed-v1",
+  "maxProjectionAgeSeconds": 120,
+  "markets": [
+    {
+      "id": "1",
+      "title": "BTC Up or Down — Sepolia QA pool",
+      "category": "Crypto",
+      "description": "Private Sepolia VirtualPriceAMM market #1 (MockFeed). Virtual USDC only; not withdrawable. Public UI still uses paper ledger for 5m windows.",
+      "outcomes": ["Up", "Down"],
+      "source": "MockFeed BTC on Base Sepolia",
+      "sourceUrl": "https://sepolia.basescan.org/address/0x657F55EdDeb1ab37F1bebF99824147B60fC47Aca",
+      "rules": "Start/end from MockFeed AggregatorV3 rounds. Tie voids. Staging only — not Mainnet.",
+      "resolutionSpec": {
+        "kind": "crypto",
+        "sourceId": "mock-sepolia:BTC",
+        "maxFetchAgeSeconds": 3600,
+        "asset": "BTC",
+        "intervalSeconds": 3600,
+        "observationToleranceSeconds": 300,
+        "tie": "void"
+      }
+    }
+  ],
+  "notes": [
+    "Wire via VIRTUAL_TRADING_CONFIG=<minified JSON> and VIRTUAL_RPC_URL=https://sepolia.base.org",
+    "User-facing 5m Up/Down remains paper Virtual USDC (welcome box + settle robot)",
+    "XRP permanently removed from product",
+    "No Mainnet"
+  ]
+}

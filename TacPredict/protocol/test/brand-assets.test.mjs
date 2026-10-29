@@ -6,7 +6,7 @@ const root = new URL("../../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 
 test("token logos are the real upstream icons, never hand-drawn text badges", () => {
-  for (const name of ["btc", "eth", "sol", "bnb", "xrp"]) {
+  for (const name of ["btc", "eth", "sol", "bnb"]) {
     const path = `public/brand/crypto/${name}.svg`;
     assert.ok(existsSync(new URL(path, root)), `${name} logo is installed`);
     const svg = read(path);

@@ -112,8 +112,8 @@ function RewardsClient() {
         <section className="tp-chest" aria-labelledby="chest-title">
           <h1 id="chest-title">Welcome reward</h1>
           <p>
-            Open once for a random <strong>$100–$500</strong> Virtual USDC grant. Coinbase Wallet +
-            Farcaster get priority access.
+            Open once for a random <strong>$50–$500</strong> Virtual USDC grant. Trade Up/Down with
+            it — not withdrawable. Coinbase Wallet + Farcaster get priority access.
           </p>
           <WelcomeChestBox
             opening={opening}

@@ -3,22 +3,21 @@ import assert from "node:assert/strict";
 import {
   assetSettlementPolicy,
   chainlinkSupportsWindow,
-  isXrpAsset,
-  XRP_FOLLOWUP,
 } from "../../../src/lib/virtual/oracle-policy.ts";
+import { ASSET_KEYS, assetFromSlug } from "../../../src/lib/updown/window.mjs";
 import {
   assertKeeperNetworkAllowed,
   memoryKeeperStore,
   runKeeperTick,
 } from "../../../src/lib/virtual/keeper.ts";
 
-test("XRP stays in product but trading/settlement blocked", () => {
-  assert.equal(isXrpAsset("xrp"), true);
+test("XRP permanently removed from product assets", () => {
+  assert.equal(assetFromSlug("xrp"), null);
+  assert.ok(!ASSET_KEYS.includes("xrp"));
   const p = assetSettlementPolicy("xrp", 5);
   assert.equal(p.tier, "unavailable");
   assert.equal(p.paperTradingAllowed, false);
   assert.equal(p.onchainSettlementAllowed, false);
-  assert.ok(XRP_FOLLOWUP.steps.length >= 3);
 });
 
 test("5m BTC is paper_only — Chainlink heartbeat too slow", () => {

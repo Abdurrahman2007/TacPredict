@@ -84,7 +84,7 @@ test("spot-only edge snapshots do not mask full history, and full history is reu
     source: "CoinGecko",
     updatedAt: new Date(now).toISOString(),
     histories: Object.fromEntries(
-      ["bitcoin", "ethereum", "solana", "xrp", "bnb"].map((a) => [a, spotPoints]),
+      ["bitcoin", "ethereum", "solana", "bnb"].map((a) => [a, spotPoints]),
     ),
   };
   const cache = new Map([

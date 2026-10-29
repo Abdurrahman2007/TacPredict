@@ -37,8 +37,8 @@ import { ActivityCard, AlsoTrading, PositionsCard, RulesCard, StatsCard } from "
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
 import { spotShareOdds } from "@/lib/paper/spot-odds";
 import { formatLiq } from "@/lib/paper/virtual-liquidity";
-import { paperVolumeFor, settlePaperMarket, usePaperLedger } from "@/lib/paper/ledger";
-import { paperOutcome } from "@/lib/paper/feed-v1-quote";
+import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
+import { runPaperResultRobot } from "@/lib/paper/settle-robot";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
@@ -233,15 +233,14 @@ export function UpDownDetail({
       }
     : reference;
 
-  // Auto paper-settle once when past + verified start/end prices exist (idempotent).
+  // 5m+ paper result robot: settle once when past + verified start/end spots exist.
   useEffect(() => {
     if (state !== "past" || shownBeat == null || shownCurrent == null) return;
-    const result = paperOutcome(shownBeat, shownCurrent, true);
-    if (!result) return;
-    settlePaperMarket(referenceId, result, {
-      start: shownBeat,
-      end: shownCurrent,
-      at: new Date(w.end).toISOString(),
+    runPaperResultRobot({
+      marketId: referenceId,
+      startPrice: shownBeat,
+      endPrice: shownCurrent,
+      closedAtIso: new Date(w.end).toISOString(),
     });
   }, [state, shownBeat, shownCurrent, referenceId, w.end]);
 

@@ -18,7 +18,7 @@ export function PaperAmountCard({
   market: Market;
   selected?: string | undefined;
   onSelect: (id: string) => void;
-  /** False for XRP (no Base settlement oracle) or other gated assets. */
+  /** False when asset/window is unavailable for paper trading. */
   tradingAllowed?: boolean;
   settlementNote?: string;
 }) {

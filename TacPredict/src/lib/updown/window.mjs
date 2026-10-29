@@ -7,14 +7,14 @@ export const ASSETS = {
   bitcoin: { product: "BTC-USD", name: "Bitcoin", short: "BTC", logo: "btc" },
   ethereum: { product: "ETH-USD", name: "Ethereum", short: "ETH", logo: "eth" },
   solana: { product: "SOL-USD", name: "Solana", short: "SOL", logo: "sol" },
-  xrp: { product: "XRP-USD", name: "XRP", short: "XRP", logo: "xrp" },
   bnb: { product: "BNB-USD", name: "BNB", short: "BNB", logo: "bnb" },
 };
-export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "xrp", "bnb"];
+/** Product assets only — XRP permanently removed (no Base settlement path). */
+export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
 /** Supported paper / UI durations (minutes). Matches VirtualPriceAMM scheduling set. */
 export const DURATIONS = [5, 15, 30, 60, 720, 1440];
 export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
-const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", xrp: "xrp", bnb: "bnb" };
+const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */
 const GRANULARITIES = [60, 300, 900, 3600, 21600, 86400];

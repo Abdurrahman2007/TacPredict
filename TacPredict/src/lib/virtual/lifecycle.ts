@@ -51,10 +51,8 @@ export function lifecyclePlan(markets: LifecycleMarket[], now: number) {
 }
 /** Deterministic future UTC windows. Caller must attach frozen rules, feed policy and approved budget. */
 export function futureWindows(asset: string, intervalSeconds: number, now: number, count: number) {
-  // XRP is included for paper/schedule keys; Base Chainlink has no XRP feed —
-  // on-chain feed-v1 trading for XRP stays blocked until an approved oracle exists.
   if (
-    !["BTC", "ETH", "SOL", "XRP", "BNB"].includes(asset) ||
+    !["BTC", "ETH", "SOL", "BNB"].includes(asset) ||
     ![300, 900, 1800, 3600, 43200, 86400].includes(intervalSeconds) ||
     !Number.isSafeInteger(now) ||
     !Number.isInteger(count) ||

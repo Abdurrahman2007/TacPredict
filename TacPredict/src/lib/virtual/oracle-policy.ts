@@ -8,13 +8,9 @@ import type { UpDownAsset } from "@/lib/updown/window.mjs";
  * on-chain settlement input.
  *
  * Settlement (VirtualPriceAMM feed-v1): AggregatorV3 Chainlink on Base for BTC/ETH/SOL/BNB
- * only. Heartbeats (≤1200s BTC/ETH; ≤86400s SOL/BNB) are too slow for reliable 5-minute
- * boundary capture. Short windows stay paper/display-only until an approved low-latency
- * pull oracle (e.g. Pyth / RedStone / Chainlink Data Streams) is integrated and audited.
- *
- * XRP: no Base Chainlink XRP/USD AggregatorV3 in our verified directory — keep asset in UI
- * for charts; block trading & on-chain settlement until a verifiable mechanism is approved.
- * Never invent a feed address.
+ * only. Heartbeats are too slow for reliable 5-minute boundary capture on Mainnet Chainlink.
+ * Short windows use paper Virtual USDC + feed-v1 quote model until a low-latency pull oracle
+ * is approved. XRP is permanently out of the product — do not reintroduce.
  */
 
 export type SettlementTier = "chainlink_ok" | "paper_only" | "unavailable";
@@ -51,11 +47,6 @@ export function toChainlinkAsset(asset: UpDownAsset | string): ChainlinkAsset | 
   return map[asset] ?? null;
 }
 
-export function isXrpAsset(asset: UpDownAsset | string): boolean {
-  const a = String(asset).toLowerCase();
-  return a === "xrp" || a === "ripple";
-}
-
 /** Max Chainlink heartbeat that can still support a window (conservative: half window). */
 export function chainlinkSupportsWindow(asset: ChainlinkAsset, minutes: number): boolean {
   const beat = BASE_CHAINLINK_FEEDS[asset].heartbeatSeconds;
@@ -66,22 +57,6 @@ export function assetSettlementPolicy(
   asset: UpDownAsset | string,
   minutes: number,
 ): AssetSettlementPolicy {
-  if (isXrpAsset(asset)) {
-    return {
-      asset: "XRP",
-      minutes,
-      tier: "unavailable",
-      label: "XRP · charts only — settlement oracle not available on Base",
-      paperTradingAllowed: false,
-      onchainSettlementAllowed: false,
-      reasons: [
-        "No verified Base AggregatorV3 XRP/USD feed in TacPredict registry",
-        "Coinbase XRP-USD is display-only and is not contract-verifiable settlement",
-        "Do not fabricate a feed address; wire Pyth/RedStone/Data Streams only after approval",
-      ],
-    };
-  }
-
   const cl = toChainlinkAsset(asset);
   if (!cl) {
     return {
@@ -91,7 +66,7 @@ export function assetSettlementPolicy(
       label: "Unsupported asset",
       paperTradingAllowed: false,
       onchainSettlementAllowed: false,
-      reasons: ["Unknown asset"],
+      reasons: ["Unknown or removed asset (XRP is not offered)"],
     };
   }
 
@@ -101,14 +76,13 @@ export function assetSettlementPolicy(
       asset: cl,
       minutes,
       tier: "paper_only",
-      label: `${cl} · paper quotes — Chainlink too slow for ${minutes}m settlement`,
+      label: `${cl} · Virtual USDC paper · ${minutes}m`,
       paperTradingAllowed: true,
       onchainSettlementAllowed: false,
       reasons: [
-        `Chainlink ${feed.description} heartbeat ${feed.heartbeatSeconds}s exceeds safe bound for ${minutes}m windows`,
-        "Start/expiry capture requires first Aggregator round at/after boundary with predecessor before boundary",
-        "Approved low-latency pull oracle required before on-chain short-window settlement",
-        "If boundary round missing/stale/jumped: pause resolution (timeout-void) — never invent a price",
+        `Chainlink ${feed.description} heartbeat ${feed.heartbeatSeconds}s exceeds safe bound for ${minutes}m on-chain windows`,
+        "Paper path uses feed-v1 quote + Coinbase display spot; 5m result robot settles paper positions",
+        "On-chain short-window settlement needs an approved low-latency oracle",
       ],
     };
   }
@@ -127,14 +101,3 @@ export function assetSettlementPolicy(
     ],
   };
 }
-
-/** Smallest safe XRP path later (documentation helper — not enabled). */
-export const XRP_FOLLOWUP = {
-  steps: [
-    "Select Base-supported pull oracle with XRP/USD (Pyth or RedStone) — verify Mainnet+Sepolia IDs from vendor docs",
-    "Extend VirtualPriceAMM or adapter to verify signed reports (not a fake Aggregator address)",
-    "Freeze price policy hash; capture start/expiry from attested publishTime within tolerance",
-    "Sepolia E2E then separate Mainnet approval",
-  ],
-  blockedUntil: "Vendor feed ID + audit + owner approval",
-} as const;

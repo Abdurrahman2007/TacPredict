@@ -18,9 +18,10 @@
   "publicTrading": false,
   "mainnet": false,
   "nextSteps": [
-    "Grant CREATOR_ROLE + PROPOSER_ROLE to admin (admin already DEFAULT_ADMIN_ROLE via constructor)",
-    "createPool + configurePricePolicy for one BTC long window (Chainlink-safe duration)",
-    "captureStart, private Buy, separate Sell, proposeFromFeed, finalize/settle",
-    "Keep XRP trading disabled"
+    "DONE: roles, MockFeed/SEQ, createPool→Buy/Sell QA (see qa-verified-0x6397.json)",
+    "Wire VIRTUAL_TRADING_CONFIG from virtual-trading-config.json + VIRTUAL_RPC_URL (Sepolia staging)",
+    "User UI: paper Virtual USDC via Rewards box ($50–$500) + 5m settle robot",
+    "XRP permanently removed from product",
+    "No Mainnet public trading without separate approval"
   ]
 }

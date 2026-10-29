@@ -5,7 +5,7 @@ import type { Market } from "@/domain/markets/types";
 import { usdcShort } from "./display.mjs";
 export type NativeFeed = {
   markets: Market[];
-  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana" | "xrp" | "bnb", Market>>;
+  cryptoUpDown: Partial<Record<"bitcoin" | "ethereum" | "solana" | "bnb", Market>>;
   source: "TacPredict";
   updatedAt: string;
   deployments: ProtocolDeployment[];

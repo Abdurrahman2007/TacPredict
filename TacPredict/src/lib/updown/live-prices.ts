@@ -25,7 +25,6 @@ const IDLE: Record<UpDownAsset, LiveAsset> = {
   ethereum: Object.freeze(emptyLive()) as LiveAsset,
   solana: Object.freeze(emptyLive()) as LiveAsset,
   bnb: Object.freeze(emptyLive()) as LiveAsset,
-  xrp: Object.freeze(emptyLive()) as LiveAsset,
 };
 const KEEP_MS = 20 * 60_000;
 const WS_URL = "wss://ws-feed.exchange.coinbase.com";
@@ -36,7 +35,6 @@ const state: Record<UpDownAsset, LiveAsset> = {
   ethereum: IDLE.ethereum,
   solana: IDLE.solana,
   bnb: IDLE.bnb,
-  xrp: IDLE.xrp,
 };
 const listeners = new Set<() => void>();
 let socket: WebSocket | null = null;

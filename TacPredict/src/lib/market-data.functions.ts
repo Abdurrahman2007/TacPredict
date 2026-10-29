@@ -5,9 +5,8 @@ export type CryptoMarketSnapshot = {
   bitcoin: { price: number; change24h: number; high24h: number; low24h: number; marketCap: number };
   ethereum: { price: number; change24h: number };
   solana: { price: number; change24h: number };
-  xrp: { price: number; change24h: number };
   bnb: { price: number; change24h: number };
-  histories: Record<"bitcoin" | "ethereum" | "solana" | "bnb" | "xrp", PricePoint[]>;
+  histories: Record<"bitcoin" | "ethereum" | "solana" | "bnb", PricePoint[]>;
   source: "CoinGecko";
   stale?: boolean;
   updatedAt: string;
@@ -18,7 +17,7 @@ export const getCryptoMarketSnapshot = createServerFn({ method: "GET" }).handler
   return coingeckoSnapshot();
 });
 export const cryptoMarketQueryOptions = queryOptions({
-  queryKey: ["crypto-market-snapshot", "coingecko-v3"],
+  queryKey: ["crypto-market-snapshot", "coingecko-v4"],
   queryFn: () => getCryptoMarketSnapshot(),
   staleTime: CACHE_MS,
   gcTime: 60 * CACHE_MS,
@@ -31,13 +30,7 @@ export const cryptoMarketQueryOptions = queryOptions({
 
 export const getCryptoAssetHistory = createServerFn({ method: "GET" })
   .inputValidator((value: unknown) => {
-    if (
-      value !== "bitcoin" &&
-      value !== "ethereum" &&
-      value !== "solana" &&
-      value !== "bnb" &&
-      value !== "xrp"
-    )
+    if (value !== "bitcoin" && value !== "ethereum" && value !== "solana" && value !== "bnb")
       throw Error("Unsupported crypto asset");
     return value;
   })
@@ -45,11 +38,9 @@ export const getCryptoAssetHistory = createServerFn({ method: "GET" })
     const { coingeckoAssetHistory } = await import("./coingecko.server");
     return coingeckoAssetHistory(data);
   });
-export const cryptoHistoryQueryOptions = (
-  asset: "bitcoin" | "ethereum" | "solana" | "bnb" | "xrp",
-) =>
+export const cryptoHistoryQueryOptions = (asset: "bitcoin" | "ethereum" | "solana" | "bnb") =>
   queryOptions({
-    queryKey: ["crypto-asset-history", "coingecko-v3", asset],
+    queryKey: ["crypto-asset-history", "coingecko-v4", asset],
     queryFn: () => getCryptoAssetHistory({ data: asset }),
     staleTime: 600000,
     gcTime: 3600000,

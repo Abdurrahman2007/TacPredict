@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "@/styles/market-cards.css";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
@@ -21,16 +21,29 @@ import { seriesCopyQueryOptions } from "@/lib/pool/pool-admin.functions";
 import { copyFor } from "@/lib/pool/series-copy.mjs";
 import { usePriceWindow } from "@/lib/updown/use-price-window";
 import { useLivePrice } from "@/lib/updown/live-prices";
+import { spotTickersQueryOptions } from "@/lib/updown/spot.functions";
 import { spotShareOdds } from "@/lib/paper/spot-odds";
 import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
+import { rememberPaperOpen, runPaperSettleTick } from "@/lib/paper/settle-robot";
+
+/** 5/15/30m paper result robot — ticks while Up/Down home is mounted. */
+function PaperSettleRobot() {
+  const tickers = useQuery(spotTickersQueryOptions);
+  useEffect(() => {
+    const getPrice = (asset: UpDownAsset) => tickers.data?.prices[asset]?.price ?? null;
+    runPaperSettleTick(getPrice);
+    const id = window.setInterval(() => runPaperSettleTick(getPrice), 15_000);
+    return () => window.clearInterval(id);
+  }, [tickers.data]);
+  return null;
+}
 
 const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bitcoin", large: true },
   { asset: "ethereum", large: true },
   { asset: "solana", large: true },
-  { asset: "xrp", large: true },
   { asset: "bnb", large: true },
 ];
 
@@ -67,6 +80,10 @@ function AssetCard({
   const upCents = odds ? `${Math.round(odds.up)}¢` : "—";
   const downCents = odds ? `${Math.round(odds.down)}¢` : "—";
   const settlement = assetSettlementPolicy(asset, minutes);
+
+  useEffect(() => {
+    if (beat != null) rememberPaperOpen(asset, minutes, w.start, beat);
+  }, [asset, minutes, w.start, beat]);
 
   return (
     <article className="ud-home-card tp-card" aria-label={`${info.name} Up or Down`}>
@@ -163,6 +180,7 @@ export function UpDownSection({
     );
   return (
     <section className={detailed ? "" : "mt-5"}>
+      <PaperSettleRobot />
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
           {fixedMinutes === 60

@@ -81,7 +81,7 @@ test("schedule: six durations including 30m", () => {
 
 test("schedule: 5 assets × 6 intervals unique", () => {
   const now = 1_700_000_000;
-  const assets = ["BTC", "ETH", "SOL", "XRP", "BNB"];
+  const assets = ["BTC", "ETH", "SOL", "BNB"];
   const intervals = [300, 900, 1800, 3600, 43200, 86400];
   const keys = new Set();
   for (const asset of assets) {

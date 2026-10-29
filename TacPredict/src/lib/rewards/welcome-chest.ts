@@ -79,10 +79,10 @@ function subscribe(cb: () => void) {
   };
 }
 
-/** Random one-time Virtual USDC grant in $100–$500 (multiples of $10). */
+/** Random one-time Virtual USDC grant in $50–$500 (multiples of $10). */
 export function rollWelcomeAmount() {
-  const steps = Math.floor(Math.random() * 41); // 0..40 → 100..500
-  return 100 + steps * 10;
+  const steps = Math.floor(Math.random() * 46); // 0..45 → 50..500
+  return 50 + steps * 10;
 }
 
 export function useWelcomeChest() {

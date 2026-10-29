@@ -141,7 +141,7 @@ test("thin keeps ends; formatting; slugs", () => {
   assert.equal(formatUsd(67123.456, "bitcoin"), "$67,123.46");
   assert.equal(formatUsd(0), "$0");
   assert.equal(assetFromSlug("BTC"), "bitcoin");
-  assert.equal(assetFromSlug("xrp"), "xrp");
+  assert.equal(assetFromSlug("xrp"), null);
   assert.equal(assetFromSlug("unknown"), null);
   assert.equal(parseDuration("15"), 15);
   assert.equal(parseDuration("7"), 5);
@@ -158,11 +158,18 @@ import {
   windowResult as result,
 } from "../../src/lib/updown/window.mjs";
 
-test("five assets and four existing window lengths", () => {
-  assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "xrp", "bnb"]);
+test("four assets and six window lengths (XRP removed)", () => {
+  assert.deepEqual([...ASSET_KEYS], ["bitcoin", "ethereum", "solana", "bnb"]);
   assert.equal(assetFromSlug("BNB"), "bnb");
-  assert.deepEqual([...DURATIONS], [5, 15, 720, 1440]);
-  assert.deepEqual(DURATIONS.map(durationLabel), ["5 min", "15 min", "12 hours", "24 hours"]);
+  assert.deepEqual([...DURATIONS], [5, 15, 30, 60, 720, 1440]);
+  assert.deepEqual(DURATIONS.map(durationLabel), [
+    "5 min",
+    "15 min",
+    "30 min",
+    "1 hour",
+    "12 hours",
+    "24 hours",
+  ]);
 });
 
 test("candle size grows with the look-back and never exceeds 300 candles", () => {

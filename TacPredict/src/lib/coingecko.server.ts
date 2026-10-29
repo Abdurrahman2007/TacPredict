@@ -1,5 +1,5 @@
 import type { CryptoMarketSnapshot, PricePoint } from "./market-data.functions";
-const assets = ["bitcoin", "ethereum", "solana", "bnb", "xrp"] as const;
+const assets = ["bitcoin", "ethereum", "solana", "bnb"] as const;
 const ttl = 60_000;
 let cached: { value: CryptoMarketSnapshot; expires: number } | undefined;
 let pending: Promise<CryptoMarketSnapshot> | undefined;
@@ -20,7 +20,7 @@ async function history(asset: string): Promise<PricePoint[]> {
   if (saved && saved.expires > Date.now()) return saved.points;
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-    const cacheKey = `https://tacpredict.fun/__cache/coingecko/history-v4/${asset}`;
+    const cacheKey = `https://tacpredict.fun/__cache/coingecko/history-v5/${asset}`;
     const hit = await edge?.match(cacheKey).catch(() => undefined);
     if (hit) {
       const points = (await hit.json()) as PricePoint[];
@@ -34,7 +34,7 @@ async function history(asset: string): Promise<PricePoint[]> {
       }
     }
     const raw = await request(
-      `/coins/${asset === "bnb" ? "binancecoin" : asset === "xrp" ? "ripple" : asset}/market_chart?vs_currency=usd&days=1`,
+      `/coins/${asset === "bnb" ? "binancecoin" : asset}/market_chart?vs_currency=usd&days=1`,
     );
     const points = Array.isArray(raw["prices"])
       ? raw["prices"]
@@ -66,15 +66,13 @@ async function history(asset: string): Promise<PricePoint[]> {
   }
 }
 async function snapshot(): Promise<CryptoMarketSnapshot> {
-  // One request obtains all four current prices. Never expose the key to clients.
   const raw = await request(
-    "/simple/price?vs_currencies=usd&ids=bitcoin,ethereum,solana,binancecoin,ripple&include_24hr_change=true&include_last_updated_at=true&include_market_cap=true",
+    "/simple/price?vs_currencies=usd&ids=bitcoin,ethereum,solana,binancecoin&include_24hr_change=true&include_last_updated_at=true&include_market_cap=true",
   );
   const now = Date.now();
   const rows = await Promise.all(
     assets.map(async (asset) => {
-      const item = raw[asset === "bnb" ? "binancecoin" : asset === "xrp" ? "ripple" : asset] as
-        Record<string, unknown> | undefined;
+      const item = raw[asset === "bnb" ? "binancecoin" : asset] as Record<string, unknown> | undefined;
       const price = num(item?.["usd"]),
         time = num(item?.["last_updated_at"]) * 1000;
       if (price <= 0 || time <= 0 || time > now + 5000 || now - time > 900_000)
@@ -109,13 +107,11 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
     ethereum: { price: rows[1]!.price, change24h: rows[1]!.change24h },
     solana: { price: rows[2]!.price, change24h: rows[2]!.change24h },
     bnb: { price: rows[3]!.price, change24h: rows[3]!.change24h },
-    xrp: { price: rows[4]!.price, change24h: rows[4]!.change24h },
     histories: {
       bitcoin: rows[0]!.points,
       ethereum: rows[1]!.points,
       solana: rows[2]!.points,
       bnb: rows[3]!.points,
-      xrp: rows[4]!.points,
     },
     source: "CoinGecko",
     updatedAt: new Date(Math.max(...rows.map((row) => row.time))).toISOString(),
@@ -125,7 +121,7 @@ async function snapshot(): Promise<CryptoMarketSnapshot> {
 async function edgeSnapshot(): Promise<CryptoMarketSnapshot | null> {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
-    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v4");
+    const response = await edge?.match("https://tacpredict.fun/__cache/coingecko/snapshot-v5");
     if (!response) return null;
     const value = (await response.json()) as CryptoMarketSnapshot;
     return value.source === "CoinGecko" && Date.now() - Date.parse(value.updatedAt) < 900_000
@@ -139,7 +135,7 @@ async function saveEdge(value: CryptoMarketSnapshot) {
   try {
     const edge = (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
     await edge?.put(
-      "https://tacpredict.fun/__cache/coingecko/snapshot-v4",
+      "https://tacpredict.fun/__cache/coingecko/snapshot-v5",
       new Response(JSON.stringify(value), {
         headers: { "Content-Type": "application/json", "Cache-Control": "public,max-age=60" },
       }),
@@ -177,9 +173,7 @@ export async function coingeckoSnapshot(): Promise<CryptoMarketSnapshot> {
 }
 
 const historyPending = new Map<string, Promise<PricePoint[]>>();
-export async function coingeckoAssetHistory(
-  asset: "bitcoin" | "ethereum" | "solana" | "bnb" | "xrp",
-) {
+export async function coingeckoAssetHistory(asset: "bitcoin" | "ethereum" | "solana" | "bnb") {
   if (!assets.includes(asset)) throw Error("Unsupported crypto asset");
   const existing = historyPending.get(asset);
   if (existing) return existing;
