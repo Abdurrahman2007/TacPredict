@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
-import { useLoginDialog } from "@/components/login-dialog";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { cancelSignedOrder, claimPosition } from "@/lib/protocol/execution";
@@ -40,7 +40,7 @@ export function NativePortfolio({
 }) {
   const q = useNativePortfolio(),
     auth = useProtocolUser(),
-    login = useLoginDialog(),
+    access = useWalletAccess("/profile"),
     wallet = useBaseWallet(),
     feed = useQuery(nativeMarketFeedQueryOptions);
   const orders = useOwnProtocolOrders();
@@ -251,9 +251,10 @@ export function NativePortfolio({
           {!auth.user ? (
             <button
               className="finance-pill finance-pill-primary mt-5"
-              onClick={() => login("/profile")}
+              disabled={access.busy}
+              onClick={() => void access.run()}
             >
-              Sign in to your account
+              {access.state === "verify" ? "Verify your wallet" : "Connect wallet"}
               <ArrowUpRight size={15} />
             </button>
           ) : wallet.address ? (

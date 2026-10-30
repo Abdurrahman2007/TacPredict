@@ -1,4 +1,9 @@
-import { BRAND_LOGO_URL, BRAND_SOCIAL_URL } from "@/lib/brand";
+import {
+  BRAND_FAVICON_ICO_URL,
+  BRAND_FAVICON_PNG_URL,
+  BRAND_SOCIAL_URL,
+  BRAND_TOUCH_ICON_URL,
+} from "@/lib/brand";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
@@ -99,9 +104,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: BRAND_LOGO_URL, type: "image/svg+xml" },
-      { rel: "alternate icon", href: "/favicon.ico?v=blue-white-20261022", type: "image/x-icon" },
-      { rel: "apple-touch-icon", href: "/brand/apple-touch-icon-v2.png", sizes: "180x180" },
+      // Raster icons only. Phones and some browsers ignore an SVG favicon and keep showing the
+      // icon they cached earlier, which is how an old logo stayed in the tab.
+      { rel: "icon", href: BRAND_FAVICON_ICO_URL, type: "image/x-icon", sizes: "48x48" },
+      { rel: "icon", href: BRAND_FAVICON_PNG_URL, type: "image/png", sizes: "512x512" },
+      { rel: "apple-touch-icon", href: BRAND_TOUCH_ICON_URL, sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,

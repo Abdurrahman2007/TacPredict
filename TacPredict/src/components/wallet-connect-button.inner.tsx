@@ -2,6 +2,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { cn } from "@/lib/utils";
 
 function shortenAddress(address: string): string {
@@ -13,6 +14,8 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
   const feed = useQuery(nativeMarketFeedQueryOptions);
   const virtual = useVirtualAccount(feed.data?.virtualDeployment);
   const balance = virtualMoney(virtual.data?.balance);
+  const access = useWalletAccess();
+  const needsVerify = access.state === "verify";
 
   return (
     <ConnectButton.Custom>
@@ -92,16 +95,26 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
 
                   <button
                     type="button"
-                    onClick={openAccountModal}
+                    onClick={needsVerify ? () => void access.run() : openAccountModal}
                     className="app-account-button inline-flex h-11 max-w-[180px] items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary"
-                    aria-label={`Wallet ${account.address}, ${balance} Virtual USDC`}
+                    aria-label={
+                      needsVerify
+                        ? `Wallet ${account.address}, tap to verify`
+                        : `Wallet ${account.address}, ${balance} Virtual USDC`
+                    }
                   >
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
                       {account.address.slice(2, 3).toUpperCase()}
                     </span>
                     <span className="min-w-0 text-left">
                       <span className="block truncate text-xs font-semibold tabular-nums">
-                        {balance} Virtual USDC
+                        {needsVerify
+                          ? access.busy
+                            ? "Waiting for wallet…"
+                            : access.error
+                              ? "Tap to retry"
+                              : "Tap to verify"
+                          : `${balance} Virtual USDC`}
                       </span>
                       <span className="block truncate font-mono text-[10px] font-normal text-muted-foreground">
                         {shortenAddress(account.address)}

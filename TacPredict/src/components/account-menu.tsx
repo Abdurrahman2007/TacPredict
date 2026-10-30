@@ -18,7 +18,7 @@ import {
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { PixelAvatar } from "./pixel-avatar";
 import { useAccount } from "./account-provider";
-import { useLoginDialog } from "./login-dialog";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useOverviewPrivacy } from "@/lib/accounts/privacy";
@@ -35,7 +35,7 @@ export function AccountMenu() {
     [error, setError] = useState("");
   const { auth, query } = useAccount(),
     wallet = useBaseWallet(),
-    login = useLoginDialog(),
+    access = useWalletAccess("/profile"),
     cache = useQueryClient();
   const [hidden, setHidden] = useOverviewPrivacy();
   const [slippage, setSlippage] = useTradeSlippage();
@@ -203,12 +203,13 @@ export function AccountMenu() {
                 <button
                   type="button"
                   className="account-primary"
+                  disabled={access.busy}
                   onClick={() => {
-                    setOpen(false);
-                    login("/profile");
+                    if (access.state === "connect") setOpen(false);
+                    void access.run();
                   }}
                 >
-                  Connect wallet
+                  {access.label || "Verify wallet"}
                   <ChevronRight size={16} />
                 </button>
               )}

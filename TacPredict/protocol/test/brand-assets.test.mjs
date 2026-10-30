@@ -71,17 +71,20 @@ test("browser and share logo variants are generated from versioned brand assets"
 });
 
 
-test("scroll discovery is in-page and social links use the exact supplied destinations", () => {
+test("scroll discovery is in-page and the page has no site footer", () => {
   const discovery = read("src/components/market-discovery.tsx");
-  const footer = read("src/components/site-footer.tsx");
   assert.ok(discovery.includes("IntersectionObserver"));
   assert.ok(discovery.includes("prefers-reduced-motion"));
   assert.ok(discovery.includes("if (!visible || reduced) return"));
   assert.ok(!discovery.includes("sessionStorage"));
-  assert.ok(footer.includes('href="https://x.com/TacPredict"'));
-  assert.ok(footer.includes('href="https://t.me/TacPredict"'));
-  assert.ok(footer.includes('rel="noopener noreferrer"'));
-  assert.ok(read("src/components/app-shell.tsx").includes("<SiteFooter />"));
+  assert.ok(discovery.includes("@/styles/market-discovery.css"));
+  // The footer was removed on request (twice). It must not come back through an old merge.
+  const shell = read("src/components/app-shell.tsx");
+  assert.ok(!shell.includes("SiteFooter"));
+  assert.ok(!shell.includes("<footer"));
+  assert.ok(!existsSync(new URL("src/components/site-footer.tsx", root)));
+  assert.ok(!existsSync(new URL("src/styles/site-footer.css", root)));
+  assert.ok(!read("src/styles/market-discovery.css").includes("tp-site-footer"));
   // Home is crypto Up/Down first; MarketDiscovery remains available as a component.
   assert.ok(read("src/components/market-discovery.tsx").includes("export function MarketDiscovery"));
   assert.ok(read("src/routes/index.tsx").includes("UpDownSection"));

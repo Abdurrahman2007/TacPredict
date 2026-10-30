@@ -8,7 +8,7 @@ and existing users and newly created accounts may use different ones.
 - Confirm signup subject: `Verify your email — TacPredict`
 - Both bodies display `{{ .Token }}` only, **not** `{{ .ConfirmationURL }}`.
 - Backend OTP length: 6; expiration: 600 seconds.
-- Template logo: `https://tacpredict.fun/brand/favicon.png` (PNG for mail-client compatibility).
+- Template logo: `https://tacpredict.fun/brand/app-icon-v2.png` (PNG for mail-client compatibility).
 
 The visible **From** address/name is independent of the HTML template.
 Authentication → Email → SMTP must use an authenticated delivery provider:

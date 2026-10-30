@@ -13,8 +13,29 @@ import { safeAuthNext } from "@/lib/auth-config";
 const attempted = new Set<string>();
 const pending = new Map<string, Promise<void>>();
 
+/** A wallet that never answers must not block the bridge for good. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("wallet provider timeout")), ms);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        window.clearTimeout(timer);
+        reject(error instanceof Error ? error : new Error(String(error)));
+      },
+    );
+  });
+}
+
 /**
  * Keeps legacy BaseWalletProvider in sync with RainbowKit/Wagmi.
+ *
+ * wagmi is the single source of truth for "is a wallet connected". The account is mirrored with
+ * `adopt`, which never calls eth_requestAccounts: once the person has connected, no page asks them
+ * to connect again, not after a reload, a route change or a restored session.
  *
  * A signature request (SIWE) is only ever opened right after the person
  * connects a wallet in this page view. Wagmi silently restoring a previous
@@ -24,10 +45,10 @@ const pending = new Map<string, Promise<void>>();
  */
 export function WagmiBaseBridge() {
   const { address, isConnected, connector, chainId, status } = useAccount();
-  const { address: baseAddress, connect, disconnect } = useBaseWallet();
+  const { address: baseAddress, adopt, disconnect } = useBaseWallet();
   const router = useRouter();
   const siweDone = useRef<string | null>(null);
-  const bridging = useRef(false);
+  const bridging = useRef<string | null>(null);
   const freshConnect = useRef(false);
 
   useAccountEffect({
@@ -39,29 +60,36 @@ export function WagmiBaseBridge() {
     },
   });
 
+  // 1. Mirror the connected account right away; pages read it from useBaseWallet().
+  useEffect(() => {
+    if (status === "disconnected") {
+      if (baseAddress) disconnect();
+      return;
+    }
+    if (isConnected && address) adopt({ address, chainId: chainId ?? null });
+  }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect]);
+
+  // 2. Attach the wallet provider (needed to send transactions) and run the one-time sign-in.
   useEffect(() => {
     if (status === "disconnected") {
       if (siweDone.current) attempted.delete(siweDone.current);
       siweDone.current = null;
-      if (baseAddress) disconnect();
       return;
     }
 
-    if (!isConnected || !address || !connector || bridging.current) return;
+    if (!isConnected || !address || !connector) return;
+    const key = address.toLowerCase();
+    if (bridging.current === key) return;
 
-    bridging.current = true;
+    bridging.current = key;
     void (async () => {
       try {
-        const provider = (await connector.getProvider()) as WalletProvider | undefined;
+        const provider = (await withTimeout(connector.getProvider(), 8000)) as
+          | WalletProvider
+          | undefined;
         if (!provider?.request) return;
 
-        if (baseAddress?.toLowerCase() !== address.toLowerCase()) {
-          await connect({
-            id: connector.id,
-            name: connector.name || "Wallet",
-            provider,
-          });
-        }
+        adopt({ address, chainId: chainId ?? null, provider });
 
         // The administrator workspace signs in with email + password and authenticator. A wallet
         // connected there only signs contract transactions; a wallet sign-in would replace the
@@ -69,7 +97,6 @@ export function WagmiBaseBridge() {
         const path = window.location.pathname;
         if (path === "/admin" || path.startsWith("/admin/")) return;
 
-        const key = address.toLowerCase();
         if (siweDone.current === key) return;
 
         const { data } = await supabase.auth.getSession();
@@ -89,7 +116,7 @@ export function WagmiBaseBridge() {
           else {
             attempted.add(key);
             siweDone.current = key;
-            const login = signInWithEthereumWallet(provider).then(() => undefined);
+            const login = signInWithEthereumWallet(provider, address).then(() => undefined);
             pending.set(key, login);
             try {
               await login;
@@ -112,10 +139,10 @@ export function WagmiBaseBridge() {
       } catch (error) {
         console.error("[web3] wallet bridge failed", error);
       } finally {
-        bridging.current = false;
+        bridging.current = null;
       }
     })();
-  }, [address, baseAddress, isConnected, connector, chainId, status, connect, disconnect, router]);
+  }, [address, isConnected, connector, chainId, status, adopt, router]);
 
   return null;
 }

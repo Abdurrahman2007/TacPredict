@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { LoginButton } from "./login-dialog";
 import { PortfolioNavLabel } from "./portfolio-nav-label";
-import { SiteFooter } from "./site-footer";
 /** Crypto-first shell: Markets list removed from nav; Rewards replaces that slot. */
 const navItems = [
   { to: "/" as const, label: "Home", icon: House, portfolio: false },
@@ -64,7 +63,6 @@ function ShellContent({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
         {children}
       </main>
-      <SiteFooter />
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         aria-label="Mobile navigation"

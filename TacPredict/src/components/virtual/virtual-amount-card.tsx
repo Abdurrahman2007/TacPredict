@@ -4,7 +4,7 @@ import { parseUnits, type Address, type Hex } from "viem";
 import type { Market } from "@/domain/markets/types";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
-import { useLoginDialog } from "@/components/login-dialog";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { prepareVirtual, observeVirtual } from "@/lib/virtual/functions";
 import { executeVirtualTrade, reconciledVirtualTransaction } from "@/lib/virtual/execution";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
@@ -23,7 +23,7 @@ export function VirtualAmountCard({
   const ref = market.virtual!,
     w = useBaseWallet(),
     auth = useProtocolUser(),
-    login = useLoginDialog(),
+    access = useWalletAccess(),
     id = useId(),
     client = useQueryClient();
   const account = useVirtualAccount(ref.deployment),
@@ -332,9 +332,17 @@ export function VirtualAmountCard({
         <p>Nontransferable virtual credits. No real-money value, withdrawals or token approvals.</p>
       </details>
       {!w.address || !auth.user ? (
-        <button type="button" className="pd-submit" onClick={() => login()}>
-          Connect wallet
-        </button>
+        <>
+          <button
+            type="button"
+            className="pd-submit"
+            disabled={access.busy}
+            onClick={() => void access.run()}
+          >
+            {access.label || "Verify wallet"}
+          </button>
+          {access.error ? <p role="alert">{access.error}</p> : null}
+        </>
       ) : (
         <button
           type="button"

@@ -2,14 +2,20 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WalletProvider } from "./wallet";
 
 // Explicit sign-in only. The read-only Connect wallet flow never calls this.
-export async function signInWithEthereumWallet(wallet: WalletProvider) {
+export async function signInWithEthereumWallet(
+  wallet: WalletProvider,
+  knownAddress?: string | null,
+) {
   const siwe = import.meta.env.SSR ? null : await import("viem/siwe");
   if (!siwe) throw new Error("Wallet sign-in needs a browser.");
   const existing = await wallet.request({ method: "eth_accounts" });
+  // A wallet that wagmi already connected is never asked to connect again just to sign in.
   const accounts =
     Array.isArray(existing) && existing.length
       ? existing
-      : await wallet.request({ method: "eth_requestAccounts" });
+      : knownAddress && /^0x[0-9a-f]{40}$/i.test(knownAddress)
+        ? [knownAddress]
+        : await wallet.request({ method: "eth_requestAccounts" });
   const chain = await wallet.request({ method: "eth_chainId" });
   if (
     !Array.isArray(accounts) ||

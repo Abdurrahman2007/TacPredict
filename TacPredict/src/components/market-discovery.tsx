@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
-import "@/styles/site-footer.css";
+import "@/styles/market-discovery.css";
 
 const categories = ["Crypto", "Football", "Cricket"] as const;
 

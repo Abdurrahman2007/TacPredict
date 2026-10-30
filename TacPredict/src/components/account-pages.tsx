@@ -15,18 +15,14 @@ import {
 import { OwnProfile } from "./own-profile";
 import { useAccount } from "./account-provider";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
-import { useLoginDialog } from "./login-dialog";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { PixelAvatar } from "./pixel-avatar";
 import { accountApi } from "@/lib/accounts/client";
 import { normalizeUsername } from "@/lib/accounts/rules.mjs";
 export function AccountGate({ children }: { children: React.ReactNode }) {
   const path = useLocation().pathname;
-  const { auth, query } = useAccount(),
-    wallet = useBaseWallet(),
-    login = useLoginDialog();
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+  const { auth, query } = useAccount();
+  const access = useWalletAccess(path === "/referrals" ? "/referrals" : "/account");
   if (!auth.ready || (auth.user && query.isPending))
     return (
       <section className="account-card account-center" role="status">
@@ -43,34 +39,16 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
         <p>Connect your wallet and sign a free message to create your profile and referral link.</p>
         <button
           className="account-primary"
-          disabled={busy}
-          onClick={async () => {
-            if (!wallet.provider) {
-              login(path === "/referrals" ? "/referrals" : "/account");
-              return;
-            }
-            setBusy(true);
-            setError("");
-            try {
-              await signInWithEthereumWallet(wallet.provider);
-            } catch {
-              setError("Sign-in was not completed. Please try again.");
-            } finally {
-              setBusy(false);
-            }
-          }}
+          disabled={access.busy}
+          onClick={() => void access.run()}
         >
-          {busy
-            ? "Waiting for wallet…"
-            : wallet.provider
-              ? "Sign in with wallet"
-              : "Connect wallet"}
+          {access.label || "Sign in with wallet"}
           <ArrowUpRight size={17} />
         </button>
         <small>No transaction or token approval.</small>
-        {error && (
+        {access.error && (
           <p role="alert" className="account-error">
-            {error}
+            {access.error}
           </p>
         )}
       </section>

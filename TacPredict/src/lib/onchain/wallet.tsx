@@ -18,6 +18,11 @@ export type WalletState = {
   busy: boolean;
   error: string;
   connect: (wallet: WalletChoice) => Promise<void>;
+  /**
+   * Mirror an account that wagmi/RainbowKit already connected. Never prompts the wallet and never
+   * calls eth_requestAccounts, so a restored or already-approved connection cannot ask again.
+   */
+  adopt: (account: { address: string; chainId: number | null; provider?: WalletProvider | null }) => void;
   disconnect: () => void;
   refresh: () => Promise<void>;
   switchToBase: () => Promise<void>;
@@ -40,6 +45,7 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const revision = useRef(0);
+  const adopted = useRef<string | null>(null);
   const connectionLock = useRef(false);
   const identity = useRef("");
   const invalidate = useCallback(() => {
@@ -76,8 +82,11 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
   const sync = useCallback(async (wallet: WalletProvider) => {
     const version = ++revision.current;
     try {
+      // An adopted account comes from wagmi: the provider's own account list may be empty after a
+      // restored session, which must never turn a connected wallet into "Not connected".
+      const fixed = adopted.current;
       const [accounts, chain] = await Promise.all([
-        wallet.request({ method: "eth_accounts" }),
+        fixed ? Promise.resolve([fixed]) : wallet.request({ method: "eth_accounts" }),
         wallet.request({ method: "eth_chainId" }),
       ]);
       if (version !== revision.current) return;
@@ -112,6 +121,8 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       void sync(provider);
     };
     const disconnected = () => {
+      // wagmi owns the connection state for an adopted account and reports its own disconnect.
+      if (adopted.current) return;
       ++revision.current;
       setAddress(null);
       setChainId(null);
@@ -132,9 +143,25 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       provider.removeListener?.("chainChanged", changed);
       provider.removeListener?.("disconnect", disconnected);
     };
-  }, [provider, sync, invalidate]);
+  }, [provider, address, sync, invalidate]);
+
+  const adopt = useCallback<WalletState["adopt"]>((account) => {
+    if (!isAddress(account.address)) return;
+    if (adopted.current?.toLowerCase() !== account.address.toLowerCase()) {
+      setUsdc(null);
+      setGasBalance(null);
+    }
+    adopted.current = account.address;
+    setAddress((current) =>
+      current?.toLowerCase() === account.address.toLowerCase() ? current : account.address,
+    );
+    if (account.chainId !== null) setChainId(account.chainId);
+    const next = account.provider;
+    if (next) setProvider((current) => (current === next ? current : next));
+  }, []);
 
   const connect = async (wallet: WalletChoice) => {
+    adopted.current = null;
     if (connectionLock.current) return;
     connectionLock.current = true;
     setBusy(true);
@@ -156,15 +183,16 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       setBusy(false);
     }
   };
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     ++revision.current;
+    adopted.current = null;
     setProvider(null);
     setAddress(null);
     setChainId(null);
     setUsdc(null);
     setGasBalance(null);
     setError("");
-  };
+  }, []);
   const refresh = async () => {
     if (provider && !busy) {
       setBusy(true);
@@ -207,6 +235,7 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
         busy,
         error,
         connect,
+        adopt,
         disconnect,
         refresh,
         switchToBase,
