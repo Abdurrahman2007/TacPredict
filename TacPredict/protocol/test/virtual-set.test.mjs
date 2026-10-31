@@ -54,7 +54,7 @@ async function test(name, fn) {
 
 try {
   await deploy("TestUSDC");
-  await deploy("VirtualUSDC", [admin.address, false]);
+  await deploy("VirtualUSDC", [admin.address, false, 10_000n * USDC]);
 
   await test("The virtual registry only accepts the virtual token, never other USDC-like tokens or non-contracts", async () => {
     await assert.rejects(deploy("VirtualMarketRegistry", [admin.address, address.TestUSDC], false));
@@ -83,17 +83,24 @@ try {
     assert.equal(await read("VirtualUSDC", "protocolLocked"), true);
   });
 
-  await test("A wallet claims exactly 500 USDC once per season and there is no other way to get a balance", async () => {
+  await test("The admin funds wallets only inside the per-season budget, and cannot take or edit balances", async () => {
     assert.equal(await read("VirtualUSDC", "decimals"), 6);
     assert.equal(await read("VirtualUSDC", "symbol"), "vUSDC");
+    const grant = (who, to, amount) => write("VirtualUSDC", "adminGrant", [to, amount, h("setup")], who);
+    await assert.rejects(grant(1, maker.address, 500n * USDC));
+    await assert.rejects(grant(0, zeroAddress, 500n * USDC));
+    await assert.rejects(grant(0, maker.address, 0n));
+    await assert.rejects(grant(0, maker.address, 10_001n * USDC));
     for (const i of [0, 1, 2, 3]) {
-      await write("VirtualUSDC", "claim", [], i);
+      await grant(0, accounts[i].address, 500n * USDC);
       assert.equal(await balance(accounts[i]), 500n * USDC);
-      await assert.rejects(write("VirtualUSDC", "claim", [], i));
     }
+    assert.equal(await read("VirtualUSDC", "adminGrantedInSeason"), 2000n * USDC);
     assert.equal(await read("VirtualUSDC", "totalSupply"), 2000n * USDC);
     assert.equal(await read("VirtualUSDC", "totalGranted"), 2000n * USDC);
-    assert.ok(!art.VirtualUSDC.abi.some((x) => x.name === "mint"));
+    await assert.rejects(grant(0, observer.address, 8_001n * USDC), undefined, "2000 + 8001 is over the 10000 budget");
+    const names = art.VirtualUSDC.abi.map((x) => x.name);
+    for (const forbidden of ["mint", "burn", "adminBurn", "adminTransfer", "setBalance"]) assert.ok(!names.includes(forbidden), forbidden);
   });
 
   await test("Virtual USDC cannot be sent to another wallet or pulled out by anyone but the trading contracts", async () => {
@@ -198,28 +205,70 @@ try {
     assert.equal(await read("VirtualUSDC", "totalSupply"), 2000n * USDC, "nothing was created or lost by trading");
   });
 
-  await test("Seasons: only the admin, not too soon, and a new claim adds 500 without resetting", async () => {
+  const other = accounts[4];
+  await test("The box gives a whole-dollar 50 to 500 USDC once per season", async () => {
+    let seen = 0n;
+    for (const i of [0, 1, 2, 3]) {
+      const before = await balance(accounts[i]);
+      await write("VirtualUSDC", "openBox", [], i);
+      const amount = (await balance(accounts[i])) - before;
+      assert.ok(amount >= 50n * USDC && amount <= 500n * USDC, "amount in range: " + amount);
+      assert.equal(amount % USDC, 0n, "whole dollars");
+      assert.equal(await read("VirtualUSDC", "boxSeason", [accounts[i].address]), 1n);
+      await assert.rejects(write("VirtualUSDC", "openBox", [], i));
+      seen += amount;
+    }
+    assert.equal(await read("VirtualUSDC", "totalBoxAmount"), seen);
+    assert.equal(await read("VirtualUSDC", "boxesOpened"), 4n);
+  });
+
+  await test("Daily check-in pays 20, 30 \u2026 80 USDC over seven days, wraps, and a missed day restarts it", async () => {
+    await assert.rejects(write("VirtualUSDC", "checkIn", [], 4), undefined, "needs the box first");
+    await write("VirtualUSDC", "openBox", [], 4);
+    const now = Number((await pub.getBlock()).timestamp);
+    await advance(86400 - (now % 86400) + 10); // just after the next UTC midnight, so one day is one step
+    const rewards = [20, 30, 40, 50, 60, 70, 80, 20, 30];
+    for (const [n, usdc] of rewards.entries()) {
+      if (n > 0) await advance(86400);
+      const before = await balance(other);
+      await write("VirtualUSDC", "checkIn", [], 4);
+      assert.equal((await balance(other)) - before, BigInt(usdc) * USDC, "day " + (n + 1));
+      if (n === 0) await assert.rejects(write("VirtualUSDC", "checkIn", [], 4), undefined, "once per UTC day");
+    }
+    assert.equal(await read("VirtualUSDC", "streak", [other.address]), 2n);
+    await advance(2 * 86400);
+    const before = await balance(other);
+    await write("VirtualUSDC", "checkIn", [], 4);
+    assert.equal((await balance(other)) - before, 20n * USDC);
+    assert.equal(await read("VirtualUSDC", "streak", [other.address]), 1n);
+    assert.ok((await read("VirtualUSDC", "totalCheckInAmount")) > 0n);
+  });
+
+  await test("Seasons: only the admin, not too soon; a new season resets the admin budget and allows a new box", async () => {
     await assert.rejects(write("VirtualUSDC", "startSeason", [], 1));
     await assert.rejects(write("VirtualUSDC", "startSeason"));
     await advance(20 * 24 * 3600 + 1);
     await assert.rejects(write("VirtualUSDC", "startSeason", [], 1));
     await write("VirtualUSDC", "startSeason");
     assert.equal(await read("VirtualUSDC", "season"), 2n);
+    assert.equal(await read("VirtualUSDC", "adminGrantedInSeason"), 0n);
     const before = await balance(maker);
-    await write("VirtualUSDC", "claim", [], 1);
-    assert.equal((await balance(maker)) - before, 500n * USDC);
-    await assert.rejects(write("VirtualUSDC", "claim", [], 1));
+    await write("VirtualUSDC", "openBox", [], 1);
+    assert.ok((await balance(maker)) - before >= 50n * USDC, "kept the old balance and added a new box");
+    await assert.rejects(write("VirtualUSDC", "openBox", [], 1));
   });
 
-  await test("With resetOnClaim a new season starts every wallet at exactly 500 USDC", async () => {
-    const reset = await deploy("VirtualUSDC", [admin.address, true], false);
-    await write("VirtualUSDC", "claim", [], 1, reset);
+  await test("With resetOnClaim a new season starts the wallet from its new box only", async () => {
+    const reset = await deploy("VirtualUSDC", [admin.address, true, 0n], false);
+    await write("VirtualUSDC", "openBox", [], 1, reset);
     await advance(20 * 24 * 3600 + 1);
     await write("VirtualUSDC", "startSeason", [], 0, reset);
-    await write("VirtualUSDC", "claim", [], 1, reset);
-    assert.equal(await read("VirtualUSDC", "balanceOf", [maker.address], reset), 500n * USDC);
-    assert.equal(await read("VirtualUSDC", "totalSupply", [], reset), 500n * USDC);
-    assert.equal(await read("VirtualUSDC", "totalGranted", [], reset), 1000n * USDC);
+    await write("VirtualUSDC", "openBox", [], 1, reset);
+    const held = await read("VirtualUSDC", "balanceOf", [maker.address], reset);
+    assert.ok(held >= 50n * USDC && held <= 500n * USDC);
+    assert.equal(await read("VirtualUSDC", "totalSupply", [], reset), held);
+    assert.ok((await read("VirtualUSDC", "totalGranted", [], reset)) >= held + 50n * USDC, "the first box was burned");
+    await assert.rejects(write("VirtualUSDC", "adminGrant", [maker.address, USDC, h("none")], 0, reset), undefined, "zero budget disables grants");
   });
 
   console.log(`${passed} virtual set tests passed`);
