@@ -3,7 +3,7 @@ pragma solidity ^0.8.30;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @notice Virtual USDC for TacPredict campaigns. It has no value, cannot be sent to another person and
-/// cannot leave the trading contracts, so it can never be withdrawn or sold. Nothing is ever burned from a wallet.
+/// cannot leave the trading contracts, so it can never be withdrawn or sold.
 ///
 /// Three ways to receive a balance:
 ///  1. The welcome box, once per wallet, ever: a whole-dollar amount from 50 to 500 USDC that the platform draws at
@@ -14,9 +14,12 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 ///  2. `checkIn()`: one transaction per UTC day, signed and paid for by the wallet, after its box was credited.
 ///     Rewards 20, 30, 40, 50, 60, 70, 80 USDC on streak days 1 to 7, then 80 USDC a day while the streak lasts.
 ///     A missed day restarts at 20. It keeps working until the admin turns it off.
-///  3. `adminGrant()`: the admin can fund a wallet, at most ADMIN_ACCOUNT_CAP (100,000 USDC) in total per wallet.
-///     Every grant is an event with a reason hash. The admin cannot take, burn or edit any balance and cannot
-///     touch positions. The admin can also switch the box and the check-in off or on (this only stops new credits).
+///  3. The admin, to fix glitches and run campaigns: `adminGrant()` adds any amount to a wallet and
+///     `adminSetBalance()` sets a wallet's balance to exactly any amount, even zero. Adding is limited to
+///     ADMIN_DAILY_GRANT_CAP (100,000 USDC) per wallet per UTC day; lowering a balance is not limited. Every change
+///     is an event with the old balance, the new balance and a reason hash. The admin cannot touch the protocol
+///     contracts' money (so no one's locked collateral or position can be taken), cannot move tokens between wallets
+///     and cannot change positions. The admin can also switch the box and the check-in off or on.
 ///
 /// Only the contracts on the protocol list can move tokens (`transfer` / `transferFrom` by anyone else
 /// reverts). The list is set once by the admin during deployment and then locked for good. It is meant to
@@ -24,7 +27,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 ///
 /// Trust: the box amount is the platform's random draw and cannot be proven on chain. The box granter is a hot
 /// server key; if it leaks, the daily box limit bounds the damage and the admin can switch boxes off or replace it.
-/// Use a Safe multisig as admin. There is no cap on total supply: it is bounded by wallets, days and admin grants.
+/// Admin edits are a real power over virtual balances: use a Safe multisig as admin. There is no cap on total supply.
 ///
 /// Gas for check-ins and trades is paid in ETH on Base. This token itself is never real money.
 contract VirtualUSDC is ERC20 {
@@ -33,7 +36,7 @@ contract VirtualUSDC is ERC20 {
     uint256 public constant CHECKIN_BASE = 20_000_000;
     uint256 public constant CHECKIN_STEP = 10_000_000;
     uint256 public constant CHECKIN_DAYS = 7;
-    uint256 public constant ADMIN_ACCOUNT_CAP = 100_000_000_000;
+    uint256 public constant ADMIN_DAILY_GRANT_CAP = 100_000_000_000;
     uint256 private constant UNIT = 1_000_000;
 
     address public admin;
@@ -50,17 +53,19 @@ contract VirtualUSDC is ERC20 {
     uint256 public totalBoxAmount;
     uint256 public totalCheckInAmount;
     uint256 public totalAdminAmount;
+    uint256 public totalAdminBurned;
     mapping(address => bool) public protocol;
     mapping(address => bool) public boxClaimed;
     mapping(address => uint256) public lastCheckInDay;
     mapping(address => uint256) public streak;
-    mapping(address => uint256) public adminGranted;
+    mapping(address => mapping(uint256 => uint256)) public adminGrantedOnDay;
 
     event ProtocolAllowed(address indexed account);
     event ProtocolLocked();
     event BoxOpened(address indexed account, uint256 amount);
     event CheckedIn(address indexed account, uint256 indexed day, uint256 streak, uint256 amount);
     event AdminGranted(address indexed account, uint256 amount, bytes32 reasonHash);
+    event AdminAdjusted(address indexed account, uint256 previousBalance, uint256 newBalance, bytes32 reasonHash);
     event BoxGranterChanged(address indexed granter);
     event BoxDailyCapChanged(uint256 cap);
     event BoxSwitch(bool open);
@@ -170,13 +175,34 @@ contract VirtualUSDC is ERC20 {
         emit CheckedIn(msg.sender, today, count, amount);
     }
 
-    function adminGrant(address account, uint256 amount, bytes32 reasonHash) external onlyAdmin {
-        require(account != address(0) && amount > 0, "Cannot grant");
-        require(adminGranted[account] + amount <= ADMIN_ACCOUNT_CAP, "Account cap exceeded");
-        adminGranted[account] += amount;
+    function _adminMint(address account, uint256 amount) private {
+        uint256 today = block.timestamp / 1 days;
+        uint256 used = adminGrantedOnDay[account][today] + amount;
+        require(used <= ADMIN_DAILY_GRANT_CAP, "Daily admin cap exceeded");
+        adminGrantedOnDay[account][today] = used;
         totalAdminAmount += amount;
         _mint(account, amount);
+    }
+
+    /// @notice Add `amount` to a wallet (up to the daily limit per wallet).
+    function adminGrant(address account, uint256 amount, bytes32 reasonHash) external onlyAdmin {
+        require(account != address(0) && amount > 0 && !protocol[account], "Cannot grant");
+        _adminMint(account, amount);
         emit AdminGranted(account, amount, reasonHash);
+    }
+
+    /// @notice Set a wallet's balance to exactly `target`, even zero. Raising counts toward the daily limit.
+    /// The protocol contracts' own balances (locked collateral, oracle bonds) can never be changed.
+    function adminSetBalance(address account, uint256 target, bytes32 reasonHash) external onlyAdmin {
+        require(account != address(0) && !protocol[account], "Cannot adjust");
+        uint256 current = balanceOf(account);
+        if (target > current) {
+            _adminMint(account, target - current);
+        } else if (target < current) {
+            totalAdminBurned += current - target;
+            _burn(account, current - target);
+        }
+        emit AdminAdjusted(account, current, target, reasonHash);
     }
 
     function totalGranted() external view returns (uint256) { return totalBoxAmount + totalCheckInAmount + totalAdminAmount; }

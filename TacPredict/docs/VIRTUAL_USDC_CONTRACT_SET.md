@@ -19,11 +19,17 @@ Both the token and the registry revert on any chain except Base mainnet (8453) a
 
 ## VirtualUSDC rules
 
-Balance comes from three places only. Nothing is ever burned from a wallet and nothing can be reversed.
+Balance comes from three places only. A box, once credited, is never reversed by the contract itself; only the admin's correction tool (below) can lower a balance, and it leaves an event.
 
 - **Welcome box, once per wallet, ever.** The platform draws a random whole-dollar amount from 50 to 500 USDC by its own choice: it does not depend on the wallet address or on anything else. The platform's **box granter** (a server wallet) credits it with `grantBox(wallet, amount)` and pays the gas, so the user signs nothing. The contract enforces the range, whole dollars, once per wallet ever, a **daily limit on boxes** (`boxDailyCap`) and the admin on/off switch. The draw itself happens off chain, so it cannot be proven on chain: use a proper random source on the server (`crypto.randomInt`), and treat the box granter key as hot. If it leaks, the daily limit bounds the damage and the admin can switch boxes off or replace the granter.
 - **Daily check-in: one transaction per UTC day, signed and gas-paid by the wallet, after the box was credited.** 20, 30, 40, 50, 60, 70, 80 USDC on streak days 1 to 7, then 80 USDC a day while the streak lasts. A missed day restarts at 20. It keeps working until the admin turns it off (`setCheckInOpen(false)`); the admin can also switch the box off (`setBoxOpen`). Switches only stop new credits.
-- **Admin grant:** `adminGrant(wallet, amount, reasonHash)`. At most 100,000 USDC in total per wallet (`ADMIN_ACCOUNT_CAP`); there is no global budget. Every grant is an `AdminGranted` event. The admin has no function to take, burn or edit a balance and cannot touch positions. Admin handover is two-step (`proposeAdmin`, `acceptAdmin`). Use a Safe multisig as admin: a compromised admin key could fund unlimited wallets with up to 100,000 each.
+- **Admin: give, and correct.** To run campaigns and fix glitches (for example a bug that gave a wallet too much):
+  - `adminGrant(wallet, amount, reasonHash)` adds any amount, 5 USDC or 10,000 USDC, as the admin chooses.
+  - `adminSetBalance(wallet, target, reasonHash)` sets a wallet's balance to exactly `target`, including zero. Lowering burns the difference; raising mints it.
+  - Raising is limited to **100,000 USDC per wallet per UTC day** (`ADMIN_DAILY_GRANT_CAP`). Lowering is not limited.
+  - Every change is an event (`AdminGranted`, `AdminAdjusted` with the old balance, the new balance and the reason hash), and the contract keeps `totalAdminAmount` and `totalAdminBurned`, so supply always reconciles: supply = everything credited minus everything the admin lowered.
+  - The admin can never change the money of the protocol contracts themselves (collateral locked in positions, oracle bonds), cannot move tokens from one wallet to another, and cannot edit positions or orders. A glitch in a position balance is outside this tool.
+  - Admin handover is two-step (`proposeAdmin`, `acceptAdmin`). This is real power over everyone's virtual balance, so the admin must be a Safe multisig, and points or rankings should be computed from the event history rather than trusting a balance alone.
 
 Other rules:
 
@@ -31,7 +37,7 @@ Other rules:
 - There are no seasons and no resets inside the contract. Monthly points are computed off chain.
 - Wallets show it as `vUSDC`, not `USDC`, so it cannot be mistaken for real USDC. The app can still say "USDC" in its own text, next to "cannot be withdrawn".
 - Users pay gas in ETH on Base for every check-in, buy and sell (the box costs the user nothing: the platform pays that gas). That gas is the only real money involved.
-- Total supply is not capped: it is bounded by wallets, days and admin grants. It is virtual, so this is a campaign cost, not a financial one.
+- Total supply is not capped. It is virtual, so this is a campaign cost, not a financial one.
 
 ## Deployment order (when approved)
 
@@ -65,7 +71,7 @@ Pricing (`src/lib/virtual-set/market-maker.mjs`, tested):
 
 What the maker costs and risks, all virtual:
 
-- Its balance goes down when users win. Fund it with `adminGrant` (100,000 USDC per wallet in total, so plan for rotating to a fresh maker wallet or topping up from several).
+- Its balance goes down when users win. Top it up with `adminGrant` (up to 100,000 USDC per wallet per day).
 - A user who is faster than the maker's feed can still hit a quote for a few seconds. Keep quotes short, keep the spread, cap the size per quote, and watch the maker's PnL.
 - `sigmaPpm` must be calibrated from real feed history (the examples use 380 ppm per square-root second, which is cautious). A bigger sigma keeps prices nearer 50 cents for longer.
 - The maker signs with a private key held by the operator as a server secret. It is never in this repository and I never ask for it. Keep it separate from the admin (Safe multisig) and from the box granter.

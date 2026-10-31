@@ -84,7 +84,7 @@ try {
     assert.equal(await read("VirtualUSDC", "protocolLocked"), true);
   });
 
-  await test("The admin funds wallets, but cannot take or edit balances", async () => {
+  await test("The admin can fund wallets, with no way to move tokens between wallets", async () => {
     assert.equal(await read("VirtualUSDC", "decimals"), 6);
     assert.equal(await read("VirtualUSDC", "symbol"), "vUSDC");
     const grant = (who, to, amount) => write("VirtualUSDC", "adminGrant", [to, amount, h("setup")], who);
@@ -98,7 +98,7 @@ try {
     assert.equal(await read("VirtualUSDC", "totalSupply"), 2000n * USDC);
     assert.equal(await read("VirtualUSDC", "totalGranted"), 2000n * USDC);
     const names = art.VirtualUSDC.abi.map((x) => x.name);
-    for (const forbidden of ["mint", "burn", "adminBurn", "adminTransfer", "setBalance"]) assert.ok(!names.includes(forbidden), forbidden);
+    for (const forbidden of ["mint", "burn", "adminTransfer", "setBalance"]) assert.ok(!names.includes(forbidden), forbidden);
   });
 
   await test("Virtual USDC cannot be sent to another wallet or pulled out by anyone but the trading contracts", async () => {
@@ -287,15 +287,18 @@ try {
     await assert.rejects(deploy("VirtualUSDC", [admin.address, observer.address, 0n], false), undefined, "a zero limit is refused");
   });
 
-  await test("Admin grants are capped at 100,000 USDC in total per wallet; the admin can be handed over safely", async () => {
+  await test("Admin grants are limited to 100,000 USDC per wallet per UTC day; the admin can be handed over safely", async () => {
     const grant = (who, to, amount) => write("VirtualUSDC", "adminGrant", [to, amount, h("campaign")], who);
+    await onToday();
     await assert.rejects(grant(0, other.address, 100_001n * USDC));
     await grant(0, other.address, 60_000n * USDC);
     await assert.rejects(grant(0, other.address, 40_001n * USDC));
     await grant(0, other.address, 40_000n * USDC);
     await assert.rejects(grant(0, other.address, 1n));
-    assert.equal(await read("VirtualUSDC", "adminGranted", [other.address]), 100_000n * USDC);
-    await grant(0, observer.address, 99_500n * USDC); // 500 were granted at setup; the cap is per wallet, not global
+    await grant(0, observer.address, 100_000n * USDC); // the limit is per wallet, not global
+    await advance(day);
+    await grant(0, other.address, 100_000n * USDC); // and it renews every day
+    await assert.rejects(grant(0, address.VirtualConditionalPositions, USDC), undefined, "never the protocol contracts");
 
     await assert.rejects(write("VirtualUSDC", "proposeAdmin", [maker.address], 1));
     await write("VirtualUSDC", "proposeAdmin", [maker.address]);
@@ -304,10 +307,37 @@ try {
     assert.equal((await read("VirtualUSDC", "admin")).toLowerCase(), maker.address.toLowerCase());
     await assert.rejects(grant(0, taker.address, USDC), undefined, "the old admin lost its powers");
     await grant(1, taker.address, USDC);
-    // Everything that was ever created is accounted for and nothing was burned.
-    assert.equal(await read("VirtualUSDC", "totalSupply"), await read("VirtualUSDC", "totalGranted"));
   });
 
+  await test("The admin can correct any wallet to any amount, even zero, with an audit trail, but never the protocol contracts' money", async () => {
+    const set = (who, to, amount, reason = "glitch-fix") => write("VirtualUSDC", "adminSetBalance", [to, amount, h(reason)], who);
+    const lockedInPositions = await read("VirtualUSDC", "balanceOf", [address.VirtualConditionalPositions]);
+    const burnedBefore = await read("VirtualUSDC", "totalAdminBurned");
+    await assert.rejects(set(2, taker.address, 5n * USDC), undefined, "only the admin");
+    await assert.rejects(set(1, zeroAddress, 5n * USDC));
+    await assert.rejects(set(1, address.VirtualConditionalPositions, 0n), undefined, "locked collateral is untouchable");
+    await assert.rejects(set(1, address.VirtualResolutionOracle, 0n));
+    await assert.rejects(set(1, address.VirtualExchange, 5n * USDC));
+    const before = await balance(taker);
+    await set(1, taker.address, 5n * USDC); // a glitch gave too much: bring it back to a small amount
+    assert.equal(await balance(taker), 5n * USDC);
+    assert.equal(await read("VirtualUSDC", "totalAdminBurned"), burnedBefore + (before - 5n * USDC));
+    await set(1, taker.address, 0n);
+    assert.equal(await balance(taker), 0n);
+    await set(1, taker.address, 0n); // no change is fine and still logged
+    await set(1, taker.address, 10_000n * USDC); // or any amount the admin chooses, within the daily limit
+    assert.equal(await balance(taker), 10_000n * USDC);
+    await assert.rejects(set(1, observer.address, 1_000_000n * USDC), undefined, "raising is limited per day");
+    assert.equal(await read("VirtualUSDC", "balanceOf", [address.VirtualConditionalPositions]), lockedInPositions);
+    const events = await pub.getContractEvents({ address: address.VirtualUSDC, abi: art.VirtualUSDC.abi, eventName: "AdminAdjusted", fromBlock: 0n });
+    assert.ok(events.length >= 4);
+    const last = events.at(-1).args;
+    assert.equal(last.account.toLowerCase(), taker.address.toLowerCase());
+    assert.equal(last.newBalance, 10_000n * USDC);
+    assert.equal(last.reasonHash, h("glitch-fix"));
+    // Everything ever created, less what the admin lowered, is exactly what exists.
+    assert.equal(await read("VirtualUSDC", "totalSupply"), (await read("VirtualUSDC", "totalGranted")) - (await read("VirtualUSDC", "totalAdminBurned")));
+  });
 
   await test("Market maker: prices follow the feed instantly, orders are bound to the asking wallet, every fill is the user's own transaction", async () => {
     const m2 = await market(600);
@@ -363,7 +393,11 @@ try {
     assert.ok(990_000 + 20_000 > 1_000_000, "buying both sides always costs more than one dollar");
   });
 
-  assert.equal(await read("VirtualUSDC", "totalSupply"), await read("VirtualUSDC", "totalGranted"), "nothing was created or lost by trading");
+  assert.equal(
+    await read("VirtualUSDC", "totalSupply"),
+    (await read("VirtualUSDC", "totalGranted")) - (await read("VirtualUSDC", "totalAdminBurned")),
+    "trading created and lost nothing",
+  );
 
   console.log(`${passed} virtual set tests passed`);
 } finally {
