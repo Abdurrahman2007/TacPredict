@@ -3,6 +3,7 @@ import ganache from "ganache";
 import { compile } from "../scripts/compile.mjs";
 import { createPublicClient, createWalletClient, custom, defineChain, keccak256, stringToHex, zeroAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { DOWN, UP, exchangeDomain, fillCost, makerFairUpPpm, makerOrder, makerQuote, signMakerOrder } from "../../src/lib/virtual-set/market-maker.mjs";
 
 // Isolated chain with Base Sepolia's id, so the "Base only" guards pass exactly as on Base.
 const provider = ganache.provider({
@@ -54,7 +55,7 @@ async function test(name, fn) {
 
 try {
   await deploy("TestUSDC");
-  await deploy("VirtualUSDC", [admin.address]);
+  await deploy("VirtualUSDC", [admin.address, observer.address, 1000n]);
 
   await test("The virtual registry only accepts the virtual token, never other USDC-like tokens or non-contracts", async () => {
     await assert.rejects(deploy("VirtualMarketRegistry", [admin.address, address.TestUSDC], false));
@@ -209,36 +210,34 @@ try {
     await advance(day - (now % day) + 10); // just after the next UTC midnight, so one day is one step
   };
 
-  await test("The box is fixed per wallet, 50 to 500 whole USDC, shown without a transaction and credited exactly once", async () => {
-    const preview = [];
-    for (const who of accounts) {
-      const amount = await read("VirtualUSDC", "boxAmount", [who.address]);
-      assert.ok(amount >= 50n * USDC && amount <= 500n * USDC, "range " + amount);
-      assert.equal(amount % USDC, 0n, "whole dollars");
-      assert.equal(amount, await read("VirtualUSDC", "boxAmount", [who.address]), "stable");
-      preview.push(amount);
-    }
-    assert.ok(new Set(preview).size > 1, "not the same for everyone");
-    const expected = await read("VirtualUSDC", "boxAmount", [other.address]);
+  const grantBox = (who, to, amount, at) => write("VirtualUSDC", "grantBox", [to, amount], who, at);
+
+  await test("The box is the platform's own random draw: 50 to 500 whole USDC, only by the box granter, once per wallet ever", async () => {
+    await assert.rejects(grantBox(1, other.address, 100n * USDC), undefined, "only the granter");
+    await assert.rejects(grantBox(3, other.address, 49n * USDC));
+    await assert.rejects(grantBox(3, other.address, 501n * USDC));
+    await assert.rejects(grantBox(3, other.address, 100n * USDC + 1n), undefined, "whole dollars");
+    await assert.rejects(grantBox(3, zeroAddress, 100n * USDC));
     assert.equal(await balance(other), 0n);
-    await write("VirtualUSDC", "claimBox", [other.address], 3); // someone else pays the gas
-    assert.equal(await balance(other), expected);
-    await assert.rejects(write("VirtualUSDC", "claimBox", [other.address], 3));
-    await assert.rejects(write("VirtualUSDC", "claimBox", [other.address], 4));
-    await assert.rejects(write("VirtualUSDC", "claimBox", [zeroAddress], 3));
+    await grantBox(3, other.address, 237n * USDC); // the user signed nothing; the platform paid the gas
+    assert.equal(await balance(other), 237n * USDC);
+    assert.equal(await read("VirtualUSDC", "boxClaimed", [other.address]), true);
+    await assert.rejects(grantBox(3, other.address, 100n * USDC), undefined, "never a second box");
     assert.equal(await read("VirtualUSDC", "boxesOpened"), 1n);
-    assert.equal(await read("VirtualUSDC", "totalBoxAmount"), expected);
+    assert.equal(await read("VirtualUSDC", "totalBoxAmount"), 237n * USDC);
+    assert.ok(!art.VirtualUSDC.abi.some((x) => ["boxAmount", "claimBox"].includes(x.name)), "the amount is not derived from the address");
   });
 
   await test("Check-in is one transaction a day: 20 to 80 USDC over seven days, then 80 until a missed day restarts it", async () => {
+    await assert.rejects(write("VirtualUSDC", "checkIn", [], 3), undefined, "the box comes first");
+    await grantBox(3, observer.address, 500n * USDC);
     await onToday();
     const rewards = [20, 30, 40, 50, 60, 70, 80, 80, 80];
     for (const [n, usdc] of rewards.entries()) {
       if (n > 0) await advance(day);
       const before = await balance(observer);
-      const box = n === 0 ? await read("VirtualUSDC", "boxAmount", [observer.address]) : 0n;
       await write("VirtualUSDC", "checkIn", [], 3);
-      assert.equal((await balance(observer)) - before, BigInt(usdc) * USDC + box, "day " + (n + 1) + (n === 0 ? " includes the first-time box" : ""));
+      assert.equal((await balance(observer)) - before, BigInt(usdc) * USDC, "day " + (n + 1));
       if (n === 0) await assert.rejects(write("VirtualUSDC", "checkIn", [], 3), undefined, "once per UTC day");
     }
     assert.equal(await read("VirtualUSDC", "streak", [observer.address]), 9n);
@@ -247,10 +246,6 @@ try {
     await write("VirtualUSDC", "checkIn", [], 3);
     assert.equal((await balance(observer)) - before, 20n * USDC);
     assert.equal(await read("VirtualUSDC", "streak", [observer.address]), 1n);
-    // The box was credited once, inside the first check-in, and never again.
-    assert.equal(await read("VirtualUSDC", "boxClaimed", [observer.address]), true);
-    assert.equal(await read("VirtualUSDC", "boxesOpened"), 2n);
-    // A wallet whose box was already credited gets only the check-in reward.
     const otherBefore = await balance(other);
     await write("VirtualUSDC", "checkIn", [], 4);
     assert.equal((await balance(other)) - otherBefore, 20n * USDC);
@@ -259,18 +254,37 @@ try {
   await test("The admin can switch check-in and the box off and on, and only the admin can", async () => {
     await assert.rejects(write("VirtualUSDC", "setCheckInOpen", [false], 1));
     await assert.rejects(write("VirtualUSDC", "setBoxOpen", [false], 1));
-    await write("VirtualUSDC", "setCheckInOpen", [false]);
     await advance(day);
+    await write("VirtualUSDC", "setCheckInOpen", [false]);
     await assert.rejects(write("VirtualUSDC", "checkIn", [], 4), undefined, "check-in is off");
     await write("VirtualUSDC", "setCheckInOpen", [true]);
     await write("VirtualUSDC", "setBoxOpen", [false]);
-    await assert.rejects(write("VirtualUSDC", "claimBox", [maker.address], 1), undefined, "box is off");
-    const before = await balance(taker);
-    await write("VirtualUSDC", "checkIn", [], 2);
-    assert.equal((await balance(taker)) - before, 20n * USDC, "check-in still works and pays no box while the box is off");
+    await assert.rejects(grantBox(3, maker.address, 100n * USDC), undefined, "box is off");
+    const before = await balance(other);
+    await write("VirtualUSDC", "checkIn", [], 4);
+    assert.equal((await balance(other)) - before, 30n * USDC, "check-in keeps running while the box is off");
     await write("VirtualUSDC", "setBoxOpen", [true]);
-    await write("VirtualUSDC", "claimBox", [maker.address], 1);
-    assert.equal(await read("VirtualUSDC", "boxClaimed", [maker.address]), true);
+    await grantBox(3, maker.address, 50n * USDC);
+    await grantBox(3, taker.address, 500n * USDC);
+    assert.equal(await read("VirtualUSDC", "boxesOpened"), 4n);
+  });
+
+  await test("Box granter and daily box limit are admin-controlled and bound a leaked server key", async () => {
+    const small = await deploy("VirtualUSDC", [admin.address, observer.address, 2n], false);
+    const at = (who, fn, args) => write("VirtualUSDC", fn, args, who, small);
+    await at(3, "grantBox", [maker.address, 100n * USDC]);
+    await at(3, "grantBox", [taker.address, 100n * USDC]);
+    await assert.rejects(at(3, "grantBox", [other.address, 100n * USDC]), undefined, "daily limit of 2");
+    await advance(day);
+    await at(3, "grantBox", [other.address, 100n * USDC]);
+    await assert.rejects(at(1, "setBoxGranter", [maker.address]));
+    await assert.rejects(at(1, "setBoxDailyCap", [5n]));
+    await assert.rejects(at(0, "setBoxDailyCap", [0n]));
+    await at(0, "setBoxGranter", [admin.address]);
+    await assert.rejects(at(3, "grantBox", [admin.address, 100n * USDC]), undefined, "the old granter lost its power");
+    await at(0, "setBoxDailyCap", [5n]);
+    await at(0, "grantBox", [admin.address, 100n * USDC]);
+    await assert.rejects(deploy("VirtualUSDC", [admin.address, observer.address, 0n], false), undefined, "a zero limit is refused");
   });
 
   await test("Admin grants are capped at 100,000 USDC in total per wallet; the admin can be handed over safely", async () => {
@@ -293,6 +307,63 @@ try {
     // Everything that was ever created is accounted for and nothing was burned.
     assert.equal(await read("VirtualUSDC", "totalSupply"), await read("VirtualUSDC", "totalGranted"));
   });
+
+
+  await test("Market maker: prices follow the feed instantly, orders are bound to the asking wallet, every fill is the user's own transaction", async () => {
+    const m2 = await market(600);
+    const mm = observer;
+    await write("VirtualConditionalPositions", "split", [m2.id, 600n * USDC], 3); // inventory: Up and Down shares
+    const domain = exchangeDomain({ chainId: 84532, exchange: address.VirtualExchange });
+    const closeAt = Number(m2.terms.closeAt);
+    const nowOnChain = async () => Number((await pub.getBlock()).timestamp);
+    const sigma = 380;
+    const calm = makerQuote({ upPpm: makerFairUpPpm({ spot: 100, strike: 100, remainingSec: 300, sigmaPpm: sigma }) });
+    const late = makerQuote({ upPpm: makerFairUpPpm({ spot: 100.2, strike: 100, remainingSec: 1, sigmaPpm: sigma }) });
+    assert.equal(calm.up.ask, 510_000);
+    assert.equal(calm.up.bid, 490_000);
+    assert.equal(late.up.ask, 990_000, "last second, spot well above the strike: Up is 99 cents");
+    assert.equal(late.down.bid, 10_000);
+    let nonce = 0;
+    const ask = async (quote, outcome, userSide, shares, taker = accounts[2], ttlSec = 10) => {
+      const order = makerOrder({ marketId: m2.id, outcome, maker: mm.address, userSide, quote, shares, nonce: nonce++, closeAt, now: await nowOnChain(), taker: taker.address, ttlSec });
+      return { order, signature: await signMakerOrder(mm, domain, order) };
+    };
+    const up = await read("VirtualConditionalPositions", "tokenId", [m2.id, UP]);
+    const down = await read("VirtualConditionalPositions", "tokenId", [m2.id, DOWN]);
+    const shares = (who, id) => read("VirtualConditionalPositions", "balanceOf", [who.address, id]);
+
+    // Buy 10 Up at the calm price.
+    const start = await balance(taker);
+    let q = await ask(calm, UP, "buy", 10n * USDC);
+    await write("VirtualExchange", "fillOrder", [q.order, q.signature, 10n * USDC], 2);
+    assert.equal(start - (await balance(taker)), fillCost(510_000, 10n * USDC));
+    assert.equal(await shares(taker, up), 10n * USDC);
+
+    // The quote belongs to the wallet that asked for it, and it dies after a few seconds.
+    q = await ask(calm, UP, "buy", 1n * USDC);
+    await assert.rejects(write("VirtualExchange", "fillOrder", [q.order, q.signature, 1n * USDC], 1), undefined, "another wallet cannot use it");
+    await advance(11);
+    await assert.rejects(write("VirtualExchange", "fillOrder", [q.order, q.signature, 1n * USDC], 2), undefined, "expired");
+    await assert.rejects(ask(calm, UP, "buy", 1n * USDC, accounts[2], 31), undefined, "a quote cannot live for long");
+
+    // Sell the 10 Up back at the calm bid: the round trip costs exactly the spread.
+    q = await ask(calm, UP, "sell", 10n * USDC);
+    await write("VirtualExchange", "fillOrder", [q.order, q.signature, 10n * USDC], 2);
+    assert.equal(start - (await balance(taker)), fillCost(510_000, 10n * USDC) - fillCost(490_000, 10n * USDC));
+    assert.equal(await shares(taker, up), 0n);
+
+    // The price moved with the feed: the same buy now costs 99 cents a share, and the losing side is 2 cents.
+    const before = await balance(taker);
+    q = await ask(late, UP, "buy", 1n * USDC);
+    await write("VirtualExchange", "fillOrder", [q.order, q.signature, 1n * USDC], 2);
+    q = await ask(late, DOWN, "buy", 1n * USDC);
+    await write("VirtualExchange", "fillOrder", [q.order, q.signature, 1n * USDC], 2);
+    assert.equal(before - (await balance(taker)), fillCost(990_000, 1n * USDC) + fillCost(20_000, 1n * USDC));
+    assert.equal(await shares(taker, down), 1n * USDC);
+    assert.ok(990_000 + 20_000 > 1_000_000, "buying both sides always costs more than one dollar");
+  });
+
+  assert.equal(await read("VirtualUSDC", "totalSupply"), await read("VirtualUSDC", "totalGranted"), "nothing was created or lost by trading");
 
   console.log(`${passed} virtual set tests passed`);
 } finally {

@@ -53,7 +53,9 @@ test("the virtual set never references real USDC and the production contracts ar
 test("VirtualUSDC creates balance in three bounded ways and cannot be sent or pulled out by users", () => {
   const token = read("VirtualUSDC.sol");
   assert.equal([...token.matchAll(/\b_mint\(/g)].length, 3, "box, check-in and capped admin grant only");
-  assert.ok(/function _claimBox\([^)]*\)[\s\S]*?!boxClaimed\[account\][\s\S]*?boxClaimed\[account\] = true[\s\S]*?_mint\(account, amount\)/.test(token), "the box is credited once per wallet");
+  assert.ok(/function grantBox\([^)]*\)[\s\S]*?msg\.sender == boxGranter[\s\S]*?!boxClaimed\[account\][\s\S]*?amount >= BOX_MIN && amount <= BOX_MAX && amount % UNIT == 0[\s\S]*?boxesToday < boxDailyCap[\s\S]*?boxClaimed\[account\] = true[\s\S]*?_mint\(account, amount\)/.test(token), "the box is the granter's draw, once per wallet, in range, under a daily limit");
+  assert.ok(!/boxAmount|boxSalt|claimBox|keccak256/.test(token), "the amount does not depend on the address or anything the contract can see");
+  assert.ok(/function checkIn\(\)[\s\S]*?boxClaimed\[msg\.sender\]/.test(token), "check-in needs the box first");
   assert.ok(/function checkIn\(\)[\s\S]*?_mint\(msg\.sender, amount\)/.test(token));
   assert.ok(/function adminGrant\([^)]*\)[^{]*onlyAdmin[\s\S]*?adminGranted\[account\] \+ amount <= ADMIN_ACCOUNT_CAP[\s\S]*?_mint\(account, amount\)/.test(token));
   assert.ok(token.includes("ADMIN_ACCOUNT_CAP = 100_000_000_000"), "100,000 USDC per wallet");
