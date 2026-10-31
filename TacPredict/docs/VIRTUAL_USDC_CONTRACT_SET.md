@@ -48,8 +48,8 @@ Verify bytecode and source on Basescan afterwards. The existing six addresses an
 
 ## Not decided / not built yet
 
-- **Who is the counterparty for an instant buy or sell?** `VirtualExchange` is a signed order book: a trade needs someone on the other side. Options: (a) a market-maker wallet that posts orders priced from the live feed, funded with its own claimed vUSDC; (b) a seventh contract that fills at a server-signed feed quote. Neither is written.
+- **Who is the counterparty for an instant buy or sell?** `VirtualExchange` is a signed order book: a trade needs someone on the other side. Options: (a) a market-maker wallet that posts orders priced from the live feed, funded with its own vUSDC (admin grant); (b) a seventh contract that fills at a server-signed feed quote. Neither is written.
 - Reset every season (`resetOnClaim = true`) or keep and add. Default in the tests: keep and add. Also the admin season budget (tests use 10,000 USDC).
 - Monthly TAC points formula and pool (see the Season plan doc).
-- App changes: claim button, collateral/exchange addresses, indexer and matcher configuration for the new set, "cannot be withdrawn" rules text. A Supabase migration, if needed, is applied by the owner.
+- App changes: box and daily check-in screens, collateral/exchange addresses, indexer and matcher configuration for the new set, "cannot be withdrawn" rules text. A Supabase migration, if needed, is applied by the owner.
 - Independent review of `VirtualUSDC` before any mainnet use. Local tests are not an audit.
