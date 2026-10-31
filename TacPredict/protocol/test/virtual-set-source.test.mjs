@@ -52,16 +52,19 @@ test("the virtual set never references real USDC and the production contracts ar
 
 test("VirtualUSDC creates balance in three bounded ways and cannot be sent or pulled out by users", () => {
   const token = read("VirtualUSDC.sol");
-  assert.equal([...token.matchAll(/\b_mint\(/g)].length, 3, "box, check-in and budgeted admin grant only");
-  assert.ok(/function openBox\(\)[\s\S]*?_mint\(msg\.sender, amount\)/.test(token));
+  assert.equal([...token.matchAll(/\b_mint\(/g)].length, 3, "box, check-in and capped admin grant only");
+  assert.ok(/function _claimBox\([^)]*\)[\s\S]*?!boxClaimed\[account\][\s\S]*?boxClaimed\[account\] = true[\s\S]*?_mint\(account, amount\)/.test(token), "the box is credited once per wallet");
   assert.ok(/function checkIn\(\)[\s\S]*?_mint\(msg\.sender, amount\)/.test(token));
-  assert.ok(/function adminGrant\([^)]*\)[\s\S]*?adminGrantedInSeason \+ amount <= adminSeasonBudget[\s\S]*?_mint\(account, amount\)/.test(token));
+  assert.ok(/function adminGrant\([^)]*\)[^{]*onlyAdmin[\s\S]*?adminGranted\[account\] \+ amount <= ADMIN_ACCOUNT_CAP[\s\S]*?_mint\(account, amount\)/.test(token));
+  assert.ok(token.includes("ADMIN_ACCOUNT_CAP = 100_000_000_000"), "100,000 USDC per wallet");
   assert.ok(!/function mint\b|function setBalance|function burn\b|function adminBurn|function adminTransfer/.test(token), "admin cannot take or edit balances");
-  assert.equal([...token.matchAll(/\b_burn\(/g)].length, 1, "the only burn is the season reset inside openBox()");
+  assert.equal([...token.matchAll(/\b_burn\(|\b_transfer\(/g)].length, 0, "nothing is ever burned or moved by the token itself");
   assert.ok(/function transfer\([^)]*\)[^{]*\{\s*require\(protocol\[msg\.sender\]/.test(token));
   assert.ok(/function transferFrom\([^)]*\)[^{]*\{\s*require\(protocol\[msg\.sender\]/.test(token));
   assert.ok(token.includes("BOX_MIN = 50_000_000") && token.includes("BOX_MAX = 500_000_000"), "box is 50 to 500 USDC");
   assert.ok(token.includes("CHECKIN_BASE = 20_000_000") && token.includes("CHECKIN_STEP = 10_000_000") && token.includes("CHECKIN_DAYS = 7"));
+  assert.ok(token.includes("function setCheckInOpen") && token.includes("function setBoxOpen"), "admin switches");
+  assert.ok(!/startSeason|resetOnClaim/.test(token), "no season reset: a box is once per wallet, ever");
   assert.ok(token.includes('"vUSDC"'), "wallets must not show it as real USDC");
   assert.ok(!/permit|ERC20Permit/i.test(token));
   // Base only: the token and the virtual registry both refuse every chain except Base mainnet / Base Sepolia.
