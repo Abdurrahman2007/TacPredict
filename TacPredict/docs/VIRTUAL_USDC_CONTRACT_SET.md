@@ -39,7 +39,29 @@ Other rules:
 - Users pay gas in ETH on Base for every check-in, buy and sell (the box costs the user nothing: the platform pays that gas). That gas is the only real money involved.
 - Total supply is not capped. It is virtual, so this is a campaign cost, not a financial one.
 
-## Deployment order (when approved)
+## Deployed on Base mainnet (8453)
+
+All seven contracts are live, admin-controlled by the Base Account `0x57828f1aa32fd6be3988f240068df53ed94b7aef`. The record (addresses, transactions, salts, initcode hashes, constructor arguments, compiler settings and the wiring) is `protocol/deployments/virtual-base-mainnet.json`; the app reads the same addresses from `src/lib/virtual-set/deployment.mjs` (a test keeps the two identical and re-derives every CREATE2 address).
+
+| Contract | Address |
+| --- | --- |
+| VirtualUSDC (vUSDC) | `0x21b3932c2D8FC7178cC5Ea1083e98877211FD196` |
+| VirtualMarketRegistry | `0x49D7015ABddEBA550F6138f4ccF914B417237C0D` |
+| VirtualResolutionOracle | `0x99bcc662cd9716Ce4bd66571f12A8B07295FcF3F` |
+| VirtualMarketFactory | `0x35bBCe6fc02F565bccBe0FF5290B96770D3f5903` |
+| VirtualConditionalPositions | `0xF2973A60903b8E58098A144b07105f2A45dF6156` |
+| VirtualExchange | `0x716345BE42D1Ac79232721d3f4E37B9F4bBF48cB` |
+| VirtualSettlement | `0x567C1128Be6C0c0b9b18C96459D09Cf539Fcbd59` |
+
+Settings at deployment: oracle bond 5 vUSDC, challenge period 60 seconds, `boxDailyCap` 1000, **no box granter yet** (so no welcome box can be opened until the operator sets one with `setBoxGranter`). Both the box and the check-in switches start open.
+
+Checked onchain after deployment: each address holds code, Exchange and Settlement point at the deployed registry/positions (and vUSDC), the registry roles are held by the factory and the oracle only, the vUSDC protocol list is exactly positions, exchange and oracle, and `protocolLocked()` is true.
+
+Deployed through the public CREATE2 proxy. The 32-byte immutable slots in the initcode were filled with `0x01..0x20` for transcription safety; the constructor overwrites them, so the runtime bytecode is the same as a plain compile.
+
+**Status: deployed and wired, trading disabled in the app** (`VIRTUAL_SET_FLAGS.executionEnabled` is false). Basescan source verification is done by hand with the Standard-JSON-Input package; the `basescanVerified` flag and `basescan_verified` in the manifest are flipped after that.
+
+### Order the contracts were deployed in
 
 1. `VirtualUSDC(admin, boxGranter, boxDailyCap)`
 2. `VirtualMarketRegistry(admin, vUSDC)`
@@ -49,7 +71,7 @@ Other rules:
 6. Registry: grant `FACTORY_ROLE` to the factory and `ORACLE_ROLE` to the oracle.
 7. Token: `allowProtocol` for positions, exchange, oracle, then `lockProtocol()`.
 
-Verify bytecode and source on Basescan afterwards. The existing six addresses and `protocol/deployments/base-mainnet.json` are not touched.
+The existing six addresses and `protocol/deployments/base-mainnet.json` are not touched.
 
 ## Market maker: instant, feed-driven prices
 
@@ -78,7 +100,8 @@ What the maker costs and risks, all virtual:
 
 ## Not decided / not built yet
 
-- The quote endpoint, the keeper that creates a market per asset and window and resolves it, the indexer/matcher configuration for the new set, and the app screens (box reveal, daily check-in, trade card) are not written. No deployment.
+- The quote endpoint, the keeper that creates a market per asset and window and resolves it, the indexer/matcher configuration for the new set, and the app screens (box reveal, daily check-in, trade card) are not written. The contracts are deployed (see above); the app only has the read-only connection (`deployment.mjs`, `abi.ts`, `account.ts`) and no signer.
+- A box granter wallet must be set (`setBoxGranter`) and the market-maker wallet funded (`adminGrant`) before anything can be opened or traded.
 - After streak day 7 the check-in stays at 80 USDC a day (confirmed).
 - Admin = Safe multisig (2 of 3 recommended), separate from the maker wallet and the box granter.
 - Monthly TAC points formula and pool (see the Season plan doc). Do not tie points to the size of the box.
