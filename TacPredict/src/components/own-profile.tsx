@@ -146,17 +146,13 @@ export function OwnProfile({ editor }: { editor: ReactNode }) {
       ) : tab === "positions" && positions.length ? (
         <div className="own-profile-records">
           {positions.map((p) => (
-            <Link
-              key={p.marketId + "-" + p.outcome}
-              to="/markets/$marketId"
-              params={{ marketId: p.marketId }}
-            >
+            <span key={p.marketId + "-" + p.outcome}>
               <span>
                 {p.title}
                 <small>Outcome {p.outcome + 1} · Open</small>
               </span>
               <b>{sharesShort(p.sharesAtomic)} shares</b>
-            </Link>
+            </span>
           ))}
         </div>
       ) : tab === "activity" && activity.length ? (
@@ -188,8 +184,8 @@ export function OwnProfile({ editor }: { editor: ReactNode }) {
             <br />
             <span>Explore what’s trending to get started.</span>
           </p>
-          <Link to="/markets" className="account-primary">
-            Explore Markets
+          <Link to="/up-down" className="account-primary">
+            Explore crypto Up/Down
             <ArrowUpRight size={15} />
           </Link>
         </div>

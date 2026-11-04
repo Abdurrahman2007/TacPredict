@@ -200,13 +200,7 @@ export function NativePortfolio({
         ) : (
           ownOrders.map((o) => (
             <article className="finance-card !p-4" key={o.id}>
-              <Link
-                to="/markets/$marketId"
-                params={{ marketId: o.marketId }}
-                className="text-sm font-semibold"
-              >
-                {o.title}
-              </Link>
+              <span className="text-sm font-semibold">{o.title}</span>
               <div className="mt-3 flex justify-between gap-3 text-xs text-muted-foreground">
                 <span>
                   {o.side} · Outcome {o.outcomeIndex + 1} · {sharesShort(o.remainingAtomic)} shares
@@ -290,13 +284,7 @@ export function NativePortfolio({
                   <div className="flex flex-wrap justify-between items-start gap-2">
                     <div>
                       <p className="text-sm font-semibold">{a.kind}</p>
-                      <Link
-                        to="/markets/$marketId"
-                        params={{ marketId: a.marketId }}
-                        className="mt-1 block text-xs text-muted-foreground"
-                      >
-                        {a.title}
-                      </Link>
+                      <span className="mt-1 block text-xs text-muted-foreground">{a.title}</span>
                     </div>
                     <p className="text-sm tabular-nums">{usdcShort(a.amountAtomic)}</p>
                   </div>
@@ -327,13 +315,7 @@ export function NativePortfolio({
         positions.map((p) => (
           <article key={p.id} className="finance-card !p-4 sm:!p-5">
             <div className="flex items-start justify-between gap-3">
-              <Link
-                to="/markets/$marketId"
-                params={{ marketId: p.marketId }}
-                className="text-sm font-semibold leading-6"
-              >
-                {p.title}
-              </Link>
+              <span className="text-sm font-semibold leading-6">{p.title}</span>
               <span className="finance-badge shrink-0">
                 {BigInt(p.claimableAtomic) > 0n ? "Claimable" : p.positionStatus}
               </span>
@@ -367,7 +349,7 @@ export function NativePortfolio({
                   }
                   onClick={() => void claim(p)}
                 >
-                  {busy ? "Processing…" : p.status === "VOID" ? "Redeem void shares" : "Claim USDC"}
+                  {busy ? "Processing…" : p.status === "VOID" ? "Redeem void shares" : "Claim Real USDC (Mainnet)"}
                 </button>
                 {wallet.address?.toLowerCase() !== p.wallet.toLowerCase() && (
                   <p className="mt-2 text-xs text-muted-foreground">

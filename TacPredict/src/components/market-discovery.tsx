@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import "@/styles/market-discovery.css";
 
-const categories = ["Crypto", "Football", "Cricket"] as const;
+const categories = ["Crypto"] as const;
 
 /** Decorative discovery globe, running only when scrolled into view. Never a startup overlay. */
 export function MarketDiscovery() {
@@ -74,15 +74,9 @@ export function MarketDiscovery() {
           <h3>
             Discover <span key={category}>{category}</span>
           </h3>
-          {category === "Crypto" ? (
-            <Link to="/up-down" className="discovery-action">
-              View live prices <ArrowUpRight size={17} />
-            </Link>
-          ) : (
-            <Link to="/markets" search={{ category }} className="discovery-action">
-              View markets <ArrowUpRight size={17} />
-            </Link>
-          )}
+          <Link to="/up-down" className="discovery-action">
+            View live prices <ArrowUpRight size={17} />
+          </Link>
         </div>
       </div>
       <div className="discovery-notes">
@@ -91,8 +85,8 @@ export function MarketDiscovery() {
           <p>Live crypto prices, charts and time windows.</p>
         </article>
         <article>
-          <h3>Back what you know</h3>
-          <p>Explore Football and Cricket predictions.</p>
+          <h3>Trade crypto Up/Down</h3>
+          <p>Bitcoin, Ethereum, Solana and BNB in 5m, 30m, 1h, 12h and 24h windows.</p>
         </article>
         <article>
           <h3>Your portfolio</h3>

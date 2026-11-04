@@ -160,9 +160,7 @@ export function PublicPagesView() {
                   </td>
                   <td>{m.native?.status ?? "Listing pending"}</td>
                   <td>
-                    <Link to="/markets/$marketId" params={{ marketId: m.id }}>
-                      View ↗
-                    </Link>
+                    <span title="Public market page removed in the virtual-only cleanup">—</span>
                   </td>
                 </tr>
               ))}
