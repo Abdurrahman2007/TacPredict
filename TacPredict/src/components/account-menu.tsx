@@ -97,45 +97,55 @@ export function AccountMenu() {
               </button>
               <h2 className="account-section-title">Settings</h2>
 
-              <div className="account-setting">
-                <span>
-                  <EyeOff size={18} />
-                  <b>Hide balances</b>
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-label="Hide overview balances"
-                  aria-checked={hidden}
-                  className={`account-switch ${hidden ? "on" : ""}`}
-                  onClick={() => setHidden(!hidden)}
-                >
-                  <i />
-                </button>
+              <div className="account-group">
+                <div className="account-setting">
+                  <span>
+                    <span className="account-tile tile-grey">
+                      <EyeOff size={17} />
+                    </span>
+                    <b>Hide balances</b>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-label="Hide overview balances"
+                    aria-checked={hidden}
+                    className={`account-switch ${hidden ? "on" : ""}`}
+                    onClick={() => setHidden(!hidden)}
+                  >
+                    <i />
+                  </button>
+                </div>
               </div>
 
-              <div className="account-setting account-setting-stack">
-                <span>
-                  <Percent size={18} />
-                  <b>Slippage</b>
-                </span>
-                <div className="account-slippage" role="group" aria-label="Slippage tolerance">
-                  {SLIPPAGE_PRESETS.map((bps) => (
-                    <button
-                      key={bps}
-                      type="button"
-                      className={slippage === bps ? "on" : undefined}
-                      aria-pressed={slippage === bps}
-                      onClick={() => setSlippage(bps)}
-                    >
-                      {formatSlippage(bps)}
-                    </button>
-                  ))}
+              <p className="account-group-label">Trading</p>
+              <div className="account-group">
+                <div className="account-setting account-setting-stack">
+                  <span>
+                    <span className="account-tile tile-blue">
+                      <Percent size={17} />
+                    </span>
+                    <b>Slippage</b>
+                  </span>
+                  <div className="account-slippage" role="group" aria-label="Slippage tolerance">
+                    {SLIPPAGE_PRESETS.map((bps) => (
+                      <button
+                        key={bps}
+                        type="button"
+                        className={slippage === bps ? "on" : undefined}
+                        aria-pressed={slippage === bps}
+                        onClick={() => setSlippage(bps)}
+                      >
+                        {formatSlippage(bps)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
             <>
+              <div className="account-grabber" aria-hidden="true" />
               <div className="account-identity">
                 <PixelAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={48} />
                 <div>
@@ -150,19 +160,30 @@ export function AccountMenu() {
                 </div>
               </div>
 
-              <nav className="account-menu-list" aria-label="Menu">
+              <p className="account-group-label">Account</p>
+              <nav className="account-menu-list account-group" aria-label="Account">
                 <Link to="/account" onClick={() => setOpen(false)}>
-                  <UserRound size={19} />
+                  <span className="account-tile tile-blue">
+                    <UserRound size={17} />
+                  </span>
                   Profile
                   <ChevronRight size={15} />
                 </Link>
                 <Link to="/referrals" onClick={() => setOpen(false)}>
-                  <Users size={19} />
+                  <span className="account-tile tile-green">
+                    <Users size={17} />
+                  </span>
                   Refer friend
                   <ChevronRight size={15} />
                 </Link>
+              </nav>
+
+              <p className="account-group-label">Support</p>
+              <nav className="account-menu-list account-group" aria-label="Support">
                 <button type="button" onClick={() => setView("settings")}>
-                  <Settings2 size={19} />
+                  <span className="account-tile tile-grey">
+                    <Settings2 size={17} />
+                  </span>
                   Settings
                   <ChevronRight size={15} />
                 </button>
@@ -170,12 +191,16 @@ export function AccountMenu() {
                   href="mailto:support@tacpredict.fun?subject=TacPredict%20Support"
                   onClick={() => setOpen(false)}
                 >
-                  <LifeBuoy size={19} />
+                  <span className="account-tile tile-orange">
+                    <LifeBuoy size={17} />
+                  </span>
                   Help
                   <ChevronRight size={15} />
                 </a>
                 <Link to="/terms" onClick={() => setOpen(false)}>
-                  <FileText size={19} />
+                  <span className="account-tile tile-purple">
+                    <FileText size={17} />
+                  </span>
                   Terms
                   <ChevronRight size={15} />
                 </Link>
@@ -183,22 +208,25 @@ export function AccountMenu() {
                   href="mailto:support@tacpredict.fun?subject=TacPredict%20Feedback"
                   onClick={() => setOpen(false)}
                 >
-                  <MessageSquare size={19} />
+                  <span className="account-tile tile-pink">
+                    <MessageSquare size={17} />
+                  </span>
                   Feedback
                   <ChevronRight size={15} />
                 </a>
               </nav>
 
               {auth.user ? (
-                <button
-                  type="button"
-                  className="account-logout"
-                  disabled={busy}
-                  onClick={() => void logout()}
-                >
-                  <LogOut size={18} />
-                  {busy ? "Logging out…" : "Log out"}
-                </button>
+                <div className="account-group account-logout-group">
+                  <button
+                    type="button"
+                    className="account-logout"
+                    disabled={busy}
+                    onClick={() => void logout()}
+                  >
+                    {busy ? "Logging out…" : "Log out"}
+                  </button>
+                </div>
               ) : (
                 <button
                   type="button"

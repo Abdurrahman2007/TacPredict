@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { rankingOptions } from "@/lib/ranking/read.functions";
 import {
   signedMoney,
@@ -56,7 +56,7 @@ function RankingPage() {
   return ready ? (
     <RankingClient />
   ) : (
-    <section className="tp-rank-board" aria-busy="true" aria-label="Loading ranking">
+    <section className="tp-lb" aria-busy="true" aria-label="Loading ranking">
       <h1 className="sr-only">Ranking</h1>
     </section>
   );
@@ -87,24 +87,30 @@ function RankingClient() {
       ? demoTrader(s.trader)
       : data?.selected
     : null;
+  const podium = s.trader ? [] : rows.slice(0, 3);
+  const podiumOrder =
+    podium.length === 3
+      ? [podium[1], podium[0], podium[2]].filter(
+          (t): t is RankingTrader => Boolean(t),
+        )
+      : podium;
+  const rest = s.trader ? [] : rows.slice(3);
 
   return (
-    <section className="tp-rank-board" aria-labelledby="ranking-title">
-      <Link to="/" className="tp-rank-back">
-        <ArrowLeft size={14} /> Home
-      </Link>
-      <header className="tp-rank-top">
+    <section className="tp-lb" aria-labelledby="ranking-title">
+      <header className="tp-lb-head">
         <div>
           {s.trader ? (
-            <Link to="/ranking" search={{ period }} className="tp-rank-back">
+            <Link to="/ranking" search={{ period }} className="tp-lb-back">
               <ArrowLeft size={14} /> Leaderboard
             </Link>
           ) : null}
           <h1 id="ranking-title">
             {s.trader ? (selected?.name ?? traderName(s.trader)) : "Ranking"}
           </h1>
+          {!s.trader ? <p>Top traders · Virtual USDC</p> : null}
         </div>
-        <div className="tp-rank-seg" role="group" aria-label="Ranking period">
+        <div className="tp-lb-seg" role="group" aria-label="Ranking period">
           {(Object.keys(periodNames) as RankingPeriod[]).map((v) => (
             <button
               key={v}
@@ -120,36 +126,38 @@ function RankingClient() {
       </header>
 
       {demoBoard && !s.trader ? (
-        <p role="note" style={{ padding: "12px 14px", borderRadius: 16, background: "#171a2e", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
-          Demo leaderboard: no live ranking rows were returned, so the rows below are
-          example traders, not verified results. TAC distribution for any pool is not
-          promised — see Terms.
+        <p className="tp-lb-demo" role="note">
+          Demo leaderboard · Example traders, not verified results
         </p>
       ) : null}
 
       {!s.trader ? (
-        <aside className="tp-rank-pool" aria-label="Monthly reward pool">
-          <div className="tp-rank-pool-copy">
-            <span className="tp-rank-pool-kicker">{monthLabel()}</span>
+        <aside className="tp-lb-pool" aria-label="Monthly reward pool">
+          <div>
+            <span className="tp-lb-pool-kicker">Monthly reward pool · {monthLabel()}</span>
             <strong>
               {MONTHLY_TAC_POOL.toLocaleString("en-US")} <em>TAC</em>
             </strong>
+            <small>
+              Points only · No token promised ·{" "}
+              <Link to="/terms">Terms</Link>
+            </small>
           </div>
-          <div className="tp-rank-pool-badge" aria-hidden="true">
+          <div className="tp-lb-pool-badge" aria-hidden="true">
+            <Trophy size={26} />
             <span>200K</span>
-            <small>TAC</small>
           </div>
         </aside>
       ) : null}
 
       {q.isPending && !demoBoard && !s.trader ? (
-        <p className="tp-rank-empty" role="status">
+        <p className="tp-lb-empty" role="status">
           Loading ranking…
         </p>
       ) : s.trader ? (
         <>
-          <div className="tp-rank-who" style={{ marginBottom: 16 }}>
-            <PixelAvatar seed={s.trader} size={56} />
+          <div className="tp-lb-hero">
+            <PixelAvatar seed={s.trader} size={72} />
             <div>
               <strong>{selected?.name ?? traderName(s.trader)}</strong>
               {!isDemoTrader(s.trader) ? (
@@ -167,7 +175,7 @@ function RankingClient() {
               )}
             </div>
           </div>
-          <div className="tp-rank-stats">
+          <div className="tp-lb-stats">
             {[
               ["Rank", selected?.rank ?? "—"],
               ["Volume", selected ? unsignedMoney(selected.volumeAtomic) : "—"],
@@ -182,9 +190,10 @@ function RankingClient() {
               </div>
             ))}
           </div>
-          <div className="tp-rank-tabs" role="group" aria-label="Trader data">
+          <div className="tp-lb-seg tp-lb-tabs" role="group" aria-label="Trader data">
             <button
               type="button"
+              className={tab === "positions" ? "on" : undefined}
               aria-pressed={tab === "positions"}
               onClick={() => setTab("positions")}
             >
@@ -192,6 +201,7 @@ function RankingClient() {
             </button>
             <button
               type="button"
+              className={tab === "activity" ? "on" : undefined}
               aria-pressed={tab === "activity"}
               onClick={() => setTab("activity")}
             >
@@ -200,9 +210,9 @@ function RankingClient() {
           </div>
           {tab === "positions" ? (
             selected?.positions.length ? (
-              <div>
+              <div className="tp-lb-list">
                 {selected.positions.map((p, i) => (
-                  <div key={`${p.marketId}-${p.outcome}-${i}`} className="tp-rank-record">
+                  <div key={`${p.marketId}-${p.outcome}-${i}`} className="tp-lb-record">
                     <span>
                       <strong>{p.title}</strong>
                       <small>
@@ -216,14 +226,14 @@ function RankingClient() {
                 ))}
               </div>
             ) : (
-              <div className="tp-rank-empty">
+              <div className="tp-lb-empty">
                 <p>{selected ? "No positions" : "No finalized activity for this period"}</p>
               </div>
             )
           ) : selected?.activity.length ? (
-            <div>
+            <div className="tp-lb-list">
               {selected.activity.map((a) => (
-                <div key={a.id} className="tp-rank-record">
+                <div key={a.id} className="tp-lb-record">
                   <span>
                     <strong>{a.title}</strong>
                     <small>
@@ -236,7 +246,7 @@ function RankingClient() {
               ))}
             </div>
           ) : (
-            <p className="tp-rank-empty">No trades for this period</p>
+            <p className="tp-lb-empty">No trades for this period</p>
           )}
         </>
       ) : (
@@ -245,60 +255,75 @@ function RankingClient() {
             <Link
               to="/ranking"
               search={{ period, trader: wallet.address.toLowerCase() }}
-              className="tp-rank-row self"
+              className="tp-lb-self"
             >
-              <span className="tp-rank-num">{data?.self?.rank ?? "—"}</span>
-              <span className="tp-rank-who">
-                <PixelAvatar seed={wallet.address} />
-                <span>
-                  <strong>You</strong>
-                  <small>{traderName(wallet.address)}</small>
-                </span>
+              <PixelAvatar seed={wallet.address} size={40} />
+              <span className="tp-lb-who">
+                <strong>You</strong>
+                <small>Your rank · {data?.self?.rank ?? "—"}</small>
               </span>
-              <span className="tp-rank-money">
+              <span className="tp-lb-money">
                 <span>{data?.self ? unsignedMoney(data.self.volumeAtomic) : "—"}</span>
-                <small>{data?.self ? signedMoney(data.self.pnlAtomic) : "—"}</small>
+                <small className={data?.self ? pnlClass(data.self.pnlAtomic) : ""}>
+                  {data?.self ? signedMoney(data.self.pnlAtomic) : "—"}
+                </small>
               </span>
             </Link>
           )}
-          <div className="tp-rank-cols" aria-hidden="true">
-            <span>#</span>
-            <span>Trader</span>
-            <span>Vol / P&amp;L</span>
-          </div>
-          <div>
-            {rows.map((t) => (
+
+          {podium.length > 0 ? (
+            <div className="tp-lb-podium" aria-label="Top 3 traders">
+              {podiumOrder.map((t) => (
+                <Link
+                  to="/ranking"
+                  search={{ period, trader: t.wallet }}
+                  key={t.wallet}
+                  className={`tp-lb-podium-card rank-${t.rank ?? 0}`}
+                >
+                  <span className="tp-lb-medal">{t.rank ?? "—"}</span>
+                  <PixelAvatar seed={t.wallet} size={t.rank === 1 ? 64 : 52} />
+                  <strong>{t.name}</strong>
+                  <span className="tp-lb-podium-vol">{unsignedMoney(t.volumeAtomic)}</span>
+                  <span className={`tp-lb-pnl ${pnlClass(t.pnlAtomic)}`}>
+                    {signedMoney(t.pnlAtomic)}
+                  </span>
+                  <small>
+                    {t.markets} markets · {t.settledMarkets} settled
+                    {isDemoTrader(t.wallet) ? " · Demo" : ""}
+                  </small>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="tp-lb-list">
+            {rest.map((t) => (
               <Link
                 to="/ranking"
                 search={{ period, trader: t.wallet }}
                 key={t.wallet}
-                className="tp-rank-row"
+                className="tp-lb-row"
               >
-                <span
-                  className="tp-rank-num"
-                  data-medal={t.rank && t.rank <= 3 ? t.rank : undefined}
-                >
-                  {t.rank ?? "—"}
+                <span className="tp-lb-rank">{t.rank ?? "—"}</span>
+                <PixelAvatar seed={t.wallet} size={40} />
+                <span className="tp-lb-who">
+                  <strong>{t.name}</strong>
+                  <small>
+                    {t.markets} markets · {t.settledMarkets} settled
+                    {isDemoTrader(t.wallet) ? " · Demo" : ""}
+                  </small>
                 </span>
-                <span className="tp-rank-who">
-                  <PixelAvatar seed={t.wallet} />
-                  <span>
-                    <strong>{t.name}</strong>
-                    <small>
-                      {t.markets} markets · {t.settledMarkets} settled
-                      {isDemoTrader(t.wallet) ? " · Demo" : ""}
-                    </small>
-                  </span>
-                </span>
-                <span className="tp-rank-money">
+                <span className="tp-lb-money">
                   <span>{unsignedMoney(t.volumeAtomic)}</span>
                   <small className={pnlClass(t.pnlAtomic)}>{signedMoney(t.pnlAtomic)}</small>
                 </span>
               </Link>
             ))}
           </div>
+          {rows.length === 0 ? <p className="tp-lb-empty">No traders yet</p> : null}
+
           {!demoBoard && data && (
-            <nav className="ranking-paging" aria-label="Ranking pages">
+            <nav className="tp-lb-paging" aria-label="Ranking pages">
               <button
                 type="button"
                 disabled={page === 0}
