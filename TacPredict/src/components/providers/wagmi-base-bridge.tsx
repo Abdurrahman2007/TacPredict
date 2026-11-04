@@ -45,7 +45,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
  */
 export function WagmiBaseBridge() {
   const { address, isConnected, connector, chainId, status } = useAccount();
-  const { address: baseAddress, adopt, disconnect } = useBaseWallet();
+  const { address: baseAddress, adopt, disconnect, settleWagmi } = useBaseWallet();
   const router = useRouter();
   const siweDone = useRef<string | null>(null);
   const bridging = useRef<string | null>(null);
@@ -63,11 +63,25 @@ export function WagmiBaseBridge() {
   // 1. Mirror the connected account right away; pages read it from useBaseWallet().
   useEffect(() => {
     if (status === "disconnected") {
+      // Definitive, even when there is no address to clear: without this,
+      // a genuinely disconnected user would stay "restoring" forever and
+      // never see a Connect control at all.
       if (baseAddress) disconnect();
+      else settleWagmi();
       return;
     }
     if (isConnected && address) adopt({ address, chainId: chainId ?? null });
-  }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect]);
+  }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect, settleWagmi]);
+
+  // 1b. A wallet provider that never answers must not freeze the UI in
+  // "restoring" forever. After 10s, fall back to the settled disconnected
+  // state so the user can click Connect again; a later wagmi connect
+  // still adopts normally through effect 1.
+  useEffect(() => {
+    if (status !== "reconnecting" && status !== "connecting") return;
+    const timer = window.setTimeout(() => settleWagmi(), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [status, settleWagmi]);
 
   // 2. Attach the wallet provider (needed to send transactions) and run the one-time sign-in.
   useEffect(() => {

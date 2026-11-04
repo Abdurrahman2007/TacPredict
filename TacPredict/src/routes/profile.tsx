@@ -11,7 +11,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
-import { useLoginDialog } from "@/components/login-dialog";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { usePaperLedger, type PaperPosition } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
@@ -45,13 +45,17 @@ function signedMoney(n: number, hidden: boolean) {
 
 function PortfolioPage() {
   const wallet = useBaseWallet();
-  const login = useLoginDialog();
+  const access = useWalletAccess("/profile");
   const ledger = usePaperLedger();
   const [hidden, setHidden] = useOverviewPrivacy();
   const [tab, setTab] = useState<"positions" | "history">("positions");
   const [range, setRange] = useState<keyof typeof periods>("1D");
   const [notice, setNotice] = useState("");
   const disconnected = !wallet.address;
+  // A Connect control may only appear once wagmi has definitively settled
+  // disconnected. While restoring, the wallet is about to reappear, so the
+  // page shows a neutral loading button instead of a connect prompt.
+  const showConnect = !wallet.address && !wallet.restoring;
 
   /** Cost basis of open positions (mark-to-market lives on the market page). */
   const positionValue = useMemo(
@@ -73,7 +77,9 @@ function PortfolioPage() {
 
   async function copyAddress() {
     if (!wallet.address) {
-      login("/profile");
+      // access.run() opens the modal only when definitively disconnected;
+      // during a restore it is a no-op, so no modal can appear here.
+      void access.run();
       return;
     }
     try {
@@ -124,9 +130,13 @@ function PortfolioPage() {
         <span>Available</span>
         <strong>{money(available, hidden)}</strong>
         <div className="tp-wp-actions">
-          {disconnected ? (
-            <button type="button" className="tp-wp-primary" onClick={() => login("/profile")}>
+          {showConnect ? (
+            <button type="button" className="tp-wp-primary" onClick={() => void access.run()}>
               Connect wallet
+            </button>
+          ) : disconnected ? (
+            <button type="button" className="tp-wp-primary" disabled>
+              Connecting…
             </button>
           ) : (
             <Link to="/rewards" className="tp-wp-primary">
@@ -307,10 +317,15 @@ function PortfolioPage() {
         )}
       </section>
 
-      {disconnected && (
-        <button type="button" className="tp-wp-connect" onClick={() => login("/profile")}>
+      {showConnect && (
+        <button type="button" className="tp-wp-connect" onClick={() => void access.run()}>
           Connect wallet
           <ArrowUpRight size={16} />
+        </button>
+      )}
+      {disconnected && !showConnect && (
+        <button type="button" className="tp-wp-connect" disabled>
+          Connecting…
         </button>
       )}
 

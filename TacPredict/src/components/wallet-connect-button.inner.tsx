@@ -1,4 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
@@ -16,6 +17,12 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
   const balance = virtualMoney(virtual.data?.balance);
   const access = useWalletAccess();
   const needsVerify = access.state === "verify";
+  // Wagmi is the authority on connection state. RainbowKit's `account`
+  // is null while wagmi is still reconnecting a stored connection, so
+  // trusting it alone shows a clickable "Connect Wallet" to someone who
+  // is already connected. Only a definitive "disconnected" may show it.
+  const { status: wagmiStatus } = useAccount();
+  const wagmiRestoring = wagmiStatus === "reconnecting" || wagmiStatus === "connecting";
 
   return (
     <ConnectButton.Custom>
@@ -48,6 +55,14 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
             })}
           >
             {(() => {
+              if (wagmiRestoring) {
+                return (
+                  <span
+                    aria-label="Wallet loading"
+                    className="inline-flex h-10 w-[148px] items-center justify-center rounded-full bg-white/20 animate-pulse"
+                  />
+                );
+              }
               if (!connected) {
                 return (
                   <button

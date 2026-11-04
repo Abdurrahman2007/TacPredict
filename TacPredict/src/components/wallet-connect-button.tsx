@@ -2,12 +2,19 @@ import { useEffect, useState, type ComponentType } from "react";
 import { cn } from "@/lib/utils";
 import { useWeb3Ready } from "@/components/providers/web3-ready";
 
+/**
+ * Neutral loading state while the providers are still mounting / wagmi is
+ * still restoring a stored connection. It must never read "Connect Wallet":
+ * that text on first paint is exactly the repeat prompt users report, and
+ * this pill is not clickable, so it cannot open the connect modal.
+ */
 function ConnectWalletSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center", className)}>
-      <span className="inline-flex h-10 items-center justify-center rounded-full bg-white/90 px-6 text-sm font-semibold text-[#10171c]">
-        Connect Wallet
-      </span>
+    <div className={cn("flex items-center", className)} aria-label="Wallet loading">
+      <span
+        aria-hidden="true"
+        className="inline-flex h-10 w-[148px] items-center justify-center rounded-full bg-white/20 animate-pulse"
+      />
     </div>
   );
 }

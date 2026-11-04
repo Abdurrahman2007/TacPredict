@@ -39,7 +39,7 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
         <p>Connect your wallet and sign a free message to create your profile and referral link.</p>
         <button
           className="account-primary"
-          disabled={access.busy}
+          disabled={access.busy || access.restoring}
           onClick={() => void access.run()}
         >
           {access.label || "Sign in with wallet"}

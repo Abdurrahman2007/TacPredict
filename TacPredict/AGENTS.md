@@ -58,3 +58,14 @@
 - Missing values show as unavailable (— / Unavailable), never as a verified
   zero, except where a zero is verified. This supersedes any older doc line
   that says balances display 0 until a verified amount arrives.
+  (Portfolio stats are the one exception, per owner instruction: they show
+  0, not —, when disconnected or empty.)
+- Wallet connect is once-only: wagmi persists the connection in localStorage
+  and auto-reconnects on mount, but the app must never show a "Connect
+  wallet" control while that restore is still in flight. BaseWallet
+  `restoring` is true until the bridge reports a definitive connected or
+  disconnected state (with a 10s fallback); while restoring, headers,
+  Portfolio, Rewards and all gated actions show a neutral loading state
+  and `useLoginDialog()` never opens the connect modal. A connected wallet
+  gets at most one SIWE signature per fresh connect/session; a restored
+  connection never opens a popup.

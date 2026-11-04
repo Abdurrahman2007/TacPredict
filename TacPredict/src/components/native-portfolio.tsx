@@ -245,7 +245,7 @@ export function NativePortfolio({
           {!auth.user ? (
             <button
               className="finance-pill finance-pill-primary mt-5"
-              disabled={access.busy}
+              disabled={access.busy || access.restoring}
               onClick={() => void access.run()}
             >
               {access.state === "verify" ? "Verify your wallet" : "Connect wallet"}

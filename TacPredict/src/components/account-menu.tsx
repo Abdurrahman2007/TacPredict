@@ -203,7 +203,7 @@ export function AccountMenu() {
                 <button
                   type="button"
                   className="account-primary"
-                  disabled={access.busy}
+                  disabled={access.busy || access.restoring}
                   onClick={() => {
                     if (access.state === "connect") setOpen(false);
                     void access.run();

@@ -77,6 +77,10 @@ function RewardsClient() {
   const showCheckin = chest.opened && !opening && burst == null;
 
   function openChest() {
+    // During a restore the wallet is about to reappear: do nothing rather
+    // than open the connect modal for an already-connected wallet. login()
+    // itself is also gated, so this is a second, belt-and-braces guard.
+    if (wallet.restoring) return;
     if (!wallet.address) {
       login("/rewards");
       return;
@@ -136,15 +140,17 @@ function RewardsClient() {
               type="button"
               className="tp-checkin-btn"
               onClick={openChest}
-              disabled={opening}
+              disabled={opening || wallet.restoring}
             >
-              {!isConnected
-                ? "Connect Coinbase / Farcaster"
-                : opening
-                  ? "Opening box…"
-                  : priority
-                    ? "Open priority box"
-                    : "Open reward box"}
+              {wallet.restoring
+                ? "Connecting…"
+                : !isConnected
+                  ? "Connect Coinbase / Farcaster"
+                  : opening
+                    ? "Opening box…"
+                    : priority
+                      ? "Open priority box"
+                      : "Open reward box"}
             </button>
           ) : (
             <button
@@ -161,13 +167,15 @@ function RewardsClient() {
       <section className="tp-tac-points" aria-labelledby="tac-title" style={{ marginTop: 20, padding: 16, borderRadius: 20, background: "#171a2e" }}>
         <h2 id="tac-title" style={{ margin: "0 0 6px", fontSize: 18 }}>TAC Points</h2>
         <p style={{ margin: "0 0 8px", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
-          {isConnected
-            ? tac.isPending
-              ? "Loading…"
-              : tac.isError
-                ? "TAC Points unavailable right now — no estimate is shown."
-                : `Your balance: ${tac.data?.balance.toLocaleString("en-US") ?? "—"} TAC Points.`
-            : "Connect a wallet to see your TAC Points."}
+          {wallet.restoring
+            ? "Connecting…"
+            : isConnected
+              ? tac.isPending
+                ? "Loading…"
+                : tac.isError
+                  ? "TAC Points unavailable right now — no estimate is shown."
+                  : `Your balance: ${tac.data?.balance.toLocaleString("en-US") ?? "—"} TAC Points.`
+              : "Connect a wallet to see your TAC Points."}
         </p>
         <p style={{ margin: 0, color: "#9aa3b2", fontSize: 13, lineHeight: 1.5 }}>
           Points only · No token promised.
@@ -214,9 +222,9 @@ function RewardsClient() {
               })}
             </ol>
 
-            {!ready ? (
+            {!ready || wallet.restoring ? (
               <button type="button" className="tp-checkin-btn" disabled>
-                …
+                {wallet.restoring ? "Connecting…" : "…"}
               </button>
             ) : !isConnected ? (
               <button type="button" className="tp-checkin-btn" onClick={() => login("/rewards")}>

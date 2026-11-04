@@ -9,6 +9,12 @@ import { Link } from "@tanstack/react-router";
 export function ConnectWallet({ className }: { className?: string }) {
   const wallet = useBaseWallet();
   const login = useLoginDialog();
+  if (wallet.restoring)
+    return (
+      <Button className={className} disabled>
+        <Wallet className="size-4" /> Connecting…
+      </Button>
+    );
   if (wallet.address)
     return (
       <Button variant="outline" className={className} asChild>

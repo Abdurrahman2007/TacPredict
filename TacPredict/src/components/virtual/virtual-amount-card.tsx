@@ -346,7 +346,7 @@ export function VirtualAmountCard({
           <button
             type="button"
             className="pd-submit"
-            disabled={access.busy}
+            disabled={access.busy || access.restoring}
             onClick={() => void access.run()}
           >
             {access.label || "Verify wallet"}

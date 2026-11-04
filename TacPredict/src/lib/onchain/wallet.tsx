@@ -17,6 +17,16 @@ export type WalletState = {
   gasBalance: bigint | null;
   busy: boolean;
   error: string;
+  /**
+   * True until wagmi has reported a definitive state (connected or
+   * disconnected) for this page view. While true, no UI may render a
+   * "Connect wallet" control: wagmi is still restoring a stored
+   * connection from localStorage, and showing "disconnected" then would
+   * be a flash, not a fact. See WagmiBaseBridge.
+   */
+  restoring: boolean;
+  /** Mark wagmi as settled without touching the address (disconnected case). */
+  settleWagmi: () => void;
   connect: (wallet: WalletChoice) => Promise<void>;
   /**
    * Mirror an account that wagmi/RainbowKit already connected. Never prompts the wallet and never
@@ -44,6 +54,8 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
   const [gasBalance, setGasBalance] = useState<bigint | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [restoring, setRestoring] = useState(true);
+  const settleWagmi = useCallback(() => setRestoring(false), []);
   const revision = useRef(0);
   const adopted = useRef<string | null>(null);
   const connectionLock = useRef(false);
@@ -152,6 +164,8 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       setGasBalance(null);
     }
     adopted.current = account.address;
+    // An adopted address is a definitive connected state: stop restoring.
+    setRestoring(false);
     setAddress((current) =>
       current?.toLowerCase() === account.address.toLowerCase() ? current : account.address,
     );
@@ -175,6 +189,7 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
       if (!Array.isArray(accounts) || !isAddress(accounts[0])) throw new Error("No wallet account");
       setAddress(accounts[0]);
       setProvider(wallet.provider);
+      setRestoring(false);
       await sync(wallet.provider);
     } catch (e) {
       setError(message(e));
@@ -186,6 +201,7 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
   const disconnect = useCallback(() => {
     ++revision.current;
     adopted.current = null;
+    setRestoring(false);
     setProvider(null);
     setAddress(null);
     setChainId(null);
@@ -234,6 +250,8 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
         gasBalance,
         busy,
         error,
+        restoring,
+        settleWagmi,
         connect,
         adopt,
         disconnect,
