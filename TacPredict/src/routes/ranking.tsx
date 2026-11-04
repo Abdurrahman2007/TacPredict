@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Crown, Trophy } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { rankingOptions } from "@/lib/ranking/read.functions";
 import {
   signedMoney,
@@ -264,9 +264,8 @@ function RankingClient() {
                   key={t.wallet}
                   className={`tp-lb-podium-card rank-${t.rank ?? 0}`}
                 >
-                  {t.rank === 1 ? <Crown size={20} className="tp-lb-crown" aria-hidden="true" /> : null}
                   <span className="tp-lb-medal">{t.rank ?? "—"}</span>
-                  <InitialAvatar seed={t.wallet} size={t.rank === 1 ? 72 : 56} label={t.name} />
+                  <InitialAvatar seed={t.wallet} size={t.rank === 1 ? 48 : 40} label={t.name} />
                   <strong>{t.name}</strong>
                   <span className="tp-lb-podium-vol">{unsignedMoney(t.volumeAtomic)}</span>
                   <span className={`tp-lb-pnl ${pnlClass(t.pnlAtomic)}`}>
