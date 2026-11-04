@@ -8,7 +8,7 @@ import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { rankingOptions } from "@/lib/ranking/read.functions";
 import { signedMoney, unsignedMoney, type RankingPeriod } from "@/lib/ranking/core.mjs";
 import { sharesShort } from "@/lib/protocol/display.mjs";
-import { PixelAvatar } from "./pixel-avatar";
+import { InitialAvatar } from "./initial-avatar";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 const periods = { "1d": "24 hours", "7d": "7 days", "30d": "30 days", all: "All time" } as const;
 export function OwnProfile({ editor }: { editor: ReactNode }) {
@@ -41,7 +41,7 @@ export function OwnProfile({ editor }: { editor: ReactNode }) {
   return (
     <>
       <header className="own-profile-identity">
-        <PixelAvatar seed={auth.user!.id} size={64} />
+        <InitialAvatar seed={auth.user!.id} size={64} label={user.username} />
         <div>
           <h2>
             @{user.username}

@@ -16,7 +16,7 @@ import { OwnProfile } from "./own-profile";
 import { useAccount } from "./account-provider";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
-import { PixelAvatar } from "./pixel-avatar";
+import { InitialAvatar } from "./initial-avatar";
 import { accountApi } from "@/lib/accounts/client";
 import { normalizeUsername } from "@/lib/accounts/rules.mjs";
 export function AccountGate({ children }: { children: React.ReactNode }) {
@@ -134,7 +134,7 @@ function ProfileEditor() {
     <>
       <section className="account-card">
         <div className="account-profile-top">
-          <PixelAvatar seed={auth.user!.id} size={76} />
+          <InitialAvatar seed={auth.user!.id} size={76} label={profile.username} />
           <div>
             <h2>@{profile.username}</h2>
             <span className="account-badge">

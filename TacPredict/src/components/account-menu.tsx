@@ -16,7 +16,7 @@ import {
   Percent,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
-import { PixelAvatar } from "./pixel-avatar";
+import { InitialAvatar } from "./initial-avatar";
 import { useAccount } from "./account-provider";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
@@ -147,7 +147,7 @@ export function AccountMenu() {
             <>
               <div className="account-grabber" aria-hidden="true" />
               <div className="account-identity">
-                <PixelAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={48} />
+                <InitialAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={48} label={username ?? "TacPredict"} />
                 <div>
                   <b>
                     {username

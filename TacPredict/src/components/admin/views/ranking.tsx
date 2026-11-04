@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { adminRankingOptions } from "@/lib/ranking/read.functions";
 import { signedMoney, unsignedMoney, type RankingPeriod } from "@/lib/ranking/core.mjs";
-import { PixelAvatar } from "@/components/pixel-avatar";
+import { InitialAvatar } from "@/components/initial-avatar";
 import { PageHeader, Card, Loaded, Notice } from "../admin-ui";
 export function RankingView() {
   const [period, setPeriod] = useState<RankingPeriod>("30d"),
@@ -61,10 +61,10 @@ export function RankingView() {
                       <td>
                         <Link
                           to="/ranking"
-                          search={{ period, trader: t.wallet }}
+                          search={{ trader: t.wallet }}
                           style={{ display: "flex", alignItems: "center", gap: 10 }}
                         >
-                          <PixelAvatar seed={t.wallet} size={30} />
+                          <InitialAvatar seed={t.wallet} size={30} label={t.name} />
                           {t.name}
                         </Link>
                       </td>
