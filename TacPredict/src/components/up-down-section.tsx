@@ -103,7 +103,6 @@ function AssetCard({
           >
             <h3>{title}</h3>
           </Link>
-          <span className="tp-crypto-badge">Virtual USDC</span>
         </div>
         <span
           className="ud-live tp-crypto-live"
@@ -134,14 +133,10 @@ function AssetCard({
         </Link>
       </div>
       <div className="tp-crypto-footer">
-        <span>{vol > 0 ? `Vol ${formatLiq(vol)}` : "Vol —"}</span>
-        <span>
-          {settlement.tier === "unavailable"
-            ? "Charts only"
-            : settlement.tier === "paper_only"
-              ? "Paper"
-              : "Live"}
-        </span>
+        <span>Vol {formatLiq(vol)}</span>
+        {settlement.tier === "paper_only" ? null : (
+          <span>{settlement.tier === "unavailable" ? "Charts only" : "Live"}</span>
+        )}
       </div>
     </article>
   );
