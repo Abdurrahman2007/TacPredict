@@ -221,3 +221,10 @@ nav[aria-label="Mobile navigation"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Home price summary: no Start/Now overlap on narrow screens. */
+@media (max-width: 480px) {
+  .tp-price-summary { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .tp-price-summary > div { min-width: 0; }
+  .tp-price-summary dd { font-size: 19px !important; }
+}

@@ -33,7 +33,7 @@ export async function syncConnectedWallet(input: {
     .single();
 
   if (userError || !user) {
-    console.error("[web3] users upsert failed", userError);
+    console.warn("[web3] wallet sync unavailable:", userError?.message ?? "Failed to sync user");
     return { ok: false, message: userError?.message ?? "Failed to sync user" };
   }
 
@@ -48,7 +48,7 @@ export async function syncConnectedWallet(input: {
   );
 
   if (walletError) {
-    console.error("[web3] wallets upsert failed", walletError);
+    console.warn("[web3] wallet sync unavailable:", walletError.message);
     return { ok: false, message: walletError.message };
   }
 

@@ -235,7 +235,7 @@ function RankingClient() {
         </>
       ) : (
         <>
-          {wallet.address && (
+          {wallet.address && data?.self && (
             <Link
               to="/ranking"
               search={{ trader: wallet.address.toLowerCase() }}

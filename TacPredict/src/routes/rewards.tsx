@@ -13,6 +13,7 @@ import { isPriorityWallet, useWelcomeChest } from "@/lib/rewards/welcome-chest";
 import { UsdcCoin, WelcomeChestBox } from "@/components/rewards/welcome-chest";
 import { usePaperLedger } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
+import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import "@/styles/rewards-checkin.css";
 import "@/styles/chest-open.css";
 
@@ -54,6 +55,7 @@ function RewardsClient() {
   const chest = useWelcomeChest();
   const paper = usePaperLedger();
   const tac = useTacPointsBalance();
+  const auth = useProtocolUser();
   const { ready, status, remaining, canClaim, claim, nextDay } = useDailyCheckin();
   const [opening, setOpening] = useState(false);
   const [burst, setBurst] = useState<number | null>(null);
@@ -169,10 +171,12 @@ function RewardsClient() {
         <p style={{ margin: "0 0 8px", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
           {wallet.restoring
             ? "Connecting…"
-            : isConnected
-              ? tac.isPending
-                ? "Loading…"
-                : tac.isError
+            : isConnected && auth.ready && !auth.user
+              ? "Verify your wallet to see your TAC Points."
+              : isConnected
+                ? tac.isPending
+                  ? "Loading…"
+                  : tac.isError
                   ? "TAC Points unavailable right now — no estimate is shown."
                   : `Your balance: ${tac.data?.balance.toLocaleString("en-US") ?? "—"} TAC Points.`
               : "Connect a wallet to see your TAC Points."}

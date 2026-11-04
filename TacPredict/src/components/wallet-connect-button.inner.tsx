@@ -111,7 +111,7 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                   <button
                     type="button"
                     onClick={needsVerify ? () => void access.run() : openAccountModal}
-                    className="app-account-button inline-flex h-11 max-w-[180px] items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary"
+                    className="app-account-button inline-flex h-10 max-w-[168px] shrink-0 items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary sm:max-w-[180px]"
                     aria-label={
                       needsVerify
                         ? `Wallet ${account.address}, tap to verify`
@@ -123,13 +123,23 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                     </span>
                     <span className="min-w-0 text-left">
                       <span className="block truncate text-xs font-semibold tabular-nums">
-                        {needsVerify
-                          ? access.busy
-                            ? "Waiting for wallet…"
-                            : access.error
-                              ? "Tap to retry"
-                              : "Tap to verify"
-                          : `${balance} Virtual USDC`}
+                        {needsVerify ? (
+                          access.busy ? (
+                            "Waiting…"
+                          ) : access.error ? (
+                            <>
+                              <span className="hidden sm:inline">Tap to retry</span>
+                              <span className="sm:hidden">Retry</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="hidden sm:inline">Tap to verify</span>
+                              <span className="sm:hidden">Verify</span>
+                            </>
+                          )
+                        ) : (
+                          `${balance} Virtual USDC`
+                        )}
                       </span>
                       <span className="block truncate font-mono text-[10px] font-normal text-muted-foreground">
                         {shortenAddress(account.address)}

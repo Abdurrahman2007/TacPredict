@@ -199,7 +199,13 @@ export function UpDownChart({
               strokeWidth="1.4"
               strokeDasharray="6 5"
             />
-            <text x={L + 2} y={y(beat) - 6} fontSize="10.5" fill="#b8c4d9">
+            <text
+              x={L + 2}
+              y={y(beat) - 6}
+              fontSize="10.5"
+              fill="#b8c4d9"
+              style={{ paintOrder: "stroke", stroke: "#0f161a", strokeWidth: 4 }}
+            >
               Price to beat
             </text>
             <rect x={W - R + 4} y={beatTagY - 9} width={R - 4} height="18" rx="9" fill="#2d363d" />
