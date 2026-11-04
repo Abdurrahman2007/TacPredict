@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Crown, Trophy } from "lucide-react";
 import { rankingOptions } from "@/lib/ranking/read.functions";
 import {
@@ -11,6 +11,11 @@ import {
 } from "@/lib/ranking/core.mjs";
 import type { RankingTrader } from "@/lib/ranking/core.d.mts";
 import { InitialAvatar } from "@/components/initial-avatar";
+import {
+  demoTrader,
+  isDemoTrader,
+  withDemoRankingRows,
+} from "@/lib/ranking/demo-traders";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import "@/styles/ranking.css";
 import "@/styles/ranking-board.css";
@@ -35,6 +40,30 @@ const subscribeHydration = () => () => {};
 
 function monthLabel(d = new Date()) {
   return d.toLocaleString("en-US", { month: "long", year: "numeric" });
+}
+
+/** Time left until the next calendar month starts (UTC). */
+function monthCountdown(now: number) {
+  const d = new Date(now);
+  const end = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+  const diff = Math.max(0, end - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return days > 0
+    ? `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`
+    : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
+function useMonthCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return monthCountdown(now);
 }
 
 function RankingPage() {
@@ -68,9 +97,13 @@ function RankingClient() {
   );
   const data = q.data;
   const [tab, setTab] = useState<"positions" | "activity">("positions");
-  const rows = data?.rows ?? [];
+  const countdown = useMonthCountdown();
+  const liveRows = data?.rows ?? [];
+  const rows = withDemoRankingRows(liveRows);
   const selected: RankingTrader | null | undefined = s.trader
-    ? data?.selected
+    ? isDemoTrader(s.trader)
+      ? demoTrader(s.trader)
+      : data?.selected
     : null;
   const podium = s.trader ? [] : rows.slice(0, 3);
   const rest = s.trader ? [] : rows.slice(3);
@@ -97,6 +130,7 @@ function RankingClient() {
             <strong>
               {MONTHLY_TAC_POOL.toLocaleString("en-US")} <em>TAC</em>
             </strong>
+            <div className="tp-lb-countdown">Resets in {countdown}</div>
           </div>
           <div className="tp-lb-pool-badge" aria-hidden="true">
             <Trophy size={26} aria-hidden="true" />
@@ -115,15 +149,19 @@ function RankingClient() {
             <InitialAvatar seed={s.trader} size={72} label={selected?.name} />
             <div>
               <strong>{selected?.name ?? traderName(s.trader)}</strong>
-              <small>
-                <a
-                  href={`https://basescan.org/address/${s.trader}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {s.trader.slice(0, 6)}…{s.trader.slice(-4)} ↗
-                </a>
-              </small>
+              {!isDemoTrader(s.trader) ? (
+                <small>
+                  <a
+                    href={`https://basescan.org/address/${s.trader}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {s.trader.slice(0, 6)}…{s.trader.slice(-4)} ↗
+                  </a>
+                </small>
+              ) : (
+                <small>{s.trader.slice(0, 6)}…{s.trader.slice(-4)}</small>
+              )}
             </div>
           </div>
           <div className="tp-lb-stats">
@@ -259,9 +297,6 @@ function RankingClient() {
               </Link>
             ))}
           </div>
-          {rows.length === 0 && !q.isPending ? (
-            <p className="tp-lb-empty">No traders this month yet</p>
-          ) : null}
 
           {data && data.total > 0 && (
             <nav className="tp-lb-paging" aria-label="Ranking pages">

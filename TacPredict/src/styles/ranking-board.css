@@ -382,3 +382,4 @@
   outline-offset: 3px;
 }
 .tp-lb-podium-card, .tp-lb-row { min-width: 0; }
+.tp-lb-countdown { margin-top: 8px; font-size: 13px; font-weight: 700; color: #8fd4a8; font-variant-numeric: tabular-nums; }
