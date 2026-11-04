@@ -119,6 +119,14 @@ function RankingClient() {
         </div>
       </header>
 
+      {demoBoard && !s.trader ? (
+        <p role="note" style={{ padding: "12px 14px", borderRadius: 16, background: "#171a2e", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
+          Demo leaderboard: no live ranking rows were returned, so the rows below are
+          example traders, not verified results. TAC distribution for any pool is not
+          promised — see Terms.
+        </p>
+      ) : null}
+
       {!s.trader ? (
         <aside className="tp-rank-pool" aria-label="Monthly reward pool">
           <div className="tp-rank-pool-copy">
@@ -278,6 +286,7 @@ function RankingClient() {
                     <strong>{t.name}</strong>
                     <small>
                       {t.markets} markets · {t.settledMarkets} settled
+                      {isDemoTrader(t.wallet) ? " · Demo" : ""}
                     </small>
                   </span>
                 </span>

@@ -144,6 +144,7 @@
   opacity: 0;
 }
 .tp-chest-stage[data-phase="open"] .tp-chest-coins,
+.tp-chest-stage[data-phase="burst"] .tp-chest-coins,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-coins,
 .tp-chest-stage[data-phase="done"] .tp-chest-coins {
   opacity: 1;
@@ -160,6 +161,7 @@
   transform: translate3d(0, 12px, 0) scale(0.4);
 }
 .tp-chest-stage[data-phase="open"] .tp-chest-coin,
+.tp-chest-stage[data-phase="burst"] .tp-chest-coin,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-coin,
 .tp-chest-stage[data-phase="done"] .tp-chest-coin {
   animation: coin-burst 0.95s cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
@@ -385,5 +387,19 @@
   .tp-chest-stage[data-phase="reveal"] .tp-chest-lid,
   .tp-chest-stage[data-phase="done"] .tp-chest-lid {
     transform: rotateX(-118deg);
+  }
+}
+
+/* Reduced motion: show the opened chest instantly, no shake/burst travel. */
+@media (prefers-reduced-motion: reduce) {
+  .tp-chest-stage[data-phase="shake"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="open"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="burst"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="reveal"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="done"] .tp-chest-3d {
+    animation: none;
+  }
+  .tp-chest-aura {
+    animation: none;
   }
 }

@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 const USDC_LOGO =
   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png";
 
-type Phase = "idle" | "shake" | "open" | "reveal" | "done";
+type Phase = "idle" | "shake" | "open" | "burst" | "reveal" | "done";
 
-/** High-quality welcome box: shake → lid open → coin burst → amount reveal. */
+/** High-quality welcome box: shake → lid open → coin burst → amount reveal. Reduced-motion users get the final state without animation (see chest-open.css). */
 export function WelcomeChestBox({
   opening,
   amount,
@@ -28,10 +28,12 @@ export function WelcomeChestBox({
     }
     setPhase("shake");
     const t1 = window.setTimeout(() => setPhase("open"), 520);
-    const t2 = window.setTimeout(() => setPhase("reveal"), 1100);
+    const t2 = window.setTimeout(() => setPhase("burst"), 760);
+    const t3 = window.setTimeout(() => setPhase("reveal"), 1250);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
+      window.clearTimeout(t3);
     };
   }, [opening, amount]);
 

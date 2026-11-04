@@ -14,6 +14,7 @@ import { PortfolioPerformanceChart } from "@/components/portfolio-performance-ch
 import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { usePaperLedger, type PaperPosition } from "@/lib/paper/ledger";
+import { useTacPointsBalance } from "@/lib/tac-points";
 import "@/styles/portfolio-reference.css";
 import "@/styles/portfolio-paper.css";
 
@@ -60,6 +61,11 @@ function PortfolioPage() {
   const available = disconnected ? 0 : ledger.balance;
   const equity = disconnected ? 0 : ledger.balance + positionValue;
   const realized = disconnected ? 0 : ledger.realizedPnl;
+  const tac = useTacPointsBalance();
+  /** Paper total volume: every paper trade's size, buys and sells combined. Paper only — never mixed with onchain virtual or real USDC. */
+  const totalVolume = disconnected
+    ? 0
+    : ledger.trades.reduce((sum, t) => sum + Math.abs(t.usdc), 0);
   const sells = useMemo(
     () => ledger.trades.filter((t) => t.kind === "sell"),
     [ledger.trades],
@@ -114,6 +120,21 @@ function PortfolioPage() {
         </div>
       </header>
 
+      <div
+        role="note"
+        className="tp-wp-separation"
+        style={{
+          marginBottom: 16, padding: "12px 14px", borderRadius: 16,
+          background: "#171a2e", color: "#d7dce6", fontSize: 14, lineHeight: 1.5,
+        }}
+      >
+        <strong>Three separate balances — never mixed.</strong> Paper Virtual USDC (this
+        page, stored on this device, unsettled until server settlement exists) · Onchain
+        Virtual USDC on Base Mainnet (real ETH gas, non-redeemable) · TAC Points (points
+        only, not USDC, not a token yet). Real USDC is not shown here; the Real USDC claim
+        button lives only in the native portfolio view.
+      </div>
+
       <section className="tp-wp-available" aria-label="Available to trade">
         <span>Available to trade</span>
         <strong>{money(available, hidden)}</strong>
@@ -131,6 +152,33 @@ function PortfolioPage() {
           <Link to="/" className="tp-wp-secondary">
             Trade
           </Link>
+        </div>
+      </section>
+
+      <section className="tp-wp-stats" aria-label="Portfolio totals" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+        <div style={{ padding: 14, borderRadius: 16, background: "#171a2e" }}>
+          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>Total volume · Paper</span>
+          <strong style={{ fontSize: 20 }}>{disconnected ? "—" : money(totalVolume, hidden)}</strong>
+          <small style={{ display: "block", color: "#9aa3b2" }}>Virtual USDC · paper trades only</small>
+        </div>
+        <div style={{ padding: 14, borderRadius: 16, background: "#171a2e" }}>
+          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>PnL · Paper (unsettled)</span>
+          <strong style={{ fontSize: 20 }} className={realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined}>
+            {disconnected ? "—" : signedMoney(realized, hidden)}
+          </strong>
+          <small style={{ display: "block", color: "#9aa3b2" }}>Paper PnL until server settlement exists — not a payout</small>
+        </div>
+        <div style={{ padding: 14, borderRadius: 16, background: "#171a2e" }}>
+          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>TAC Points</span>
+          <strong style={{ fontSize: 20 }}>
+            {disconnected ? "—" : tac.isPending ? "…" : tac.isError ? "Unavailable" : tac.data?.balance.toLocaleString("en-US") ?? "—"}
+          </strong>
+          <small style={{ display: "block", color: "#9aa3b2" }}>Points only — not USDC, not a token yet, no promise</small>
+        </div>
+        <div style={{ padding: 14, borderRadius: 16, background: "#171a2e" }}>
+          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>Onchain Virtual USDC</span>
+          <strong style={{ fontSize: 20 }}>—</strong>
+          <small style={{ display: "block", color: "#9aa3b2" }}>Shown in the virtual portfolio view, not mixed with paper</small>
         </div>
       </section>
 
@@ -191,8 +239,8 @@ function PortfolioPage() {
               <div className="tp-wp-total">
                 <span>Total</span>
                 <b>{money(0, hidden)}</b>
-                <Link to="/" aria-label="View markets">
-                  View All <ChevronRight size={16} />
+                <Link to="/up-down" aria-label="Trade crypto Up/Down">
+                  Trade <ChevronRight size={16} />
                 </Link>
               </div>
             </div>
@@ -231,8 +279,8 @@ function PortfolioPage() {
               <div className="tp-wp-total">
                 <span>Total</span>
                 <b>{money(positionValue, hidden)}</b>
-                <Link to="/" aria-label="View markets">
-                  View All <ChevronRight size={16} />
+                <Link to="/up-down" aria-label="Trade crypto Up/Down">
+                  Trade <ChevronRight size={16} />
                 </Link>
               </div>
             </>

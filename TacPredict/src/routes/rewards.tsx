@@ -12,6 +12,7 @@ import { Link } from "@tanstack/react-router";
 import { isPriorityWallet, useWelcomeChest } from "@/lib/rewards/welcome-chest";
 import { WelcomeChestBox } from "@/components/rewards/welcome-chest";
 import { usePaperLedger } from "@/lib/paper/ledger";
+import { useTacPointsBalance } from "@/lib/tac-points";
 import "@/styles/rewards-checkin.css";
 import "@/styles/chest-open.css";
 
@@ -55,6 +56,7 @@ function RewardsClient() {
   const wallet = useBaseWallet();
   const chest = useWelcomeChest();
   const paper = usePaperLedger();
+  const tac = useTacPointsBalance();
   const { ready, status, remaining, canClaim, claim, nextDay } = useDailyCheckin();
   const [opening, setOpening] = useState(false);
   const [burst, setBurst] = useState<number | null>(null);
@@ -161,6 +163,26 @@ function RewardsClient() {
           )}
         </section>
       ) : null}
+
+      <section className="tp-tac-points" aria-labelledby="tac-title" style={{ marginTop: 20, padding: 16, borderRadius: 20, background: "#171a2e" }}>
+        <h2 id="tac-title" style={{ margin: "0 0 6px", fontSize: 18 }}>TAC Points</h2>
+        <p style={{ margin: "0 0 8px", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
+          {isConnected
+            ? tac.isPending
+              ? "Loading…"
+              : tac.isError
+                ? "TAC Points unavailable right now — no estimate is shown."
+                : `Your balance: ${tac.data?.balance.toLocaleString("en-US") ?? "—"} TAC Points.`
+            : "Connect a wallet to see your TAC Points."}
+        </p>
+        <p style={{ margin: 0, color: "#9aa3b2", fontSize: 13, lineHeight: 1.5 }}>
+          TAC Points are points only — not USDC, not a token, not money. They{" "}
+          <strong>may be considered</strong> for a future token or airdrop{" "}
+          <strong>only if announced</strong>. No token, airdrop, price or date is
+          promised, and nothing here changes the Terms, which promise no future
+          TAC token. Paper rewards above are unsettled until server settlement exists.
+        </p>
+      </section>
 
       {showCheckin ? (
         <>
