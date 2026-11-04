@@ -28,7 +28,7 @@ import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 import { rememberPaperOpen, runPaperSettleTick } from "@/lib/paper/settle-robot";
 
-/** 5/15/30m paper result robot — ticks while Up/Down home is mounted. */
+/** Paper settlement tick — ticks while Up/Down home is mounted. New windows are 5 / 30 min; legacy 15 min positions still settle. */
 function PaperSettleRobot() {
   const tickers = useQuery(spotTickersQueryOptions);
   useEffect(() => {
@@ -108,8 +108,12 @@ function AssetCard({
             {clock(w.end, zone)}
           </p>
         </div>
-        <span className="ud-live tp-crypto-live" title="Live share prices track spot vs open">
-          {formatCountdown(w.end - nowMs)}
+        <span
+          className="ud-live tp-crypto-live"
+          title="Time left in this window (hours:minutes:seconds, or minutes:seconds)"
+          aria-label={`Time left in this window: ${formatCountdown(w.end - nowMs)}`}
+        >
+          Ends in {formatCountdown(w.end - nowMs)}
         </span>
       </div>
       {large && <CoinGeckoChart asset={asset} window={w} summary dense />}
@@ -132,9 +136,12 @@ function AssetCard({
           Down {downCents}
         </Link>
       </div>
+      <p className="tp-crypto-virtual">
+        Prices in Virtual USDC · Paper trading · Non-redeemable · No real money
+      </p>
       <div className="tp-crypto-footer">
-        <span>Vol {formatLiq(vol)}</span>
-        <span title={settlement.reasons.join(" · ")}>
+        <span>{vol > 0 ? `Vol ${formatLiq(vol)}` : "Vol —"}</span>
+        <span>
           {settlement.tier === "unavailable"
             ? "Charts only"
             : settlement.tier === "paper_only"
@@ -142,7 +149,7 @@ function AssetCard({
               : odds
                 ? spot != null && beat != null
                   ? `${spot >= beat ? "▲" : "▼"} vs open`
-                  : "Live ¢"
+                  : "Live prices in Virtual USDC"
                 : pw.pending
                   ? "Loading…"
                   : "Paper market"}
@@ -183,11 +190,15 @@ export function UpDownSection({
       <PaperSettleRobot />
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
-          {fixedMinutes === 60
-            ? "Live · 1H"
-            : fixedMinutes === 1440
-              ? "Live · 24H"
-              : "Trending Up & Down"}
+          {fixedMinutes === 30
+            ? "Live · 30M"
+            : fixedMinutes === 60
+              ? "Live · 1H"
+              : fixedMinutes === 720
+                ? "Live · 12H"
+                : fixedMinutes === 1440
+                  ? "Live · 24H"
+                  : "Trending Up & Down"}
         </h2>
         <Link
           to="/up-down"
@@ -210,7 +221,7 @@ export function UpDownSection({
               type="button"
               aria-pressed={minutes === d}
               onClick={() => setMinutes(d)}
-              className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
+              className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
             >
               {durationLabel(d)}
             </button>

@@ -42,10 +42,25 @@ function HomePage() {
   return (
     <div className="home-reference">
       <div className="home-crypto-chart">
+        <p className="tp-home-virtual-note" role="note">
+          Crypto only — Bitcoin, Ethereum, Solana and BNB. Prices in Virtual USDC · Paper
+          trading · Non-redeemable · No real money. Onchain Virtual USDC trades on Base
+          Mainnet still need a real wallet signature and real ETH gas.
+        </p>
         <UpDownSection markets={nativeFeed.markets} snapshotTime={nativeFeed.updatedAt} />
         <div className="home-long-rounds">
           <UpDownSection
+            fixedMinutes={30}
+            markets={nativeFeed.markets}
+            snapshotTime={nativeFeed.updatedAt}
+          />
+          <UpDownSection
             fixedMinutes={60}
+            markets={nativeFeed.markets}
+            snapshotTime={nativeFeed.updatedAt}
+          />
+          <UpDownSection
+            fixedMinutes={720}
             markets={nativeFeed.markets}
             snapshotTime={nativeFeed.updatedAt}
           />

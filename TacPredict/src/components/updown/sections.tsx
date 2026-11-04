@@ -263,8 +263,8 @@ export function StatsCard({
   paperVolume?: string | null;
 }) {
   const rows: [string, string][] = [
-    ["Volume", paperVolume ?? (market ? volumeText(market.volume) : "$0")],
-    ["Traders", market ? String(market.participants ?? 0) : "0"],
+    ["Volume", paperVolume ?? (market ? volumeText(market.volume) : "—")],
+    ["Traders", market ? String(market.participants ?? "—") : "—"],
   ];
   return (
     <section className="ud-card ud-statistics" aria-label="Statistics">

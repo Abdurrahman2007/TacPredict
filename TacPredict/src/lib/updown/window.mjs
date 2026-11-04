@@ -1,5 +1,5 @@
 /**
- * Pure helpers for Up/Down windows (5 min, 15 min, 12 hours, 24 hours). Windows are aligned to the UTC clock,
+ * Pure helpers for Up/Down windows (5 min, 30 min, 1 hour, 12 hours, 24 hours). Windows are aligned to the UTC clock,
  * so "9:15 -> 9:20" is the same window for everybody. Every number comes from real Coinbase data
  * passed in by the caller; nothing here invents a price.
  */
@@ -11,9 +11,9 @@ export const ASSETS = {
 };
 /** Product assets only — XRP permanently removed (no Base settlement path). */
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
-/** Supported paper / UI durations (minutes). Matches VirtualPriceAMM scheduling set. */
-export const DURATIONS = [5, 15, 30, 60, 720, 1440];
-export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
+/** Supported paper / UI durations (minutes). 15m was removed in the virtual-only cleanup; ?d=15 falls back to 5m via parseDuration. */
+export const DURATIONS = [5, 30, 60, 720, 1440];
+export const DISPLAY_DURATIONS = [5, 30, 60, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */

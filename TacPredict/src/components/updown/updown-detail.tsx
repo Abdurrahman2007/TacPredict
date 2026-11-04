@@ -186,7 +186,7 @@ export function UpDownDetail({
     deltaText,
     direction: delta?.direction ?? null,
   };
-  // Live share prices: feed-v1 (spot, strike, time remaining) — never stale feed ¢.
+  // Live share prices: spot, strike and time remaining — never a stale price.
   const remainingSec = state === "live" ? Math.max(0, (w.end - nowMs) / 1000) : 0;
   const odds = spotShareOdds(shownCurrent, shownBeat, minutes, remainingSec);
   const settlement = assetSettlementPolicy(asset, minutes);
@@ -233,7 +233,7 @@ export function UpDownDetail({
       }
     : reference;
 
-  // 5m+ paper result robot: settle once when past + verified start/end spots exist.
+  // Paper settlement: settle once when past + verified start/end spots exist.
   useEffect(() => {
     if (state !== "past" || shownBeat == null || shownCurrent == null) return;
     runPaperResultRobot({

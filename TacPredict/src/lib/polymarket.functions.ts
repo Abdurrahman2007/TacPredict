@@ -60,7 +60,8 @@ function formatClose(endDate: string | undefined) {
 }
 
 function compact(value: string | number | undefined) {
-  const amount = Number(value ?? 0);
+  if (value == null || !Number.isFinite(Number(value))) return "—";
+  const amount = Number(value);
   return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
     Number.isFinite(amount) ? amount : 0,
   );
@@ -119,8 +120,8 @@ function mapMarket(item: GammaMarket): Market | null {
     ...(item.liquidity != null && Number.isFinite(Number(item.liquidity))
       ? { liquidity: Number(item.liquidity) }
       : {}),
-    volume: `$${compact(volume)}`,
-    participants: 0, // This feed does not provide a verified predictor count.
+    volume: volume > 0 ? `$${compact(volume)}` : "—",
+    participants: 0, // This feed does not provide a verified predictor count; the UI must not present this as a verified count.
     outcomes,
     featured: Number(item.volume24hr ?? 0) > 10_000,
     trend: "flat",

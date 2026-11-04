@@ -1,5 +1,5 @@
 /**
- * Client short-window paper settlement robot (5 / 15 / 30 min).
+ * Client short-window paper settlement robot. New windows are 5 / 30 min; 15 min is kept here only so paper positions opened before the virtual-only cleanup still settle.
  * Records price-to-beat while a window is live; settles when it ends.
  * Virtual USDC paper ledger only — no Mainnet / no chain broadcast.
  */
