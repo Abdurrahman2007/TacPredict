@@ -120,15 +120,6 @@ function PortfolioPage() {
         </div>
       </header>
 
-      <div className="tp-wp-chips" role="list" aria-label="Balance types">
-        <span role="listitem">Paper <b>{money(available, hidden)}</b></span>
-        <span role="listitem">Onchain <b>—</b></span>
-        <span role="listitem">
-          TAC <b>{disconnected ? "—" : tac.isPending ? "…" : tac.isError ? "—" : (tac.data?.balance.toLocaleString("en-US") ?? "—")}</b>
-        </span>
-        <span role="listitem">Real USDC <b>—</b></span>
-      </div>
-
       <section className="tp-wp-available" aria-label="Available to trade">
         <span>Available</span>
         <strong>{money(available, hidden)}</strong>
@@ -148,26 +139,30 @@ function PortfolioPage() {
         </div>
       </section>
 
-      <section className="tp-wp-stats" aria-label="Portfolio totals" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-        <div style={{ padding: 16, borderRadius: 22, background: "#171a2e" }}>
-          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>Total volume</span>
-          <strong style={{ fontSize: 28 }}>{disconnected ? "—" : money(totalVolume, hidden)}</strong>
+      <section className="tp-wp-stats" aria-label="Portfolio totals">
+        <div className="tp-wp-stat">
+          <span>Total volume</span>
+          <strong>{money(totalVolume, hidden)}</strong>
         </div>
-        <div style={{ padding: 16, borderRadius: 22, background: "#171a2e" }}>
-          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>PnL</span>
-          <strong style={{ fontSize: 28 }} className={realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined}>
-            {disconnected ? "—" : signedMoney(realized, hidden)}
+        <div className="tp-wp-stat">
+          <span>PnL</span>
+          <strong className={realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined}>
+            {signedMoney(realized, hidden)}
           </strong>
         </div>
-        <div style={{ padding: 16, borderRadius: 22, background: "#171a2e" }}>
-          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>TAC Points</span>
-          <strong style={{ fontSize: 28 }}>
-            {disconnected ? "—" : tac.isPending ? "…" : tac.isError ? "—" : tac.data?.balance.toLocaleString("en-US") ?? "—"}
+        <div className="tp-wp-stat">
+          <span>TAC Points</span>
+          <strong>
+            {hidden
+              ? "••••"
+              : disconnected || tac.isPending || tac.isError
+                ? "0"
+                : (tac.data?.balance.toLocaleString("en-US") ?? "0")}
           </strong>
         </div>
-        <div style={{ padding: 16, borderRadius: 22, background: "#171a2e" }}>
-          <span style={{ display: "block", color: "#9aa3b2", fontSize: 13 }}>Onchain</span>
-          <strong style={{ fontSize: 28 }}>—</strong>
+        <div className="tp-wp-stat">
+          <span>Onchain</span>
+          <strong>{money(0, hidden)}</strong>
         </div>
       </section>
 

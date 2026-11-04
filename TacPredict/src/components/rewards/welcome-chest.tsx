@@ -1,9 +1,38 @@
 import { useEffect, useState } from "react";
 
-const USDC_LOGO =
-  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png";
-
 type Phase = "idle" | "shake" | "open" | "burst" | "reveal" | "done";
+
+/**
+ * Local USDC-style coin: blue disc, white ring, white $.
+ * No external image dependency, so it can never render as a broken image.
+ */
+export function UsdcCoin({ size = 28 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      role="img"
+      aria-label="Virtual USDC"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <circle cx="24" cy="24" r="22" fill="#2775ca" />
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="1.5" />
+      <circle cx="24" cy="24" r="16.5" fill="none" stroke="#ffffff" strokeOpacity="0.35" strokeWidth="1.5" />
+      <text
+        x="24"
+        y="32.5"
+        textAnchor="middle"
+        fontSize="26"
+        fontWeight="800"
+        fill="#ffffff"
+        fontFamily="system-ui, -apple-system, sans-serif"
+      >
+        $
+      </text>
+    </svg>
+  );
+}
 
 /** High-quality welcome box: shake → lid open → coin burst → amount reveal. Reduced-motion users get the final state without animation (see chest-open.css). */
 export function WelcomeChestBox({
@@ -66,19 +95,19 @@ export function WelcomeChestBox({
           <span className="tp-chest-body">
             <span className="tp-chest-rim" />
             <span className="tp-chest-band" />
-            <img src={USDC_LOGO} alt="" width={42} height={42} className="tp-chest-seal" />
+            <span className="tp-chest-seal">
+              <UsdcCoin size={56} />
+            </span>
           </span>
           <span className="tp-chest-coins">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <img
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <span
                 key={i}
-                src={USDC_LOGO}
-                alt=""
-                width={28}
-                height={28}
                 className="tp-chest-coin"
                 style={{ ["--c" as string]: i }}
-              />
+              >
+                <UsdcCoin size={36} />
+              </span>
             ))}
           </span>
         </span>
@@ -92,7 +121,7 @@ export function WelcomeChestBox({
       >
         {amount != null ? (
           <>
-            <img src={USDC_LOGO} alt="" width={28} height={28} />
+            <UsdcCoin size={32} />
             <strong>+${amount}</strong>
             <span>Virtual USDC credited</span>
           </>

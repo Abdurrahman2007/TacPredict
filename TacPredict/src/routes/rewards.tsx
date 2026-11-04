@@ -10,14 +10,11 @@ import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { Link } from "@tanstack/react-router";
 import { isPriorityWallet, useWelcomeChest } from "@/lib/rewards/welcome-chest";
-import { WelcomeChestBox } from "@/components/rewards/welcome-chest";
+import { UsdcCoin, WelcomeChestBox } from "@/components/rewards/welcome-chest";
 import { usePaperLedger } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
 import "@/styles/rewards-checkin.css";
 import "@/styles/chest-open.css";
-
-const USDC_LOGO =
-  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png";
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
@@ -39,7 +36,7 @@ function RewardsPage() {
       <div className="tp-rewards" data-testid="rewards-page" aria-busy="true">
         <header className="tp-rewards-hero">
           <div className="tp-rewards-hero-top">
-            <img src={USDC_LOGO} alt="" width={22} height={22} className="tp-usdc-logo" />
+            <UsdcCoin size={22} />
             <span>Virtual USDC</span>
           </div>
           <strong className="tp-rewards-balance">…</strong>
@@ -101,7 +98,7 @@ function RewardsClient() {
     <div className="tp-rewards" data-testid="rewards-page">
       <header className="tp-rewards-hero">
         <div className="tp-rewards-hero-top">
-          <img src={USDC_LOGO} alt="" width={22} height={22} className="tp-usdc-logo" />
+          <UsdcCoin size={22} />
           <span>Virtual USDC</span>
         </div>
         <strong className="tp-rewards-balance">
@@ -180,7 +177,7 @@ function RewardsClient() {
       {showCheckin ? (
         <>
           <section className="tp-chest-won" aria-label="Welcome grant">
-            <img src={USDC_LOGO} alt="" width={36} height={36} className="tp-usdc-logo" />
+            <UsdcCoin size={36} />
             <div>
               <strong>+${chest.amount ?? 0}</strong>
               <span>One-time welcome · Virtual USDC</span>
@@ -210,7 +207,7 @@ function RewardsClient() {
                       {done ? <Check size={14} strokeWidth={2.5} /> : day}
                     </span>
                     <span className="tp-day-amt">
-                      <img src={USDC_LOGO} alt="" width={12} height={12} />${amount}
+                      <UsdcCoin size={12} />${amount}
                     </span>
                   </li>
                 );
