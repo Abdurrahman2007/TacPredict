@@ -64,7 +64,10 @@ function AssetCard({
   const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
   const live = useLivePrice(asset, true);
   const pw = usePriceWindow(asset, w, nowMs, true);
-  const spot = live.price ?? pw.series.at(-1)?.price ?? null;
+  // Odds use the same Now/Beat the card displays, so the share price never
+  // disagrees with the chart above it. Live ticks still flow into the series,
+  // and the 1-second clock makes the price move toward 99¢/1¢ as time runs out.
+  const spot = pw.series.at(-1)?.price ?? live.price ?? null;
   const beat =
     pw.boundary ??
     (pw.series.find((p) => p.time >= w.start)?.price ?? null);
