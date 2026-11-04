@@ -45,3 +45,17 @@ Premium UI update: removed crypto spot-window 5m/15m/1h selectors; provider dura
 Home header refinement: featured logo and LIVE countdown top row; exact “Bitcoin Up or Down - 5 min” source-duration title beneath, then 12-hour date/time range. Client renders the browser's timezone with an explicit GMT offset; server initial output is UTC to avoid hydration mismatch. Detail retains full-word duration subtitle and no spot-window selectors.
 
 Amount layout fix: compact preview ticket with local amount presets and inline outcome selection, no duplicate Connect wallet CTA. Mobile outcome dock portals outside animated ancestors and measures actual navigation height. Tapping either side opens an accessible compact amount bottom sheet above the dock/navigation; desktop amount panel remains alongside details. Trade submission remains disabled; no transfer/signing changes.
+
+## Virtual-only phase (2026-11-04 cleanup)
+
+- Public scope is crypto-only Up/Down (BTC, ETH, SOL, BNB), durations
+  5m / 30m / 1h / 12h / 24h, navigation Home / Rewards / Ranking / Portfolio.
+  The public Markets list was removed; do not redeploy it without a new decision.
+- Onchain Virtual USDC remains on Base Mainnet (8453). Real-USDC pool trading
+  stays hard-blocked, and operator Mainnet signing requires the non-default
+  VITE_ENABLE_OPERATOR_SIGNING=true build flag. No private key, signer or
+  production flag was introduced by this cleanup.
+- Missing values are shown as unavailable, not as verified zeros, in the
+  virtual-only UI. Older lines above that say balances display 0 until a
+  verified amount arrives are superseded for this phase.
+- Fees/sponsor work is deferred; no fee subsidy is deployed with this cleanup.
