@@ -1,0 +1,128 @@
+/* iOS-native polish layer (virtual-only cleanup).
+   Feel only: system fonts, large soft-rounded cards, spring-like
+   transform/opacity motion, backdrop blur on chrome only, native tap
+   feedback. No layout-thrashing animations: never animate width, height,
+   margin or padding here. Blur is kept off scrolling lists so mobile
+   stays at 60fps. Browser zoom is untouched (viewport has no
+   user-scalable=no). */
+:root {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+body {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+/* Large soft-rounded cards and sheets */
+.tp-card,
+.ud-home-card,
+.tp-wp-available,
+.tp-wp-pl,
+.tp-wp-holdings,
+.tp-rewards-hero,
+.tp-chest-stage {
+  border-radius: 22px;
+}
+.ud-home-card,
+.tp-card {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 12px 32px rgb(0 0 0 / 0.18);
+  transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.28s ease;
+  will-change: transform;
+}
+/* Gentle spring-like motion for lists and cards (transform/opacity only) */
+.tp-wp-list li,
+.tp-crypto-footer {
+  transition: transform 0.25s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.25s ease;
+}
+/* Native tap feedback */
+.ios-press:active,
+button:active,
+a:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+button,
+a {
+  transition: transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.18s ease;
+}
+/* iOS-style segmented controls: pill groups, 44px targets */
+.tp-wp-periods,
+.ud-home-durations {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+}
+.tp-wp-periods button,
+.ud-home-durations button {
+  min-height: 44px;
+  border-radius: 999px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.3, 0.64, 1), background-color 0.2s ease, color 0.2s ease;
+}
+.tp-wp-periods button.on {
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+}
+/* Header + bottom tab bar: backdrop blur on chrome only, never over lists */
+.app-header {
+  backdrop-filter: saturate(1.4) blur(18px);
+  -webkit-backdrop-filter: saturate(1.4) blur(18px);
+}
+nav[aria-label="Mobile navigation"] {
+  backdrop-filter: saturate(1.4) blur(20px);
+  -webkit-backdrop-filter: saturate(1.4) blur(20px);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+/* 44px minimum hit targets on icon buttons */
+.tp-wp-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
+/* Premium footer */
+.tp-site-footer {
+  margin: 32px auto 0;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  text-align: center;
+  color: #9aa3b2;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tp-site-footer strong {
+  color: #e8edf3;
+  font-size: 15px;
+}
+.tp-site-footer a {
+  color: #c7d0dd;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tp-site-footer nav {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.tp-site-footer nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+/* Respect reduced motion everywhere in this layer */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

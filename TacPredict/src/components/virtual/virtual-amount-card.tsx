@@ -249,6 +249,16 @@ export function VirtualAmountCard({
           <span>${virtualMoney(account.data?.balance)}</span>
           <small>Virtual USDC · {ref.deployment.chainId === 8453 ? "Base" : "Test network"}</small>
         </div>
+        <div
+          role="note"
+          className="mt-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm leading-snug text-amber-100"
+        >
+          <strong>Real gas on Base Mainnet.</strong> This token is Virtual USDC —
+          non-redeemable, not real USDC and not money. But every onchain buy, sell
+          and settle still needs a real wallet signature and real ETH gas on Base
+          Mainnet (8453). Paper trades are gas-free. No fee subsidy applies in this
+          phase.
+        </div>
         <label htmlFor={id} className="pd-amount-input">
           {mode === "buy" && <span>$</span>}
           <input

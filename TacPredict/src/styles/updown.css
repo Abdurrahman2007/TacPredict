@@ -1152,6 +1152,21 @@
 .ud-prices dd {
   font-variant-numeric: tabular-nums;
 }
+.tp-home-virtual-note {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #171a2e;
+  color: #d7dce6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tp-crypto-virtual {
+  margin: 8px 0 0;
+  color: #9aa3b2;
+  font-size: 12px;
+  line-height: 1.4;
+}
 .home-long-rounds {
   display: grid;
   gap: 24px;

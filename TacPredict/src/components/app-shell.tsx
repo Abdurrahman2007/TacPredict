@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { House, Gift, Wallet, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
+import "@/styles/ios-polish.css";
 import { LoginButton } from "./login-dialog";
 import { PortfolioNavLabel } from "./portfolio-nav-label";
 /** Crypto-first shell: Markets list removed from nav; Rewards replaces that slot. */
@@ -30,9 +31,14 @@ function ShellContent({ children }: { children: ReactNode }) {
             className="app-header-brand group flex min-w-0 items-center gap-2.5"
             aria-label="TacPredict home"
           >
-            <BrandMark className="size-9 transition-transform duration-300 group-hover:scale-[1.04]" />
-            <span className="app-header-name text-base font-semibold tracking-tight">
-              TacPredict
+            <BrandMark className="size-10 transition-transform duration-300 group-hover:scale-[1.04]" />
+            <span className="flex min-w-0 flex-col leading-none">
+              <span className="app-header-name text-[17px] font-semibold tracking-tight">
+                TacPredict
+              </span>
+              <span className="mt-1 hidden text-[11px] font-medium text-muted-foreground sm:block">
+                Virtual USDC · Base
+              </span>
             </span>
           </Link>
           <nav
@@ -63,6 +69,20 @@ function ShellContent({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
         {children}
       </main>
+      <footer className="tp-site-footer" aria-label="Site information">
+        <div className="flex items-center justify-center gap-2">
+          <BrandMark className="size-9" />
+          <strong>TacPredict</strong>
+        </div>
+        <p>
+          Virtual USDC only · Paper trading · Non-redeemable · Not real money.
+          Onchain Virtual USDC trades on Base Mainnet still need a real wallet
+          signature and real ETH gas. No fee subsidy applies in this phase.
+        </p>
+        <nav aria-label="Footer">
+          <Link to="/terms">Terms</Link>
+        </nav>
+      </footer>
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         aria-label="Mobile navigation"

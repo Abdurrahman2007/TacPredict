@@ -61,6 +61,20 @@ export function NativeOperatorConsole({
       },
     );
   const deployment = q.data?.find((d) => d.chainId === chain);
+  /** Virtual-phase gate: operator signing is disabled unless VITE_ENABLE_OPERATOR_SIGNING=true is set at build time. Admin gating around this component is unchanged. */
+  const operatorEnabled = import.meta.env["VITE_ENABLE_OPERATOR_SIGNING"] === "true";
+  if (!operatorEnabled) {
+    return (
+      <section className="finance-card mt-5 space-y-4">
+        <h2 className="text-lg font-semibold">Operator transactions disabled</h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Real Mainnet signing is disabled in the virtual-only phase. This console is
+          hidden behind the non-default VITE_ENABLE_OPERATOR_SIGNING flag and admin
+          gating; no transaction can be signed from here while it is off.
+        </p>
+      </section>
+    );
+  }
   const ready = Boolean(
     deployment && wallet.provider && wallet.address && wallet.chainId === chain && ack,
   );
