@@ -66,7 +66,7 @@ function ShellContent({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:pb-12 md:pt-8">
+      <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-6 lg:pb-12 md:pt-6">
         {children}
       </main>
       <footer className="tp-site-footer" aria-label="Site information">

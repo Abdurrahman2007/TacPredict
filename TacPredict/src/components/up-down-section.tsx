@@ -173,7 +173,7 @@ export function UpDownSection({
   return (
     <section className={detailed ? "" : "mt-5"}>
       <PaperSettleRobot />
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
           {fixedMinutes === 30
             ? "Live · 30M"
@@ -196,7 +196,7 @@ export function UpDownSection({
       </div>
       {!fixedMinutes && (
         <div
-          className="ud-home-durations tp-duration-segmented mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+          className="ud-home-durations tp-duration-segmented mb-3 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
           role="group"
           aria-label="Window length"
         >

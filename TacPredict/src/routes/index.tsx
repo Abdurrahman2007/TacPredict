@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { UpDownSection } from "@/components/up-down-section";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
@@ -40,27 +39,9 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { data: nativeFeed } = useSuspenseQuery(nativeMarketFeedQueryOptions);
-  const [showNote, setShowNote] = useState(false);
   return (
     <div className="home-reference">
       <div className="home-crypto-chart">
-        <div className="tp-home-badge-row">
-          <button
-            type="button"
-            className="tp-home-badge"
-            aria-expanded={showNote}
-            onClick={() => setShowNote((v) => !v)}
-          >
-            Virtual USDC · Paper <span aria-hidden>ⓘ</span>
-          </button>
-          {showNote ? (
-            <p className="tp-home-virtual-note" role="note">
-              Crypto only — Bitcoin, Ethereum, Solana and BNB. Prices in Virtual USDC ·
-              Paper trading · Non-redeemable · No real money. Onchain Virtual USDC trades
-              on Base Mainnet still need a real wallet signature and real ETH gas.
-            </p>
-          ) : null}
-        </div>
         <UpDownSection
           detailed
           markets={nativeFeed.markets}
