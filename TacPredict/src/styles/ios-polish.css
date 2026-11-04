@@ -85,6 +85,101 @@ nav[aria-label="Mobile navigation"] {
   min-width: 44px;
   min-height: 44px;
 }
+/* Visual-first pass: numbers and charts lead, helper text stays tiny. */
+.tp-home-badge-row {
+  margin-bottom: 14px;
+}
+.tp-home-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.06);
+  color: #e8edf3;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tp-home-virtual-note {
+  margin-top: 10px;
+}
+.tp-crypto-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  color: #c7d0dd;
+  font-size: 11px;
+  font-weight: 600;
+}
+.tp-crypto-title h3 {
+  font-size: 17px !important;
+}
+.tp-price-summary dd {
+  font-size: 26px !important;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.ud-home-card .ud-chart svg {
+  aspect-ratio: 360/210 !important;
+}
+.ud-home-card .ud-outcome-up {
+  min-height: 52px !important;
+  background: #166534 !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 20px rgb(22 101 52 / 0.35);
+}
+.ud-home-card .ud-outcome-down {
+  min-height: 52px !important;
+  background: #991b1b !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 20px rgb(153 27 27 / 0.35);
+}
+.tp-duration-segmented {
+  background: rgb(255 255 255 / 0.06);
+}
+.tp-duration-segmented button {
+  flex: 1;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tp-duration-segmented button[aria-pressed="true"] {
+  background: #e8edf3;
+  color: #0f161a;
+}
+.tp-wp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tp-wp-chips span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  color: #9aa3b2;
+  font-size: 13px;
+}
+.tp-wp-chips b {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.tp-wp-available strong {
+  font-size: 36px !important;
+  line-height: 1.1;
+}
+.tp-rewards-balance {
+  font-size: 44px !important;
+  line-height: 1.05;
+}
 /* Premium footer */
 .tp-site-footer {
   margin: 32px auto 0;

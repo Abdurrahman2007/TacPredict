@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
 import { CoinGeckoChart } from "@/components/updown/coingecko-chart";
-import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
+import { useNow } from "@/lib/updown/use-clock";
 import {
   ASSETS,
   DISPLAY_DURATIONS,
@@ -59,7 +59,6 @@ function AssetCard({
   large: boolean;
 }) {
   const info = ASSETS[asset];
-  const zone = useTimeZone();
   const start = windowStartFor(nowMs, minutes);
   const w = makeWindow(start, minutes);
   const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
@@ -76,7 +75,6 @@ function AssetCard({
   const vol = paperVolumeFor(marketId, ledger.trades);
   const title = `${copy.title} - ${durationLabel(minutes)}`;
   const search = { d: minutes };
-  const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
   const upCents = odds ? `${Math.round(odds.up)}¢` : "—";
   const downCents = odds ? `${Math.round(odds.down)}¢` : "—";
   const settlement = assetSettlementPolicy(asset, minutes);
@@ -102,11 +100,7 @@ function AssetCard({
           >
             <h3>{title}</h3>
           </Link>
-          <p className="tp-crypto-time">
-            {dayLabel(w.start, zone)}, {clock(w.start, zone)} –{" "}
-            {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
-            {clock(w.end, zone)}
-          </p>
+          <span className="tp-crypto-badge">Virtual USDC</span>
         </div>
         <span
           className="ud-live tp-crypto-live"
@@ -123,7 +117,7 @@ function AssetCard({
           to="/up-down/$asset"
           params={{ asset: slugOf(asset) }}
           search={{ ...search, side: "up" }}
-          className="ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ud-outcome-up"
+          className="ios-press flex min-h-14 items-center justify-center rounded-2xl text-base font-bold text-white ud-outcome-up"
         >
           Up {upCents}
         </Link>
@@ -131,28 +125,19 @@ function AssetCard({
           to="/up-down/$asset"
           params={{ asset: slugOf(asset) }}
           search={{ ...search, side: "down" }}
-          className="ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ud-outcome-down"
+          className="ios-press flex min-h-14 items-center justify-center rounded-2xl text-base font-bold text-white ud-outcome-down"
         >
           Down {downCents}
         </Link>
       </div>
-      <p className="tp-crypto-virtual">
-        Prices in Virtual USDC · Paper trading · Non-redeemable · No real money
-      </p>
       <div className="tp-crypto-footer">
         <span>{vol > 0 ? `Vol ${formatLiq(vol)}` : "Vol —"}</span>
         <span>
           {settlement.tier === "unavailable"
             ? "Charts only"
             : settlement.tier === "paper_only"
-              ? "Paper · no on-chain settle"
-              : odds
-                ? spot != null && beat != null
-                  ? `${spot >= beat ? "▲" : "▼"} vs open`
-                  : "Live prices in Virtual USDC"
-                : pw.pending
-                  ? "Loading…"
-                  : "Paper market"}
+              ? "Paper"
+              : "Live"}
         </span>
       </div>
     </article>
@@ -209,9 +194,9 @@ export function UpDownSection({
           <ChevronRight className="size-4" />
         </Link>
       </div>
-      {detailed && (
+      {!fixedMinutes && (
         <div
-          className="ud-home-durations mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+          className="ud-home-durations tp-duration-segmented mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
           role="group"
           aria-label="Window length"
         >

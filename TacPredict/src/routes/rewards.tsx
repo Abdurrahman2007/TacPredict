@@ -126,10 +126,7 @@ function RewardsClient() {
       {!chest.opened || opening || burst != null ? (
         <section className="tp-chest" aria-labelledby="chest-title">
           <h1 id="chest-title">Welcome reward</h1>
-          <p>
-            Open once for a random <strong>$50–$500</strong> Virtual USDC grant. Trade Up/Down with
-            it — not withdrawable. Coinbase Wallet + Farcaster get priority access.
-          </p>
+          <p>Open once · <strong>$50–$500</strong> Virtual USDC · Not withdrawable.</p>
           <WelcomeChestBox
             opening={opening}
             amount={revealAmount}
@@ -176,11 +173,7 @@ function RewardsClient() {
             : "Connect a wallet to see your TAC Points."}
         </p>
         <p style={{ margin: 0, color: "#9aa3b2", fontSize: 13, lineHeight: 1.5 }}>
-          TAC Points are points only — not USDC, not a token, not money. They{" "}
-          <strong>may be considered</strong> for a future token or airdrop{" "}
-          <strong>only if announced</strong>. No token, airdrop, price or date is
-          promised, and nothing here changes the Terms, which promise no future
-          TAC token. Paper rewards above are unsettled until server settlement exists.
+          Points only · No token promised.
         </p>
       </section>
 

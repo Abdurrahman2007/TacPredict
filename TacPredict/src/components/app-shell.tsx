@@ -70,18 +70,9 @@ function ShellContent({ children }: { children: ReactNode }) {
         {children}
       </main>
       <footer className="tp-site-footer" aria-label="Site information">
-        <div className="flex items-center justify-center gap-2">
-          <BrandMark className="size-9" />
-          <strong>TacPredict</strong>
-        </div>
         <p>
-          Virtual USDC only · Paper trading · Non-redeemable · Not real money.
-          Onchain Virtual USDC trades on Base Mainnet still need a real wallet
-          signature and real ETH gas. No fee subsidy applies in this phase.
+          TacPredict · Virtual USDC · <Link to="/terms">Terms</Link>
         </p>
-        <nav aria-label="Footer">
-          <Link to="/terms">Terms</Link>
-        </nav>
       </footer>
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
