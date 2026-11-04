@@ -715,8 +715,9 @@
   border-top: 1px solid #303a3f;
   padding-top: 10px;
   margin-top: 12px;
-  font-size: 11px;
-  color: #97a5ac;
+  font-size: 13px;
+  font-weight: 500;
+  color: #c9d4da;
   font-variant-numeric: tabular-nums;
 }
 .ud-home-card .ud-chart {
