@@ -28,20 +28,17 @@ export function PaperAmountCard({
   const [amount, setAmount] = useState("");
   const [notice, setNotice] = useState("");
   const outcome = market.outcomes.find((o) => o.id === selected) ?? market.outcomes[0];
-  const priceCents =
-    outcome && outcome.probabilityKnown !== false ? outcome.probability : null;
+  const priceCents = outcome && outcome.probabilityKnown !== false ? outcome.probability : null;
   const expired =
     Boolean(market.endsAt) && Number.isFinite(Date.parse(market.endsAt!))
       ? Date.now() >= Date.parse(market.endsAt!)
       : false;
   const usdc = Number(amount);
-  /** Preview always uses typed amount, else default $5 so To win shows before any trade. */
-  const previewUsdc = usdc > 0 ? usdc : 5;
-  const previewShares =
-    priceCents && previewUsdc > 0 ? previewUsdc / (priceCents / 100) : 0;
+  // Preview follows the typed amount and the live share price only — no example amount.
   const shares = priceCents && usdc > 0 ? usdc / (priceCents / 100) : 0;
   const toWin = shares > 0 ? shares : 0;
-  const previewToWin = previewShares > 0 ? previewShares : 0;
+  const profit = shares > 0 ? toWin - usdc : 0;
+  const profitPct = shares > 0 && usdc > 0 ? (profit / usdc) * 100 : 0;
   const openHere = useMemo(
     () => ledger.positions.filter((p) => p.marketId === market.id),
     [ledger.positions, market.id],
@@ -50,9 +47,8 @@ export function PaperAmountCard({
 
   function liveCentsFor(side: "Up" | "Down") {
     return (
-      market.outcomes.find((o) =>
-        side === "Up" ? /^up$/i.test(o.label) : /^down$/i.test(o.label),
-      )?.probability ?? null
+      market.outcomes.find((o) => (side === "Up" ? /^up$/i.test(o.label) : /^down$/i.test(o.label)))
+        ?.probability ?? null
     );
   }
 
@@ -135,9 +131,7 @@ export function PaperAmountCard({
               onClick={() => onSelect(o.id)}
             >
               {o.label}{" "}
-              <span>
-                {o.probabilityKnown === false ? "—" : `${o.probability.toFixed(0)}¢`}
-              </span>
+              <span>{o.probabilityKnown === false ? "—" : `${o.probability.toFixed(0)}¢`}</span>
             </button>
           ))}
         </div>
@@ -178,28 +172,47 @@ export function PaperAmountCard({
                   ${n}
                 </button>
               ))}
+              <button
+                type="button"
+                disabled={!tradingAllowed || expired || !(ledger.balance > 0)}
+                onClick={() => setAmount(String(Math.floor(ledger.balance * 100) / 100))}
+              >
+                Max
+              </button>
             </div>
           </div>
-          {priceCents != null && previewShares > 0 ? (
-            <dl className="tp-paper-pnl" aria-label="Order preview">
-              <div>
-                <dt>Avg</dt>
-                <dd>{Math.round(priceCents)}¢</dd>
-              </div>
-              <div>
-                <dt>Example</dt>
-                <dd>${previewUsdc.toFixed(0)}</dd>
-              </div>
-              <div>
-                <dt>To win</dt>
-                <dd className="tp-pnl-pos">${previewToWin.toFixed(2)}</dd>
-              </div>
-              <div>
-                <dt>Profit if win</dt>
-                <dd className="tp-pnl-pos">{money(previewToWin - previewUsdc)}</dd>
-              </div>
-            </dl>
-          ) : null}
+          <dl
+            className="tp-paper-pnl tp-paper-pnl-v2"
+            aria-label="Order preview"
+            aria-live="polite"
+          >
+            <div>
+              <dt>Avg price</dt>
+              <dd>{priceCents != null ? `${Math.round(priceCents)}¢` : "—"}</dd>
+            </div>
+            <div>
+              <dt>Shares</dt>
+              <dd>{shares > 0 ? shares.toFixed(2) : "—"}</dd>
+            </div>
+            <div>
+              <dt>To win</dt>
+              <dd className={shares > 0 ? "tp-pnl-pos" : undefined}>
+                {shares > 0 ? `$${toWin.toFixed(2)}` : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt>Profit if win</dt>
+              <dd className={shares > 0 ? "tp-pnl-pos" : undefined}>
+                {shares > 0 ? (
+                  <>
+                    {money(profit)} <small>+{profitPct.toFixed(0)}%</small>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+          </dl>
           <button
             type="button"
             className="pd-submit"
@@ -207,12 +220,21 @@ export function PaperAmountCard({
               !tradingAllowed ||
               expired ||
               !(usdc > 0) ||
+              usdc > ledger.balance ||
               priceCents == null ||
               priceCents <= 0
             }
             onClick={submitBuy}
           >
-            {!tradingAllowed ? "Unavailable" : expired ? "Expired" : "Trade"}
+            {!tradingAllowed
+              ? "Unavailable"
+              : expired
+                ? "Expired"
+                : usdc > ledger.balance
+                  ? "Insufficient balance"
+                  : outcome
+                    ? `Buy ${outcome.label}${usdc > 0 ? ` · $${usdc.toFixed(2)}` : ""}`
+                    : "Trade"}
           </button>
           <p className="pd-order-note">
             {settlementNote ??

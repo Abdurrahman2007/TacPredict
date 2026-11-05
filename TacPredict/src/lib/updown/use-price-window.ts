@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cryptoHistoryQueryOptions, cryptoMarketQueryOptions } from "@/lib/market-data.functions";
 import {
@@ -29,6 +29,15 @@ export function usePriceWindow(asset: UpDownAsset, selected: Win, now = Date.now
     enabled: dense && now > 0,
   });
   const live = useLivePrice(asset, dense);
+  // When a new window opens, fetch its opening candle right away instead of waiting for the
+  // 20-second poll; otherwise the price to beat (and share odds) are missing for a while.
+  const refetchSpot = spot.refetch;
+  useEffect(() => {
+    if (!dense || !(now > 0) || now < selected.start) return;
+    const id = window.setTimeout(() => void refetchSpot(), 2500);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected.start, dense]);
   const view = useMemo(() => {
     const useSpot = dense && Boolean(spot.data?.candles.length);
     const points = useSpot

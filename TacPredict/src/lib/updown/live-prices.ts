@@ -45,7 +45,19 @@ let closeTimer: ReturnType<typeof setTimeout> | undefined;
 let watchdog: ReturnType<typeof setInterval> | undefined;
 let lastMessage = 0;
 
-const emit = () => listeners.forEach((listener) => listener());
+const emitNow = () => listeners.forEach((listener) => listener());
+/**
+ * Coinbase sends many ticker frames per second. Re-rendering every chart on every frame made
+ * dragging the chart feel laggy on phones, so frames are coalesced into one update every 250ms.
+ */
+let emitTimer: ReturnType<typeof setTimeout> | undefined;
+const emit = () => {
+  if (emitTimer !== undefined) return;
+  emitTimer = setTimeout(() => {
+    emitTimer = undefined;
+    emitNow();
+  }, 250);
+};
 
 function setAllStatus(status: LiveStatus) {
   for (const asset of ASSET_KEYS) state[asset] = { ...state[asset], status };

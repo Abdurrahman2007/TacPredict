@@ -14,6 +14,10 @@ import {
   ChevronLeft,
   EyeOff,
   Percent,
+  Gift,
+  Trophy,
+  Pencil,
+  Wallet,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { InitialAvatar } from "./initial-avatar";
@@ -22,11 +26,7 @@ import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useOverviewPrivacy } from "@/lib/accounts/privacy";
-import {
-  SLIPPAGE_PRESETS,
-  formatSlippage,
-  useTradeSlippage,
-} from "@/lib/accounts/slippage";
+import { SLIPPAGE_PRESETS, formatSlippage, useTradeSlippage } from "@/lib/accounts/slippage";
 
 export function AccountMenu() {
   const [open, setOpen] = useState(false),
@@ -82,9 +82,7 @@ export function AccountMenu() {
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="account-sheet" aria-describedby="account-menu-description">
-          <DialogTitle className="sr-only">
-            {view === "settings" ? "Settings" : "Menu"}
-          </DialogTitle>
+          <DialogTitle className="sr-only">{view === "settings" ? "Settings" : "Menu"}</DialogTitle>
           <DialogDescription id="account-menu-description" className="sr-only">
             Profile, referrals, support and settings
           </DialogDescription>
@@ -146,91 +144,92 @@ export function AccountMenu() {
           ) : (
             <>
               <div className="account-grabber" aria-hidden="true" />
-              <div className="account-identity">
-                <InitialAvatar seed={auth.user?.id ?? "tacpredict-guest"} size={48} label={username ?? "TacPredict"} />
+              <div className="wm-identity">
+                <InitialAvatar
+                  seed={auth.user?.id ?? "tacpredict-guest"}
+                  size={44}
+                  label={username ?? "TacPredict"}
+                />
                 <div>
-                  <b>
-                    {username
-                      ? "@" + username
-                      : auth.user
-                        ? "Your account"
-                        : "TacPredict"}
-                  </b>
-                  <span>{auth.user ? "Signed in" : "Guest"}</span>
+                  <b>{username ? "@" + username : auth.user ? "Your account" : "Guest"}</b>
+                  <span>
+                    {wallet.address
+                      ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}`
+                      : "Not connected"}
+                  </span>
                 </div>
-              </div>
-
-              <p className="account-group-label">Account</p>
-              <nav className="account-menu-list account-group" aria-label="Account">
-                <Link to="/account" onClick={() => setOpen(false)}>
-                  <span className="account-tile tile-blue">
-                    <UserRound size={17} />
-                  </span>
-                  Profile
-                  <ChevronRight size={15} />
-                </Link>
-                <Link to="/referrals" onClick={() => setOpen(false)}>
-                  <span className="account-tile tile-green">
-                    <Users size={17} />
-                  </span>
-                  Refer friend
-                  <ChevronRight size={15} />
-                </Link>
-              </nav>
-
-              <p className="account-group-label">Support</p>
-              <nav className="account-menu-list account-group" aria-label="Support">
-                <button type="button" onClick={() => setView("settings")}>
-                  <span className="account-tile tile-grey">
-                    <Settings2 size={17} />
-                  </span>
-                  Settings
-                  <ChevronRight size={15} />
-                </button>
-                <a
-                  href="mailto:support@tacpredict.fun?subject=TacPredict%20Support"
+                <Link
+                  to="/account"
+                  className="wm-edit"
+                  aria-label="Edit profile"
                   onClick={() => setOpen(false)}
                 >
-                  <span className="account-tile tile-orange">
-                    <LifeBuoy size={17} />
-                  </span>
-                  Help
-                  <ChevronRight size={15} />
-                </a>
-                <Link to="/terms" onClick={() => setOpen(false)}>
-                  <span className="account-tile tile-purple">
-                    <FileText size={17} />
-                  </span>
-                  Terms
-                  <ChevronRight size={15} />
+                  <Pencil size={18} />
+                </Link>
+              </div>
+
+              <nav className="wm-list" aria-label="Menu">
+                <Link to="/account" onClick={() => setOpen(false)}>
+                  <UserRound size={21} />
+                  Your Profile
+                </Link>
+                <Link to="/rewards" onClick={() => setOpen(false)}>
+                  <Gift size={21} />
+                  Rewards
+                </Link>
+                <Link to="/ranking" onClick={() => setOpen(false)}>
+                  <Trophy size={21} />
+                  Ranking
+                </Link>
+                <Link to="/referrals" onClick={() => setOpen(false)}>
+                  <Users size={21} />
+                  Refer a friend
                 </Link>
                 <a
                   href="mailto:support@tacpredict.fun?subject=TacPredict%20Feedback"
                   onClick={() => setOpen(false)}
                 >
-                  <span className="account-tile tile-pink">
-                    <MessageSquare size={17} />
-                  </span>
-                  Feedback
-                  <ChevronRight size={15} />
+                  <MessageSquare size={21} />
+                  Give feedback
                 </a>
-              </nav>
-
-              {auth.user ? (
-                <div className="account-group account-logout-group">
+                <a
+                  href="mailto:support@tacpredict.fun?subject=TacPredict%20Support"
+                  onClick={() => setOpen(false)}
+                >
+                  <LifeBuoy size={21} />
+                  Help &amp; Support
+                </a>
+                <Link to="/terms" onClick={() => setOpen(false)}>
+                  <FileText size={21} />
+                  Terms
+                </Link>
+                <button type="button" onClick={() => setView("settings")}>
+                  <Settings2 size={21} />
+                  Settings
+                  <ChevronRight size={16} className="wm-chev" />
+                </button>
+                {auth.user ? (
                   <button
                     type="button"
-                    className="account-logout"
+                    className="wm-logout"
                     disabled={busy}
                     onClick={() => void logout()}
                   >
-                    {busy ? "Logging out…" : "Log out"}
+                    <LogOut size={21} />
+                    {busy ? "Logging out…" : "Log Out"}
                   </button>
-                </div>
+                ) : null}
+              </nav>
+
+              {wallet.address && auth.user ? (
+                <Link to="/rewards" className="wm-primary" onClick={() => setOpen(false)}>
+                  <Wallet size={18} />
+                  Get Virtual USDC
+                </Link>
               ) : (
                 <button
                   type="button"
-                  className="account-primary"
+                  className="wm-primary"
                   disabled={access.busy || access.restoring}
                   onClick={() => {
                     if (access.state === "connect") setOpen(false);
@@ -238,7 +237,6 @@ export function AccountMenu() {
                   }}
                 >
                   {access.label || "Verify wallet"}
-                  <ChevronRight size={16} />
                 </button>
               )}
               {error && (

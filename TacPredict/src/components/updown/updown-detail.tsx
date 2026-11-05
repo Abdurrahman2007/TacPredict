@@ -40,6 +40,7 @@ import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { runPaperResultRobot } from "@/lib/paper/settle-robot";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
+import { useSticky } from "@/lib/ui/use-sticky";
 
 /** Keeps the query key steady while the clock moves; long look-backs round to whole hours. */
 function lookbackFor(needed: number) {
@@ -188,7 +189,10 @@ export function UpDownDetail({
   };
   // Live share prices: spot, strike and time remaining — never a stale price.
   const remainingSec = state === "live" ? Math.max(0, (w.end - nowMs) / 1000) : 0;
-  const odds = spotShareOdds(shownCurrent, shownBeat, minutes, remainingSec);
+  const odds = useSticky(
+    spotShareOdds(shownCurrent, shownBeat, minutes, remainingSec),
+    `${asset}-${minutes}-${w.start}-${state}`,
+  );
   const settlement = assetSettlementPolicy(asset, minutes);
   const paper = usePaperLedger();
   const referenceId = `reference-${asset}-${w.start}-${minutes}`;
@@ -247,9 +251,19 @@ export function UpDownDetail({
   if (!nowMs)
     return (
       <div className="ud-page ud-loading" role="status" aria-label="Loading price window">
-        <div className="ud-skeleton ud-skeleton-title" />
-        <div className="ud-skeleton ud-skeleton-chart" />
-        Loading price window…
+        <div className="flex items-center gap-3">
+          <div className="tp-skel" style={{ width: 48, height: 48, borderRadius: 999 }} />
+          <div className="grid flex-1 gap-2">
+            <div className="tp-skel" style={{ width: "55%", height: 22 }} />
+            <div className="tp-skel" style={{ width: "40%", height: 14 }} />
+          </div>
+        </div>
+        <div className="mt-6 flex gap-6">
+          <div className="tp-skel" style={{ width: "40%", height: 44 }} />
+          <div className="tp-skel" style={{ width: "40%", height: 44 }} />
+        </div>
+        <div className="tp-skel mt-6" style={{ height: 230, borderRadius: 18 }} />
+        <span className="sr-only">Loading price window…</span>
       </div>
     );
   return (

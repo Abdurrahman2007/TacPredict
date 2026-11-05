@@ -42,12 +42,26 @@ export function CoinGeckoChart({
             <dt title="Observed reference price; settlement follows the market rules">
               {boundary !== null ? "Beat:" : "Start:"}
             </dt>
-            <dd>{reference !== null ? formatUsd(reference, asset) : pending ? "Loading…" : "—"}</dd>
+            <dd>
+              {reference !== null ? (
+                formatUsd(reference, asset)
+              ) : pending ? (
+                <span className="tp-skel inline-block" style={{ width: 120, height: 26 }} />
+              ) : (
+                "—"
+              )}
+            </dd>
           </div>
           <div>
             <dt className="tp-current">Now:</dt>
             <dd className="tp-current">
-              {last ? formatUsd(last.price, asset) : pending ? "Loading…" : "—"}
+              {last ? (
+                formatUsd(last.price, asset)
+              ) : pending ? (
+                <span className="tp-skel inline-block" style={{ width: 120, height: 26 }} />
+              ) : (
+                "—"
+              )}
               {delta && series.length > 1 && (
                 <span className={delta.direction === "down" ? "ud-down" : "ud-up"}>
                   {delta.direction === "down" ? "↘" : "↗"}{" "}
@@ -75,10 +89,18 @@ export function CoinGeckoChart({
           interactive
           ohlc={evidence ? undefined : feed.candles}
           source={evidence?.source ?? feed.source}
+          window={selected}
+        />
+      ) : pending ? (
+        <div
+          className="tp-skel"
+          role="status"
+          aria-label="Loading chart"
+          style={{ height: summary ? 150 : 220, borderRadius: 18, marginTop: 12 }}
         />
       ) : (
         <div className="ud-chart ud-chart-empty" role="status">
-          <span>{pending ? "Loading chart…" : "Price feed paused"}</span>
+          <span>Price feed paused</span>
         </div>
       )}
       {series.length < 2 && !history.isPending && (

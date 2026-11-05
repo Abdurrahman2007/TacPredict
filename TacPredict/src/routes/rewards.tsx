@@ -1,11 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useSyncExternalStore } from "react";
-import { Check, Sparkles } from "lucide-react";
-import {
-  CHECKIN_DAYS,
-  formatCountdown,
-  useDailyCheckin,
-} from "@/lib/daily-checkin";
+import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
+import { CHECKIN_DAYS, formatCountdown, useDailyCheckin } from "@/lib/daily-checkin";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { Link } from "@tanstack/react-router";
@@ -16,6 +12,7 @@ import { useTacPointsBalance } from "@/lib/tac-points";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import "@/styles/rewards-checkin.css";
 import "@/styles/chest-open.css";
+import "@/styles/rewards-v2.css";
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({
@@ -100,14 +97,28 @@ function RewardsClient() {
 
   const revealAmount = burst ?? chest.amount;
 
+  const tacText = wallet.restoring
+    ? "Connecting…"
+    : isConnected && auth.ready && !auth.user
+      ? "Verify wallet"
+      : isConnected
+        ? tac.isPending
+          ? "…"
+          : tac.isError
+            ? "Unavailable"
+            : (tac.data?.balance.toLocaleString("en-US") ?? "—")
+        : "0";
+
   return (
-    <div className="tp-rewards" data-testid="rewards-page">
-      <header className="tp-rewards-hero">
-        <div className="tp-rewards-hero-top">
+    <div className="tp-rewards rw" data-testid="rewards-page">
+      <header className="rw-hero">
+        <i className="rw-hero-orb" aria-hidden />
+        <div className="rw-hero-top">
           <UsdcCoin size={22} />
-          <span>Virtual USDC</span>
+          <span>Virtual USDC balance</span>
         </div>
-        <strong className="tp-rewards-balance">
+        <strong className="rw-balance">
+          $
           {!isConnected
             ? "0"
             : virtualUsdc.toLocaleString("en-US", {
@@ -115,21 +126,35 @@ function RewardsClient() {
                 maximumFractionDigits: 2,
               })}
         </strong>
-        <span className="tp-rewards-unit">Virtual USDC · tradeable (paper)</span>
-        {isConnected && chest.opened ? (
-          <p className="tp-rewards-trade-hint">
-            <Link to="/up-down" search={{ d: 5 }}>
-              Trade 5m Up/Down
-            </Link>{" "}
-            with this balance · not withdrawable
-          </p>
-        ) : null}
+        <span className="rw-unit">Tradeable on paper · not withdrawable</span>
+        <div className="rw-hero-stats">
+          <div>
+            <small>Streak</small>
+            <b>
+              <Zap size={14} aria-hidden /> {claimedThrough}/7
+            </b>
+          </div>
+          <div>
+            <small>TAC Points</small>
+            <b>
+              <Star size={14} aria-hidden /> {tacText}
+            </b>
+          </div>
+          <Link to="/up-down" search={{ d: 5 }} className="rw-trade">
+            Trade
+          </Link>
+        </div>
       </header>
 
       {!chest.opened || opening || burst != null ? (
-        <section className="tp-chest" aria-labelledby="chest-title">
-          <h1 id="chest-title">Welcome reward</h1>
-          <p>Open once · <strong>$50–$500</strong> Virtual USDC · Not withdrawable.</p>
+        <section className="rw-card rw-chest" aria-labelledby="chest-title">
+          <span className="rw-chip">
+            <Gift size={13} aria-hidden /> One-time welcome
+          </span>
+          <h1 id="chest-title">Mystery reward box</h1>
+          <p>
+            Win <strong>$50–$500</strong> Virtual USDC instantly.
+          </p>
           <WelcomeChestBox
             opening={opening}
             amount={revealAmount}
@@ -140,71 +165,51 @@ function RewardsClient() {
           {!chest.opened ? (
             <button
               type="button"
-              className="tp-checkin-btn"
+              className="rw-btn rw-btn-glow"
               onClick={openChest}
               disabled={opening || wallet.restoring}
             >
               {wallet.restoring
                 ? "Connecting…"
                 : !isConnected
-                  ? "Connect Coinbase / Farcaster"
+                  ? "Connect wallet to open"
                   : opening
-                    ? "Opening box…"
+                    ? "Opening…"
                     : priority
                       ? "Open priority box"
-                      : "Open reward box"}
+                      : "Open box"}
             </button>
           ) : (
-            <button
-              type="button"
-              className="tp-checkin-btn"
-              onClick={() => setBurst(null)}
-            >
+            <button type="button" className="rw-btn" onClick={() => setBurst(null)}>
               Continue to daily check-in
             </button>
           )}
         </section>
       ) : null}
 
-      <section className="tp-tac-points" aria-labelledby="tac-title" style={{ marginTop: 20, padding: 16, borderRadius: 20, background: "#171a2e" }}>
-        <h2 id="tac-title" style={{ margin: "0 0 6px", fontSize: 18 }}>TAC Points</h2>
-        <p style={{ margin: "0 0 8px", color: "#d7dce6", fontSize: 14, lineHeight: 1.5 }}>
-          {wallet.restoring
-            ? "Connecting…"
-            : isConnected && auth.ready && !auth.user
-              ? "Verify your wallet to see your TAC Points."
-              : isConnected
-                ? tac.isPending
-                  ? "Loading…"
-                  : tac.isError
-                  ? "TAC Points unavailable right now — no estimate is shown."
-                  : `Your balance: ${tac.data?.balance.toLocaleString("en-US") ?? "—"} TAC Points.`
-              : "Connect a wallet to see your TAC Points."}
-        </p>
-        <p style={{ margin: 0, color: "#9aa3b2", fontSize: 13, lineHeight: 1.5 }}>
-          Points only · No token promised.
-        </p>
-      </section>
-
       {showCheckin ? (
         <>
-          <section className="tp-chest-won" aria-label="Welcome grant">
-            <UsdcCoin size={36} />
+          <section className="rw-won" aria-label="Welcome grant">
+            <UsdcCoin size={34} />
             <div>
               <strong>+${chest.amount ?? 0}</strong>
-              <span>One-time welcome · Virtual USDC</span>
+              <span>Welcome box opened · Virtual USDC</span>
             </div>
             <Sparkles size={18} aria-hidden />
           </section>
 
-          <section className="tp-checkin" aria-labelledby="checkin-title">
-            <div className="tp-checkin-head">
-              <h1 id="checkin-title">Daily check-in</h1>
-              <span>{claimedThrough}/7</span>
+          <section className="rw-card rw-checkin" aria-labelledby="checkin-title">
+            <div className="rw-checkin-head">
+              <div>
+                <h1 id="checkin-title">Daily check-in</h1>
+                <p>Come back every day · rewards grow to $80</p>
+              </div>
+              <span className="rw-ring" style={{ ["--p" as string]: claimedThrough / 7 }}>
+                <b>{claimedThrough}</b>/7
+              </span>
             </div>
-            <p className="tp-checkin-note">Day 1 $20 · then +$10 each day · 7-day ladder</p>
 
-            <ol className="tp-checkin-days">
+            <ol className="rw-days">
               {CHECKIN_DAYS.map((amount, i) => {
                 const day = i + 1;
                 const done = day <= claimedThrough;
@@ -212,58 +217,88 @@ function RewardsClient() {
                 return (
                   <li
                     key={day}
-                    className={done ? "done" : active ? "active" : undefined}
+                    className={`${done ? "done" : active ? "active" : ""} ${day === 7 ? "big" : ""}`}
                     aria-current={active ? "step" : undefined}
                   >
-                    <span className="tp-day-num">
-                      {done ? <Check size={14} strokeWidth={2.5} /> : day}
+                    <span className="rw-day-label">Day {day}</span>
+                    <span className="rw-day-icon">
+                      {done ? (
+                        <Check size={18} strokeWidth={3} />
+                      ) : day === 7 ? (
+                        <Gift size={22} />
+                      ) : (
+                        <UsdcCoin size={22} />
+                      )}
                     </span>
-                    <span className="tp-day-amt">
-                      <UsdcCoin size={12} />${amount}
-                    </span>
+                    <span className="rw-day-amt">${amount}</span>
                   </li>
                 );
               })}
             </ol>
 
             {!ready || wallet.restoring ? (
-              <button type="button" className="tp-checkin-btn" disabled>
+              <button type="button" className="rw-btn" disabled>
                 {wallet.restoring ? "Connecting…" : "…"}
               </button>
             ) : !isConnected ? (
-              <button type="button" className="tp-checkin-btn" onClick={() => login("/rewards")}>
+              <button
+                type="button"
+                className="rw-btn rw-btn-glow"
+                onClick={() => login("/rewards")}
+              >
                 Connect · Day 1 · $20
               </button>
             ) : canClaim ? (
               <button
                 type="button"
-                className="tp-checkin-btn"
+                className="rw-btn rw-btn-glow"
                 disabled={claim.isPending}
                 onClick={() => claim.mutate()}
               >
                 {claim.isPending
                   ? "Confirming…"
-                  : `Claim · Day ${nextDay} · $${status.data?.nextReward ?? 20}`}
+                  : `Claim Day ${nextDay} · $${status.data?.nextReward ?? 20}`}
               </button>
             ) : (
-              <button type="button" className="tp-checkin-btn cool" disabled>
-                Next in {formatCountdown(remaining)}
+              <button type="button" className="rw-btn cool" disabled>
+                Next reward in {formatCountdown(remaining)}
               </button>
             )}
 
             {claim.isError && (
-              <p className="tp-checkin-msg" role="alert">
+              <p className="rw-msg" role="alert">
                 {claim.error instanceof Error ? claim.error.message : "Claim failed"}
               </p>
             )}
             {claim.isSuccess && claim.data?.reward != null && (
-              <p className="tp-checkin-msg ok" role="status">
+              <p className="rw-msg ok" role="status">
                 +${claim.data.reward} Virtual USDC
               </p>
             )}
           </section>
         </>
       ) : null}
+
+      <section className="rw-card rw-tac" aria-labelledby="tac-title">
+        <span className="rw-tac-icon" aria-hidden>
+          <Star size={20} />
+        </span>
+        <div>
+          <h2 id="tac-title">TAC Points</h2>
+          <p>
+            {wallet.restoring
+              ? "Connecting…"
+              : isConnected && auth.ready && !auth.user
+                ? "Verify your wallet to see your TAC Points."
+                : isConnected
+                  ? tac.isError
+                    ? "TAC Points unavailable right now — no estimate is shown."
+                    : `Balance: ${tacText} TAC Points`
+                  : "Connect a wallet to see your TAC Points."}
+          </p>
+          <small>Points only · No token promised.</small>
+        </div>
+      </section>
     </div>
   );
 }

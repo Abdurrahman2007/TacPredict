@@ -27,6 +27,7 @@ import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 import { rememberPaperOpen, runPaperSettleTick } from "@/lib/paper/settle-robot";
+import { useSticky } from "@/lib/ui/use-sticky";
 
 /** Paper settlement tick — ticks while Up/Down home is mounted. New windows are 5 / 30 min; legacy 15 min positions still settle. */
 function PaperSettleRobot() {
@@ -46,6 +47,28 @@ const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "solana", large: true },
   { asset: "bnb", large: true },
 ];
+
+/** World-style shimmer placeholder with the same shape as a live card. */
+export function HomeCardSkeleton() {
+  return (
+    <div className="tp-skel-card" aria-hidden="true">
+      <div className="flex items-center gap-3">
+        <div className="tp-skel" style={{ width: 34, height: 34, borderRadius: 999 }} />
+        <div className="tp-skel" style={{ width: "48%", height: 20 }} />
+        <div className="tp-skel ml-auto" style={{ width: 70, height: 18 }} />
+      </div>
+      <div className="mt-6 flex justify-between gap-4">
+        <div className="tp-skel" style={{ width: "38%", height: 34 }} />
+        <div className="tp-skel" style={{ width: "38%", height: 34 }} />
+      </div>
+      <div className="tp-skel mt-5" style={{ height: 150, borderRadius: 18 }} />
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="tp-skel" style={{ height: 56, borderRadius: 18 }} />
+        <div className="tp-skel" style={{ height: 56, borderRadius: 18 }} />
+      </div>
+    </div>
+  );
+}
 
 function AssetCard({
   asset,
@@ -67,12 +90,15 @@ function AssetCard({
   // Odds use the same Now/Beat the card displays, so the share price never
   // disagrees with the chart above it. Live ticks still flow into the series,
   // and the 1-second clock makes the price move toward 99¢/1¢ as time runs out.
-  const spot = pw.series.at(-1)?.price ?? live.price ?? null;
-  const beat =
-    pw.boundary ??
-    (pw.series.find((p) => p.time >= w.start)?.price ?? null);
+  // Sticky per window: a refetch or socket reconnect must not blink the share price to "—".
+  const windowKey = `${asset}-${minutes}-${w.start}`;
+  const spot = useSticky(pw.series.at(-1)?.price ?? live.price ?? null, windowKey);
+  const beat = useSticky(
+    pw.boundary ?? pw.series.find((p) => p.time >= w.start)?.price ?? null,
+    windowKey,
+  );
   const remainingSec = Math.max(0, (w.end - nowMs) / 1000);
-  const odds = spotShareOdds(spot, beat, minutes, remainingSec);
+  const odds = useSticky(spotShareOdds(spot, beat, minutes, remainingSec), windowKey);
   const ledger = usePaperLedger();
   const marketId = `reference-${asset}-${w.start}-${minutes}`;
   const vol = paperVolumeFor(marketId, ledger.trades);
@@ -159,11 +185,15 @@ export function UpDownSection({
   const nowMs = useNow(Date.parse(snapshotTime) || 0);
   if (!nowMs)
     return (
-      <section className="ud-loading" role="status" aria-label="Loading Up/Down windows">
-        <div className="ud-skeleton ud-skeleton-title" />
+      <section className="mt-5" role="status" aria-label="Loading Up/Down windows">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="tp-skel" style={{ width: 190, height: 24 }} />
+          <div className="tp-skel" style={{ width: 96, height: 40, borderRadius: 999 }} />
+        </div>
+        <div className="tp-skel mb-3" style={{ height: 52, borderRadius: 999 }} />
         <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
-          {CARDS.map(({ asset }) => (
-            <div key={asset} className="ud-skeleton ud-skeleton-chart" />
+          {CARDS.slice(0, 2).map(({ asset }) => (
+            <HomeCardSkeleton key={asset} />
           ))}
         </div>
       </section>
@@ -213,13 +243,7 @@ export function UpDownSection({
       )}
       <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
         {CARDS.map(({ asset, large }) => (
-          <AssetCard
-            key={asset}
-            asset={asset}
-            minutes={minutes}
-            nowMs={nowMs}
-            large={large}
-          />
+          <AssetCard key={asset} asset={asset} minutes={minutes} nowMs={nowMs} large={large} />
         ))}
       </div>
     </section>

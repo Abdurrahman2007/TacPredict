@@ -1,30 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Crown, Trophy } from "lucide-react";
 import { rankingOptions } from "@/lib/ranking/read.functions";
-import {
-  signedMoney,
-  unsignedMoney,
-  isWallet,
-  traderName,
-} from "@/lib/ranking/core.mjs";
+import { signedMoney, unsignedMoney, isWallet, traderName } from "@/lib/ranking/core.mjs";
 import type { RankingTrader } from "@/lib/ranking/core.d.mts";
 import { InitialAvatar } from "@/components/initial-avatar";
-import {
-  demoTrader,
-  isDemoTrader,
-  withDemoRankingRows,
-} from "@/lib/ranking/demo-traders";
+import { demoTrader, isDemoTrader, withDemoRankingRows } from "@/lib/ranking/demo-traders";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import "@/styles/ranking.css";
 import "@/styles/ranking-board.css";
+import "@/styles/ranking-v2.css";
 
 export const Route = createFileRoute("/ranking")({
   head: () => ({ meta: [{ title: "Ranking — TacPredict" }] }),
-  validateSearch: (
-    s: Record<string, unknown>,
-  ): { trader?: string; page?: number } => ({
+  validateSearch: (s: Record<string, unknown>): { trader?: string; page?: number } => ({
     ...(isWallet(s["trader"]) ? { trader: s["trader"].toLowerCase() } : {}),
     page:
       Number.isInteger(Number(s["page"])) && Number(s["page"]) >= 0 && Number(s["page"]) <= 399
@@ -66,6 +56,37 @@ function useMonthCountdown() {
   return monthCountdown(now);
 }
 
+function monthParts(now: number) {
+  const d = new Date(now);
+  const end = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+  const diff = Math.max(0, end - now);
+  return [
+    ["Days", Math.floor(diff / 86400000)],
+    ["Hrs", Math.floor((diff % 86400000) / 3600000)],
+    ["Min", Math.floor((diff % 3600000) / 60000)],
+    ["Sec", Math.floor((diff % 60000) / 1000)],
+  ] as const;
+}
+
+function useNowTick() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now;
+}
+
+const PLACES = ["1st", "2nd", "3rd"] as const;
+
+function atomic(v: string | null | undefined) {
+  try {
+    return v == null ? 0n : BigInt(v);
+  } catch {
+    return 0n;
+  }
+}
+
 function RankingPage() {
   const ready = useSyncExternalStore(
     subscribeHydration,
@@ -93,11 +114,18 @@ function RankingClient() {
     navigate = Route.useNavigate(),
     wallet = useBaseWallet();
   const q = useQuery(
-    rankingOptions({ period: "month", page, trader: s.trader, wallet: wallet.address?.toLowerCase() }),
+    rankingOptions({
+      period: "month",
+      page,
+      trader: s.trader,
+      wallet: wallet.address?.toLowerCase(),
+    }),
   );
   const data = q.data;
   const [tab, setTab] = useState<"positions" | "activity">("positions");
   const countdown = useMonthCountdown();
+  const now = useNowTick();
+  const [metric, setMetric] = useState<"volume" | "pnl">("volume");
   const liveRows = data?.rows ?? [];
   const rows = withDemoRankingRows(liveRows);
   const selected: RankingTrader | null | undefined = s.trader
@@ -105,44 +133,69 @@ function RankingClient() {
       ? demoTrader(s.trader)
       : data?.selected
     : null;
-  const podium = s.trader ? [] : rows.slice(0, 3);
-  const rest = s.trader ? [] : rows.slice(3);
+  const sorted =
+    metric === "volume"
+      ? rows
+      : [...rows].sort((x, y) => {
+          const d = atomic(y.pnlAtomic) - atomic(x.pnlAtomic);
+          return d > 0n ? 1 : d < 0n ? -1 : 0;
+        });
+  const ranked = sorted.map((t, i) => ({
+    ...t,
+    place: metric === "volume" ? (t.rank ?? i + 1) : i + 1,
+  }));
+  const podium = s.trader ? [] : ranked.slice(0, 3);
+  const rest = s.trader ? [] : ranked.slice(3);
+  const top = atomic((metric === "volume" ? ranked[0]?.volumeAtomic : ranked[0]?.pnlAtomic) ?? "0");
 
   return (
-    <section className="tp-lb" aria-labelledby="ranking-title">
-      <header className="tp-lb-head">
+    <section className="tp-lb tp-rk" aria-labelledby="ranking-title">
+      <header className="tp-rk-head">
         <div>
           {s.trader ? (
             <Link to="/ranking" className="tp-lb-back">
               <ArrowLeft size={14} /> Leaderboard
             </Link>
-          ) : null}
+          ) : (
+            <span className="tp-rk-kicker">{monthLabel()}</span>
+          )}
           <h1 id="ranking-title">
-            {s.trader ? (selected?.name ?? traderName(s.trader)) : "Ranking"}
+            {s.trader ? (selected?.name ?? traderName(s.trader)) : "Leaderboard"}
           </h1>
         </div>
+        {!s.trader ? (
+          <span className="tp-rk-trophy" aria-hidden="true">
+            <Trophy size={22} />
+          </span>
+        ) : null}
       </header>
 
       {!s.trader ? (
-        <aside className="tp-lb-pool" aria-label="Monthly reward pool">
-          <div>
-            <span className="tp-lb-pool-kicker">Monthly pool · {monthLabel()}</span>
-            <strong>
-              {MONTHLY_TAC_POOL.toLocaleString("en-US")} <em>TAC</em>
-            </strong>
-            <div className="tp-lb-countdown">Resets in {countdown}</div>
+        <aside className="tp-rk-pool" aria-label="Monthly reward pool">
+          <i className="tp-rk-shine" aria-hidden />
+          <span className="tp-rk-pool-label">Monthly prize pool</span>
+          <strong className="tp-rk-pool-amt">
+            {MONTHLY_TAC_POOL.toLocaleString("en-US")} <em>TAC</em>
+          </strong>
+          <div className="tp-rk-timer" role="timer" aria-label={`Resets in ${countdown}`}>
+            {monthParts(now).map(([label, value]) => (
+              <span key={label}>
+                <b>{String(value).padStart(2, "0")}</b>
+                <small>{label}</small>
+              </span>
+            ))}
           </div>
-          <div className="tp-lb-pool-badge" aria-hidden="true">
-            <Trophy size={26} aria-hidden="true" />
-            <span>200K</span>
-          </div>
+          <p className="tp-rk-pool-note">Points only · Ranked by monthly volume</p>
         </aside>
       ) : null}
 
       {q.isPending && !s.trader ? (
-        <p className="tp-lb-empty" role="status">
-          Loading ranking…
-        </p>
+        <div className="tp-rk-loading" role="status" aria-label="Loading ranking">
+          <div className="tp-skel" style={{ height: 210, borderRadius: 24 }} />
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="tp-skel" style={{ height: 64, borderRadius: 18 }} />
+          ))}
+        </div>
       ) : s.trader ? (
         <>
           <div className="tp-lb-hero">
@@ -160,7 +213,9 @@ function RankingClient() {
                   </a>
                 </small>
               ) : (
-                <small>{s.trader.slice(0, 6)}…{s.trader.slice(-4)}</small>
+                <small>
+                  {s.trader.slice(0, 6)}…{s.trader.slice(-4)}
+                </small>
               )}
             </div>
           </div>
@@ -206,9 +261,7 @@ function RankingClient() {
                       <strong>{p.title}</strong>
                       <small>{p.settled ? "Settled" : "Open"}</small>
                     </span>
-                    <strong>
-                      {(BigInt(p.sharesAtomic) / 1000000n).toLocaleString()} shares
-                    </strong>
+                    <strong>{(BigInt(p.sharesAtomic) / 1000000n).toLocaleString()} shares</strong>
                   </div>
                 ))}
               </div>
@@ -235,67 +288,108 @@ function RankingClient() {
         </>
       ) : (
         <>
-          {wallet.address && data?.self && (
-            <Link
-              to="/ranking"
-              search={{ trader: wallet.address.toLowerCase() }}
-              className="tp-lb-self"
-            >
-              <span className="tp-lb-rank">{data?.self?.rank ?? "—"}</span>
-              <InitialAvatar seed={wallet.address} size={40} label="You" />
-              <span className="tp-lb-who">
-                <strong>You</strong>
-              </span>
-              <span className="tp-lb-money">
-                <span>{data?.self ? unsignedMoney(data.self.volumeAtomic) : "—"}</span>
-                <small className={data?.self ? pnlClass(data.self.pnlAtomic) : ""}>
-                  {data?.self ? signedMoney(data.self.pnlAtomic) : "—"}
-                </small>
-              </span>
-            </Link>
-          )}
+          <div className="tp-seg tp-rk-seg" role="tablist" aria-label="Rank by">
+            {(["volume", "pnl"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={metric === m}
+                className={metric === m ? "on" : undefined}
+                onClick={() => setMetric(m)}
+              >
+                {m === "volume" ? "Volume" : "Profit"}
+              </button>
+            ))}
+            <i className="tp-seg-thumb" data-pos={metric === "volume" ? 0 : 1} aria-hidden />
+          </div>
 
           {podium.length > 0 ? (
-            <div className="tp-lb-podium" aria-label="Top 3 traders">
-              {podium.map((t) => (
-                <Link
-                  to="/ranking"
-                  search={{ trader: t.wallet }}
-                  key={t.wallet}
-                  className={`tp-lb-podium-card rank-${t.rank ?? 0}`}
-                >
-                  <span className="tp-lb-medal">{t.rank ?? "—"}</span>
-                  <InitialAvatar seed={t.wallet} size={t.rank === 1 ? 48 : 40} label={t.name} />
-                  <strong>{t.name}</strong>
-                  <span className="tp-lb-podium-vol">{unsignedMoney(t.volumeAtomic)}</span>
-                  <span className={`tp-lb-pnl ${pnlClass(t.pnlAtomic)}`}>
-                    {signedMoney(t.pnlAtomic)}
-                  </span>
-                </Link>
-              ))}
+            <div className="tp-rk-podium" aria-label="Top 3 traders" key={metric}>
+              {[podium[1], podium[0], podium[2]].map((t, i) =>
+                t ? (
+                  <Link
+                    to="/ranking"
+                    search={{ trader: t.wallet }}
+                    key={t.wallet}
+                    className={`tp-rk-step place-${t.place}`}
+                    style={{ ["--d" as string]: `${[1, 0, 2][i]! * 90}ms` }}
+                  >
+                    <span className="tp-rk-avatar">
+                      {t.place === 1 ? (
+                        <Crown className="tp-rk-crown" size={22} aria-hidden />
+                      ) : null}
+                      <InitialAvatar
+                        seed={t.wallet}
+                        size={t.place === 1 ? 64 : 52}
+                        label={t.name}
+                      />
+                      <span className="tp-rk-badge">{t.place}</span>
+                    </span>
+                    <strong>{t.name}</strong>
+                    <span className="tp-rk-val">
+                      {metric === "volume"
+                        ? unsignedMoney(t.volumeAtomic)
+                        : signedMoney(t.pnlAtomic)}
+                    </span>
+                    <span className="tp-rk-block">
+                      <b>{t.place}</b>
+                      <small>{PLACES[(t.place ?? 1) - 1] ?? ""}</small>
+                    </span>
+                  </Link>
+                ) : (
+                  <span key={i} />
+                ),
+              )}
             </div>
           ) : null}
 
-          <div className="tp-lb-list">
-            {rest.map((t) => (
-              <Link
-                to="/ranking"
-                search={{ trader: t.wallet }}
-                key={t.wallet}
-                className="tp-lb-row"
-              >
-                <span className="tp-lb-rank">{t.rank ?? "—"}</span>
-                <InitialAvatar seed={t.wallet} size={40} label={t.name} />
-                <span className="tp-lb-who">
-                  <strong>{t.name}</strong>
-                </span>
-                <span className="tp-lb-money">
-                  <span>{unsignedMoney(t.volumeAtomic)}</span>
-                  <small className={pnlClass(t.pnlAtomic)}>{signedMoney(t.pnlAtomic)}</small>
-                </span>
-              </Link>
-            ))}
-          </div>
+          <ol className="tp-rk-list" key={`list-${metric}`}>
+            {rest.map((t, i) => {
+              const v = atomic(metric === "volume" ? t.volumeAtomic : t.pnlAtomic);
+              const pct =
+                top > 0n && v > 0n ? Math.max(4, Math.min(100, Number((v * 100n) / top))) : 4;
+              return (
+                <li key={t.wallet} style={{ ["--d" as string]: `${Math.min(i, 10) * 35}ms` }}>
+                  <Link to="/ranking" search={{ trader: t.wallet }} className="tp-rk-row">
+                    <span className="tp-rk-num">{t.place}</span>
+                    <InitialAvatar seed={t.wallet} size={40} label={t.name} />
+                    <span className="tp-rk-who">
+                      <strong>{t.name}</strong>
+                      <span className="tp-rk-bar" aria-hidden>
+                        <i style={{ transform: `scaleX(${pct / 100})` }} />
+                      </span>
+                    </span>
+                    <span className="tp-rk-money">
+                      <b>{unsignedMoney(t.volumeAtomic)}</b>
+                      <small className={pnlClass(t.pnlAtomic)}>{signedMoney(t.pnlAtomic)}</small>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+
+          {wallet.address && data?.self ? (
+            <Link
+              to="/ranking"
+              search={{ trader: wallet.address.toLowerCase() }}
+              className="tp-rk-you"
+            >
+              <span className="tp-rk-num">{data.self.rank ?? "—"}</span>
+              <InitialAvatar seed={wallet.address} size={40} label="You" />
+              <span className="tp-rk-who">
+                <strong>You</strong>
+                <small>Keep trading to climb</small>
+              </span>
+              <span className="tp-rk-money">
+                <b>{unsignedMoney(data.self.volumeAtomic)}</b>
+                <small className={pnlClass(data.self.pnlAtomic)}>
+                  {signedMoney(data.self.pnlAtomic)}
+                </small>
+              </span>
+            </Link>
+          ) : null}
 
           {data && data.total > 0 && (
             <nav className="tp-lb-paging" aria-label="Ranking pages">

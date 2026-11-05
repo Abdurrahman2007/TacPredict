@@ -85,7 +85,12 @@ export function referenceObservation(points, boundary, now) {
 /** Price chart context is independent of the prediction duration; retain actual timestamps. */
 export function referenceChartView(points, selected, now) {
   const end = Math.min(selected.end, now);
-  const start = Math.min(selected.start, end - 30 * 60000);
+  // Show some history before the window, but let the live part grow to fill the chart:
+  // early in a window the past dominates, later the live trade takes most of the width.
+  const elapsed = Math.max(0, end - selected.start);
+  const minutes = Math.max(1, Number(selected.minutes) || (selected.end - selected.start) / 60000);
+  const span = Math.max(elapsed * 1.6, Math.min(minutes, 30) * 60000);
+  const start = Math.min(selected.start, end - span);
   const series = chartWindow(points, start, end);
   const first = series[0],
     last = series.at(-1);

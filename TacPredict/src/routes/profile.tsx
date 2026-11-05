@@ -9,6 +9,10 @@ import {
   EyeOff,
   RefreshCw,
   Wallet,
+  BarChart3,
+  Star,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
@@ -17,6 +21,7 @@ import { usePaperLedger, type PaperPosition } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
 import "@/styles/portfolio-reference.css";
 import "@/styles/portfolio-paper.css";
+import "@/styles/portfolio-v2.css";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -70,10 +75,12 @@ function PortfolioPage() {
   const totalVolume = disconnected
     ? 0
     : ledger.trades.reduce((sum, t) => sum + Math.abs(t.usdc), 0);
-  const sells = useMemo(
-    () => ledger.trades.filter((t) => t.kind === "sell"),
-    [ledger.trades],
-  );
+  const sells = useMemo(() => ledger.trades.filter((t) => t.kind === "sell"), [ledger.trades]);
+
+  const wins = sells.filter((t) => (t.realizedPnl ?? 0) > 0).length;
+  const winRate =
+    disconnected || sells.length === 0 ? null : Math.round((wins / sells.length) * 100);
+  const pnlTone = realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined;
 
   async function copyAddress() {
     if (!wallet.address) {
@@ -92,109 +99,139 @@ function PortfolioPage() {
   }
 
   return (
-    <main className="tp-world-port">
-      <header className="tp-wp-head">
+    <main className="tp-world-port pf">
+      <header className="pf-head">
         <div>
           <h1>Portfolio</h1>
-          <div className="tp-wp-wallet">
-            <Wallet size={14} aria-hidden />
-            <span>
-              {disconnected
-                ? "Not connected"
-                : `${wallet.address!.slice(0, 6)}…${wallet.address!.slice(-4)}`}
-            </span>
-            {!disconnected && (
-              <button type="button" onClick={() => void copyAddress()} aria-label="Copy wallet">
-                <Copy size={13} />
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="tp-wp-tools">
           <button
             type="button"
-            className="tp-wp-icon"
+            className="pf-wallet"
+            onClick={() => void copyAddress()}
+            aria-label={disconnected ? "Connect wallet" : "Copy wallet address"}
+          >
+            <Wallet size={13} aria-hidden />
+            {disconnected
+              ? wallet.restoring
+                ? "Connecting…"
+                : "Not connected"
+              : `${wallet.address!.slice(0, 6)}…${wallet.address!.slice(-4)}`}
+            {!disconnected && <Copy size={12} aria-hidden />}
+          </button>
+        </div>
+        <div className="pf-tools">
+          <button
+            type="button"
+            className="pf-icon"
             onClick={() => setHidden(!hidden)}
             aria-label={hidden ? "Show balances" : "Hide balances"}
             aria-pressed={hidden}
           >
-            {hidden ? <EyeOff size={17} /> : <Eye size={17} />}
+            {hidden ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
-          <button type="button" className="tp-wp-icon" aria-label="Refresh" disabled>
-            <RefreshCw size={16} />
+          <button
+            type="button"
+            className="pf-icon"
+            aria-label="Refresh"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshCw size={17} />
           </button>
         </div>
       </header>
 
-      <section className="tp-wp-available" aria-label="Available to trade">
-        <span>Available</span>
-        <strong>{money(available, hidden)}</strong>
-        <div className="tp-wp-actions">
+      <section className="pf-hero" aria-label="Portfolio value">
+        <i className="pf-hero-orb" aria-hidden />
+        <span className="pf-label">Total equity</span>
+        <strong className="pf-equity">{money(equity, hidden)}</strong>
+        <span className={`pf-pnl-pill ${pnlTone ?? ""}`}>
+          <TrendingUp size={13} aria-hidden /> {signedMoney(realized, hidden)} realized
+        </span>
+        <div className="pf-split">
+          <div>
+            <small>Available</small>
+            <b>{money(available, hidden)}</b>
+          </div>
+          <div>
+            <small>In positions</small>
+            <b>{money(disconnected ? 0 : positionValue, hidden)}</b>
+          </div>
+        </div>
+        <div className="pf-actions">
           {showConnect ? (
-            <button type="button" className="tp-wp-primary" onClick={() => void access.run()}>
+            <button type="button" className="pf-primary" onClick={() => void access.run()}>
               Connect wallet
             </button>
           ) : disconnected ? (
-            <button type="button" className="tp-wp-primary" disabled>
+            <button type="button" className="pf-primary" disabled>
               Connecting…
             </button>
           ) : (
-            <Link to="/rewards" className="tp-wp-primary">
+            <Link to="/rewards" className="pf-primary">
               Get Virtual USDC
             </Link>
           )}
-          <Link to="/" className="tp-wp-secondary">
+          <Link to="/" className="pf-secondary">
             Trade
           </Link>
         </div>
       </section>
 
-      <section className="tp-wp-stats" aria-label="Portfolio totals">
-        <div className="tp-wp-stat">
-          <span>Total volume</span>
-          <strong>{money(totalVolume, hidden)}</strong>
+      <section className="pf-stats" aria-label="Portfolio totals">
+        <div>
+          <span className="pf-stat-icon blue">
+            <BarChart3 size={16} />
+          </span>
+          <small>Volume</small>
+          <b>{money(totalVolume, hidden)}</b>
         </div>
-        <div className="tp-wp-stat">
-          <span>PnL</span>
-          <strong className={realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined}>
-            {signedMoney(realized, hidden)}
-          </strong>
+        <div>
+          <span className="pf-stat-icon green">
+            <TrendingUp size={16} />
+          </span>
+          <small>Profit/Loss</small>
+          <b className={pnlTone}>{signedMoney(realized, hidden)}</b>
         </div>
-        <div className="tp-wp-stat">
-          <span>TAC Points</span>
-          <strong>
+        <div>
+          <span className="pf-stat-icon orange">
+            <Target size={16} />
+          </span>
+          <small>Win rate</small>
+          <b>{hidden ? "••••" : winRate == null ? "0%" : `${winRate}%`}</b>
+        </div>
+        <div>
+          <span className="pf-stat-icon purple">
+            <Star size={16} />
+          </span>
+          <small>TAC Points</small>
+          <b>
             {hidden
               ? "••••"
               : disconnected || tac.isPending || tac.isError
                 ? "0"
                 : (tac.data?.balance.toLocaleString("en-US") ?? "0")}
-          </strong>
-        </div>
-        <div className="tp-wp-stat">
-          <span>Onchain</span>
-          <strong>{money(0, hidden)}</strong>
+          </b>
         </div>
       </section>
 
-      <section className="tp-wp-pl" aria-label="Profit and loss">
-        <div className="tp-wp-pl-row">
-          <h2>Profit/Loss</h2>
-          <strong className={realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined}>
-            {signedMoney(realized, hidden)}
-          </strong>
-        </div>
-        <div className="tp-wp-periods" role="group" aria-label="Period">
-          {(Object.keys(periods) as (keyof typeof periods)[]).map((p) => (
-            <button
-              key={p}
-              type="button"
-              className={range === p ? "on" : undefined}
-              aria-pressed={range === p}
-              onClick={() => setRange(p)}
-            >
-              {p}
-            </button>
-          ))}
+      <section className="pf-card pf-chart" aria-label="Profit and loss">
+        <div className="pf-card-head">
+          <div>
+            <h2>Profit/Loss</h2>
+            <strong className={pnlTone}>{signedMoney(realized, hidden)}</strong>
+          </div>
+          <div className="pf-periods" role="group" aria-label="Period">
+            {(Object.keys(periods) as (keyof typeof periods)[]).map((p) => (
+              <button
+                key={p}
+                type="button"
+                className={range === p ? "on" : undefined}
+                aria-pressed={range === p}
+                onClick={() => setRange(p)}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
         <PortfolioPerformanceChart
           key={range}
@@ -203,134 +240,115 @@ function PortfolioPage() {
           hidden={hidden}
           period={periods[range]}
         />
-        <p className="tp-wp-equity">
-          Equity {money(equity, hidden)}
-          {!disconnected && positionValue > 0 ? (
-            <span> · Positions {money(positionValue, hidden)}</span>
-          ) : null}
-          <span> · Realized {signedMoney(realized, hidden)}</span>
-        </p>
       </section>
 
-      <section className="tp-wp-holdings" aria-label="Holdings">
-        <div className="tp-wp-tabs" role="group">
-          <button
-            type="button"
-            aria-pressed={tab === "positions"}
-            onClick={() => setTab("positions")}
-          >
-            Positions
-          </button>
-          <button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>
-            History
-          </button>
+      <section className="pf-card pf-holdings" aria-label="Holdings">
+        <div className="tp-seg" role="tablist">
+          {(["positions", "history"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              className={tab === t ? "on" : undefined}
+              onClick={() => setTab(t)}
+            >
+              {t === "positions" ? "Positions" : "History"}
+              {t === "positions" && !disconnected && ledger.positions.length > 0 ? (
+                <em>{ledger.positions.length}</em>
+              ) : null}
+            </button>
+          ))}
+          <i className="tp-seg-thumb" data-pos={tab === "positions" ? 0 : 1} aria-hidden />
         </div>
 
         {tab === "positions" ? (
           ledger.positions.length === 0 || disconnected ? (
-            <div className="tp-wp-empty">
-              <p>No positions</p>
-              <div className="tp-wp-total">
-                <span>Total</span>
-                <b>{money(0, hidden)}</b>
-                <Link to="/up-down" aria-label="Trade crypto Up/Down">
-                  Trade <ChevronRight size={16} />
-                </Link>
-              </div>
+            <div className="pf-empty">
+              <span className="pf-empty-icon" aria-hidden>
+                <BarChart3 size={24} />
+              </span>
+              <p>No open positions</p>
+              <Link to="/" className="pf-secondary">
+                Start trading <ChevronRight size={16} />
+              </Link>
             </div>
           ) : (
-            <>
-              <ul className="tp-wp-list">
-                {ledger.positions.map((p) => {
-                  const cost = p.shares * p.avgCost;
-                  const maxWin = p.shares;
-                  return (
-                    <li key={p.id}>
-                      <div>
-                        <strong>{p.title}</strong>
-                        <small>
-                          {p.side} · {p.shares.toFixed(2)} sh · {(p.avgCost * 100).toFixed(0)}¢ ·
-                          to win {money(maxWin, hidden)}
-                        </small>
-                      </div>
-                      <b>
-                        {money(cost, hidden)}
-                        <small
-                          style={{
-                            display: "block",
-                            fontWeight: 600,
-                            color: "#6dce95",
-                            fontSize: 12,
-                          }}
-                        >
-                          {signedMoney(maxWin - cost, hidden)} if win
-                        </small>
-                      </b>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="tp-wp-total">
-                <span>Total</span>
-                <b>{money(positionValue, hidden)}</b>
-                <Link to="/up-down" aria-label="Trade crypto Up/Down">
-                  Trade <ChevronRight size={16} />
-                </Link>
-              </div>
-            </>
+            <ul className="tp-pos-list">
+              {ledger.positions.map((p) => {
+                const cost = p.shares * p.avgCost;
+                const maxWin = p.shares;
+                return (
+                  <li key={p.id} className="tp-pos-row tp-pos-hist">
+                    <span className="tp-pos-side" data-side={p.side}>
+                      {p.side}
+                    </span>
+                    <span className="tp-pos-main">
+                      <strong>{p.title}</strong>
+                      <small>
+                        {p.shares.toFixed(2)} sh · avg {(p.avgCost * 100).toFixed(0)}¢
+                      </small>
+                    </span>
+                    <span className="tp-pos-val">
+                      <b>{money(cost, hidden)}</b>
+                      <small className="tp-pnl-pos">
+                        {signedMoney(maxWin - cost, hidden)} if win
+                      </small>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           )
         ) : ledger.trades.length === 0 || disconnected ? (
-          <div className="tp-wp-empty">
-            <p>No history</p>
-            <div className="tp-wp-total">
-              <span>Total</span>
-              <b>{money(0, hidden)}</b>
-            </div>
+          <div className="pf-empty">
+            <span className="pf-empty-icon" aria-hidden>
+              <RefreshCw size={22} />
+            </span>
+            <p>No trades yet</p>
           </div>
         ) : (
-          <>
-            <ul className="tp-wp-list">
-              {ledger.trades.slice(0, 40).map((t) => (
-                <li key={t.id}>
-                  <div>
-                    <strong>
-                      {t.kind === "buy" ? "Buy" : "Sell"} {t.side}
-                    </strong>
-                    <small>
-                      {t.title} · {t.shares.toFixed(2)} sh @ {t.priceCents.toFixed(0)}¢
-                      {t.realizedPnl != null
-                        ? ` · PnL ${signedMoney(t.realizedPnl, false)}`
-                        : ""}
-                    </small>
-                  </div>
+          <ul className="tp-pos-list">
+            {ledger.trades.slice(0, 40).map((t) => (
+              <li key={t.id} className="tp-pos-row tp-pos-hist">
+                <span className="tp-pos-side" data-side={t.side} data-kind={t.kind}>
+                  {t.kind === "buy" ? "Buy" : "Sell"}
+                </span>
+                <span className="tp-pos-main">
+                  <strong>{t.title}</strong>
+                  <small>
+                    {t.side} · {t.shares.toFixed(2)} sh @ {t.priceCents.toFixed(0)}¢
+                  </small>
+                </span>
+                <span className="tp-pos-val">
                   <b>{money(t.usdc, hidden)}</b>
-                </li>
-              ))}
-            </ul>
-            <div className="tp-wp-total">
-              <span>Realized P&amp;L</span>
-              <b className={realized >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}>
-                {signedMoney(realized, hidden)}
-              </b>
-            </div>
-          </>
+                  {t.realizedPnl != null ? (
+                    <small className={t.realizedPnl >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}>
+                      {signedMoney(t.realizedPnl, hidden)}
+                    </small>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
+        <div className="tp-pos-foot">
+          <span>
+            {tab === "positions" ? "Total" : "Realized P&L"}{" "}
+            <b className={tab === "history" ? pnlTone : undefined}>
+              {tab === "positions"
+                ? money(disconnected ? 0 : positionValue, hidden)
+                : signedMoney(realized, hidden)}
+            </b>
+          </span>
+          <Link to="/up-down" className="tp-pos-all">
+            Trade ↗
+          </Link>
+        </div>
       </section>
 
-      {showConnect && (
-        <button type="button" className="tp-wp-connect" onClick={() => void access.run()}>
-          Connect wallet
-          <ArrowUpRight size={16} />
-        </button>
-      )}
-      {disconnected && !showConnect && (
-        <button type="button" className="tp-wp-connect" disabled>
-          Connecting…
-        </button>
-      )}
-
       {notice ? (
-        <p className="tp-wp-notice" role="status">
+        <p className="pf-notice" role="status">
           {notice}
         </p>
       ) : null}
