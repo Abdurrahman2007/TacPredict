@@ -62,6 +62,15 @@
   display: grid;
   gap: 6px;
   margin-bottom: 22px;
+  padding: 22px 20px 20px;
+  border-radius: 26px;
+  border: 1px solid #ffffff1f;
+  background:
+    radial-gradient(120% 160% at 85% 0%, #2f6df655 0%, transparent 55%),
+    linear-gradient(160deg, #1d2438 0%, #141a2c 60%, #101623 100%);
+  box-shadow:
+    0 18px 40px #00000055,
+    inset 0 1px 0 #ffffff22;
 }
 .tp-wp-available > span {
   color: #9aabb6;
@@ -69,10 +78,39 @@
   font-weight: 600;
 }
 .tp-wp-available strong {
-  font-size: clamp(36px, 8vw, 48px);
-  font-weight: 650;
+  font-size: clamp(44px, 11vw, 58px);
+  font-weight: 750;
   letter-spacing: -0.05em;
   line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+/* Premium 2x2 stats grid: numbers first, no helper text. */
+.tp-wp-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.tp-wp-stat {
+  display: grid;
+  gap: 6px;
+  padding: 18px 16px;
+  border-radius: 22px;
+  border: 1px solid #ffffff14;
+  background:
+    radial-gradient(140% 140% at 90% 0%, #2f6df633 0%, transparent 55%),
+    linear-gradient(165deg, #1b2236 0%, #151b2e 100%);
+  box-shadow: 0 12px 28px #00000040;
+}
+.tp-wp-stat > span {
+  color: #9aa3b2;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tp-wp-stat strong {
+  font-size: 30px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 .tp-wp-available small {

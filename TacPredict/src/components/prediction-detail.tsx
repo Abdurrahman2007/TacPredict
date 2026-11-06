@@ -125,8 +125,8 @@ export function PredictionDetail({
   const total = positions.reduce((n, p) => n + BigInt(p.valueAtomic ?? "0"), 0n);
   return (
     <div className="pd-page animate-enter">
-      <Link to="/markets" className="pd-back">
-        <ArrowLeft size={17} /> Markets
+      <Link to="/" className="pd-back">
+        <ArrowLeft size={17} /> Home
       </Link>
       {mounted &&
         createPortal(
@@ -275,7 +275,7 @@ export function PredictionDetail({
               ],
               [
                 "Traders",
-                String(market.virtual ? market.participants : (market.native?.traders ?? 0)),
+                String(market.virtual ? market.participants : (market.native?.traders ?? "—")),
               ],
             ].map(([label, value]) => (
               <div className="pd-stat" key={label}>

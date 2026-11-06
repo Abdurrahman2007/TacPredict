@@ -9,7 +9,7 @@ const wallet = z
   .transform((v) => v.toLowerCase());
 const input = z
   .object({
-    period: z.enum(["1d", "7d", "30d", "all"]).default("30d"),
+    period: z.enum(["1d", "7d", "30d", "all", "month"]).default("month"),
     page: z.number().int().min(0).max(399).default(0),
     trader: wallet.optional(),
     wallet: wallet.optional(),
@@ -53,7 +53,7 @@ export const rankingOptions = (data: z.input<typeof input>) =>
     refetchInterval: 60000,
     retry: 0,
   });
-export const adminRankingOptions = (period: "1d" | "7d" | "30d" | "all") =>
+export const adminRankingOptions = (period: "1d" | "7d" | "30d" | "all" | "month") =>
   queryOptions({
     queryKey: ["admin-ranking", period],
     queryFn: () => getAdminRanking({ data: { period, page: 0 } }),

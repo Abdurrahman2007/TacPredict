@@ -26,6 +26,7 @@ export const spotWindowQueryOptions = (asset: UpDownAsset, minutes: number, refe
   queryOptions({
     queryKey: ["spot-window", asset, minutes],
     queryFn: () => getSpotWindowData({ data: { asset, minutes } }),
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === asset ? prev : undefined),
     staleTime: 2000,
     refetchInterval: refetchMs,
     refetchIntervalInBackground: false,
@@ -58,6 +59,9 @@ export const referenceWindowQueryOptions = (asset: UpDownAsset, minutes: number)
   queryOptions({
     queryKey: ["reference-window", asset, minutes],
     queryFn: () => getReferenceWindowData({ data: { asset, minutes } }),
+    // A longer look-back is a new key; keep showing this asset's real candles meanwhile so
+    // prices and share odds never blink to "—" during the refetch.
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === asset ? prev : undefined),
     staleTime: 20000,
     refetchInterval: 20000,
     refetchIntervalInBackground: false,

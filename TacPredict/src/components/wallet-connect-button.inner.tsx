@@ -1,4 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
@@ -16,6 +17,12 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
   const balance = virtualMoney(virtual.data?.balance);
   const access = useWalletAccess();
   const needsVerify = access.state === "verify";
+  // Wagmi is the authority on connection state. RainbowKit's `account`
+  // is null while wagmi is still reconnecting a stored connection, so
+  // trusting it alone shows a clickable "Connect Wallet" to someone who
+  // is already connected. Only a definitive "disconnected" may show it.
+  const { status: wagmiStatus } = useAccount();
+  const wagmiRestoring = wagmiStatus === "reconnecting" || wagmiStatus === "connecting";
 
   return (
     <ConnectButton.Custom>
@@ -48,6 +55,14 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
             })}
           >
             {(() => {
+              if (wagmiRestoring) {
+                return (
+                  <span
+                    aria-label="Wallet loading"
+                    className="inline-flex h-10 w-[148px] items-center justify-center rounded-full bg-white/20 animate-pulse"
+                  />
+                );
+              }
               if (!connected) {
                 return (
                   <button
@@ -96,7 +111,7 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                   <button
                     type="button"
                     onClick={needsVerify ? () => void access.run() : openAccountModal}
-                    className="app-account-button inline-flex h-11 max-w-[180px] items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary"
+                    className="app-account-button inline-flex h-10 max-w-[168px] shrink-0 items-center gap-2 rounded-full border border-white/10 bg-card px-3 text-left text-foreground shadow-sm hover:bg-secondary sm:max-w-[180px]"
                     aria-label={
                       needsVerify
                         ? `Wallet ${account.address}, tap to verify`
@@ -108,13 +123,23 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                     </span>
                     <span className="min-w-0 text-left">
                       <span className="block truncate text-xs font-semibold tabular-nums">
-                        {needsVerify
-                          ? access.busy
-                            ? "Waiting for wallet…"
-                            : access.error
-                              ? "Tap to retry"
-                              : "Tap to verify"
-                          : `${balance} Virtual USDC`}
+                        {needsVerify ? (
+                          access.busy ? (
+                            "Waiting…"
+                          ) : access.error ? (
+                            <>
+                              <span className="hidden sm:inline">Tap to retry</span>
+                              <span className="sm:hidden">Retry</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="hidden sm:inline">Tap to verify</span>
+                              <span className="sm:hidden">Verify</span>
+                            </>
+                          )
+                        ) : (
+                          `${balance} Virtual USDC`
+                        )}
                       </span>
                       <span className="block truncate font-mono text-[10px] font-normal text-muted-foreground">
                         {shortenAddress(account.address)}

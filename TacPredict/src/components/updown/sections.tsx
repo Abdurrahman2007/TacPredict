@@ -93,17 +93,27 @@ function MyPositions({ market }: { market: Market }) {
   );
 }
 
+function signed(n: number) {
+  return `${n >= 0 ? "+" : "−"}$${Math.abs(n).toFixed(2)}`;
+}
+
+/** iOS-style positions & history card with a one-tap (confirm) Sell on each open position. */
 function PaperPositionsBlock({
   marketId,
   upCents,
   downCents,
+  tradingAllowed = true,
 }: {
   marketId: string;
   upCents: number | null;
   downCents: number | null;
+  tradingAllowed?: boolean;
 }) {
   const [tab, setTab] = useState<"positions" | "history">("positions");
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
   const ledger = usePaperLedger();
+  const zone = useTimeZone();
   const open = ledger.positions.filter((p) => p.marketId === marketId);
   const history = ledger.trades.filter((t) => t.marketId === marketId).slice(0, 20);
   const markOf = (side: "Up" | "Down") => (side === "Up" ? upCents : downCents);
@@ -117,74 +127,122 @@ function PaperPositionsBlock({
     return sum + (p.shares * (c / 100) - p.shares * p.avgCost);
   }, 0);
 
+  function sell(id: string, cents: number) {
+    if (confirm !== id) {
+      setConfirm(id);
+      window.setTimeout(() => setConfirm((c) => (c === id ? null : c)), 3000);
+      return;
+    }
+    setConfirm(null);
+    const res = ledger.sell(id, cents);
+    setNotice(res.ok ? `Sold · PnL ${signed(res.pnl)}` : res.message);
+    window.setTimeout(() => setNotice(""), 2600);
+  }
+
   return (
-    <section className="ud-card" aria-label="Your positions">
-      <div className="ud-tabs" role="group">
+    <section className="ud-card tp-pos-card" aria-label="Your positions">
+      <div className="tp-seg" role="tablist">
         {(["positions", "history"] as const).map((t) => (
-          <button key={t} type="button" aria-pressed={tab === t} onClick={() => setTab(t)}>
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            aria-selected={tab === t}
+            className={tab === t ? "on" : undefined}
+            onClick={() => setTab(t)}
+          >
             {t === "positions" ? "Positions" : "History"}
+            {t === "positions" && open.length > 0 ? <em>{open.length}</em> : null}
           </button>
         ))}
+        <i className="tp-seg-thumb" data-pos={tab === "positions" ? 0 : 1} aria-hidden />
       </div>
       {tab === "positions" ? (
         open.length === 0 ? (
-          <p className="ud-muted">No positions</p>
+          <p className="tp-pos-empty">No positions yet</p>
         ) : (
-          open.map((p) => {
-            const c = markOf(p.side);
-            const mark = c != null ? p.shares * (c / 100) : p.shares * p.avgCost;
-            const pnl = c != null ? mark - p.shares * p.avgCost : null;
-            return (
-              <div className="ud-row" key={p.id}>
-                <span>
-                  {p.side} · {p.shares.toFixed(2)} sh
-                  {pnl != null ? (
-                    <small style={{ display: "block", color: pnl >= 0 ? "#6dce95" : "#ff7b7b" }}>
-                      PnL {pnl >= 0 ? "+" : "−"}${Math.abs(pnl).toFixed(2)}
+          <ul className="tp-pos-list">
+            {open.map((p) => {
+              const c = markOf(p.side);
+              const cost = p.shares * p.avgCost;
+              const mark = c != null ? p.shares * (c / 100) : cost;
+              const pnl = c != null ? mark - cost : null;
+              const pct = pnl != null && cost > 0 ? (pnl / cost) * 100 : null;
+              return (
+                <li key={p.id} className="tp-pos-row">
+                  <span className="tp-pos-side" data-side={p.side}>
+                    {p.side}
+                  </span>
+                  <span className="tp-pos-main">
+                    <strong>{p.shares.toFixed(2)} shares</strong>
+                    <small>
+                      Avg {(p.avgCost * 100).toFixed(0)}¢
+                      {c != null ? ` · Now ${Math.round(c)}¢` : ""}
                     </small>
-                  ) : null}
-                </span>
-                <i />
-                <span className="tabular-nums">${mark.toFixed(2)}</span>
-              </div>
-            );
-          })
+                  </span>
+                  <span className="tp-pos-val">
+                    <b>${mark.toFixed(2)}</b>
+                    {pnl != null ? (
+                      <small className={pnl >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}>
+                        {signed(pnl)}
+                        {pct != null ? ` (${pct >= 0 ? "+" : ""}${pct.toFixed(0)}%)` : ""}
+                      </small>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    className="tp-pos-sell"
+                    data-confirm={confirm === p.id || undefined}
+                    disabled={!tradingAllowed || c == null}
+                    onClick={() => c != null && sell(p.id, c)}
+                  >
+                    {confirm === p.id ? "Confirm" : `Sell${c != null ? ` ${Math.round(c)}¢` : ""}`}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         )
       ) : history.length === 0 ? (
-        <p className="ud-muted">No history</p>
+        <p className="tp-pos-empty">No history yet</p>
       ) : (
-        history.map((t) => (
-          <div className="ud-row" key={t.id}>
-            <span>
-              {t.kind} {t.side}
-              {t.realizedPnl != null ? (
-                <small
-                  style={{
-                    display: "block",
-                    color: t.realizedPnl >= 0 ? "#6dce95" : "#ff7b7b",
-                  }}
-                >
-                  PnL {t.realizedPnl >= 0 ? "+" : "−"}${Math.abs(t.realizedPnl).toFixed(2)}
-                </small>
-              ) : null}
-            </span>
-            <i />
-            <span className="tabular-nums">${t.usdc.toFixed(2)}</span>
-          </div>
-        ))
+        <ul className="tp-pos-list">
+          {history.map((t) => (
+            <li key={t.id} className="tp-pos-row tp-pos-hist">
+              <span className="tp-pos-side" data-side={t.side} data-kind={t.kind}>
+                {t.kind === "buy" ? "Buy" : "Sell"}
+              </span>
+              <span className="tp-pos-main">
+                <strong>
+                  {t.side} · {t.shares.toFixed(2)} sh @ {t.priceCents.toFixed(0)}¢
+                </strong>
+                <small>{clock(Date.parse(t.at), zone)}</small>
+              </span>
+              <span className="tp-pos-val">
+                <b>${t.usdc.toFixed(2)}</b>
+                {t.realizedPnl != null ? (
+                  <small className={t.realizedPnl >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}>
+                    {signed(t.realizedPnl)}
+                  </small>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
-      <div className="ud-row" style={{ borderTop: "1px solid var(--ud-line)", marginTop: 8 }}>
+      {notice ? (
+        <p className="tp-pos-notice" role="status">
+          {notice}
+        </p>
+      ) : null}
+      <div className="tp-pos-foot">
         <span>
-          Total
+          Total <b className="tabular-nums">${total.toFixed(2)}</b>
           {open.length > 0 && (upCents != null || downCents != null) ? (
-            <small style={{ display: "block", color: uPnL >= 0 ? "#6dce95" : "#ff7b7b" }}>
-              Unrealized {uPnL >= 0 ? "+" : "−"}${Math.abs(uPnL).toFixed(2)}
-            </small>
+            <small className={uPnL >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}> {signed(uPnL)}</small>
           ) : null}
         </span>
-        <i />
-        <b className="tabular-nums">${total.toFixed(2)}</b>
-        <Link to="/profile" className="ud-muted">
+        <Link to="/profile" className="tp-pos-all">
           View All ↗
         </Link>
       </div>
@@ -205,9 +263,7 @@ export function PositionsCard({
 }) {
   const [tab, setTab] = useState("positions");
   if (paperMarketId)
-    return (
-      <PaperPositionsBlock marketId={paperMarketId} upCents={upCents} downCents={downCents} />
-    );
+    return <PaperPositionsBlock marketId={paperMarketId} upCents={upCents} downCents={downCents} />;
   if (market?.virtual)
     return (
       <section className="ud-card">
@@ -263,8 +319,8 @@ export function StatsCard({
   paperVolume?: string | null;
 }) {
   const rows: [string, string][] = [
-    ["Volume", paperVolume ?? (market ? volumeText(market.volume) : "$0")],
-    ["Traders", market ? String(market.participants ?? 0) : "0"],
+    ["Volume", paperVolume ?? (market ? volumeText(market.volume) : "—")],
+    ["Traders", market ? String(market.participants ?? "—") : "—"],
   ];
   return (
     <section className="ud-card ud-statistics" aria-label="Statistics">

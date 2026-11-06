@@ -29,3 +29,43 @@
 - Production is Base Mainnet 8453 and native six-decimal USDC. Base Sepolia 84532 is isolated testing, never evidence of a funded Mainnet end-to-end run. Use RPC and explorers to verify execution/state after consulting first-party guidance.
 - Never turn a missing price, balance, share count, probability, history or runtime observation into a verified zero. Keep wallet cash, position valuation, cost basis and claimable payouts distinct. A last trade is not an executable quote.
 - CLOB Exchange and UpDownPool are separate protocols with separate deployment, oracle/reporter, funding and release requirements. `node protocol/scripts/check-launch-readiness.mjs` only observes CLOB release evidence and never activates trading. No private key, automated signer, infinite approval or production flag may be introduced as a shortcut around missing evidence.
+
+## Virtual-only phase (2026-11-04 cleanup, branch feature/virtual-only-cleanup)
+
+- Public product in this phase is crypto-only Up/Down (BTC, ETH, SOL, BNB) in
+  5m, 30m, 1h, 12h and 24h windows. The public Markets list is removed; the
+  navigation is exactly Home, Rewards, Ranking, Portfolio. Admin market tooling
+  and market data libraries are kept, but public `/markets` routes and links
+  are gone — do not re-add a public Markets page without a new decision.
+- Onchain Virtual USDC stays on Base Mainnet (8453), NOT Sepolia. The token is
+  virtual and non-redeemable, but every onchain buy/sell/settle still needs a
+  real wallet signature and real ETH gas on Mainnet — every onchain virtual
+  ticket must say so prominently. Paper trades are gas-free and labelled paper.
+- Real-USDC pool trading stays hard-blocked. Operator/pool-admin Mainnet
+  signing is disabled unless the non-default build flag
+  VITE_ENABLE_OPERATOR_SIGNING=true is set; admin gating around it is unchanged.
+- Paper localStorage balances must never feed rewards, rankings or payouts.
+  Paper PnL is labelled paper/unsettled until server settlement exists.
+- TAC Points are points only, not USDC and not a token. They may be considered
+  for a future token/airdrop only if announced; no token, airdrop, price or
+  date is promised. This does not override the Terms page, which promises no
+  future TAC token.
+- Fees/sponsor work is deferred: no sponsor logic, fee subsidy or low-fee
+  promise exists in this phase, and none may be shown in UI copy.
+- Design: iOS-native feel — system font stack, large soft-rounded cards,
+  transform/opacity motion only, backdrop blur on header/bottom nav only,
+  44px hit targets, browser zoom enabled, prefers-reduced-motion respected.
+- Missing values show as unavailable (— / Unavailable), never as a verified
+  zero, except where a zero is verified. This supersedes any older doc line
+  that says balances display 0 until a verified amount arrives.
+  (Portfolio stats are the one exception, per owner instruction: they show
+  0, not —, when disconnected or empty.)
+- Wallet connect is once-only: wagmi persists the connection in localStorage
+  and auto-reconnects on mount, but the app must never show a "Connect
+  wallet" control while that restore is still in flight. BaseWallet
+  `restoring` is true until the bridge reports a definitive connected or
+  disconnected state (with a 10s fallback); while restoring, headers,
+  Portfolio, Rewards and all gated actions show a neutral loading state
+  and `useLoginDialog()` never opens the connect modal. A connected wallet
+  gets at most one SIWE signature per fresh connect/session; a restored
+  connection never opens a popup.

@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as ReferralsRouteImport } from './routes/referrals'
@@ -26,8 +25,6 @@ import { Route as AdminSectionRouteImport } from './routes/admin.$section'
 import { Route as AdminMarketImporterRouteImport } from './routes/admin.market-importer'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
-import { Route as MarketsIndexRouteImport } from './routes/markets.index'
-import { Route as MarketsMarketIdRouteImport } from './routes/markets.$marketId'
 import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
 
@@ -49,11 +46,6 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketsRoute = MarketsRouteImport.update({
-  id: '/markets',
-  path: '/markets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -116,16 +108,6 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketsIndexRoute = MarketsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MarketsRoute,
-} as any)
-const MarketsMarketIdRoute = MarketsMarketIdRouteImport.update({
-  id: '/$marketId',
-  path: '/$marketId',
-  getParentRoute: () => MarketsRoute,
-} as any)
 const UpDownAssetRoute = UpDownAssetRouteImport.update({
   id: '/up-down_/$asset',
   path: '/up-down/$asset',
@@ -142,7 +124,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/ranking': typeof RankingRoute
   '/referrals': typeof ReferralsRoute
@@ -154,10 +135,8 @@ export interface FileRoutesByFullPath {
   '/admin/market-importer': typeof AdminMarketImporterRoute
   '/admin/login': typeof AdminLoginRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
-  '/markets/': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRoutesByTo {
@@ -175,10 +154,8 @@ export interface FileRoutesByTo {
   '/admin/market-importer': typeof AdminMarketImporterRoute
   '/admin/login': typeof AdminLoginRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin': typeof AdminIndexRoute
-  '/markets': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRoutesById {
@@ -187,7 +164,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/markets': typeof MarketsRouteWithChildren
   '/profile': typeof ProfileRoute
   '/ranking': typeof RankingRoute
   '/referrals': typeof ReferralsRoute
@@ -199,10 +175,8 @@ export interface FileRoutesById {
   '/admin/market-importer': typeof AdminMarketImporterRoute
   '/admin_/login': typeof AdminLoginRoute
   '/auth_/callback': typeof AuthCallbackRoute
-  '/markets/$marketId': typeof MarketsMarketIdRoute
   '/up-down_/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
-  '/markets/': typeof MarketsIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
 }
 export interface FileRouteTypes {
@@ -212,7 +186,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/markets'
     | '/profile'
     | '/ranking'
     | '/referrals'
@@ -224,10 +197,8 @@ export interface FileRouteTypes {
     | '/admin/market-importer'
     | '/admin/login'
     | '/auth/callback'
-    | '/markets/$marketId'
     | '/up-down/$asset'
     | '/admin/'
-    | '/markets/'
     | '/api/protocol/metadata/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -245,10 +216,8 @@ export interface FileRouteTypes {
     | '/admin/market-importer'
     | '/admin/login'
     | '/auth/callback'
-    | '/markets/$marketId'
     | '/up-down/$asset'
     | '/admin'
-    | '/markets'
     | '/api/protocol/metadata/$hash'
   id:
     | '__root__'
@@ -256,7 +225,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/markets'
     | '/profile'
     | '/ranking'
     | '/referrals'
@@ -268,10 +236,8 @@ export interface FileRouteTypes {
     | '/admin/market-importer'
     | '/admin_/login'
     | '/auth_/callback'
-    | '/markets/$marketId'
     | '/up-down_/$asset'
     | '/admin/'
-    | '/markets/'
     | '/api/protocol/metadata/$hash'
   fileRoutesById: FileRoutesById
 }
@@ -280,7 +246,6 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
-  MarketsRoute: typeof MarketsRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RankingRoute: typeof RankingRoute
   ReferralsRoute: typeof ReferralsRoute
@@ -322,13 +287,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/markets': {
-      id: '/markets'
-      path: '/markets'
-      fullPath: '/markets'
-      preLoaderRoute: typeof MarketsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -415,20 +373,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/markets/': {
-      id: '/markets/'
-      path: '/'
-      fullPath: '/markets/'
-      preLoaderRoute: typeof MarketsIndexRouteImport
-      parentRoute: typeof MarketsRoute
-    }
-    '/markets/$marketId': {
-      id: '/markets/$marketId'
-      path: '/$marketId'
-      fullPath: '/markets/$marketId'
-      preLoaderRoute: typeof MarketsMarketIdRouteImport
-      parentRoute: typeof MarketsRoute
-    }
     '/up-down_/$asset': {
       id: '/up-down_/$asset'
       path: '/up-down/$asset'
@@ -460,25 +404,11 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface MarketsRouteChildren {
-  MarketsMarketIdRoute: typeof MarketsMarketIdRoute
-  MarketsIndexRoute: typeof MarketsIndexRoute
-}
-
-const MarketsRouteChildren: MarketsRouteChildren = {
-  MarketsMarketIdRoute: MarketsMarketIdRoute,
-  MarketsIndexRoute: MarketsIndexRoute,
-}
-
-const MarketsRouteWithChildren =
-  MarketsRoute._addFileChildren(MarketsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
-  MarketsRoute: MarketsRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RankingRoute: RankingRoute,
   ReferralsRoute: ReferralsRoute,

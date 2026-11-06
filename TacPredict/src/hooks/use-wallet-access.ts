@@ -17,11 +17,17 @@ export function useWalletAccess(next: AuthNext = "/") {
   const login = useLoginDialog();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // While wagmi is still restoring a stored connection, the wallet is
+  // neither "connected" nor "disconnected" yet. Treat it as its own state:
+  // run() must open neither the connect modal nor a signature request,
+  // and buttons must show a neutral loading label instead of "Connect".
+  const restoring = wallet.restoring;
   const state = walletAccess({ address: wallet.address, signedIn: Boolean(auth.user) });
   const { provider, address } = wallet;
 
   const run = useCallback(async () => {
     setError("");
+    if (restoring) return;
     if (state === "connect") {
       login(next);
       return;
@@ -39,14 +45,15 @@ export function useWalletAccess(next: AuthNext = "/") {
     } finally {
       setBusy(false);
     }
-  }, [state, provider, address, login, next]);
+  }, [restoring, state, provider, address, login, next]);
 
   return {
     state,
+    restoring,
     busy,
     error,
     run,
     ready: auth.ready,
-    label: busy ? "Waiting for wallet…" : ACCESS_LABEL[state],
+    label: restoring ? "Connecting…" : busy ? "Waiting for wallet…" : ACCESS_LABEL[state],
   };
 }

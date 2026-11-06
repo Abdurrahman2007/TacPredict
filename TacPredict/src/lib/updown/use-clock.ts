@@ -20,14 +20,22 @@ export function useTimeZone() {
   return zone;
 }
 
+const clockFormats = new Map<string, Intl.DateTimeFormat>();
+/** Formatters are cached: creating Intl objects on every chart frame is expensive on phones. */
 export function clock(ms: number, zone: string, seconds = false) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    ...(seconds ? { second: "2-digit" as const } : {}),
-    hour12: true,
-    timeZone: zone,
-  }).format(ms);
+  const key = `${zone}|${seconds ? 1 : 0}`;
+  let f = clockFormats.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      ...(seconds ? { second: "2-digit" as const } : {}),
+      hour12: true,
+      timeZone: zone,
+    });
+    clockFormats.set(key, f);
+  }
+  return f.format(ms);
 }
 
 export function dayLabel(ms: number, zone: string) {

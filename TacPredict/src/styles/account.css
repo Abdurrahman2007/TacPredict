@@ -878,3 +878,99 @@
     padding-top: 6px;
   }
 }
+
+/* iOS-style menu groups (2026-11-04): grouped list, icon tiles, grabber. */
+.account-grabber {
+  width: 36px;
+  height: 5px;
+  margin: -8px auto 18px;
+  border-radius: 999px;
+  background: #3a4a55;
+}
+.account-group-label {
+  margin: 18px 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8e9aa6;
+}
+.account-group-label:first-of-type {
+  margin-top: 0;
+}
+.account-sheet .account-group {
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid #26343e;
+  border-radius: 16px;
+  background: #1b2730;
+}
+.account-sheet .account-menu-list > a,
+.account-sheet .account-menu-list > button {
+  min-height: 56px;
+  padding: 8px 14px 8px 12px;
+  border-radius: 0;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.account-sheet .account-menu-list > a + a,
+.account-sheet .account-menu-list > a + button,
+.account-sheet .account-menu-list > button + a,
+.account-sheet .account-menu-list > button + button {
+  border-top: 1px solid #26343e;
+}
+.account-sheet .account-menu-list > a:hover,
+.account-sheet .account-menu-list > button:hover {
+  background: #22323d;
+}
+.account-tile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: #fff;
+}
+.account-tile svg {
+  color: #fff !important;
+  margin: 0 !important;
+  width: 17px !important;
+}
+.tile-blue { background: #0a84ff; }
+.tile-green { background: #30d158; }
+.tile-orange { background: #ff9f0a; }
+.tile-purple { background: #bf5af2; }
+.tile-pink { background: #ff375f; }
+.tile-grey { background: #8e8e93; }
+.account-sheet .account-group .account-setting {
+  border-top: 0;
+  padding: 14px;
+}
+.account-sheet .account-logout-group {
+  margin-top: 18px;
+}
+.account-sheet .account-logout {
+  justify-content: center;
+  border-top: 0;
+  padding: 14px;
+  min-height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ff453a;
+}
+.account-sheet .account-primary {
+  margin-top: 18px;
+  min-height: 52px;
+  border-radius: 14px;
+  background: #0a84ff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  justify-content: center;
+}
+.account-sheet .account-identity {
+  border-bottom: 0;
+  padding-bottom: 6px;
+}

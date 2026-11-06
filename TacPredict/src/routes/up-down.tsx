@@ -35,7 +35,7 @@ function UpDownPage() {
         snapshotTime={feed.updatedAt}
       />
       <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-        Prices from Coinbase Exchange · Trades settle on TacPredict USDC markets
+        Prices from Coinbase Exchange · Virtual USDC only · Paper trading · Non-redeemable
       </p>
     </div>
   );

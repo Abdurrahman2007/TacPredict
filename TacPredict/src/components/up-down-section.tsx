@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
 import { CoinGeckoChart } from "@/components/updown/coingecko-chart";
-import { clock, dayLabel, useNow, useTimeZone } from "@/lib/updown/use-clock";
+import { useNow } from "@/lib/updown/use-clock";
 import {
   ASSETS,
   DISPLAY_DURATIONS,
@@ -27,8 +27,9 @@ import { formatLiq } from "@/lib/paper/virtual-liquidity";
 import { paperVolumeFor, usePaperLedger } from "@/lib/paper/ledger";
 import { assetSettlementPolicy } from "@/lib/virtual/oracle-policy";
 import { rememberPaperOpen, runPaperSettleTick } from "@/lib/paper/settle-robot";
+import { useSticky } from "@/lib/ui/use-sticky";
 
-/** 5/15/30m paper result robot — ticks while Up/Down home is mounted. */
+/** Paper settlement tick — ticks while Up/Down home is mounted. New windows are 5 / 30 min; legacy 15 min positions still settle. */
 function PaperSettleRobot() {
   const tickers = useQuery(spotTickersQueryOptions);
   useEffect(() => {
@@ -47,6 +48,28 @@ const CARDS: { asset: UpDownAsset; large: boolean }[] = [
   { asset: "bnb", large: true },
 ];
 
+/** World-style shimmer placeholder with the same shape as a live card. */
+export function HomeCardSkeleton() {
+  return (
+    <div className="tp-skel-card" aria-hidden="true">
+      <div className="flex items-center gap-3">
+        <div className="tp-skel" style={{ width: 34, height: 34, borderRadius: 999 }} />
+        <div className="tp-skel" style={{ width: "48%", height: 20 }} />
+        <div className="tp-skel ml-auto" style={{ width: 70, height: 18 }} />
+      </div>
+      <div className="mt-6 flex justify-between gap-4">
+        <div className="tp-skel" style={{ width: "38%", height: 34 }} />
+        <div className="tp-skel" style={{ width: "38%", height: 34 }} />
+      </div>
+      <div className="tp-skel mt-5" style={{ height: 150, borderRadius: 18 }} />
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="tp-skel" style={{ height: 56, borderRadius: 18 }} />
+        <div className="tp-skel" style={{ height: 56, borderRadius: 18 }} />
+      </div>
+    </div>
+  );
+}
+
 function AssetCard({
   asset,
   minutes,
@@ -59,24 +82,28 @@ function AssetCard({
   large: boolean;
 }) {
   const info = ASSETS[asset];
-  const zone = useTimeZone();
   const start = windowStartFor(nowMs, minutes);
   const w = makeWindow(start, minutes);
   const copy = copyFor(useQuery(seriesCopyQueryOptions).data, asset);
   const live = useLivePrice(asset, true);
   const pw = usePriceWindow(asset, w, nowMs, true);
-  const spot = live.price ?? pw.series.at(-1)?.price ?? null;
-  const beat =
-    pw.boundary ??
-    (pw.series.find((p) => p.time >= w.start)?.price ?? null);
+  // Odds use the same Now/Beat the card displays, so the share price never
+  // disagrees with the chart above it. Live ticks still flow into the series,
+  // and the 1-second clock makes the price move toward 99¢/1¢ as time runs out.
+  // Sticky per window: a refetch or socket reconnect must not blink the share price to "—".
+  const windowKey = `${asset}-${minutes}-${w.start}`;
+  const spot = useSticky(pw.series.at(-1)?.price ?? live.price ?? null, windowKey);
+  const beat = useSticky(
+    pw.boundary ?? pw.series.find((p) => p.time >= w.start)?.price ?? null,
+    windowKey,
+  );
   const remainingSec = Math.max(0, (w.end - nowMs) / 1000);
-  const odds = spotShareOdds(spot, beat, minutes, remainingSec);
+  const odds = useSticky(spotShareOdds(spot, beat, minutes, remainingSec), windowKey);
   const ledger = usePaperLedger();
   const marketId = `reference-${asset}-${w.start}-${minutes}`;
   const vol = paperVolumeFor(marketId, ledger.trades);
   const title = `${copy.title} - ${durationLabel(minutes)}`;
   const search = { d: minutes };
-  const sameDay = dayLabel(w.start, zone) === dayLabel(w.end, zone);
   const upCents = odds ? `${Math.round(odds.up)}¢` : "—";
   const downCents = odds ? `${Math.round(odds.down)}¢` : "—";
   const settlement = assetSettlementPolicy(asset, minutes);
@@ -102,14 +129,13 @@ function AssetCard({
           >
             <h3>{title}</h3>
           </Link>
-          <p className="tp-crypto-time">
-            {dayLabel(w.start, zone)}, {clock(w.start, zone)} –{" "}
-            {sameDay ? "" : `${dayLabel(w.end, zone)}, `}
-            {clock(w.end, zone)}
-          </p>
         </div>
-        <span className="ud-live tp-crypto-live" title="Live share prices track spot vs open">
-          {formatCountdown(w.end - nowMs)}
+        <span
+          className="ud-live tp-crypto-live"
+          title="Time left in this window (hours:minutes:seconds, or minutes:seconds)"
+          aria-label={`Time left in this window: ${formatCountdown(w.end - nowMs)}`}
+        >
+          Ends in {formatCountdown(w.end - nowMs)}
         </span>
       </div>
       {large && <CoinGeckoChart asset={asset} window={w} summary dense />}
@@ -119,7 +145,7 @@ function AssetCard({
           to="/up-down/$asset"
           params={{ asset: slugOf(asset) }}
           search={{ ...search, side: "up" }}
-          className="ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ud-outcome-up"
+          className="ios-press flex min-h-14 items-center justify-center rounded-2xl text-base font-bold text-white ud-outcome-up"
         >
           Up {upCents}
         </Link>
@@ -127,26 +153,16 @@ function AssetCard({
           to="/up-down/$asset"
           params={{ asset: slugOf(asset) }}
           search={{ ...search, side: "down" }}
-          className="ios-press flex min-h-12 items-center justify-center rounded-full text-sm font-bold text-white ud-outcome-down"
+          className="ios-press flex min-h-14 items-center justify-center rounded-2xl text-base font-bold text-white ud-outcome-down"
         >
           Down {downCents}
         </Link>
       </div>
       <div className="tp-crypto-footer">
         <span>Vol {formatLiq(vol)}</span>
-        <span title={settlement.reasons.join(" · ")}>
-          {settlement.tier === "unavailable"
-            ? "Charts only"
-            : settlement.tier === "paper_only"
-              ? "Paper · no on-chain settle"
-              : odds
-                ? spot != null && beat != null
-                  ? `${spot >= beat ? "▲" : "▼"} vs open`
-                  : "Live ¢"
-                : pw.pending
-                  ? "Loading…"
-                  : "Paper market"}
-        </span>
+        {settlement.tier === "paper_only" ? null : (
+          <span>{settlement.tier === "unavailable" ? "Charts only" : "Live"}</span>
+        )}
       </div>
     </article>
   );
@@ -169,11 +185,15 @@ export function UpDownSection({
   const nowMs = useNow(Date.parse(snapshotTime) || 0);
   if (!nowMs)
     return (
-      <section className="ud-loading" role="status" aria-label="Loading Up/Down windows">
-        <div className="ud-skeleton ud-skeleton-title" />
+      <section className="mt-5" role="status" aria-label="Loading Up/Down windows">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="tp-skel" style={{ width: 190, height: 24 }} />
+          <div className="tp-skel" style={{ width: 96, height: 40, borderRadius: 999 }} />
+        </div>
+        <div className="tp-skel mb-3" style={{ height: 52, borderRadius: 999 }} />
         <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
-          {CARDS.map(({ asset }) => (
-            <div key={asset} className="ud-skeleton ud-skeleton-chart" />
+          {CARDS.slice(0, 2).map(({ asset }) => (
+            <HomeCardSkeleton key={asset} />
           ))}
         </div>
       </section>
@@ -181,13 +201,17 @@ export function UpDownSection({
   return (
     <section className={detailed ? "" : "mt-5"}>
       <PaperSettleRobot />
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
-          {fixedMinutes === 60
-            ? "Live · 1H"
-            : fixedMinutes === 1440
-              ? "Live · 24H"
-              : "Trending Up & Down"}
+          {fixedMinutes === 30
+            ? "Live · 30M"
+            : fixedMinutes === 60
+              ? "Live · 1H"
+              : fixedMinutes === 720
+                ? "Live · 12H"
+                : fixedMinutes === 1440
+                  ? "Live · 24H"
+                  : "Trending Up & Down"}
         </h2>
         <Link
           to="/up-down"
@@ -198,9 +222,9 @@ export function UpDownSection({
           <ChevronRight className="size-4" />
         </Link>
       </div>
-      {detailed && (
+      {!fixedMinutes && (
         <div
-          className="ud-home-durations mb-4 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+          className="ud-home-durations tp-duration-segmented mb-3 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
           role="group"
           aria-label="Window length"
         >
@@ -210,7 +234,7 @@ export function UpDownSection({
               type="button"
               aria-pressed={minutes === d}
               onClick={() => setMinutes(d)}
-              className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
+              className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
             >
               {durationLabel(d)}
             </button>
@@ -219,13 +243,7 @@ export function UpDownSection({
       )}
       <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
         {CARDS.map(({ asset, large }) => (
-          <AssetCard
-            key={asset}
-            asset={asset}
-            minutes={minutes}
-            nowMs={nowMs}
-            large={large}
-          />
+          <AssetCard key={asset} asset={asset} minutes={minutes} nowMs={nowMs} large={large} />
         ))}
       </div>
     </section>

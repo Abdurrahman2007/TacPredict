@@ -1,4 +1,4 @@
-export type RankingPeriod = "1d" | "7d" | "30d" | "all";
+export type RankingPeriod = "1d" | "7d" | "30d" | "all" | "month";
 export type RankingActivity = {
   id: string;
   marketId: string;

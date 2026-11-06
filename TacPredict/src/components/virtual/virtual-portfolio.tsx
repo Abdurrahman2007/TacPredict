@@ -37,6 +37,7 @@ export function VirtualPortfolio({
     const title = markets.find((m) => m.virtual?.onchainId === id)?.title ?? `Market ${id}`;
     return title.toLowerCase().includes(search.toLowerCase());
   };
+  /** Onchain settle on Base Mainnet (8453) needs a real wallet signature and real ETH gas, even though the token is virtual/non-redeemable. */
   async function settle(id: string) {
     if (busy || !w.provider || !w.address || w.chainId !== deployment.chainId) return;
     setBusy(true);

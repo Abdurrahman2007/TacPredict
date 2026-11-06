@@ -85,31 +85,24 @@ export function PrelaunchMarkets({
                 <span>Crypto · Preview</span>
                 <span>{market.closesAt}</span>
               </div>
-              <Link
-                to="/markets/$marketId"
-                params={{ marketId: p.id }}
-                className="flex items-start gap-3"
-              >
+              <span className="flex items-start gap-3">
                 <img src={market.image} alt="" className="size-9 shrink-0" />
                 <h3 className="min-w-0 text-lg font-semibold leading-snug">{p.title}</h3>
-              </Link>
+              </span>
               <div className="mt-5 space-y-3">
                 {market.outcomes.map((outcome, index) => (
-                  <Link
+                  <span
                     key={outcome.id}
-                    to="/markets/$marketId"
-                    params={{ marketId: p.id }}
-                    search={{ outcome: outcome.id }}
                     aria-label={`Predict ${outcome.label}: ${p.title}`}
                     className="ios-press flex min-h-14 items-center gap-3 rounded-xl"
                   >
                     <OutcomeRow outcome={outcome} index={index} />
-                  </Link>
+                  </span>
                 ))}
               </div>
               <footer className="mt-5 flex justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
-                <span>$0 OI</span>
-                <span>$0 Vol</span>
+                <span>OI —</span>
+                <span>Vol —</span>
               </footer>
             </article>
           );

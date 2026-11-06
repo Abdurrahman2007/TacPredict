@@ -32,7 +32,15 @@ export function buildRanking({
   period = "30d",
 }) {
   const cutoff =
-    period === "all" ? -Infinity : now - ({ "1d": 1, "7d": 7, "30d": 30 }[period] ?? 30) * 86400000;
+    period === "all"
+      ? -Infinity
+      : period === "month"
+        ? Date.UTC(
+            new Date(now).getUTCFullYear(),
+            new Date(now).getUTCMonth(),
+            1,
+          )
+        : now - ({ "1d": 1, "7d": 7, "30d": 30 }[period] ?? 30) * 86400000;
   const byId = new Map(markets.map((m) => [String(m.onchain_id), m])),
     tokenMap = new Map(),
     ledgers = new Map(),

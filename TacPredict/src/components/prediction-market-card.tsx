@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import type { Market } from "@/domain/markets/types";
 import { marketSection } from "@/domain/markets/sections.mjs";
 import { usdcShort, volumeText } from "@/lib/protocol/display.mjs";
@@ -24,7 +23,7 @@ export function PredictionMarketCard({
         timeZone: "UTC",
       }).format(stamp) + " UTC"
     : market.closesAt;
-  // Football's third outcome (Draw) must remain visible, not silently dropped.
+  // Legacy multi-outcome note: a third outcome (Draw) must remain visible, not silently dropped, where legacy market data is shown (admin/preview surfaces only).
   const outcomes = market.outcomes.slice(0, market.outcomes.length === 3 ? 3 : 2);
   return (
     <article className={`tp-market-card tp-card${featured ? " home-featured-card" : ""}`}>
@@ -32,25 +31,15 @@ export function PredictionMarketCard({
         <span>{marketSection(market) ?? market.category}</span>
         <time dateTime={market.endsAt}>{close}</time>
       </div>
-      <Link
-        to="/markets/$marketId"
-        params={{ marketId: market.id }}
-        className="tp-card-title tp-card-hit"
-      >
+      <span className="tp-card-title tp-card-hit">
         <MarketIcon market={market} className="size-9 shrink-0" />
         <h3>{market.title}</h3>
-      </Link>
+      </span>
       <div className="tp-card-outcomes">
         {outcomes.map((outcome, index) => (
-          <Link
-            key={outcome.id}
-            to="/markets/$marketId"
-            params={{ marketId: market.id }}
-            search={{ outcome: outcome.id }}
-            className="tp-card-outcome ios-press"
-          >
+          <span key={outcome.id} className="tp-card-outcome ios-press">
             <OutcomeRow outcome={outcome} index={index} />
-          </Link>
+          </span>
         ))}
       </div>
       <footer className="tp-card-footer">
@@ -64,9 +53,9 @@ export function PredictionMarketCard({
         <span>{volumeText(market.volume)} Vol</span>
       </footer>
       {market.outcomes.length > 3 && (
-        <Link className="tp-card-more" to="/markets/$marketId" params={{ marketId: market.id }}>
-          View all {market.outcomes.length} outcomes ↗
-        </Link>
+        <span className="tp-card-more">
+          {market.outcomes.length} outcomes · Public market detail removed in the virtual-only cleanup
+        </span>
       )}
     </article>
   );

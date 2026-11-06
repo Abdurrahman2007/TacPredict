@@ -1,16 +1,16 @@
-/* Cinematic welcome chest */
+/* Cinematic welcome chest — visibly redesigned: larger, richer, gold latch, glow. */
 .tp-chest-stage {
   position: relative;
   display: grid;
   place-items: center;
   margin: 8px auto 18px;
-  min-height: 240px;
+  min-height: 300px;
   perspective: 900px;
 }
 .tp-chest-hit {
   position: relative;
-  width: 200px;
-  height: 180px;
+  width: 252px;
+  height: 226px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -21,21 +21,21 @@
 }
 .tp-chest-aura {
   position: absolute;
-  inset: 8% -4% auto;
-  height: 70%;
+  inset: 2% -8% auto;
+  height: 82%;
   border-radius: 50%;
-  background: radial-gradient(circle, #5b8cff55 0%, #2775ca22 40%, transparent 70%);
-  filter: blur(8px);
-  opacity: 0.55;
+  background: radial-gradient(circle, #5b8cff77 0%, #2775ca33 40%, transparent 70%);
+  filter: blur(10px);
+  opacity: 0.75;
   animation: chest-aura 2.8s ease-in-out infinite;
 }
 .tp-chest-stage.priority .tp-chest-aura {
-  background: radial-gradient(circle, #7aa2ff77 0%, #3d6adf33 45%, transparent 72%);
-  opacity: 0.85;
+  background: radial-gradient(circle, #ffd97055 0%, #7aa2ff88 45%, transparent 72%);
+  opacity: 0.95;
 }
 .tp-chest-3d {
   position: absolute;
-  inset: 18px 20px 12px;
+  inset: 18px 16px 12px;
   transform-style: preserve-3d;
   transform: rotateX(12deg);
   transition: transform 0.35s ease;
@@ -46,7 +46,7 @@
 .tp-chest-stage[data-phase="open"] .tp-chest-3d,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-3d,
 .tp-chest-stage[data-phase="done"] .tp-chest-3d {
-  transform: rotateX(8deg) scale(1.02);
+  transform: rotateX(8deg) scale(1.06);
 }
 .tp-chest-lid {
   position: absolute;
@@ -62,30 +62,34 @@
 .tp-chest-stage[data-phase="open"] .tp-chest-lid,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-lid,
 .tp-chest-stage[data-phase="done"] .tp-chest-lid {
-  transform: rotateX(-128deg) translateZ(6px);
+  transform: rotateX(-142deg) translateZ(8px);
 }
 .tp-chest-lid-face {
   display: block;
   height: 100%;
-  border-radius: 18px 18px 8px 8px;
+  border-radius: 20px 20px 8px 8px;
   background:
-    linear-gradient(180deg, #5b8cff 0%, #3d6adf 48%, #2a4a9a 100%);
+    linear-gradient(180deg, #7aa2ff 0%, #3d6adf 42%, #7c3aed 78%, #2a1a5e 100%);
   box-shadow:
-    0 10px 24px #0008,
-    inset 0 1px 0 #ffffff55,
-    inset 0 -8px 16px #0004;
-  border: 1px solid #7aa2ff88;
+    0 12px 28px #0008,
+    inset 0 1px 0 #ffffff66,
+    inset 0 -10px 20px #0005;
+  border: 1px solid #a5b4fc99;
 }
 .tp-chest-latch {
   position: absolute;
   left: 50%;
-  bottom: -10px;
-  width: 28px;
-  height: 18px;
-  margin-left: -14px;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #f0d27a, #b8922e);
-  box-shadow: 0 2px 6px #0006;
+  bottom: -12px;
+  width: 38px;
+  height: 24px;
+  margin-left: -19px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffe08a, #f0c14b 45%, #b8922e);
+  box-shadow:
+    0 3px 10px #0007,
+    0 0 18px #ffd97088,
+    inset 0 1px 0 #ffffffaa;
+  border: 1px solid #ffe08a88;
   z-index: 5;
 }
 .tp-chest-body {
@@ -94,13 +98,13 @@
   right: 0;
   bottom: 0;
   height: 62%;
-  border-radius: 16px 16px 20px 20px;
+  border-radius: 18px 18px 24px 24px;
   background:
-    linear-gradient(165deg, #2a3844 0%, #1a232b 55%, #121920 100%);
-  border: 1px solid #3d5360;
+    linear-gradient(165deg, #33475e 0%, #1d2b3a 55%, #101824 100%);
+  border: 1px solid #4a6575;
   box-shadow:
-    0 18px 36px #0009,
-    inset 0 1px 0 #ffffff18;
+    0 22px 44px #0009,
+    inset 0 1px 0 #ffffff22;
   overflow: hidden;
   z-index: 2;
 }
@@ -109,29 +113,34 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 10px;
-  background: linear-gradient(180deg, #4a6575, #2a3844);
+  height: 12px;
+  background: linear-gradient(180deg, #5b7a8c, #2a3844);
 }
 .tp-chest-band {
   position: absolute;
   left: 0;
   right: 0;
   top: 42%;
-  height: 14px;
-  background: linear-gradient(180deg, #3d6adf99, #2a4a9a88);
-  box-shadow: inset 0 1px 0 #ffffff33;
+  height: 16px;
+  background: linear-gradient(180deg, #ffd970cc, #b8922e99);
+  box-shadow: inset 0 1px 0 #ffffff55;
 }
 .tp-chest-seal {
   position: absolute;
   left: 50%;
   top: 54%;
-  width: 42px;
-  height: 42px;
-  margin: -21px 0 0 -21px;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 6px 16px #0007;
+  box-shadow:
+    0 8px 20px #0008,
+    0 0 22px #2775ca88;
   z-index: 3;
+}
+.tp-chest-seal svg {
+  width: 100%;
+  height: 100%;
 }
 .tp-chest-coins {
   position: absolute;
@@ -144,6 +153,7 @@
   opacity: 0;
 }
 .tp-chest-stage[data-phase="open"] .tp-chest-coins,
+.tp-chest-stage[data-phase="burst"] .tp-chest-coins,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-coins,
 .tp-chest-stage[data-phase="done"] .tp-chest-coins {
   opacity: 1;
@@ -152,17 +162,17 @@
   position: absolute;
   left: 50%;
   top: 40%;
-  margin-left: -14px;
+  margin-left: -18px;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 4px 10px #0008;
+  box-shadow: 0 6px 14px #0008;
   opacity: 0;
   transform: translate3d(0, 12px, 0) scale(0.4);
 }
 .tp-chest-stage[data-phase="open"] .tp-chest-coin,
+.tp-chest-stage[data-phase="burst"] .tp-chest-coin,
 .tp-chest-stage[data-phase="reveal"] .tp-chest-coin,
 .tp-chest-stage[data-phase="done"] .tp-chest-coin {
-  animation: coin-burst 0.95s cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
+  animation: coin-burst 1.1s cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
   animation-delay: calc(var(--c) * 55ms);
 }
 .tp-chest-sparkles {
@@ -286,10 +296,10 @@
   color: #9aabb6;
   font-size: 13px;
 }
-.tp-chest-reveal img {
+.tp-chest-reveal svg {
   border-radius: 999px;
-  background: #fff;
   margin-bottom: 2px;
+  filter: drop-shadow(0 4px 12px #2775ca88);
 }
 .tp-chest-opening-label {
   color: #9aabb6;
@@ -336,12 +346,12 @@
   100% {
     opacity: 1;
     transform: translate3d(
-        calc((var(--c) - 2) * 28px),
-        calc(-48px - var(--c) * 10px),
+        calc((var(--c) - 3) * 38px),
+        calc(-66px - var(--c) * 12px),
         0
       )
-      scale(1)
-      rotate(calc((var(--c) - 2) * 18deg));
+      scale(1.15)
+      rotate(calc((var(--c) - 3) * 20deg));
   }
 }
 @keyframes spark-fly {
@@ -385,5 +395,19 @@
   .tp-chest-stage[data-phase="reveal"] .tp-chest-lid,
   .tp-chest-stage[data-phase="done"] .tp-chest-lid {
     transform: rotateX(-118deg);
+  }
+}
+
+/* Reduced motion: show the opened chest instantly, no shake/burst travel. */
+@media (prefers-reduced-motion: reduce) {
+  .tp-chest-stage[data-phase="shake"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="open"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="burst"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="reveal"] .tp-chest-3d,
+  .tp-chest-stage[data-phase="done"] .tp-chest-3d {
+    animation: none;
+  }
+  .tp-chest-aura {
+    animation: none;
   }
 }

@@ -1,6 +1,8 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-/** v2: start at $0 — Virtual USDC only from rewards / trades, never a free $10k grant. */
+/** v2: start at $0 — Virtual USDC only from rewards / trades, never a free $10k grant.
+ * PAPER ONLY: this browser localStorage ledger must never be used as a source for
+ * rewards, rankings or payouts. Paper PnL is unsettled until server settlement exists. */
 const KEY = "tac-paper-ledger-v2";
 const EVENT = "tac-paper-ledger";
 const START = 0;
