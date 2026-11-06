@@ -1,6 +1,6 @@
 # Virtual USDC contract set (Base)
 
-Status: **source + tests only. Nothing is deployed, no app or database setting changes.** Mainnet deployment needs separate approval from the project owner.
+Status: **deployed on Base mainnet (see below), admin-controlled, trading disabled in the app.** No database setting changes.
 
 ## Why a new set
 
@@ -45,19 +45,19 @@ All seven contracts are live, admin-controlled by the Base Account `0x57828f1aa3
 
 | Contract | Address |
 | --- | --- |
-| VirtualUSDC (vUSDC) | `0x21b3932c2D8FC7178cC5Ea1083e98877211FD196` |
-| VirtualMarketRegistry | `0x49D7015ABddEBA550F6138f4ccF914B417237C0D` |
-| VirtualResolutionOracle | `0x99bcc662cd9716Ce4bd66571f12A8B07295FcF3F` |
-| VirtualMarketFactory | `0x35bBCe6fc02F565bccBe0FF5290B96770D3f5903` |
-| VirtualConditionalPositions | `0xF2973A60903b8E58098A144b07105f2A45dF6156` |
-| VirtualExchange | `0x716345BE42D1Ac79232721d3f4E37B9F4bBF48cB` |
-| VirtualSettlement | `0x567C1128Be6C0c0b9b18C96459D09Cf539Fcbd59` |
+| VirtualUSDC (vUSDC) | `0xe595d15d0824705d26483c6FdABFa45693bb071e` |
+| VirtualMarketRegistry | `0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013` |
+| VirtualResolutionOracle | `0x6A22091A157013eFb7bD2388A280573662Dd5b21` |
+| VirtualMarketFactory | `0xbf17837221F202CBFF642b8C049D6a4Cc1d031d8` |
+| VirtualConditionalPositions | `0x4A2584bbB19fEf7df240e6d0787fd82d8175b554` |
+| VirtualExchange | `0xEc947763fEe77917218732A3dcffAE0e0A40409B` |
+| VirtualSettlement | `0x27eB22dF79D5aa59759c4e15a49bA1f27147ddbF` |
 
 Settings at deployment: oracle bond 5 vUSDC, challenge period 60 seconds, `boxDailyCap` 1000, **no box granter yet** (so no welcome box can be opened until the operator sets one with `setBoxGranter`). Both the box and the check-in switches start open.
 
 Checked onchain after deployment: each address holds code, Exchange and Settlement point at the deployed registry/positions (and vUSDC), the registry roles are held by the factory and the oracle only, the vUSDC protocol list is exactly positions, exchange and oracle, and `protocolLocked()` is true.
 
-Deployed through the public CREATE2 proxy. The 32-byte immutable slots in the initcode were filled with `0x01..0x20` for transcription safety; the constructor overwrites them, so the runtime bytecode is the same as a plain compile.
+Deployed through the public CREATE2 proxy with the exact compiler initcode (`protocol/deployments/virtual-base-mainnet.initcode.json`, salt prefix `TacPredict.virtual.v2.`), so Basescan can match the creation code byte for byte. VirtualUSDC and VirtualMarketRegistry were deployed in their own transactions; the oracle, factory, positions, exchange and settlement went out together in one atomic batch. The first set (v1, salt prefix `TacPredict.virtual.v1.`) is deprecated and unused: nothing was minted from it and no box granter was set for it. Only this v2 set is referenced by the app.
 
 **Status: deployed and wired, trading disabled in the app** (`VIRTUAL_SET_FLAGS.executionEnabled` is false). Basescan source verification is done by hand with the Standard-JSON-Input package; the `basescanVerified` flag and `basescan_verified` in the manifest are flipped after that.
 

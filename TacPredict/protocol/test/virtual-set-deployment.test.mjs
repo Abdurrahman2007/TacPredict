@@ -41,6 +41,25 @@ test("every address is the CREATE2 address of its recorded salt and initcode has
   }
 });
 
+test("the manifest is the exact-initcode plan that was deployed: same salts, hashes, sizes and constructor arguments", () => {
+  const plan = JSON.parse(fs.readFileSync(path.join(root, "protocol/deployments/virtual-base-mainnet.initcode.json"), "utf8"));
+  assert.equal(plan.create2_proxy, manifest.create2_proxy);
+  assert.equal(plan.contracts.length, Object.keys(manifest.contracts).length);
+  for (const c of Object.values(manifest.contracts)) {
+    const p = plan.contracts.find((x) => x.name === c.name);
+    assert.ok(p, `${c.name} is in the initcode plan`);
+    assert.equal(p.address.toLowerCase(), c.address.toLowerCase(), `${c.name} address`);
+    assert.equal(p.salt, c.salt, `${c.name} salt`);
+    assert.equal(p.initCodeHash, c.initCodeHash, `${c.name} initcode hash`);
+    assert.equal((p.initcode.length - 2) / 2, c.initCodeBytes, `${c.name} initcode size`);
+    assert.equal(c.immutablePlaceholdersFilled, 0, `${c.name} was deployed from the plain compiler output`);
+    assert.ok(p.initcode.endsWith(c.constructorArgsHex), `${c.name} constructor arguments are the end of the initcode`);
+  }
+  assert.equal(manifest.deployment_block, manifest.contracts.usdc.blockNumber);
+  assert.match(manifest.wiring.txHash, /^0x[0-9a-f]{64}$/);
+  assert.match(manifest.wiring.lockTxHash, /^0x[0-9a-f]{64}$/);
+});
+
 test("the set is separate from the six production contracts and from the real USDC", () => {
   const legacyAddresses = new Set(
     [legacy.collateral_token, legacy.registry, legacy.oracle, legacy.factory, legacy.positions, legacy.exchange, legacy.settlement].map((a) =>
