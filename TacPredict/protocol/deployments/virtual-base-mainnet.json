@@ -1,0 +1,188 @@
+{
+  "name": "TacPredict virtual USDC set (tacpredict.fun)",
+  "chain_id": 8453,
+  "status": "deployed_admin_controlled_trading_disabled",
+  "trading_enabled": false,
+  "basescan_verified": true,
+  "admin": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+  "collateral_token": "0xe595d15d0824705d26483c6FdABFa45693bb071e",
+  "collateral_is_virtual": true,
+  "create2_proxy": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+  "deployment_block": "53377721",
+  "parameters": {
+    "oracle_bond_vusdc_units": "5000000",
+    "oracle_challenge_period_seconds": 60,
+    "box_granter": "0x0000000000000000000000000000000000000000",
+    "box_daily_cap": 1000
+  },
+  "compiler": {
+    "solc": "0.8.30+commit.73712a01",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "shanghai",
+    "openzeppelin": "5.2.0",
+    "license": "MIT"
+  },
+  "contracts": {
+    "usdc": {
+      "name": "VirtualUSDC",
+      "address": "0xe595d15d0824705d26483c6FdABFa45693bb071e",
+      "txHash": "0x4037de2225d6b2c215237acbd52d2cd30dbce28d7638ecab1c95456dec20aad5",
+      "blockNumber": "53377721",
+      "salt": "0xdc9ce635f72a23bc1df2528154c98311849a4e237553dd1d35ba78f573349c76",
+      "initCodeHash": "0xdec63a5e90bc4cde306e59d24c831df96830f00f843c311761190bce6a4dcd17",
+      "initCodeBytes": 7890,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+        "0x0000000000000000000000000000000000000000",
+        "1000"
+      ],
+      "constructorArgsHex": "00000000000000000000000057828f1aa32fd6be3988f240068df53ed94b7aef000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e8",
+      "sourceFile": "protocol/contracts/VirtualUSDC.sol",
+      "verifyContract": "contracts/VirtualUSDC.sol:VirtualUSDC"
+    },
+    "registry": {
+      "name": "VirtualMarketRegistry",
+      "address": "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013",
+      "txHash": "0xa9dd9fde8508e6a060b489ef92751d9e7744170fc02456d4b8b1883a6a3c7ef1",
+      "blockNumber": "53377782",
+      "salt": "0xc7c2496967699580c8c88840c65b0931def0474a9dba70505e5bbab3780d4ea4",
+      "initCodeHash": "0xc68993cc14ad5cd5cdbb59e51fbdd5d0383fd76459937dc2972ff000780a18dc",
+      "initCodeBytes": 7114,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+        "0xe595d15d0824705d26483c6FdABFa45693bb071e"
+      ],
+      "constructorArgsHex": "00000000000000000000000057828f1aa32fd6be3988f240068df53ed94b7aef000000000000000000000000e595d15d0824705d26483c6fdabfa45693bb071e",
+      "sourceFile": "protocol/contracts/VirtualMarketRegistry.sol",
+      "verifyContract": "contracts/VirtualMarketRegistry.sol:VirtualMarketRegistry"
+    },
+    "oracle": {
+      "name": "VirtualResolutionOracle",
+      "address": "0x6A22091A157013eFb7bD2388A280573662Dd5b21",
+      "txHash": "0x6cc48d5c58cf4c299a5761d452ab36a29c59ef2fb3bd4d7ccf71f6105a59f3da",
+      "blockNumber": "53722463",
+      "salt": "0x72aeb3491addf38b2353a913894d312e1f4e302d4b4c164f3b5a27bc9cc8508a",
+      "initCodeHash": "0xc324f7d1190ecda5728a0e523075aa08c264a9d3fe6260a0758da247ee6749ab",
+      "initCodeBytes": 7986,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+        "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013",
+        "5000000",
+        "60"
+      ],
+      "constructorArgsHex": "00000000000000000000000057828f1aa32fd6be3988f240068df53ed94b7aef000000000000000000000000cd98e90223c7e04ac7987a2fab6a71ba4aa6f01300000000000000000000000000000000000000000000000000000000004c4b40000000000000000000000000000000000000000000000000000000000000003c",
+      "sourceFile": "protocol/contracts/VirtualResolutionOracle.sol",
+      "verifyContract": "contracts/VirtualResolutionOracle.sol:VirtualResolutionOracle"
+    },
+    "factory": {
+      "name": "VirtualMarketFactory",
+      "address": "0xbf17837221F202CBFF642b8C049D6a4Cc1d031d8",
+      "txHash": "0x6cc48d5c58cf4c299a5761d452ab36a29c59ef2fb3bd4d7ccf71f6105a59f3da",
+      "blockNumber": "53722463",
+      "salt": "0xc9577c4e5ca54a7c8d00411207accebd5156cddc471ec6b93e7f0ba65db58ea4",
+      "initCodeHash": "0x55f121c45354c04096133e32f3cd7644a7dadef62574aedafe80d37c76ee7246",
+      "initCodeBytes": 2927,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
+        "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013",
+        "0x6A22091A157013eFb7bD2388A280573662Dd5b21"
+      ],
+      "constructorArgsHex": "00000000000000000000000057828f1aa32fd6be3988f240068df53ed94b7aef000000000000000000000000cd98e90223c7e04ac7987a2fab6a71ba4aa6f0130000000000000000000000006a22091a157013efb7bd2388a280573662dd5b21",
+      "sourceFile": "protocol/contracts/VirtualMarketFactory.sol",
+      "verifyContract": "contracts/VirtualMarketFactory.sol:VirtualMarketFactory"
+    },
+    "positions": {
+      "name": "VirtualConditionalPositions",
+      "address": "0x4A2584bbB19fEf7df240e6d0787fd82d8175b554",
+      "txHash": "0x6cc48d5c58cf4c299a5761d452ab36a29c59ef2fb3bd4d7ccf71f6105a59f3da",
+      "blockNumber": "53722463",
+      "salt": "0x4a50cff292f33ef767917536044c5e8e0344449d9f29d7aa186224365feb59ac",
+      "initCodeHash": "0x1a5ab354837d36bded62af6f5b278c4dbc45178169fd930113486b5898b7a231",
+      "initCodeBytes": 9117,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013"
+      ],
+      "constructorArgsHex": "000000000000000000000000cd98e90223c7e04ac7987a2fab6a71ba4aa6f013",
+      "sourceFile": "protocol/contracts/VirtualConditionalPositions.sol",
+      "verifyContract": "contracts/VirtualConditionalPositions.sol:VirtualConditionalPositions"
+    },
+    "exchange": {
+      "name": "VirtualExchange",
+      "address": "0xEc947763fEe77917218732A3dcffAE0e0A40409B",
+      "txHash": "0x6cc48d5c58cf4c299a5761d452ab36a29c59ef2fb3bd4d7ccf71f6105a59f3da",
+      "blockNumber": "53722463",
+      "salt": "0x6ef0b5c8914705aae08691ad88fb72a4aeb440c598a0ff654a6224e8b655dc26",
+      "initCodeHash": "0x50a47a7ad83ae080eb9a6a8e50736a0093bd2f193ab86c7d9d5ba471848bc7f0",
+      "initCodeBytes": 9599,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013",
+        "0x4A2584bbB19fEf7df240e6d0787fd82d8175b554"
+      ],
+      "constructorArgsHex": "000000000000000000000000cd98e90223c7e04ac7987a2fab6a71ba4aa6f0130000000000000000000000004a2584bbb19fef7df240e6d0787fd82d8175b554",
+      "sourceFile": "protocol/contracts/VirtualExchange.sol",
+      "verifyContract": "contracts/VirtualExchange.sol:VirtualExchange"
+    },
+    "settlement": {
+      "name": "VirtualSettlement",
+      "address": "0x27eB22dF79D5aa59759c4e15a49bA1f27147ddbF",
+      "txHash": "0x6cc48d5c58cf4c299a5761d452ab36a29c59ef2fb3bd4d7ccf71f6105a59f3da",
+      "blockNumber": "53722463",
+      "salt": "0x4d92b7888540bc971b76d4bf1c01bd9de32642965f7581e4c186f7eec4bfbf7d",
+      "initCodeHash": "0x1fdd60c4b0fa67e0d153fffe1d0407f8f44873eab5667b3a26ea8ec5cfff099f",
+      "initCodeBytes": 1732,
+      "immutablePlaceholdersFilled": 0,
+      "constructorArgs": [
+        "0xCd98E90223C7E04ac7987A2fAb6a71Ba4aA6f013",
+        "0x4A2584bbB19fEf7df240e6d0787fd82d8175b554"
+      ],
+      "constructorArgsHex": "000000000000000000000000cd98e90223c7e04ac7987a2fab6a71ba4aa6f0130000000000000000000000004a2584bbb19fef7df240e6d0787fd82d8175b554",
+      "sourceFile": "protocol/contracts/VirtualSettlement.sol",
+      "verifyContract": "contracts/VirtualSettlement.sol:VirtualSettlement"
+    }
+  },
+  "wiring": {
+    "txHash": "0x941d580d3f703117f6f39f7f1a155cb25a0a9b8ab466741733d233c2f7c8d763",
+    "lockTxHash": "0x56788fe76036281a0bf9ed978ed7d66d92f066812db32a9c82c764db59031b32",
+    "registry_roles": {
+      "FACTORY_ROLE": {
+        "role": "0xdfbefbf47cfe66b701d8cfdbce1de81c821590819cb07e71cb01b6602fb0ee27",
+        "holder": "0xbf17837221F202CBFF642b8C049D6a4Cc1d031d8"
+      },
+      "ORACLE_ROLE": {
+        "role": "0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1",
+        "holder": "0x6A22091A157013eFb7bD2388A280573662Dd5b21"
+      }
+    },
+    "usdc_protocol_list": [
+      "0x4A2584bbB19fEf7df240e6d0787fd82d8175b554",
+      "0xEc947763fEe77917218732A3dcffAE0e0A40409B",
+      "0x6A22091A157013eFb7bD2388A280573662Dd5b21"
+    ],
+    "usdc_protocol_locked": true
+  },
+  "checked_onchain": {
+    "method": "eth_getCode at each predicted CREATE2 address, then getter calls",
+    "checks": [
+      "exchange.registry/positions/usdc and settlement.registry/positions return the deployed addresses",
+      "registry.hasRole(FACTORY_ROLE, factory) and hasRole(ORACLE_ROLE, oracle) are true",
+      "usdc.protocol(positions, exchange, oracle) are true; settlement, factory, registry and admin are false",
+      "usdc.protocolLocked() is true; usdc.admin() is the admin above"
+    ]
+  },
+  "notes": [
+    "Independent of the six legacy production contracts in base-mainnet.json; nothing here replaces them.",
+    "Contracts were deployed through the public CREATE2 proxy with the exact compiler initcode (protocol/deployments/virtual-base-mainnet.initcode.json), so Basescan can match the creation code. Salt prefix TacPredict.virtual.v2.",
+    "The first set (v1, salt prefix TacPredict.virtual.v1.) is deprecated and unused by the app: nothing was minted and no box granter was set. Only its USDC and Registry could be verified on Basescan.",
+    "Not independently audited. Real trading stays disabled until the launch checks in AGENTS.md pass."
+  ]
+}
