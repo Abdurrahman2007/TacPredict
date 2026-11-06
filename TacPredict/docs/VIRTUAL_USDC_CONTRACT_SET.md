@@ -59,7 +59,7 @@ Checked onchain after deployment: each address holds code, Exchange and Settleme
 
 Deployed through the public CREATE2 proxy with the exact compiler initcode (`protocol/deployments/virtual-base-mainnet.initcode.json`, salt prefix `TacPredict.virtual.v2.`), so Basescan can match the creation code byte for byte. VirtualUSDC and VirtualMarketRegistry were deployed in their own transactions; the oracle, factory, positions, exchange and settlement went out together in one atomic batch. The first set (v1, salt prefix `TacPredict.virtual.v1.`) is deprecated and unused: nothing was minted from it and no box granter was set for it. Only this v2 set is referenced by the app.
 
-**Status: deployed and wired, trading disabled in the app** (`VIRTUAL_SET_FLAGS.executionEnabled` is false). Basescan source verification is done by hand with the Standard-JSON-Input package; the `basescanVerified` flag and `basescan_verified` in the manifest are flipped after that.
+**Status: deployed and wired, trading disabled in the app** (`VIRTUAL_SET_FLAGS.executionEnabled` is false). The project owner verified all seven contracts on Basescan with the Standard-JSON-Input package on 2026-11-06 (reported by the owner; the flag `basescanVerified` and `basescan_verified` in the manifest are now true). Execution stays off until the quote endpoint, keeper and app screens exist.
 
 ### Order the contracts were deployed in
 

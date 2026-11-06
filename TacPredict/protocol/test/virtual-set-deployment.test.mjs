@@ -78,7 +78,7 @@ test("trading and verification flags are off and move together with the manifest
   assert.equal(VIRTUAL_SET_FLAGS.executionEnabled, false);
   assert.equal(manifest.trading_enabled, false);
   assert.equal(VIRTUAL_SET_FLAGS.basescanVerified, manifest.basescan_verified);
-  assert.deepEqual(virtualSetBlockers(), ["execution_disabled", "source_not_verified"]);
+  assert.deepEqual(virtualSetBlockers(), ["execution_disabled"]);
   assert.deepEqual(virtualSetBlockers({ executionEnabled: true, basescanVerified: true }), []);
   assert.deepEqual(virtualSetBlockers({ executionEnabled: true, basescanVerified: false }), ["source_not_verified"]);
 });

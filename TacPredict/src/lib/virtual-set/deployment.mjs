@@ -33,7 +33,7 @@ export const VIRTUAL_SET_FLAGS = Object.freeze({
   /** The app may send onchain buy/sell/check-in transactions. */
   executionEnabled: false,
   /** Source is verified on Basescan (flip after the manual verification is done). */
-  basescanVerified: false,
+  basescanVerified: true,
 });
 
 export const VIRTUAL_SET_EXPLORER = Object.freeze({

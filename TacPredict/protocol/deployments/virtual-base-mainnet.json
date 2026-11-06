@@ -3,7 +3,7 @@
   "chain_id": 8453,
   "status": "deployed_admin_controlled_trading_disabled",
   "trading_enabled": false,
-  "basescan_verified": false,
+  "basescan_verified": true,
   "admin": "0x57828f1aa32fD6be3988F240068Df53ed94b7AeF",
   "collateral_token": "0xe595d15d0824705d26483c6FdABFa45693bb071e",
   "collateral_is_virtual": true,
