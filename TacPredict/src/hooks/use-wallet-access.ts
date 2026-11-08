@@ -25,23 +25,31 @@ export function useWalletAccess(next: AuthNext = "/") {
   const state = walletAccess({ address: wallet.address, signedIn: Boolean(auth.user) });
   const { provider, address } = wallet;
 
-  const run = useCallback(async () => {
+  /** Resolves true when the wallet ends up signed in (or already was); false when it still needs attention. */
+  const run = useCallback(async (): Promise<boolean> => {
     setError("");
-    if (restoring) return;
+    if (restoring) return false;
     if (state === "connect") {
       login(next);
-      return;
+      return false;
     }
-    if (state !== "verify") return;
+    if (state !== "verify") return true;
     if (!provider) {
       setError("Your wallet is still starting. Try again in a moment.");
-      return;
+      return false;
     }
     setBusy(true);
     try {
       await signInWithEthereumWallet(provider, address);
-    } catch {
-      setError("Verification was not completed. Please try again.");
+      return true;
+    } catch (cause) {
+      const text = cause instanceof Error ? cause.message : "";
+      setError(
+        text.length > 0 && text.length < 140
+          ? text
+          : "Verification was not completed. Please try again.",
+      );
+      return false;
     } finally {
       setBusy(false);
     }

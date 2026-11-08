@@ -4,8 +4,13 @@ import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import { CHECKIN_DAYS, formatCountdown, useDailyCheckin } from "@/lib/daily-checkin";
 import { useLoginDialog } from "@/components/login-dialog";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
+import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { Link } from "@tanstack/react-router";
-import { isPriorityWallet, useWelcomeChest } from "@/lib/rewards/welcome-chest";
+import {
+  isPriorityWallet,
+  useWelcomeChest,
+  type OnchainBoxResult,
+} from "@/lib/rewards/welcome-chest";
 import { UsdcCoin, WelcomeChestBox } from "@/components/rewards/welcome-chest";
 import { usePaperLedger } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
@@ -53,6 +58,7 @@ function RewardsClient() {
   const paper = usePaperLedger();
   const tac = useTacPointsBalance();
   const auth = useProtocolUser();
+  const access = useWalletAccess("/rewards");
   const { ready, status, remaining, canClaim, claim, nextDay } = useDailyCheckin();
   const [opening, setOpening] = useState(false);
   const [burst, setBurst] = useState<number | null>(null);
@@ -90,8 +96,16 @@ function RewardsClient() {
     setChestError("");
     if (chest.onchain) {
       // The box is granted on Base by the reward wallet; the animation plays while that transaction confirms.
+      // A connected wallet that is not verified yet is verified first (one signature), then the box opens.
+      const address = wallet.address;
       const started = Date.now();
-      void chest.openOnchain(wallet.address).then((res) => {
+      void (async () => {
+        let res: OnchainBoxResult;
+        if (!auth.user && !(await access.run())) {
+          res = { ok: false, message: "Verify your wallet to open the box, then tap it again" };
+        } else {
+          res = await chest.openOnchain(address);
+        }
         const wait = Math.max(0, 1200 - (Date.now() - started));
         window.setTimeout(() => {
           if (res.ok) {
@@ -101,7 +115,7 @@ function RewardsClient() {
           }
           window.setTimeout(() => setOpening(false), res.ok ? 900 : 0);
         }, wait);
-      });
+      })();
       return;
     }
     window.setTimeout(() => {
@@ -145,7 +159,9 @@ function RewardsClient() {
               })}
         </strong>
         <span className="rw-unit">
-          {chest.onchain ? "Tradeable on Base · not withdrawable" : "Tradeable on paper · not withdrawable"}
+          {chest.onchain
+            ? "Tradeable on Base · not withdrawable"
+            : "Tradeable on paper · not withdrawable"}
         </span>
         <div className="rw-hero-stats">
           <div>
