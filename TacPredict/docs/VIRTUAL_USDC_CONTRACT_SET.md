@@ -80,7 +80,7 @@ The existing six addresses and `protocol/deployments/base-mainnet.json` are not 
 How a trade works (all with the unchanged six-contract set):
 
 1. The app asks the server for a quote for one market, outcome, side and size.
-2. The server reads the live feed (spot, strike, seconds left), computes the fair Up probability and signs **one order from the maker wallet**: valid for at most 10 seconds (never more than 30, never past the close), **bound to the asking wallet** (`taker`), at the maker's ask when the user buys and at the maker's bid when the user sells.
+2. The server reads the live feed (spot, strike, seconds left), computes the fair Up probability and signs **one order from the maker wallet**: valid for 30 seconds (never past the close), **bound to the asking wallet** (`taker`), at the maker's ask when the user buys and at the maker's bid when the user sells.
 3. The user's wallet sends `fillOrder`. That is the user's own onchain transaction and the user pays Base gas. Buying and selling are both `fillOrder`; no admin or server can fill on the user's behalf.
 4. The maker needs inventory: it `split`s vUSDC into complete Up and Down sets and sells from them, and `merge`s pairs back.
 
@@ -98,11 +98,41 @@ What the maker costs and risks, all virtual:
 - `sigmaPpm` must be calibrated from real feed history (the examples use 380 ppm per square-root second, which is cautious). A bigger sigma keeps prices nearer 50 cents for longer.
 - The maker signs with a private key held by the operator as a server secret. It is never in this repository and I never ask for it. Keep it separate from the admin (Safe multisig) and from the box granter.
 
+## On-chain trading: BTC, ETH, SOL, BNB in 5 and 15 minute windows
+
+Everything below lives in `src/lib/virtual-set/` and is **off until `VSET_TRADING_ENABLED=1`**. With it off the app behaves exactly as before (paper ledger).
+
+**What the user sees** is the existing Up/Down page. With the flag on, the balance, positions, history and profit come from the chain, the welcome box and daily check-in are real contract calls, and the buy and sell buttons send real Base transactions from the user's own wallet (they need a little ETH for gas; the ticket says so). 30 minute and longer windows show "Coming soon" until they are added.
+
+**Pieces**
+
+| Piece | File | What it does |
+| --- | --- | --- |
+| Window rules | `schedule.mjs`, `market-terms.mjs` | Window grid, market terms and hashes, result rule (close above open = Up, below = Down, equal = void), box amount tiers. Pure and tested. |
+| Keeper | `keeper.server.ts` | One bounded pass: approvals, create markets ahead for watched pages, stock them (`split`), propose the result from Coinbase 1 minute candles, finalize after the 60 s challenge, pay winners with `redeemFor`, index fills. A database lock keeps one run at a time. |
+| Quote | `quote.server.ts` | Signs one 30 second maker order bound to the asking wallet. Refuses if the market is not open, the price is missing or the maker lacks the shares / vUSDC. |
+| Trade (browser) | `trade.client.ts`, `trade-plan.mjs` | Approve once, fresh quote, dry-run, `fillOrder` from the user's wallet, then the server records the fill from the receipt. |
+| Box | `box.server.ts` | Picks the random $50-$500 draw and sends `grantBox` from the granter wallet. |
+| Account view | `portfolio.server.ts`, `ledger-view.ts` | Balance = token balance, positions = ERC-1155 balances with cost basis from indexed fills, resolved markets book a settled result. |
+
+**Resolution source and rule.** Results use Coinbase Exchange 1 minute candles (`coinbase-exchange:<PRODUCT>:candles:60s`), open of the first candle against the close of the last candle of the window. This is a trusted resolver run by the keeper wallet (PROPOSER_ROLE), not a decentralised oracle. A tie is void (every share pays half).
+
+**Operating it**
+
+1. Run `supabase/migration-drafts/virtual-set-v2-trading.sql` (step 1) in the Supabase SQL editor. Step 2 in the same file schedules the keeper once a minute with pg_cron.
+2. Set these Cloudflare secrets (never in git): `VSET_KEEPER_PRIVATE_KEY` (the wallet `0x1043...7515`, which is also the maker), `VSET_BOX_GRANTER_PRIVATE_KEY` (the wallet `0x0128...37E2`), `VSET_KEEPER_TRIGGER_SECRET` (any random 32+ character string, the same one used in the cron SQL). Optional: `VSET_RPC_URL` (a dedicated Base RPC is better than the public one).
+3. Fund the keeper with ETH for gas (every market costs a few cheap transactions) and with vUSDC float through `adminGrant` (50,000 is the plan). The granter needs a little ETH only.
+4. Set `VSET_TRADING_ENABLED=1` last.
+
+Each secret is checked against its fixed address, so a wrong key fails loudly instead of acting as someone else. The trigger secret only starts a keeper pass; it moves no funds.
+
+**Known limits.** One resolver (see above); the 30 second quote window is a free option for a trader faster than the feed (the spread and the per-wallet rate limit are the guard); markets with no trades are still resolved so the maker's float comes back; fee sponsorship is not built (users pay their own gas); the Workers plan must allow enough CPU time and subrequests for a keeper pass.
+
 ## Not decided / not built yet
 
-- The quote endpoint, the keeper that creates a market per asset and window and resolves it, the indexer/matcher configuration for the new set, and the app screens (box reveal, daily check-in, trade card) are not written. The contracts are deployed (see above); the app only has the read-only connection (`deployment.mjs`, `abi.ts`, `account.ts`) and no signer.
-- A box granter wallet must be set (`setBoxGranter`) and the market-maker wallet funded (`adminGrant`) before anything can be opened or traded.
-- After streak day 7 the check-in stays at 80 USDC a day (confirmed).
+- 30 minute, 1 hour, 12 hour and 24 hour windows on chain.
+- Fee sponsorship (a paymaster for new users).
 - Admin = Safe multisig (2 of 3 recommended), separate from the maker wallet and the box granter.
+- After streak day 7 the check-in stays at 80 USDC a day (confirmed).
 - Monthly TAC points formula and pool (see the Season plan doc). Do not tie points to the size of the box.
-- Independent review of `VirtualUSDC` and the maker flow before any mainnet use. Local tests are not an audit.
+- Independent review of `VirtualUSDC` and the maker flow before any larger rollout. Local tests are not an audit.

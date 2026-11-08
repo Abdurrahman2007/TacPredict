@@ -11,6 +11,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { cents } from "@/lib/protocol/display.mjs";
+import { useOnchainWindow } from "@/lib/virtual-set/use-onchain";
 import { UpDownIslandContent, type IslandContext } from "./island";
 import "@/styles/prediction-detail.css";
 
@@ -35,6 +36,8 @@ export function UpDownTradeBar({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string | undefined>(undefined);
   const view = market ?? reference;
+  // Being on a window's page tells the server to prepare its on-chain market ahead of the open.
+  useOnchainWindow(view.id);
   const initialApplied = useRef<string | undefined>(undefined);
   useEffect(() => {
     setOpen(false);
