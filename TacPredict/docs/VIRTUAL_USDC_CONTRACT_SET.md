@@ -111,7 +111,7 @@ Everything below lives in `src/lib/virtual-set/` and is **off until `VSET_TRADIN
 | Window rules | `schedule.mjs`, `market-terms.mjs` | Window grid, market terms and hashes, result rule (close above open = Up, below = Down, equal = void), box amount tiers. Pure and tested. |
 | Keeper | `keeper.server.ts` | One bounded pass: approvals, create markets ahead for watched pages, stock them (`split`), propose the result from Coinbase 1 minute candles, finalize after the 60 s challenge, pay winners with `redeemFor`, index fills. A database lock keeps one run at a time. |
 | Quote | `quote.server.ts` | Signs one 30 second maker order bound to the asking wallet. Refuses if the market is not open, the price is missing or the maker lacks the shares / vUSDC. |
-| Trade (browser) | `trade.client.ts`, `trade-plan.mjs` | Approve once, fresh quote, dry-run, `fillOrder` from the user's wallet, then the server records the fill from the receipt. |
+| Trade (browser) | `wallet-trade.ts`, `trade-plan.mjs` | Approve once, fresh quote, dry-run, `fillOrder` from the user's wallet, then the server records the fill from the receipt. |
 | Box | `box.server.ts` | Picks the random $50-$500 draw and sends `grantBox` from the granter wallet. |
 | Account view | `portfolio.server.ts`, `ledger-view.ts` | Balance = token balance, positions = ERC-1155 balances with cost basis from indexed fills, resolved markets book a settled result. |
 

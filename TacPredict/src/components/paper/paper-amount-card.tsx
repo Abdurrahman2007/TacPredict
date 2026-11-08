@@ -3,7 +3,7 @@ import type { Market } from "@/domain/markets/types";
 import { useLoginDialog } from "@/components/login-dialog";
 import { usePaperLedger } from "@/lib/paper/ledger";
 import { sharesToAtomic } from "@/lib/virtual-set/trade-plan.mjs";
-import { executeOnchainTrade } from "@/lib/virtual-set/trade.client";
+import { executeOnchainTrade } from "@/lib/virtual-set/wallet-trade";
 import { useOnchainWindow, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
 
 /** Short button text for a window that cannot take a trade yet (reason comes from the server). */

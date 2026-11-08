@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { secondsUntil } from "@/lib/reward-clock";
-import { sendCheckIn } from "@/lib/virtual-set/trade.client";
+import { sendCheckIn } from "@/lib/virtual-set/wallet-trade";
 import { useOnchainCheckinStatus, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
 
 /** Day 1 = $20 … Day 7 = $80 (+$10/day). UI ladder; claim prefers RPC when available. */
