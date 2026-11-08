@@ -11,9 +11,9 @@ export const ASSETS = {
 };
 /** Product assets only — XRP permanently removed (no Base settlement path). */
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
-/** Supported paper / UI durations (minutes). 15m was removed in the virtual-only cleanup; ?d=15 falls back to 5m via parseDuration. */
-export const DURATIONS = [5, 30, 60, 720, 1440];
-export const DISPLAY_DURATIONS = [5, 30, 60, 720, 1440];
+/** Supported UI durations (minutes). 15m is back for the on-chain Virtual USDC set (5m and 15m trade on Base). */
+export const DURATIONS = [5, 15, 30, 60, 720, 1440];
+export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */

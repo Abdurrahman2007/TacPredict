@@ -56,6 +56,7 @@ function RewardsClient() {
   const { ready, status, remaining, canClaim, claim, nextDay } = useDailyCheckin();
   const [opening, setOpening] = useState(false);
   const [burst, setBurst] = useState<number | null>(null);
+  const [chestError, setChestError] = useState("");
   const isConnected = Boolean(wallet.address);
   /** Tradeable Virtual USDC = paper ledger (welcome box + check-in credits + trades). */
   const virtualUsdc = isConnected ? paper.balance : 0;
@@ -86,6 +87,23 @@ function RewardsClient() {
     }
     if (chest.opened || opening) return;
     setOpening(true);
+    setChestError("");
+    if (chest.onchain) {
+      // The box is granted on Base by the reward wallet; the animation plays while that transaction confirms.
+      const started = Date.now();
+      void chest.openOnchain(wallet.address).then((res) => {
+        const wait = Math.max(0, 1200 - (Date.now() - started));
+        window.setTimeout(() => {
+          if (res.ok) {
+            if (res.amount !== null) setBurst(res.amount);
+          } else {
+            setChestError(res.message);
+          }
+          window.setTimeout(() => setOpening(false), res.ok ? 900 : 0);
+        }, wait);
+      });
+      return;
+    }
     window.setTimeout(() => {
       const next = chest.open(wallet.address!);
       setBurst(next.amount);
@@ -126,7 +144,9 @@ function RewardsClient() {
                 maximumFractionDigits: 2,
               })}
         </strong>
-        <span className="rw-unit">Tradeable on paper · not withdrawable</span>
+        <span className="rw-unit">
+          {chest.onchain ? "Tradeable on Base · not withdrawable" : "Tradeable on paper · not withdrawable"}
+        </span>
         <div className="rw-hero-stats">
           <div>
             <small>Streak</small>
@@ -184,6 +204,11 @@ function RewardsClient() {
               Continue to daily check-in
             </button>
           )}
+          {chestError ? (
+            <p className="rw-msg" role="alert">
+              {chestError}
+            </p>
+          ) : null}
         </section>
       ) : null}
 

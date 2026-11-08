@@ -1,4 +1,6 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { EMPTY_ONCHAIN_LEDGER, onchainToLedger } from "@/lib/virtual-set/ledger-view";
+import { useOnchainAccount } from "@/lib/virtual-set/use-onchain";
 
 /** v2: start at $0 — Virtual USDC only from rewards / trades, never a free $10k grant.
  * PAPER ONLY: this browser localStorage ledger must never be used as a source for
@@ -187,7 +189,16 @@ export function usePaperLedger(): Ledger & {
   }) => { ok: true } | { ok: false; message: string };
   sell: (positionId: string, priceCents: number) => { ok: true; pnl: number } | { ok: false; message: string };
 } {
-  const ledger = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const paper = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // When on-chain trading is switched on, the account is the connected wallet's real Virtual USDC on Base and the
+  // local paper ledger is not shown (and never touched).
+  const chain = useOnchainAccount();
+  const chainLedger = useMemo(
+    () => (chain.portfolio ? onchainToLedger(chain.portfolio) : EMPTY_ONCHAIN_LEDGER),
+    [chain.portfolio],
+  );
+  const onchain = chain.enabled;
+  const ledger = onchain ? chainLedger : paper;
 
   const buy = useCallback(
     ({
@@ -203,6 +214,7 @@ export function usePaperLedger(): Ledger & {
       usdc: number;
       priceCents: number;
     }) => {
+      if (onchain) return { ok: false as const, message: "Trades are made on chain" };
       if (!(usdc > 0) || !(priceCents > 0 && priceCents <= 100))
         return { ok: false as const, message: "Invalid order" };
       const price = Math.min(0.99, Math.max(0.01, priceCents / 100));
@@ -252,10 +264,11 @@ export function usePaperLedger(): Ledger & {
       });
       return { ok: true as const };
     },
-    [],
+    [onchain],
   );
 
   const sell = useCallback((positionId: string, priceCents: number) => {
+    if (onchain) return { ok: false as const, message: "Trades are made on chain" };
     if (!(priceCents > 0 && priceCents <= 100))
       return { ok: false as const, message: "Invalid price" };
     const cur = syncFromStorage();
@@ -283,7 +296,7 @@ export function usePaperLedger(): Ledger & {
       realizedPnl: Math.round((cur.realizedPnl + pnl) * 1e6) / 1e6,
     });
     return { ok: true as const, pnl };
-  }, []);
+  }, [onchain]);
 
   return {
     balance: ledger.balance,

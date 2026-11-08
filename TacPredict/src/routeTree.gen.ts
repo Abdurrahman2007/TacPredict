@@ -27,6 +27,8 @@ import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
+import { Route as ApiV2KeeperRouteImport } from './routes/api/v2/keeper'
+import { Route as ApiV2MarketKeyRouteImport } from './routes/api/v2/market/$key'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -118,6 +120,16 @@ const ApiProtocolMetadataHashRoute = ApiProtocolMetadataHashRouteImport.update({
   path: '/api/protocol/metadata/$hash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV2KeeperRoute = ApiV2KeeperRouteImport.update({
+  id: '/api/v2/keeper',
+  path: '/api/v2/keeper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2MarketKeyRoute = ApiV2MarketKeyRouteImport.update({
+  id: '/api/v2/market/$key',
+  path: '/api/v2/market/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,6 +150,8 @@ export interface FileRoutesByFullPath {
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/v2/keeper': typeof ApiV2KeeperRoute
+  '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -157,6 +171,8 @@ export interface FileRoutesByTo {
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/v2/keeper': typeof ApiV2KeeperRoute
+  '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,6 +194,8 @@ export interface FileRoutesById {
   '/up-down_/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/v2/keeper': typeof ApiV2KeeperRoute
+  '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +218,8 @@ export interface FileRouteTypes {
     | '/up-down/$asset'
     | '/admin/'
     | '/api/protocol/metadata/$hash'
+    | '/api/v2/keeper'
+    | '/api/v2/market/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +239,8 @@ export interface FileRouteTypes {
     | '/up-down/$asset'
     | '/admin'
     | '/api/protocol/metadata/$hash'
+    | '/api/v2/keeper'
+    | '/api/v2/market/$key'
   id:
     | '__root__'
     | '/'
@@ -239,6 +261,8 @@ export interface FileRouteTypes {
     | '/up-down_/$asset'
     | '/admin/'
     | '/api/protocol/metadata/$hash'
+    | '/api/v2/keeper'
+    | '/api/v2/market/$key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,6 +281,8 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   UpDownAssetRoute: typeof UpDownAssetRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
+  ApiV2KeeperRoute: typeof ApiV2KeeperRoute
+  ApiV2MarketKeyRoute: typeof ApiV2MarketKeyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -387,6 +413,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProtocolMetadataHashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v2/keeper': {
+      id: '/api/v2/keeper'
+      path: '/api/v2/keeper'
+      fullPath: '/api/v2/keeper'
+      preLoaderRoute: typeof ApiV2KeeperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/market/$key': {
+      id: '/api/v2/market/$key'
+      path: '/api/v2/market/$key'
+      fullPath: '/api/v2/market/$key'
+      preLoaderRoute: typeof ApiV2MarketKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -420,6 +460,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   UpDownAssetRoute: UpDownAssetRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
+  ApiV2KeeperRoute: ApiV2KeeperRoute,
+  ApiV2MarketKeyRoute: ApiV2MarketKeyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

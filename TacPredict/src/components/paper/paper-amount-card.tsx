@@ -1,6 +1,18 @@
 import { useId, useMemo, useState } from "react";
 import type { Market } from "@/domain/markets/types";
+import { useLoginDialog } from "@/components/login-dialog";
 import { usePaperLedger } from "@/lib/paper/ledger";
+import { sharesToAtomic } from "@/lib/virtual-set/trade-plan.mjs";
+import { executeOnchainTrade } from "@/lib/virtual-set/wallet-trade";
+import { useOnchainWindow, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
+
+/** Short button text for a window that cannot take a trade yet (reason comes from the server). */
+function waitLabel(reason: string | null) {
+  if (reason === "not_open") return "Opens soon";
+  if (reason === "closing" || reason === "ended") return "Closed";
+  if (reason === "market_failed") return "Unavailable";
+  return "Preparing…";
+}
 
 function money(n: number) {
   const sign = n > 0 ? "+" : n < 0 ? "−" : "";
@@ -23,6 +35,16 @@ export function PaperAmountCard({
   settlementNote?: string;
 }) {
   const ledger = usePaperLedger();
+  const wallet = useOptionalWallet();
+  const openLogin = useLoginDialog();
+  const onchain = useOnchainWindow(market.id);
+  const refreshChain = useRefreshOnchain();
+  // On-chain mode: the 5 and 15 minute windows trade real Virtual USDC on Base from the user's own wallet.
+  const chainMode = onchain.enabled;
+  const chainBlocked = chainMode && !onchain.supported;
+  const needsWallet = chainMode && onchain.supported && !wallet?.address;
+  const waiting = chainMode && onchain.supported && !onchain.ready;
+  const [busy, setBusy] = useState(false);
   const id = useId();
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
@@ -52,9 +74,90 @@ export function PaperAmountCard({
     );
   }
 
+  async function submitChainBuy(side: "Up" | "Down") {
+    if (!wallet?.address) {
+      openLogin();
+      return;
+    }
+    if (!wallet.provider) {
+      setNotice("Wallet is not ready — reconnect it and try again");
+      return;
+    }
+    setBusy(true);
+    setNotice("");
+    const res = await executeOnchainTrade({
+      provider: wallet.provider,
+      address: wallet.address,
+      chainId: wallet.chainId,
+      switchToBase: wallet.switchToBase,
+      key: market.id,
+      outcome: side === "Up" ? 0 : 1,
+      side: "buy",
+      amount: usdc.toFixed(2),
+      shownCents: priceCents,
+      onStatus: setNotice,
+    });
+    if (res.ok) {
+      setNotice(`Bought ${res.shares.toFixed(2)} ${side} at ${res.priceCents}¢ · to win $${res.shares.toFixed(2)}`);
+      setAmount("");
+      setMode("sell");
+      await refreshChain();
+    } else {
+      setNotice(res.message);
+    }
+    setBusy(false);
+  }
+
+  async function submitChainSell(positionId: string, liveCents: number) {
+    const position = ledger.positions.find((p) => p.id === positionId);
+    const atomic = position ? sharesToAtomic(position.shares) : null;
+    if (!position || atomic === null) {
+      setNotice("Position not found");
+      return;
+    }
+    if (!wallet?.address) {
+      openLogin();
+      return;
+    }
+    if (!wallet.provider) {
+      setNotice("Wallet is not ready — reconnect it and try again");
+      return;
+    }
+    setBusy(true);
+    setNotice("");
+    const res = await executeOnchainTrade({
+      provider: wallet.provider,
+      address: wallet.address,
+      chainId: wallet.chainId,
+      switchToBase: wallet.switchToBase,
+      key: market.id,
+      outcome: position.side === "Up" ? 0 : 1,
+      side: "sell",
+      sharesAtomic: atomic,
+      shownCents: liveCents,
+      onStatus: setNotice,
+    });
+    if (res.ok) {
+      const pnl = res.usdc - position.shares * position.avgCost;
+      setNotice(`Sold at ${res.priceCents}¢ · PnL ${money(pnl)}`);
+      await refreshChain();
+    } else {
+      setNotice(res.message);
+    }
+    setBusy(false);
+  }
+
   function submitBuy() {
     if (!tradingAllowed) {
       setNotice(settlementNote ?? "Trading unavailable for this market");
+      return;
+    }
+    if (chainBlocked) {
+      setNotice("This window length is coming soon on chain — try 5 or 15 min");
+      return;
+    }
+    if (needsWallet) {
+      openLogin();
       return;
     }
     if (expired) {
@@ -66,6 +169,10 @@ export function PaperAmountCard({
       return;
     }
     const side = sideOnOutcome(outcome.label);
+    if (chainMode) {
+      void submitChainBuy(side);
+      return;
+    }
     const res = ledger.buy({
       marketId: market.id,
       title: market.title,
@@ -87,6 +194,10 @@ export function PaperAmountCard({
       setNotice(settlementNote ?? "Trading unavailable for this market");
       return;
     }
+    if (chainMode) {
+      void submitChainSell(positionId, liveCents);
+      return;
+    }
     const res = ledger.sell(positionId, liveCents);
     if (res.ok) {
       setNotice(`Sold · PnL ${money(res.pnl)}`);
@@ -96,7 +207,7 @@ export function PaperAmountCard({
   }
 
   return (
-    <section className="pd-order" aria-label="Paper Virtual USDC trade">
+    <section className="pd-order" aria-label={chainMode ? "Virtual USDC trade on Base" : "Paper Virtual USDC trade"}>
       <div className="pd-order-controls">
         <div className="pd-mode" aria-label="Order direction">
           {(["buy", "sell"] as const).map((m) => (
@@ -142,7 +253,9 @@ export function PaperAmountCard({
           <div className="pd-amount-panel">
             <div className="pd-balance">
               <span>${ledger.balance.toFixed(2)}</span>
-              <small>Virtual USDC · paper · non-redeemable</small>
+              <small>
+                {chainMode ? "Virtual USDC · on-chain · non-redeemable" : "Virtual USDC · paper · non-redeemable"}
+              </small>
             </div>
             <label htmlFor={id} className="pd-amount-input">
               <span>$</span>
@@ -154,7 +267,7 @@ export function PaperAmountCard({
                 aria-label="Buy amount in Virtual USDC"
                 value={amount}
                 placeholder="0"
-                disabled={!tradingAllowed || expired}
+                disabled={!tradingAllowed || expired || chainBlocked || busy}
                 style={{ width: `${Math.max(1, Math.min(12, amount.length || 1))}ch` }}
                 onChange={(e) => {
                   if (/^\d{0,10}(\.\d{0,2})?$/.test(e.target.value)) setAmount(e.target.value);
@@ -166,7 +279,7 @@ export function PaperAmountCard({
                 <button
                   type="button"
                   key={n}
-                  disabled={!tradingAllowed || expired}
+                  disabled={!tradingAllowed || expired || chainBlocked || busy}
                   onClick={() => setAmount(String(n))}
                 >
                   ${n}
@@ -174,7 +287,7 @@ export function PaperAmountCard({
               ))}
               <button
                 type="button"
-                disabled={!tradingAllowed || expired || !(ledger.balance > 0)}
+                disabled={!tradingAllowed || expired || chainBlocked || busy || !(ledger.balance > 0)}
                 onClick={() => setAmount(String(Math.floor(ledger.balance * 100) / 100))}
               >
                 Max
@@ -217,28 +330,43 @@ export function PaperAmountCard({
             type="button"
             className="pd-submit"
             disabled={
+              busy ||
               !tradingAllowed ||
+              chainBlocked ||
               expired ||
-              !(usdc > 0) ||
-              usdc > ledger.balance ||
-              priceCents == null ||
-              priceCents <= 0
+              (needsWallet
+                ? false
+                : waiting ||
+                  !(usdc > 0) ||
+                  usdc > ledger.balance ||
+                  priceCents == null ||
+                  priceCents <= 0)
             }
             onClick={submitBuy}
           >
-            {!tradingAllowed
-              ? "Unavailable"
-              : expired
-                ? "Expired"
-                : usdc > ledger.balance
-                  ? "Insufficient balance"
-                  : outcome
-                    ? `Buy ${outcome.label}${usdc > 0 ? ` · $${usdc.toFixed(2)}` : ""}`
-                    : "Trade"}
+            {busy
+              ? "Working…"
+              : !tradingAllowed
+                ? "Unavailable"
+                : chainBlocked
+                  ? "Coming soon"
+                  : needsWallet
+                    ? "Connect wallet"
+                    : expired
+                      ? "Expired"
+                      : waiting
+                        ? waitLabel(onchain.reason)
+                        : usdc > ledger.balance
+                          ? "Insufficient balance"
+                          : outcome
+                            ? `Buy ${outcome.label}${usdc > 0 ? ` · $${usdc.toFixed(2)}` : ""}`
+                            : "Trade"}
           </button>
           <p className="pd-order-note">
-            {settlementNote ??
-              "Share prices track live spot vs open. Virtual USDC only — no withdraw."}
+            {chainMode
+              ? "Real Base transactions: each trade needs a little ETH for the network fee. Virtual USDC only — no withdraw."
+              : (settlementNote ??
+                "Share prices track live spot vs open. Virtual USDC only — no withdraw.")}
           </p>
         </>
       ) : (
@@ -284,7 +412,7 @@ export function PaperAmountCard({
                       type="button"
                       className="pd-submit"
                       style={{ width: "auto", minHeight: 40, margin: 0, padding: "0 16px" }}
-                      disabled={!tradingAllowed || live == null}
+                      disabled={busy || !tradingAllowed || live == null || (chainMode && (!onchain.supported || waiting))}
                       onClick={() => live != null && submitSell(p.id, live)}
                     >
                       Sell {live != null ? `${Math.round(live)}¢` : ""}

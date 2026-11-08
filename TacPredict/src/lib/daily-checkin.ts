@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { secondsUntil } from "@/lib/reward-clock";
+import { sendCheckIn } from "@/lib/virtual-set/wallet-trade";
+import { useOnchainCheckinStatus, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
 
 /** Day 1 = $20 … Day 7 = $80 (+$10/day). UI ladder; claim prefers RPC when available. */
 export const CHECKIN_DAYS = [20, 30, 40, 50, 60, 70, 80] as const;
@@ -51,6 +53,9 @@ function nextFromStreak(streak: number) {
 export function useDailyCheckin() {
   const { user, ready } = useProtocolUser();
   const client = useQueryClient();
+  const wallet = useOptionalWallet();
+  const chain = useOnchainCheckinStatus();
+  const refreshChain = useRefreshOnchain();
   const [clock, setClock] = useState(() => Date.now());
 
   const status = useQuery({
@@ -120,14 +125,39 @@ export function useDailyCheckin() {
     return () => window.clearInterval(id);
   }, []);
 
-  const remaining = status.data
-    ? secondsUntil(status.data.availableAt, clock + status.data.serverOffset)
-    : 0;
-  const canClaim = Boolean(status.data?.ok && remaining <= 0);
-  const nextDay = status.data ? dayFromReward(status.data.nextReward) : 1;
+  // On-chain mode: the streak and the next reward come from the contract (one check-in per UTC day).
+  const chainData: Status | undefined = chain.status
+    ? {
+        ok: true,
+        availableAt: chain.status.availableAtMs ? new Date(chain.status.availableAtMs).toISOString() : null,
+        nextReward: chain.status.nextReward,
+        serverOffset: 0,
+        streak: chain.status.streak,
+        balance: 0,
+        local: false,
+      }
+    : undefined;
+  const onchain = chain.enabled && chain.address !== null;
+  const view: Pick<typeof status, "data"> = onchain ? { data: chainData } : status;
+  const remaining = view.data ? secondsUntil(view.data.availableAt, clock + view.data.serverOffset) : 0;
+  const canClaim = onchain
+    ? chain.status?.available === true
+    : Boolean(view.data?.ok && remaining <= 0);
+  const nextDay = view.data ? dayFromReward(view.data.nextReward) : 1;
 
   const claim = useMutation({
     mutationFn: async () => {
+      if (onchain) {
+        if (!wallet?.address || !wallet.provider) throw Error("Connect your wallet first");
+        const sent = await sendCheckIn({
+          provider: wallet.provider,
+          address: wallet.address,
+          chainId: wallet.chainId,
+          switchToBase: wallet.switchToBase,
+        });
+        if (!sent.ok) throw Error(sent.message);
+        return { ok: true, reward: chain.status?.nextReward ?? 20, balance: 0, streak: (chain.status?.streak ?? 0) + 1 };
+      }
       // Prefer on-chain / RPC path when signed in.
       if (user?.id && !status.data?.local) {
         const { data, error } = await supabase.rpc("claim_daily_reward");
@@ -165,13 +195,14 @@ export function useDailyCheckin() {
     },
     onSuccess: async () => {
       await Promise.all([
+        refreshChain(),
         client.invalidateQueries({ queryKey: ["daily-checkin"] }),
         client.invalidateQueries({ queryKey: ["tac-points-balance"] }),
       ]);
     },
   });
 
-  return { ready, user, status, remaining, canClaim, claim, nextDay };
+  return { ready, user, status: view, remaining, canClaim, claim, nextDay };
 }
 
 export function formatCountdown(totalSeconds: number) {
