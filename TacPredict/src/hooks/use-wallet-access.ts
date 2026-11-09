@@ -5,6 +5,7 @@ import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
 import { ACCESS_LABEL, walletAccess } from "@/lib/onchain/wallet-access.mjs";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
+import { showWalletNotice } from "@/lib/wallet-notice";
 
 /**
  * One answer to "can this person use wallet features yet?" for every page.
@@ -23,37 +24,41 @@ export function useWalletAccess(next: AuthNext = "/") {
   // and buttons must show a neutral loading label instead of "Connect".
   const restoring = wallet.restoring;
   const state = walletAccess({ address: wallet.address, signedIn: Boolean(auth.user) });
-  const { provider, address } = wallet;
+  const { provider, address, chainId } = wallet;
 
-  /** Resolves true when the wallet ends up signed in (or already was); false when it still needs attention. */
-  const run = useCallback(async (): Promise<boolean> => {
+  /**
+   * Signs the connected wallet in when it has no session yet. `ok` is true when the wallet ends up signed in (or
+   * already was); otherwise `message` says why (empty when nothing went wrong, e.g. the connect modal opened).
+   */
+  const run = useCallback(async (): Promise<{ ok: true } | { ok: false; message: string }> => {
     setError("");
-    if (restoring) return false;
+    if (restoring) return { ok: false, message: "" };
     if (state === "connect") {
       login(next);
-      return false;
+      return { ok: false, message: "" };
     }
-    if (state !== "verify") return true;
-    if (!provider) {
-      setError("Your wallet is still starting. Try again in a moment.");
-      return false;
-    }
+    if (state !== "verify") return { ok: true };
+    const fail = (message: string) => {
+      setError(message);
+      showWalletNotice(message);
+      return { ok: false as const, message };
+    };
+    if (!provider) return fail("Your wallet is still starting. Try again in a moment.");
     setBusy(true);
     try {
-      await signInWithEthereumWallet(provider, address);
-      return true;
+      await signInWithEthereumWallet(provider, address, chainId);
+      return { ok: true };
     } catch (cause) {
       const text = cause instanceof Error ? cause.message : "";
-      setError(
-        text.length > 0 && text.length < 140
+      return fail(
+        text.length > 0 && text.length < 220
           ? text
           : "Verification was not completed. Please try again.",
       );
-      return false;
     } finally {
       setBusy(false);
     }
-  }, [restoring, state, provider, address, login, next]);
+  }, [restoring, state, provider, address, chainId, login, next]);
 
   return {
     state,

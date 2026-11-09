@@ -101,8 +101,12 @@ function RewardsClient() {
       const started = Date.now();
       void (async () => {
         let res: OnchainBoxResult;
-        if (!auth.user && !(await access.run())) {
-          res = { ok: false, message: "Verify your wallet to open the box, then tap it again" };
+        const verified = auth.user ? ({ ok: true } as const) : await access.run();
+        if (!verified.ok) {
+          res = {
+            ok: false,
+            message: verified.message || "Verify your wallet to open the box, then tap it again",
+          };
         } else {
           res = await chest.openOnchain(address);
         }

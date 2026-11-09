@@ -7,18 +7,26 @@ import { isPlainSignature, isSignatureShape, signInReasonText } from "./smart-wa
 export async function signInWithEthereumWallet(
   wallet: WalletProvider,
   knownAddress?: string | null,
+  knownChainId?: number | null,
 ) {
   const siwe = import.meta.env.SSR ? null : await import("viem/siwe");
   if (!siwe) throw new Error("Wallet sign-in needs a browser.");
-  const existing = await wallet.request({ method: "eth_accounts" });
-  // A wallet that wagmi already connected is never asked to connect again just to sign in.
-  const accounts =
-    Array.isArray(existing) && existing.length
-      ? existing
-      : knownAddress && /^0x[0-9a-f]{40}$/i.test(knownAddress)
-        ? [knownAddress]
+  // A wallet that wagmi already connected is never asked anything else just to sign in: its address and network are
+  // already known, and every extra request is another chance for the wallet to drop the connection.
+  const known = knownAddress && /^0x[0-9a-f]{40}$/i.test(knownAddress) ? knownAddress : null;
+  let accounts: unknown;
+  if (known) accounts = [known];
+  else {
+    const existing = await wallet.request({ method: "eth_accounts" });
+    accounts =
+      Array.isArray(existing) && existing.length
+        ? existing
         : await wallet.request({ method: "eth_requestAccounts" });
-  const chain = await wallet.request({ method: "eth_chainId" });
+  }
+  const chain =
+    knownChainId && Number.isSafeInteger(knownChainId) && knownChainId > 0
+      ? `0x${knownChainId.toString(16)}`
+      : await wallet.request({ method: "eth_chainId" });
   if (
     !Array.isArray(accounts) ||
     typeof accounts[0] !== "string" ||
@@ -62,10 +70,11 @@ export async function signInWithEthereumWallet(
   // A smart-contract wallet (Base Account and similar): its longer proof is judged by the wallet's contract on Base,
   // which only the server can ask. The server hands back a one-time token that becomes a normal session here.
   const result = await signInSmartWallet({ data: { message, signature } });
-  if (!result.ok) throw new Error(signInReasonText(result.reason));
+  if (!result.ok) throw new Error(signInReasonText(result.reason, result.detail));
+  // "email" accepts a token made for either a new or an existing account.
   const { error } = await supabase.auth.verifyOtp({
-    type: "magiclink",
+    type: "email",
     token_hash: result.tokenHash,
   });
-  if (error) throw error;
+  if (error) throw new Error(`Could not open the session (${error.message})`);
 }

@@ -155,6 +155,15 @@ test("a normal wallet's Web3 identity still matches", () => {
   assert.equal(sessionMatchesWallet(session, `0x${"2".repeat(40)}`, NOW / 1000), false);
 });
 
+test("a refusal can carry the failing step so it can be traced", () => {
+  assert.match(
+    signInReasonText("unavailable", "link: rate limit"),
+    /unavailable.*\(link: rate limit\)/i,
+  );
+  assert.equal(signInReasonText("expired"), signInReasonText("expired", ""));
+  assert.ok(signInReasonText("unavailable", "x".repeat(500)).length < 200);
+});
+
 test("refusals read in plain words", () => {
   for (const reason of [
     "expired",

@@ -31,16 +31,18 @@ test("the wallet connected in wagmi is mirrored without asking the wallet to con
   assert.ok(bridge.includes("adopt({ address, chainId: chainId ?? null, provider })"));
   assert.ok(!/\bconnect\(\{/.test(bridge), "the bridge no longer calls the prompting connect()");
   assert.ok(bridge.includes("withTimeout(connector.getProvider()"), "a silent wallet cannot block it");
-  assert.ok(bridge.includes("signInWithEthereumWallet(provider, address)"));
+  assert.ok(bridge.includes("signInWithEthereumWallet(provider, address, chainId ?? null)"));
   // Restored connections still never open a signature request.
   assert.ok(bridge.includes('if (decision === "skip") return;'));
 });
 
 test("sign-in reuses the connected account before it would ask the wallet to connect", () => {
   const auth = read("src/lib/onchain/wallet-auth.ts");
-  const known = auth.indexOf("knownAddress &&");
+  const known = auth.indexOf("if (known) accounts = [known]");
   const request = auth.indexOf('method: "eth_requestAccounts"');
   assert.ok(known > 0 && request > known, "known address is tried first");
+  // With the address and network already known, sign-in asks the wallet for nothing but the signature.
+  assert.ok(auth.includes("knownChainId"));
 });
 
 test("every wallet-gated button follows the shared access state", () => {
@@ -57,7 +59,7 @@ test("every wallet-gated button follows the shared access state", () => {
   }
   const hook = read("src/hooks/use-wallet-access.ts");
   assert.ok(hook.includes('if (state === "connect")'));
-  assert.ok(hook.includes("signInWithEthereumWallet(provider, address)"));
+  assert.ok(hook.includes("signInWithEthereumWallet(provider, address, chainId)"));
 });
 
 test("the header wallet control never sits on a blank pill: it says what it waits for and gives up after a while", () => {

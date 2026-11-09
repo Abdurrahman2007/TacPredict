@@ -7,6 +7,7 @@ import { BrandMark } from "./brand-mark";
 import "@/styles/ios-polish.css";
 import { LoginButton } from "./login-dialog";
 import { PortfolioNavLabel } from "./portfolio-nav-label";
+import { WalletNotice } from "./wallet-notice";
 /** Crypto-first shell: Markets list removed from nav; Rewards replaces that slot. */
 const navItems = [
   { to: "/" as const, label: "Home", icon: House, portfolio: false },
@@ -26,6 +27,7 @@ function ShellContent({ children }: { children: ReactNode }) {
   const onHome = useRouterState({ select: (state) => state.location.pathname === "/" });
   return (
     <div className="min-h-dvh bg-background text-foreground">
+      <WalletNotice />
       <header className="app-header hd-v2 sticky top-0 z-40 backdrop-blur-2xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
           <Link

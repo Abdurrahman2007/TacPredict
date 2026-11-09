@@ -19,4 +19,4 @@ export declare function checkSignInMessage(input: {
   hosts: ReadonlyArray<string | null | undefined>;
   nowMs: number;
 }): SignInCheck;
-export declare function signInReasonText(reason: string): string;
+export declare function signInReasonText(reason: string, detail?: string | null): string;
