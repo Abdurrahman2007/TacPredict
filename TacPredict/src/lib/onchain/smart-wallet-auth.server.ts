@@ -31,7 +31,17 @@ export type SmartSignInResult =
         | "bad_signature"
         | "address_taken"
         | "unavailable";
+      /** Which step failed (never a secret); shown to the person so a failure can be traced. */
+      detail?: string;
     };
+
+const brief = (error: unknown): string => {
+  const text =
+    error && typeof error === "object" && "message" in error
+      ? String(error.message)
+      : String(error ?? "");
+  return text.replace(/\s+/g, " ").slice(0, 90);
+};
 
 const admin = supabaseAdmin as unknown as SupabaseClient;
 
