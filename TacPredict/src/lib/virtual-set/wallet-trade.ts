@@ -16,6 +16,7 @@ import {
 } from "viem";
 import { base } from "viem/chains";
 import type { WalletProvider } from "@/lib/onchain/wallet";
+import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import {
   gasSponsorshipAvailable,
   sponsoredWriteContract,
@@ -69,7 +70,12 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
     const account = getAddress(input.address);
     const transport = custom(input.provider);
     const pub = createPublicClient({ chain: base, transport });
-    const wallet = createWalletClient({ account, chain: base, transport });
+    const wallet = createWalletClient({
+      account,
+      chain: base,
+      transport,
+      dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+    });
 
     if (input.chainId !== base.id) {
       say("Switching your wallet to Base…");
@@ -223,7 +229,12 @@ export async function sendCheckIn(input: Pick<OnchainTradeInput, "provider" | "a
     const account = getAddress(input.address);
     const transport = custom(input.provider);
     const pub = createPublicClient({ chain: base, transport });
-    const wallet = createWalletClient({ account, chain: base, transport });
+    const wallet = createWalletClient({
+      account,
+      chain: base,
+      transport,
+      dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+    });
     if (input.chainId !== base.id) await input.switchToBase();
     if ((await pub.getChainId()) !== base.id) return { ok: false as const, message: "Switch your wallet to the Base network" };
     const sponsored = gasSponsorshipAvailable();

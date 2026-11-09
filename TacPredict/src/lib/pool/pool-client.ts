@@ -10,6 +10,7 @@ import {
 import { base } from "viem/chains";
 import type { WalletState } from "@/lib/onchain/wallet";
 import { BASE_NETWORK } from "@/lib/onchain/base";
+import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import { ERC20_ABI_TEXT, POOL_ABI_TEXT } from "./abi";
 import { durationSeconds, poolAssetId, poolErrorMessage, type PoolAsset } from "./pool.mjs";
 
@@ -34,7 +35,12 @@ async function clients(w: WalletState) {
   return {
     pub,
     account,
-    wallet: createWalletClient({ chain: base, account, transport: custom(w.provider) }),
+    wallet: createWalletClient({
+      chain: base,
+      account,
+      transport: custom(w.provider),
+      dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+    }),
   };
 }
 

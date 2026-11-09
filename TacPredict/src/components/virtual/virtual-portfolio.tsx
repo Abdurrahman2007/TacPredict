@@ -1,6 +1,7 @@
 import type { VirtualDeployment } from "@/lib/virtual/types";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
+import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import { useState } from "react";
 import { createPublicClient, createWalletClient, custom, defineChain } from "viem";
 import { base, baseSepolia } from "viem/chains";
@@ -54,7 +55,11 @@ export function VirtualPortfolio({
                 rpcUrls: { default: { http: [] } },
               });
       const pub = createPublicClient({ chain, transport: custom(w.provider) }),
-        wallet = createWalletClient({ chain, transport: custom(w.provider) });
+        wallet = createWalletClient({
+          chain,
+          transport: custom(w.provider),
+          dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+        });
       const code = await pub.getBytecode({ address: deployment.engine });
       const { keccak256 } = await import("viem");
       if (

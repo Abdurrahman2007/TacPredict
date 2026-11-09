@@ -1,4 +1,5 @@
 import { encodeFunctionData, type Abi, type Address, type Hex } from "viem";
+import { BASE_BUILDER_DATA_SUFFIX, BASE_BUILDER_DATA_SUFFIX_CAPABILITY } from "./builder-code";
 import { paymasterServiceUrl } from "./paymaster";
 
 type WriteArgs = {
@@ -11,7 +12,8 @@ type WriteArgs = {
 
 /**
  * Prefer EIP-5792 wallet_sendCalls + Pimlico paymaster (gas sponsored).
- * Falls back to a normal writeContract when the wallet cannot sponsor.
+ * Always attaches Base Builder Code attribution (ERC-8021 dataSuffix).
+ * Falls back to writeContract when the wallet cannot use sendCalls.
  * Wallet/public are untyped clients to avoid viem WalletClient identity clashes.
  */
 export async function sponsoredWriteContract(input: {
@@ -33,10 +35,16 @@ export async function sponsoredWriteContract(input: {
   const from =
     typeof input.account === "string" ? input.account : (input.account.address as Address);
 
-  if (paymaster && typeof input.wallet?.request === "function") {
+  if (typeof input.wallet?.request === "function") {
     try {
-      input.onStatus?.("Confirm — gas sponsored…");
+      input.onStatus?.(paymaster ? "Confirm — gas sponsored…" : "Confirm in your wallet…");
       const chainIdHex = `0x${input.chain.id.toString(16)}`;
+      const capabilities: Record<string, unknown> = {
+        dataSuffix: BASE_BUILDER_DATA_SUFFIX_CAPABILITY,
+      };
+      if (paymaster) {
+        capabilities.paymasterService = { url: paymaster };
+      }
       const id = (await input.wallet.request({
         method: "wallet_sendCalls",
         params: [
@@ -52,9 +60,7 @@ export async function sponsoredWriteContract(input: {
                 value: `0x${(input.request.value ?? 0n).toString(16)}`,
               },
             ],
-            capabilities: {
-              paymasterService: { url: paymaster },
-            },
+            capabilities,
           },
         ],
       })) as string | { id?: string };
@@ -81,6 +87,7 @@ export async function sponsoredWriteContract(input: {
     functionName: input.request.functionName,
     args: input.request.args,
     value: input.request.value,
+    dataSuffix: BASE_BUILDER_DATA_SUFFIX,
   }) as Promise<Hex>;
 }
 

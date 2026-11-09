@@ -9,6 +9,7 @@ import {
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import type { WalletState } from "@/lib/onchain/wallet";
+import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import {
   browserPending,
   clearPending,
@@ -117,7 +118,12 @@ async function executeLocked(
         BigInt(q.intent.nonce),
       ],
     });
-    const wallet = createWalletClient({ chain, account, transport: custom(w.provider) });
+    const wallet = createWalletClient({
+      chain,
+      account,
+      transport: custom(w.provider),
+      dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+    });
     // Persist before the wallet prompt. An ambiguous RPC failure must not permit a blind retry.
     writePending(window.localStorage, d, { hash: null, intent: q.intent });
     notifyPending();

@@ -11,6 +11,7 @@ import {
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import type { WalletState } from "@/lib/onchain/wallet";
+import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import type { ProtocolDeployment, NativeMarket } from "./types";
 import {
   erc20Abi,
@@ -59,7 +60,12 @@ export async function protocolClients(w: WalletState, d: ProtocolDeployment, new
   const account = w.address as Address;
   return {
     pub,
-    wallet: createWalletClient({ chain, account, transport: custom(w.provider) }),
+    wallet: createWalletClient({
+      chain,
+      account,
+      transport: custom(w.provider),
+      dataSuffix: BASE_BUILDER_DATA_SUFFIX,
+    }),
     account,
     chain,
   };
