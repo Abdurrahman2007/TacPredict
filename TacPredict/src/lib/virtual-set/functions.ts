@@ -20,12 +20,29 @@ export const getOnchainWindow = createServerFn({ method: "GET" })
         asset: z.enum(["bitcoin", "ethereum", "solana", "bnb"]),
         minutes: z.number().int().min(1).max(1440),
         start: z.number().int().positive(),
+        awaitKeeper: z.boolean().optional(),
       })
       .parse(value),
   )
   .handler(async ({ data }) => {
     const { onchainWindow } = await import("./window.server");
     return onchainWindow(data);
+  });
+
+/** User-tapped prepare: wait for keeper create/stock then return readiness. */
+export const prepareOnchainWindow = createServerFn({ method: "POST" })
+  .inputValidator((value: unknown) =>
+    z
+      .object({
+        asset: z.enum(["bitcoin", "ethereum", "solana", "bnb"]),
+        minutes: z.number().int().min(1).max(1440),
+        start: z.number().int().positive(),
+      })
+      .parse(value),
+  )
+  .handler(async ({ data }) => {
+    const { onchainWindow } = await import("./window.server");
+    return onchainWindow({ ...data, awaitKeeper: true });
   });
 
 export const quoteOnchain = createServerFn({ method: "POST" })

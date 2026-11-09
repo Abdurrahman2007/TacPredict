@@ -206,55 +206,23 @@ export function UpDownSection({
         </h2>
       </div>
       {!fixedMinutes && (
-        <>
-          <div
-            className="mb-3 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
-            role="group"
-            aria-label="Market category"
-          >
-            {(["All Crypto", "BTC", "ETH", "SOL", "BNB"] as const).map((label) => (
-              <span
-                key={label}
-                className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold inline-flex items-center ${
-                  label === "All Crypto"
-                    ? "bg-[#e8edf3] text-[#0f161a]"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {label}
-              </span>
-            ))}
-            {(["Politics", "Sports"] as const).map((label) => (
-              <span
-                key={label}
-                className="min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold inline-flex items-center gap-1.5 text-muted-foreground/70"
-                title={`${label} markets launch soon`}
-              >
-                {label}
-                <em className="not-italic rounded-full border border-border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Soon
-                </em>
-              </span>
-            ))}
-          </div>
-          <div
-            className="ud-home-durations tp-duration-segmented mb-3 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
-            role="group"
-            aria-label="Window length"
-          >
-            {DISPLAY_DURATIONS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                aria-pressed={minutes === d}
-                onClick={() => setMinutes(d)}
-                className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
-              >
-                {durationLabel(d)}
-              </button>
-            ))}
-          </div>
-        </>
+        <div
+          className="ud-home-durations tp-duration-segmented mb-3 flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1"
+          role="group"
+          aria-label="Window length"
+        >
+          {DISPLAY_DURATIONS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              aria-pressed={minutes === d}
+              onClick={() => setMinutes(d)}
+              className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold ${minutes === d ? "bg-[#e8edf3] text-[#0f161a]" : "text-muted-foreground"}`}
+            >
+              {durationLabel(d)}
+            </button>
+          ))}
+        </div>
       )}
       <div className="ud-home-grid grid gap-4 sm:grid-cols-2">
         {CARDS.map(({ asset, large }) => (

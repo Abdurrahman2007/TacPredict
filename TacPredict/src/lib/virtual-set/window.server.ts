@@ -26,23 +26,23 @@ export const onchainEnabled = () => process.env["VSET_TRADING_ENABLED"] === "1" 
 let lastNudge = 0;
 let nudgeInFlight: Promise<void> | null = null;
 
-function nudgeKeeper(): void {
-  if (Date.now() - lastNudge < 2500) return;
-  if (nudgeInFlight) return;
+function runKeeper(): Promise<void> {
+  if (nudgeInFlight) return nudgeInFlight;
   lastNudge = Date.now();
-  // Never block the trade-sheet status request on create/stock transactions — that froze the
-  // button on "Preparing market…" for tens of seconds with no wallet popup.
   nudgeInFlight = keeperTick()
     .catch(() => undefined)
     .then(() => {
       nudgeInFlight = null;
     });
+  return nudgeInFlight;
 }
 
 export async function onchainWindow(input: {
   asset: VsetAsset;
   minutes: number;
   start: number;
+  /** When true, wait longer for create/stock (user tapped retry / about to trade). */
+  awaitKeeper?: boolean;
 }): Promise<OnchainWindow> {
   const off: OnchainWindow = {
     enabled: false,
@@ -70,7 +70,20 @@ export async function onchainWindow(input: {
     blocker === "not_ready" ||
     blocker === "not_open";
   const soon = input.start / 1000 <= nowSec + input.minutes * 60;
-  if (needsWork && soon) nudgeKeeper();
+
+  if (needsWork && soon) {
+    // Cap wait so Cloudflare requests don't hang forever, but give create/stock time to land.
+    const waitMs = input.awaitKeeper ? 22_000 : 8_000;
+    if (Date.now() - lastNudge >= 1500 || nudgeInFlight) {
+      await Promise.race([
+        runKeeper(),
+        new Promise<void>((resolve) => setTimeout(resolve, waitMs)),
+      ]);
+      row = await marketByKey(db, key);
+      blocker = quoteBlocker(row, nowSec);
+    }
+  }
+
   // The price to beat is fetched at quote time, so a missing strike alone does not hold the window back.
   const ready = blocker === null || blocker === "no_strike";
   return {

@@ -5,7 +5,14 @@
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext } from "react";
 import { BaseWalletContext } from "@/lib/onchain/wallet-context";
-import { getOnchainBox, getOnchainCheckin, getOnchainPortfolio, getOnchainStatus, getOnchainWindow } from "./functions";
+import {
+  getOnchainBox,
+  getOnchainCheckin,
+  getOnchainPortfolio,
+  getOnchainStatus,
+  getOnchainWindow,
+  prepareOnchainWindow,
+} from "./functions";
 import { isVsetPair, parseMarketKey } from "./schedule.mjs";
 
 export const onchainKeys = {
@@ -89,6 +96,15 @@ export function useOnchainWindow(id: string | null) {
     staleTime: 1_000,
     placeholderData: keepPreviousData,
   });
+  const prepare = useCallback(async () => {
+    if (!target) return null;
+    const result = await prepareOnchainWindow({
+      data: { asset: target.asset, minutes: target.minutes, start: target.startMs },
+    });
+    await query.refetch();
+    return result;
+  }, [target, query]);
+
   return {
     enabled,
     /** The window is one that trades on chain (5 and 15 minutes). */
@@ -99,6 +115,7 @@ export function useOnchainWindow(id: string | null) {
     refreshing: query.isFetching,
     key: target ? id : null,
     refetch: () => query.refetch(),
+    prepare,
   };
 }
 

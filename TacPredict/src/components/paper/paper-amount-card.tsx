@@ -164,7 +164,7 @@ export function PaperAmountCard({
     setBusy(false);
   }
 
-  function submitBuy() {
+  async function submitBuy() {
     if (!tradingAllowed) {
       setNotice(settlementNote ?? "Trading unavailable for this market");
       return;
@@ -182,9 +182,26 @@ export function PaperAmountCard({
       return;
     }
     if (waiting) {
-      setNotice("Setting up this window — tap again in a moment");
-      void onchain.refetch();
-      return;
+      setBusy(true);
+      setNotice("Setting up market on Base…");
+      try {
+        const prepared = await onchain.prepare();
+        if (!prepared?.ready) {
+          setNotice(
+            prepared?.reason === "closing" || prepared?.reason === "ended"
+              ? "This window just closed — open the next one"
+              : "Market still setting up — try again in a few seconds",
+          );
+          setBusy(false);
+          return;
+        }
+      } catch {
+        setNotice("Could not prepare this window — try again");
+        setBusy(false);
+        return;
+      }
+      setBusy(false);
+      setNotice("");
     }
     if (!outcome || priceCents == null || !(usdc > 0)) {
       setNotice("Pick a side and amount");
@@ -192,7 +209,7 @@ export function PaperAmountCard({
     }
     const side = sideOnOutcome(outcome.label);
     if (chainMode) {
-      void submitChainBuy(side);
+      await submitChainBuy(side);
       return;
     }
     const res = ledger.buy({
@@ -359,16 +376,18 @@ export function PaperAmountCard({
               (needsWallet
                 ? false
                 : waiting
-                  ? !prepStuck
+                  ? false
                   : !(usdc > 0) ||
                     usdc > ledger.balance ||
                     priceCents == null ||
                     priceCents <= 0)
             }
-            onClick={submitBuy}
+            onClick={() => void submitBuy()}
           >
             {busy
-              ? "Confirm in wallet…"
+              ? notice.startsWith("Setting up")
+                ? "Setting up…"
+                : "Confirm in wallet…"
               : !tradingAllowed
                 ? "Unavailable"
                 : chainBlocked
@@ -387,9 +406,7 @@ export function PaperAmountCard({
           </button>
           <p className="pd-order-note">
             {chainMode && waiting
-              ? prepStuck
-                ? "Still setting up — tap the button to retry. Wallet confirm opens once the market is ready."
-                : "Setting up this window on Base — usually a few seconds."
+              ? "Tap to finish setup, then confirm the trade in your wallet."
               : chainMode
                 ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
                 : (settlementNote ??
