@@ -49,6 +49,44 @@ export function boundaryObservation(points, boundary, now) {
   );
 }
 
+/**
+ * Aggregate finer Coinbase candles into fixed buckets (e.g. 5m = 300_000 ms).
+ * Empty buckets stay empty; never invents OHLC.
+ */
+export function aggregateCandles(candles, bucketMs) {
+  const size = Math.max(60_000, Number(bucketMs) || 60_000);
+  const groups = new Map();
+  for (const c of candles ?? []) {
+    if (!(c?.time > 0) || !(c.open > 0)) continue;
+    const key = Math.floor(c.time / size) * size;
+    const prev = groups.get(key);
+    if (prev) {
+      prev.high = Math.max(prev.high, c.high);
+      prev.low = Math.min(prev.low, c.low);
+      prev.close = c.close;
+    } else {
+      groups.set(key, {
+        time: key,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+      });
+    }
+  }
+  return [...groups.values()].sort((a, b) => a.time - b.time);
+}
+
+/** Display candle size for a trading window: 5m markets → 5m bars. */
+export function displayCandleMs(minutes) {
+  const m = Number(minutes) || 5;
+  if (m <= 5) return 300_000;
+  if (m <= 15) return 300_000;
+  if (m <= 30) return 300_000;
+  if (m <= 60) return 900_000;
+  return 3_600_000;
+}
+
 /** OHLC of observed samples only. Empty buckets stay empty; this is not oracle evidence. */
 export function observedCandles(points, range) {
   const observations = chartWindow(points, range.start, range.end);

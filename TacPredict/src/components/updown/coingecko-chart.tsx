@@ -87,7 +87,7 @@ export function CoinGeckoChart({
           asset={asset}
           live={Date.now() >= selected.start && Date.now() < selected.end}
           interactive
-          ohlc={evidence ? undefined : feed.candles}
+          ohlc={feed.candles}
           source={evidence?.source ?? feed.source}
           window={selected}
         />

@@ -364,7 +364,7 @@ export function PaperAmountCard({
           </button>
           <p className="pd-order-note">
             {chainMode
-              ? "Real Base transactions: each trade needs a little ETH for the network fee. Virtual USDC only — no withdraw."
+              ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
               : (settlementNote ??
                 "Share prices track live spot vs open. Virtual USDC only — no withdraw.")}
           </p>
@@ -412,10 +412,19 @@ export function PaperAmountCard({
                       type="button"
                       className="pd-submit"
                       style={{ width: "auto", minHeight: 40, margin: 0, padding: "0 16px" }}
-                      disabled={busy || !tradingAllowed || live == null || (chainMode && (!onchain.supported || waiting))}
-                      onClick={() => live != null && submitSell(p.id, live)}
+                      disabled={
+                        busy ||
+                        (chainMode && (!onchain.supported || waiting || !wallet?.provider))
+                      }
+                      onClick={() => {
+                        const cents =
+                          live ??
+                          Math.max(1, Math.min(99, Math.round(p.avgCost * 100)));
+                        submitSell(p.id, cents);
+                      }}
                     >
-                      Sell {live != null ? `${Math.round(live)}¢` : ""}
+                      Sell{" "}
+                      {Math.round(live ?? Math.max(1, Math.min(99, p.avgCost * 100)))}¢
                     </button>
                   </li>
                 );

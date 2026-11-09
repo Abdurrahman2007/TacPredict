@@ -27,6 +27,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
+import { Route as ApiPaymasterRouteImport } from './routes/api/paymaster'
 import { Route as ApiV2KeeperRouteImport } from './routes/api/v2/keeper'
 import { Route as ApiV2MarketKeyRouteImport } from './routes/api/v2/market/$key'
 
@@ -120,6 +121,11 @@ const ApiProtocolMetadataHashRoute = ApiProtocolMetadataHashRouteImport.update({
   path: '/api/protocol/metadata/$hash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPaymasterRoute = ApiPaymasterRouteImport.update({
+  id: '/api/paymaster',
+  path: '/api/paymaster',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV2KeeperRoute = ApiV2KeeperRouteImport.update({
   id: '/api/v2/keeper',
   path: '/api/v2/keeper',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/up-down/$asset': typeof UpDownAssetRoute
   '/admin': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/up-down_/$asset': typeof UpDownAssetRoute
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
+  '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
 }
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/up-down/$asset'
     | '/admin/'
     | '/api/protocol/metadata/$hash'
+    | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
   fileRoutesByTo: FileRoutesByTo
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/up-down/$asset'
     | '/admin'
     | '/api/protocol/metadata/$hash'
+    | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
   id:
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/up-down_/$asset'
     | '/admin/'
     | '/api/protocol/metadata/$hash'
+    | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
   fileRoutesById: FileRoutesById
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   UpDownAssetRoute: typeof UpDownAssetRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
+  ApiPaymasterRoute: typeof ApiPaymasterRoute
   ApiV2KeeperRoute: typeof ApiV2KeeperRoute
   ApiV2MarketKeyRoute: typeof ApiV2MarketKeyRoute
 }
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/api/protocol/metadata/$hash'
       fullPath: '/api/protocol/metadata/$hash'
       preLoaderRoute: typeof ApiProtocolMetadataHashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/paymaster': {
+      id: '/api/paymaster'
+      path: '/api/paymaster'
+      fullPath: '/api/paymaster'
+      preLoaderRoute: typeof ApiPaymasterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v2/keeper': {

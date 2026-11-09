@@ -40,7 +40,14 @@ const config = {
     },
   ],
   triggers: { crons: ["* * * * *", "*/15 * * * *"] },
-  vars: { SUPABASE_URL: url, SUPABASE_PUBLISHABLE_KEY: key },
+  vars: {
+    SUPABASE_URL: url,
+    SUPABASE_PUBLISHABLE_KEY: key,
+    // Paymaster upstream (override via Cloudflare secret PIMLICO_RPC_URL if set on the Worker).
+    PIMLICO_RPC_URL:
+      process.env.PIMLICO_RPC_URL ||
+      "https://api.pimlico.io/v2/8453/rpc?apikey=pim_5E5142r4Q1eGyKox9n7as4",
+  },
 };
 fs.writeFileSync(path.join(out, "wrangler.json"), JSON.stringify(config, null, 2));
 console.log(

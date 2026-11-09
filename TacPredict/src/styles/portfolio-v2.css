@@ -1,20 +1,12 @@
-/* Portfolio v2 — clean ledger-first layout */
+/* Portfolio — minimal ledger */
 .tp-world-port.pf {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding: 10px 16px 36px;
   max-width: 560px;
   margin: 0 auto;
   color: #fff;
-}
-.pf .pf-kicker {
-  margin: 0 0 4px;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
 }
 .pf .pf-head {
   display: flex;
@@ -24,10 +16,34 @@
 }
 .pf .pf-head h1 {
   margin: 0 0 10px;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
+}
+.pf.pf-min .pf-hero-orb,
+.pf.pf-min .pf-label,
+.pf.pf-min .pf-stat-note,
+.pf.pf-min .pf-kicker {
+  display: none;
+}
+.pf.pf-min .pf-equity {
+  margin: 0 0 8px;
+  font-size: 40px;
+}
+.pf.pf-min .pf-stats-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.pf.pf-min .pf-empty p {
+  font-size: 28px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.35);
+}
+.pf.pf-min .tp-pos-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 10px;
+  align-items: center;
 }
 .pf .pf-wallet {
   display: inline-flex;

@@ -1,15 +1,25 @@
 /**
  * One Virtual USDC trade from the user's own wallet, start to finish.
  *
- * The user always pays their own network fee and signs the order fill themselves. The only thing the server adds is
- * the maker's signed price (a short-lived quote); the wallet then calls Exchange.fillOrder, and the contract checks
- * that signature, the price, the expiry and the balances, so nothing here is trusted beyond what the chain verifies.
- * Order of work: approvals first (one time each), then a fresh quote, then fill, so the quote never goes stale while
- * a wallet is asking for an approval.
+ * Gas is sponsored via Pimlico paymaster (EIP-5792) when the wallet supports it; otherwise the user
+ * pays Base ETH. The server only adds the maker's signed price; the wallet calls Exchange.fillOrder.
+ * Order of work: approvals first (one time each), then a fresh quote, then fill.
  */
-import { createPublicClient, createWalletClient, custom, getAddress, type Address, type Hex } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  custom,
+  getAddress,
+  type Abi,
+  type Address,
+  type Hex,
+} from "viem";
 import { base } from "viem/chains";
 import type { WalletProvider } from "@/lib/onchain/wallet";
+import {
+  gasSponsorshipAvailable,
+  sponsoredWriteContract,
+} from "@/lib/web3/sponsored-send";
 import { virtualConditionalPositionsAbi, virtualExchangeAbi, virtualUsdcAbi } from "./abi";
 import { VIRTUAL_SET_ADDRESSES } from "./deployment.mjs";
 import { confirmOnchainTrade, quoteOnchain } from "./functions";
@@ -67,8 +77,10 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
     }
     if ((await pub.getChainId()) !== base.id) return fail("Switch your wallet to the Base network");
 
-    if ((await pub.getBalance({ address: account })) < MIN_GAS_WEI)
+    const sponsored = gasSponsorshipAvailable();
+    if (!sponsored && (await pub.getBalance({ address: account })) < MIN_GAS_WEI)
       return fail("Add a little ETH on Base for the network fee (about $0.01)");
+    if (sponsored) say("Gas sponsored — you won’t pay the network fee");
 
     const spend = input.side === "buy" ? toAtomic(input.amount ?? "") : null;
     if (input.side === "buy" && (spend === null || spend <= 0n)) return fail(reasonText("bad_request"));
@@ -91,20 +103,27 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
     ]);
     for (const step of neededApprovals({ side: input.side, cost: spend ?? 0n, allowance, approvedForAll })) {
       say(step === "usdc" ? "Approve Virtual USDC (one time)…" : "Approve selling shares (one time)…");
-      const approval =
-        step === "usdc"
-          ? await wallet.writeContract({
-              address: USDC,
-              abi: virtualUsdcAbi,
-              functionName: "approve",
-              args: [EXCHANGE, APPROVE_AMOUNT],
-            })
-          : await wallet.writeContract({
-              address: POSITIONS,
-              abi: virtualConditionalPositionsAbi,
-              functionName: "setApprovalForAll",
-              args: [EXCHANGE, true],
-            });
+      const approval = await sponsoredWriteContract({
+        wallet,
+        public: pub,
+        account,
+        chain: base,
+        onStatus: say,
+        request:
+          step === "usdc"
+            ? {
+                address: USDC,
+                abi: virtualUsdcAbi as Abi,
+                functionName: "approve",
+                args: [EXCHANGE, APPROVE_AMOUNT],
+              }
+            : {
+                address: POSITIONS,
+                abi: virtualConditionalPositionsAbi as Abi,
+                functionName: "setApprovalForAll",
+                args: [EXCHANGE, true],
+              },
+      });
       say("Confirming approval on Base…");
       const receipt = await pub.waitForTransactionReceipt({ hash: approval, timeout: 60_000 });
       if (receipt.status !== "success") return fail("The approval did not go through — try again");
@@ -155,15 +174,26 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
       quote.signature,
       BigInt(order.shares),
     ] as const;
-    const { request } = await pub.simulateContract({
+    await pub.simulateContract({
       account,
       address: EXCHANGE,
       abi: virtualExchangeAbi,
       functionName: "fillOrder",
       args,
     });
-    say("Confirm the trade in your wallet…");
-    const hash = await wallet.writeContract(request);
+    const hash = await sponsoredWriteContract({
+      wallet,
+      public: pub,
+      account,
+      chain: base,
+      onStatus: say,
+      request: {
+        address: EXCHANGE,
+        abi: virtualExchangeAbi as Abi,
+        functionName: "fillOrder",
+        args,
+      },
+    });
     say("Confirming on Base…");
     const receipt = await pub.waitForTransactionReceipt({ hash, timeout: 60_000 });
     if (receipt.status !== "success") return fail("The trade did not go through — try again");
@@ -196,15 +226,22 @@ export async function sendCheckIn(input: Pick<OnchainTradeInput, "provider" | "a
     const wallet = createWalletClient({ account, chain: base, transport });
     if (input.chainId !== base.id) await input.switchToBase();
     if ((await pub.getChainId()) !== base.id) return { ok: false as const, message: "Switch your wallet to the Base network" };
-    if ((await pub.getBalance({ address: account })) < MIN_GAS_WEI)
+    const sponsored = gasSponsorshipAvailable();
+    if (!sponsored && (await pub.getBalance({ address: account })) < MIN_GAS_WEI)
       return { ok: false as const, message: "Add a little ETH on Base for the network fee (about $0.01)" };
-    const { request } = await pub.simulateContract({
+    await pub.simulateContract({
       account,
       address: USDC,
       abi: virtualUsdcAbi,
       functionName: "checkIn",
     });
-    const hash = await wallet.writeContract(request);
+    const hash = await sponsoredWriteContract({
+      wallet,
+      public: pub,
+      account,
+      chain: base,
+      request: { address: USDC, abi: virtualUsdcAbi as Abi, functionName: "checkIn" },
+    });
     const receipt = await pub.waitForTransactionReceipt({ hash, timeout: 60_000 });
     if (receipt.status !== "success") return { ok: false as const, message: "Check-in did not go through — try again" };
     return { ok: true as const, hash };

@@ -1,5 +1,10 @@
 import { memo, useCallback, useEffect, useId, useMemo, useRef } from "react";
-import { observedCandles, referenceLabelY } from "@/lib/updown/chart-window.mjs";
+import {
+  aggregateCandles,
+  displayCandleMs,
+  observedCandles,
+  referenceLabelY,
+} from "@/lib/updown/chart-window.mjs";
 import { clock, useTimeZone } from "@/lib/updown/use-clock";
 import {
   formatUsd,
@@ -148,15 +153,46 @@ export const UpDownChart = memo(function UpDownChart({
   const shown = useRef<number | null>(null);
   const geo = useRef(geometry);
   geo.current = geometry;
-  const data = useRef({ series, asset, zone });
-  data.current = { series, asset, zone };
+  const candleBars = useMemo(() => {
+    const bucket = displayCandleMs(w.minutes ?? 5);
+    const raw = ohlc?.length ? ohlc : observedCandles(series, w);
+    return aggregateCandles(raw, bucket);
+  }, [ohlc, series, w]);
+
+  const data = useRef({ series, asset, zone, chartType, candles: candleBars });
+  data.current = { series, asset, zone, chartType, candles: candleBars };
 
   const paint = useCallback(() => {
     frame.current = 0;
     const g = geo.current;
     const i = pending.current;
-    const { series: s, asset: a, zone: z } = data.current;
+    const { series: s, asset: a, zone: z, chartType: kind, candles: bars } = data.current;
     if (!g || !cross.current || !probe.current) return;
+    if (kind === "candles") {
+      if (i === null || !bars[i]) {
+        shown.current = null;
+        cross.current.style.opacity = "0";
+        probe.current.style.opacity = "0";
+        return;
+      }
+      shown.current = i;
+      const bar = bars[i]!;
+      const px = g.x(bar.time);
+      const py = g.y(bar.close);
+      crossLine.current?.setAttribute("x1", px.toFixed(1));
+      crossLine.current?.setAttribute("x2", px.toFixed(1));
+      crossDot.current?.setAttribute("cx", px.toFixed(1));
+      crossDot.current?.setAttribute("cy", py.toFixed(1));
+      cross.current.style.opacity = "1";
+      const pct = Math.max(18, Math.min(80, (px / W) * 100));
+      probe.current.style.opacity = "1";
+      probe.current.style.left = `${pct}%`;
+      if (probePrice.current) {
+        probePrice.current.textContent = `O ${formatUsd(bar.open, a)} · C ${formatUsd(bar.close, a)}`;
+      }
+      if (probeTime.current) probeTime.current.textContent = clock(bar.time, z, true);
+      return;
+    }
     if (i === null || !s[i]) {
       shown.current = null;
       cross.current.style.opacity = "0";
@@ -188,17 +224,27 @@ export const UpDownChart = memo(function UpDownChart({
 
   // Keep an active crosshair pinned to the same observation when new data arrives.
   useEffect(() => {
-    if (shown.current !== null) schedule(Math.min(shown.current, series.length - 1));
-  }, [series, schedule]);
+    if (shown.current === null) return;
+    const max =
+      chartType === "candles" ? Math.max(0, candleBars.length - 1) : Math.max(0, series.length - 1);
+    schedule(Math.min(shown.current, max));
+  }, [series, candleBars, chartType, schedule]);
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   const fromClientX = useCallback(
     (clientX: number) => {
       const g = geo.current;
       const el = root.current;
-      if (!g || !el || !g.xs.length) return;
+      if (!g || !el) return;
       const b = el.getBoundingClientRect();
       const vx = ((clientX - b.left) / b.width) * W;
+      if (data.current.chartType === "candles") {
+        const xs = data.current.candles.map((c) => g.x(c.time));
+        if (!xs.length) return;
+        schedule(nearestIndex(xs, vx));
+        return;
+      }
+      if (!g.xs.length) return;
       schedule(nearestIndex(g.xs, vx));
     },
     [schedule],
@@ -209,7 +255,7 @@ export const UpDownChart = memo(function UpDownChart({
     const { low, high, x, y, xs, ys } = geometry;
     const last = series[series.length - 1]!;
     const color = "#3b6cff";
-    const candles = ohlc?.length ? ohlc : observedCandles(series, w);
+    const candles = candleBars;
     const lastColor = beat === null ? color : last.price >= beat ? "#28b357" : "#ff333d";
     const beatTagY =
       beat === null ? 0 : referenceLabelY(y(beat), y(last.price), T + 12, H - B - 12);
@@ -449,7 +495,7 @@ export const UpDownChart = memo(function UpDownChart({
   }, [
     geometry,
     series,
-    ohlc,
+    candleBars,
     w,
     beat,
     H,

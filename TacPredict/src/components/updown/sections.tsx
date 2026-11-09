@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { Market } from "@/domain/markets/types";
 import { NativeActivity } from "@/components/native-market-data";
+import { useLoginDialog } from "@/components/login-dialog";
 import { useNativePortfolio } from "@/lib/protocol/portfolio";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { usdcShort, sharesShort, volumeText } from "@/lib/protocol/display.mjs";
@@ -25,6 +26,13 @@ import {
 import { VirtualPortfolio } from "@/components/virtual/virtual-portfolio";
 import { cryptoLogoUrl } from "@/lib/crypto-logo";
 import { usePaperLedger } from "@/lib/paper/ledger";
+import { sharesToAtomic } from "@/lib/virtual-set/trade-plan.mjs";
+import { executeOnchainTrade } from "@/lib/virtual-set/wallet-trade";
+import {
+  useOnchainWindow,
+  useOptionalWallet,
+  useRefreshOnchain,
+} from "@/lib/virtual-set/use-onchain";
 
 function MyPositions({ market }: { market: Market }) {
   const [tab, setTab] = useState<"positions" | "history">("positions");
@@ -97,22 +105,32 @@ function signed(n: number) {
   return `${n >= 0 ? "+" : "−"}$${Math.abs(n).toFixed(2)}`;
 }
 
+/** Sell ¢: live odds when known, otherwise cost basis so an open position can always exit. */
+function sellCents(live: number | null | undefined, avgCost: number) {
+  if (typeof live === "number" && live > 0 && live <= 100) return Math.round(live);
+  return Math.max(1, Math.min(99, Math.round(avgCost * 100)));
+}
+
 /** iOS-style positions & history card with a one-tap (confirm) Sell on each open position. */
 function PaperPositionsBlock({
   marketId,
   upCents,
   downCents,
-  tradingAllowed = true,
 }: {
   marketId: string;
   upCents: number | null;
   downCents: number | null;
-  tradingAllowed?: boolean;
 }) {
   const [tab, setTab] = useState<"positions" | "history">("positions");
   const [confirm, setConfirm] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
   const ledger = usePaperLedger();
+  const wallet = useOptionalWallet();
+  const openLogin = useLoginDialog();
+  const onchain = useOnchainWindow(marketId);
+  const refreshChain = useRefreshOnchain();
+  const chainMode = onchain.enabled;
   const zone = useTimeZone();
   const open = ledger.positions.filter((p) => p.marketId === marketId);
   const history = ledger.trades.filter((t) => t.marketId === marketId).slice(0, 20);
@@ -127,13 +145,63 @@ function PaperPositionsBlock({
     return sum + (p.shares * (c / 100) - p.shares * p.avgCost);
   }, 0);
 
-  function sell(id: string, cents: number) {
+  async function sell(id: string) {
+    const position = ledger.positions.find((p) => p.id === id);
+    if (!position) {
+      setNotice("Position not found");
+      return;
+    }
     if (confirm !== id) {
       setConfirm(id);
       window.setTimeout(() => setConfirm((c) => (c === id ? null : c)), 3000);
       return;
     }
     setConfirm(null);
+    const cents = sellCents(markOf(position.side), position.avgCost);
+
+    if (chainMode) {
+      if (!onchain.supported) {
+        setNotice("This window sells on chain as 5 or 15 min");
+        return;
+      }
+      if (!wallet?.address) {
+        openLogin();
+        return;
+      }
+      if (!wallet.provider) {
+        setNotice("Wallet is not ready — wait a moment and retry");
+        return;
+      }
+      const atomic = sharesToAtomic(position.shares);
+      if (atomic == null) {
+        setNotice("Position not found");
+        return;
+      }
+      setBusy(true);
+      const res = await executeOnchainTrade({
+        provider: wallet.provider,
+        address: wallet.address,
+        chainId: wallet.chainId,
+        switchToBase: wallet.switchToBase,
+        key: marketId,
+        outcome: position.side === "Up" ? 0 : 1,
+        side: "sell",
+        sharesAtomic: atomic,
+        shownCents: cents,
+        onStatus: setNotice,
+      });
+      if (res.ok) {
+        const pnl = res.usdc - position.shares * position.avgCost;
+        setNotice(`Sold · PnL ${signed(pnl)}`);
+        await refreshChain();
+      } else {
+        setNotice(res.message);
+      }
+      setBusy(false);
+      window.setTimeout(() => setNotice(""), 3200);
+      return;
+    }
+
     const res = ledger.sell(id, cents);
     setNotice(res.ok ? `Sold · PnL ${signed(res.pnl)}` : res.message);
     window.setTimeout(() => setNotice(""), 2600);
@@ -193,10 +261,12 @@ function PaperPositionsBlock({
                     type="button"
                     className="tp-pos-sell"
                     data-confirm={confirm === p.id || undefined}
-                    disabled={!tradingAllowed || c == null}
-                    onClick={() => c != null && sell(p.id, c)}
+                    disabled={busy || (chainMode && onchain.supported === false)}
+                    onClick={() => void sell(p.id)}
                   >
-                    {confirm === p.id ? "Confirm" : `Sell${c != null ? ` ${Math.round(c)}¢` : ""}`}
+                    {confirm === p.id
+                      ? "Confirm"
+                      : `Sell ${sellCents(c, p.avgCost)}¢`}
                   </button>
                 </li>
               );

@@ -54,6 +54,7 @@ export function WagmiBaseBridge() {
   const siweDone = useRef<string | null>(null);
   const bridging = useRef<string | null>(null);
   const freshConnect = useRef(false);
+  const disconnectTimer = useRef<number | null>(null);
 
   useAccountEffect({
     onConnect({ isReconnected }) {
@@ -65,25 +66,34 @@ export function WagmiBaseBridge() {
   });
 
   // 1. Mirror the connected account right away; pages read it from useBaseWallet().
+  // Brief "disconnected" flaps (leaving a wallet app / Android back) must NOT clear
+  // the address immediately — that made the header ask to Connect again.
   useEffect(() => {
+    if (disconnectTimer.current != null) {
+      window.clearTimeout(disconnectTimer.current);
+      disconnectTimer.current = null;
+    }
     if (status === "disconnected") {
-      // Definitive, even when there is no address to clear: without this,
-      // a genuinely disconnected user would stay "restoring" forever and
-      // never see a Connect control at all.
-      if (baseAddress) disconnect();
-      else settleWagmi();
-      return;
+      disconnectTimer.current = window.setTimeout(() => {
+        disconnectTimer.current = null;
+        if (baseAddress) disconnect();
+        else settleWagmi();
+      }, 4_000);
+      return () => {
+        if (disconnectTimer.current != null) {
+          window.clearTimeout(disconnectTimer.current);
+          disconnectTimer.current = null;
+        }
+      };
     }
     if (isConnected && address) adopt({ address, chainId: chainId ?? null });
   }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect, settleWagmi]);
 
   // 1b. A wallet provider that never answers must not freeze the UI in
-  // "restoring" forever. After 10s, fall back to the settled disconnected
-  // state so the user can click Connect again; a later wagmi connect
-  // still adopts normally through effect 1.
+  // "restoring" forever. Give mobile wallets longer to come back after app switch.
   useEffect(() => {
     if (status !== "reconnecting" && status !== "connecting") return;
-    const timer = window.setTimeout(() => settleWagmi(), 10_000);
+    const timer = window.setTimeout(() => settleWagmi(), 20_000);
     return () => window.clearTimeout(timer);
   }, [status, settleWagmi]);
 

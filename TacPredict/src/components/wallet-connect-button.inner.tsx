@@ -9,7 +9,7 @@ import { hasSiweAttempt, subscribeSiweAttempts } from "@/lib/onchain/siwe-attemp
 import { cn } from "@/lib/utils";
 
 /** How long a stored connection may take to come back before the header offers Connect again. */
-const RESTORE_GIVE_UP_MS = 6_000;
+const RESTORE_GIVE_UP_MS = 18_000;
 
 function shortenAddress(address: string): string {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;

@@ -1,5 +1,5 @@
-/** Canonical TacPredict mark (public/brand/tacpredict.svg, polished vector, 2026-11-04); versioned so old logo caches cannot win. All raster surfaces are derived from this one file. */
-export const BRAND_VERSION = "vector-20261104";
+/** Canonical TacPredict mark (public/brand/tacpredict.svg); versioned so old logo caches cannot win. */
+export const BRAND_VERSION = "vector-20261109b";
 export const BRAND_LOGO_URL = `/brand/tacpredict.svg?v=${BRAND_VERSION}`;
 export const BRAND_LOGO_ABSOLUTE_URL = `https://tacpredict.fun${BRAND_LOGO_URL}`;
 export const BRAND_SOCIAL_URL = `https://tacpredict.fun/brand/social-logo-v2.png?v=${BRAND_VERSION}`;
