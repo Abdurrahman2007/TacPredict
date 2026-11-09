@@ -1,13 +1,4 @@
-import {
-  encodeFunctionData,
-  type Abi,
-  type Account,
-  type Address,
-  type Chain,
-  type Hex,
-  type PublicClient,
-  type WalletClient,
-} from "viem";
+import { encodeFunctionData, type Abi, type Address, type Hex } from "viem";
 import { paymasterServiceUrl } from "./paymaster";
 
 type WriteArgs = {
@@ -18,15 +9,27 @@ type WriteArgs = {
   value?: bigint;
 };
 
+/** Minimal wallet/public surfaces — avoids viem PublicClient type identity clashes across packages. */
+type SponsoredWallet = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  writeContract: (args: Record<string, unknown>) => Promise<Hex>;
+};
+type SponsoredPublic = {
+  waitForTransactionReceipt: (args: {
+    hash: Hex;
+    timeout?: number;
+  }) => Promise<{ status: string }>;
+};
+
 /**
  * Prefer EIP-5792 wallet_sendCalls + Pimlico paymaster (gas sponsored).
  * Falls back to a normal writeContract when the wallet cannot sponsor.
  */
 export async function sponsoredWriteContract(input: {
-  wallet: WalletClient;
-  public: PublicClient;
-  account: Account | Address;
-  chain: Chain;
+  wallet: SponsoredWallet;
+  public: SponsoredPublic;
+  account: Address | { address: Address };
+  chain: { id: number };
   request: WriteArgs;
   onStatus?: (text: string) => void;
 }): Promise<Hex> {
@@ -42,7 +45,7 @@ export async function sponsoredWriteContract(input: {
   if (paymaster && typeof input.wallet.request === "function") {
     try {
       input.onStatus?.("Confirm — gas sponsored…");
-      const chainIdHex = `0x${input.chain.id.toString(16)}` as Hex;
+      const chainIdHex = `0x${input.chain.id.toString(16)}`;
       const id = (await input.wallet.request({
         method: "wallet_sendCalls",
         params: [
@@ -85,14 +88,14 @@ export async function sponsoredWriteContract(input: {
     address: input.request.address,
     abi: input.request.abi,
     functionName: input.request.functionName,
-    args: input.request.args as never,
+    args: input.request.args,
     value: input.request.value,
   });
 }
 
 async function waitForSponsoredHash(
-  wallet: WalletClient,
-  pub: PublicClient,
+  wallet: SponsoredWallet,
+  pub: SponsoredPublic,
   callsId: string,
 ): Promise<Hex | null> {
   const started = Date.now();

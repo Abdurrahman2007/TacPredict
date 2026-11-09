@@ -239,7 +239,7 @@ export const UpDownChart = memo(function UpDownChart({
       const b = el.getBoundingClientRect();
       const vx = ((clientX - b.left) / b.width) * W;
       if (data.current.chartType === "candles") {
-        const xs = data.current.candles.map((c) => g.x(c.time));
+        const xs = data.current.candles.map((c: Candle) => g.x(c.time));
         if (!xs.length) return;
         schedule(nearestIndex(xs, vx));
         return;
@@ -400,7 +400,7 @@ export const UpDownChart = memo(function UpDownChart({
           </g>
         )}
         {chartType === "candles" ? (
-          candles.map((c) => {
+          candles.map((c: Candle) => {
             const width = Math.max(
               3,
               Math.min(12, ((W - L - R) / Math.max(1, candles.length)) * 0.65),

@@ -12,6 +12,11 @@ export function boundaryObservation(
   now: number,
 ): number | null;
 
+export function aggregateCandles(
+  candles: import("./window.mjs").Candle[] | null | undefined,
+  bucketMs: number,
+): import("./window.mjs").Candle[];
+export function displayCandleMs(minutes: number): number;
 export function observedCandles(points: PricePoint[], range: Win): import("./window.mjs").Candle[];
 export function referenceObservation(
   points: PricePoint[],

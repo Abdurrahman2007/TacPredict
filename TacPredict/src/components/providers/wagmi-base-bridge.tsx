@@ -79,14 +79,15 @@ export function WagmiBaseBridge() {
         if (baseAddress) disconnect();
         else settleWagmi();
       }, 4_000);
-      return () => {
-        if (disconnectTimer.current != null) {
-          window.clearTimeout(disconnectTimer.current);
-          disconnectTimer.current = null;
-        }
-      };
+    } else if (isConnected && address) {
+      adopt({ address, chainId: chainId ?? null });
     }
-    if (isConnected && address) adopt({ address, chainId: chainId ?? null });
+    return () => {
+      if (disconnectTimer.current != null) {
+        window.clearTimeout(disconnectTimer.current);
+        disconnectTimer.current = null;
+      }
+    };
   }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect, settleWagmi]);
 
   // 1b. A wallet provider that never answers must not freeze the UI in
