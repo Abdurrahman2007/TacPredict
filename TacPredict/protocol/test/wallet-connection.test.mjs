@@ -60,6 +60,19 @@ test("every wallet-gated button follows the shared access state", () => {
   assert.ok(hook.includes("signInWithEthereumWallet(provider, address)"));
 });
 
+test("the header wallet control never sits on a blank pill: it says what it waits for and gives up after a while", () => {
+  const hook = read("src/hooks/use-give-up.ts");
+  assert.ok(hook.includes("window.setTimeout(() => setGaveUp(true), ms)"));
+  const inner = read("src/components/wallet-connect-button.inner.tsx");
+  assert.ok(inner.includes("useGiveUp(wagmiWaiting, RESTORE_GIVE_UP_MS)"));
+  assert.ok(inner.includes("Connecting…"));
+  // The hook is called unconditionally (never behind && or a branch).
+  assert.ok(!/&&\s*!?useGiveUp\(/.test(inner));
+  const button = read("src/components/wallet-connect-button.tsx");
+  assert.ok(button.includes("useGiveUp(!web3Ready || !Inner, LOAD_GIVE_UP_MS)"));
+  assert.ok(button.includes("Wallet…") && button.includes("Tap to reload"));
+});
+
 test("the connect modal shows the official Coinbase Wallet mark, never the library's own logo", () => {
   const wallet = read("src/lib/web3/preferred-wallet.ts");
   assert.ok(wallet.includes("iconUrl: COINBASE_WALLET_ICON_URL"));

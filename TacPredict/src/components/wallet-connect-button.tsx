@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { cn } from "@/lib/utils";
 import { useWeb3Ready } from "@/components/providers/web3-ready";
+import { useGiveUp } from "@/hooks/use-give-up";
 
 /**
  * Neutral loading state while the providers are still mounting / wagmi is
@@ -13,11 +14,16 @@ function ConnectWalletSkeleton({ className }: { className?: string }) {
     <div className={cn("flex items-center", className)} aria-label="Wallet loading">
       <span
         aria-hidden="true"
-        className="inline-flex h-10 w-[148px] items-center justify-center rounded-full bg-white/20 animate-pulse"
-      />
+        className="inline-flex h-10 w-[148px] items-center justify-center rounded-full border border-white/10 bg-white/10 text-xs font-semibold text-white/70 animate-pulse"
+      >
+        Wallet…
+      </span>
     </div>
   );
 }
+
+/** If the wallet code has not loaded after this long (a failed download), the header offers a reload instead. */
+const LOAD_GIVE_UP_MS = 12_000;
 
 /**
  * Navbar wallet control. Keeps wagmi/rainbowkit out of the SSR graph by
@@ -37,6 +43,23 @@ export function WalletConnectButton({ className }: { className?: string }) {
       cancelled = true;
     };
   }, [web3Ready]);
+
+  const stuck = useGiveUp(!web3Ready || !Inner, LOAD_GIVE_UP_MS);
+
+  if (stuck) {
+    return (
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className={cn(
+          "h-10 rounded-full border border-white/10 bg-white/10 px-5 text-xs font-semibold text-white",
+          className,
+        )}
+      >
+        Tap to reload
+      </button>
+    );
+  }
 
   if (!web3Ready || !Inner) {
     return className !== undefined ? (
