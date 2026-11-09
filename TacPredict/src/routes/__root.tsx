@@ -107,14 +107,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "TacPredict Crypto Market" },
       {
         property: "og:description",
-        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
+        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES or NO shares on TacPredict.",
       },
       { property: "og:url", content: "https://tacpredict.fun" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "TacPredict Crypto Market" },
       {
         name: "twitter:description",
-        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
+        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES or NO shares on TacPredict.",
       },
       { property: "og:image", content: BRAND_SOCIAL_URL },
       { property: "og:image:width", content: "1200" },
