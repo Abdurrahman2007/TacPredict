@@ -23,7 +23,7 @@ const app = {
     "https://tacpredict.fun/brand/screenshot-leaderboard.png",
   ],
   ogTitle: "TacPredict Crypto Market",
-  ogDescription: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
+  ogDescription: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES or NO shares on TacPredict.",
   ogImageUrl: "https://tacpredict.fun/brand/social-logo-v2.png",
   castShareUrl: "https://tacpredict.fun",
   noindex: false,
