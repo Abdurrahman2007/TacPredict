@@ -3,6 +3,7 @@ import { useLoginDialog } from "@/components/login-dialog";
 import { type AuthNext } from "@/lib/auth-config";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
+import { markSiweAttempt } from "@/lib/onchain/siwe-attempt.mjs";
 import { ACCESS_LABEL, walletAccess } from "@/lib/onchain/wallet-access.mjs";
 import { useProtocolUser } from "@/lib/protocol/use-auth-user";
 import { showWalletNotice } from "@/lib/wallet-notice";
@@ -46,6 +47,7 @@ export function useWalletAccess(next: AuthNext = "/") {
     if (!provider) return fail("Your wallet is still starting. Try again in a moment.");
     setBusy(true);
     try {
+      if (address) markSiweAttempt(address);
       await signInWithEthereumWallet(provider, address, chainId);
       return { ok: true };
     } catch (cause) {

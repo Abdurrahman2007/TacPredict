@@ -1,10 +1,12 @@
 import { BRAND_LOGO_URL } from "@/lib/brand";
 import { cn } from "@/lib/utils";
+
+/** Canonical TacPredict mark — no dark plate or filters that wash brand colors. */
 export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "brand-object-mark inline-flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-black/70 p-[3px] ring-1 ring-white/15",
+        "brand-object-mark inline-flex size-10 shrink-0 items-center justify-center overflow-visible",
         className,
       )}
       aria-hidden="true"

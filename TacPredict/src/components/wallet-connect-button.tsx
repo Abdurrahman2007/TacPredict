@@ -14,9 +14,9 @@ function ConnectWalletSkeleton({ className }: { className?: string }) {
     <div className={cn("flex items-center", className)} aria-label="Wallet loading">
       <span
         aria-hidden="true"
-        className="inline-flex h-10 w-[148px] items-center justify-center rounded-full border border-white/10 bg-white/10 text-xs font-semibold text-white/70 animate-pulse"
+        className="inline-flex h-10 w-[148px] items-center justify-center rounded-full border border-white/20 bg-white/15 text-xs font-semibold text-white animate-pulse"
       >
-        Wallet…
+        Connecting…
       </span>
     </div>
   );

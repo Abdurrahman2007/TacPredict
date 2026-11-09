@@ -36,7 +36,6 @@ function ShellContent({ children }: { children: ReactNode }) {
             aria-label="TacPredict home"
           >
             <span className="hd-logo">
-              <i className="hd-logo-halo" aria-hidden />
               <BrandMark className="size-10" />
             </span>
             <span className="flex min-w-0 flex-col leading-none">

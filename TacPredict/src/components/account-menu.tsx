@@ -58,6 +58,10 @@ export function AccountMenu() {
     } catch {
       /* Auth is cleared even if the wallet transport has already disconnected. */
     }
+    if (wallet.address) {
+      const { clearSiweAttempt } = await import("@/lib/onchain/siwe-attempt.mjs");
+      clearSiweAttempt(wallet.address);
+    }
     wallet.disconnect();
     cache.clear();
     setBusy(false);

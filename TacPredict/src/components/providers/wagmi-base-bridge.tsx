@@ -5,13 +5,16 @@ import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import type { WalletProvider } from "@/lib/onchain/wallet";
 import { signInWithEthereumWallet } from "@/lib/onchain/wallet-auth";
 import { shouldRequestWalletSignIn } from "@/lib/onchain/wallet-signin-policy.mjs";
+import {
+  hasSiweAttempt,
+  markSiweAttempt,
+} from "@/lib/onchain/siwe-attempt.mjs";
 import { supabase } from "@/integrations/supabase/client";
 import { sessionMatchesWallet } from "@/lib/onchain/wallet-session.mjs";
 import { safeAuthNext } from "@/lib/auth-config";
 import { showWalletNotice } from "@/lib/wallet-notice";
 
-// Shared across React remounts: one login attempt per connection, including rejection.
-const attempted = new Set<string>();
+// In-memory + sessionStorage: one login attempt per wallet per tab session.
 const pending = new Map<string, Promise<void>>();
 
 /** A wallet that never answers must not block the bridge for good. */
@@ -86,8 +89,9 @@ export function WagmiBaseBridge() {
 
   // 2. Attach the wallet provider (needed to send transactions) and run the one-time sign-in.
   useEffect(() => {
+    // Do NOT clear SIWE attempts on disconnect flaps — that caused verify to fire again
+    // every time wagmi briefly reported disconnected then reconnected.
     if (status === "disconnected") {
-      if (siweDone.current) attempted.delete(siweDone.current);
       siweDone.current = null;
       return;
     }
@@ -95,6 +99,7 @@ export function WagmiBaseBridge() {
     if (!isConnected || !address || !connector) return;
     const key = address.toLowerCase();
     if (bridging.current === key) return;
+    if (pending.has(key)) return;
 
     bridging.current = key;
     void (async () => {
@@ -102,7 +107,11 @@ export function WagmiBaseBridge() {
         const provider = (await withTimeout(connector.getProvider(), 8000)) as
           | WalletProvider
           | undefined;
-        if (!provider?.request) return;
+        if (!provider?.request) {
+          // Provider still warming up — leave attempt unmarked so a later tick can attach it,
+          // but do not open SIWE until the provider is real.
+          return;
+        }
 
         adopt({ address, chainId: chainId ?? null, provider });
 
@@ -119,26 +128,30 @@ export function WagmiBaseBridge() {
         const decision = shouldRequestWalletSignIn({
           freshConnect: freshConnect.current,
           signedIn,
-          alreadyAttempted: attempted.has(key),
+          alreadyAttempted: hasSiweAttempt(key),
         });
 
         // Restored connection: read-only. No signature request, no redirect.
-        if (decision === "skip") return;
+        if (decision === "skip") {
+          siweDone.current = key;
+          return;
+        }
 
         if (decision === "sign") {
           const inFlight = pending.get(key);
           if (inFlight) await inFlight;
           else {
-            attempted.add(key);
+            // Mark before the wallet popup so a remount cannot open a second prompt.
+            markSiweAttempt(key);
             siweDone.current = key;
             const login = signInWithEthereumWallet(provider, address, chainId ?? null)
               .then(() => undefined)
               .catch((cause: unknown) => {
-                // A failed sign-in must be visible: the header offers a retry, this says why.
+                // A failed sign-in must be visible once; header shows a single retry CTA.
                 showWalletNotice(
                   cause instanceof Error && cause.message
                     ? cause.message
-                    : "Verification was not completed. Tap your wallet to retry.",
+                    : "Verification was not completed. Open Portfolio to retry once.",
                 );
                 throw cause;
               });

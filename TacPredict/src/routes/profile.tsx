@@ -2,7 +2,6 @@ import { useOverviewPrivacy } from "@/lib/accounts/privacy";
 import { useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
-  ArrowUpRight,
   ChevronRight,
   Copy,
   Eye,
@@ -17,10 +16,9 @@ import {
 import { PortfolioPerformanceChart } from "@/components/portfolio-performance-chart";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { usePaperLedger, type PaperPosition } from "@/lib/paper/ledger";
+import { usePaperLedger, type PaperPosition, type PaperTrade } from "@/lib/paper/ledger";
 import { useTacPointsBalance } from "@/lib/tac-points";
 import "@/styles/portfolio-reference.css";
-import "@/styles/portfolio-paper.css";
 import "@/styles/portfolio-v2.css";
 
 export const Route = createFileRoute("/profile")({
@@ -31,10 +29,10 @@ export const Route = createFileRoute("/profile")({
 });
 
 const periods = {
-  "1D": "Past Day",
-  "1W": "Past Week",
-  "1M": "Past Month",
-  ALL: "All Time",
+  "1D": { label: "Past Day", ms: 86_400_000 },
+  "1W": { label: "Past Week", ms: 604_800_000 },
+  "1M": { label: "Past Month", ms: 2_592_000_000 },
+  ALL: { label: "All Time", ms: Number.POSITIVE_INFINITY },
 } as const;
 
 function money(n: number, hidden: boolean) {
@@ -48,21 +46,42 @@ function signedMoney(n: number, hidden: boolean) {
   return `${sign}$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+/** Buy notional only — real traded volume, never buy+sell double count. */
+function tradeVolume(trades: PaperTrade[]): number {
+  return trades.filter((t) => t.kind === "buy").reduce((sum, t) => sum + Math.abs(t.usdc), 0);
+}
+
+function cumulativePnlPoints(trades: PaperTrade[], sinceMs: number) {
+  const sells = trades
+    .filter((t) => t.kind === "sell" && typeof t.realizedPnl === "number")
+    .map((t) => ({ at: Date.parse(t.at), pnl: t.realizedPnl as number }))
+    .filter((t) => Number.isFinite(t.at))
+    .sort((a, b) => a.at - b.at);
+
+  const cutoff = Number.isFinite(sinceMs) ? Date.now() - sinceMs : 0;
+  let running = 0;
+  const points: { at: number; pnl: number }[] = [];
+  for (const s of sells) {
+    running += s.pnl;
+    if (s.at >= cutoff) points.push({ at: s.at, pnl: running });
+  }
+  if (points.length === 0 && sells.length > 0) {
+    points.push({ at: Date.now(), pnl: running });
+  }
+  return points;
+}
+
 function PortfolioPage() {
   const wallet = useBaseWallet();
   const access = useWalletAccess("/profile");
   const ledger = usePaperLedger();
   const [hidden, setHidden] = useOverviewPrivacy();
   const [tab, setTab] = useState<"positions" | "history">("positions");
-  const [range, setRange] = useState<keyof typeof periods>("1D");
+  const [range, setRange] = useState<keyof typeof periods>("ALL");
   const [notice, setNotice] = useState("");
   const disconnected = !wallet.address;
-  // A Connect control may only appear once wagmi has definitively settled
-  // disconnected. While restoring, the wallet is about to reappear, so the
-  // page shows a neutral loading button instead of a connect prompt.
   const showConnect = !wallet.address && !wallet.restoring;
 
-  /** Cost basis of open positions (mark-to-market lives on the market page). */
   const positionValue = useMemo(
     () => ledger.positions.reduce((sum: number, p: PaperPosition) => sum + p.shares * p.avgCost, 0),
     [ledger.positions],
@@ -71,27 +90,25 @@ function PortfolioPage() {
   const equity = disconnected ? 0 : ledger.balance + positionValue;
   const realized = disconnected ? 0 : ledger.realizedPnl;
   const tac = useTacPointsBalance();
-  /** Paper total volume: every paper trade's size, buys and sells combined. Paper only — never mixed with onchain virtual or real USDC. */
-  const totalVolume = disconnected
-    ? 0
-    : ledger.trades.reduce((sum, t) => sum + Math.abs(t.usdc), 0);
+  const totalVolume = disconnected ? 0 : tradeVolume(ledger.trades);
   const sells = useMemo(() => ledger.trades.filter((t) => t.kind === "sell"), [ledger.trades]);
-
   const wins = sells.filter((t) => (t.realizedPnl ?? 0) > 0).length;
   const winRate =
     disconnected || sells.length === 0 ? null : Math.round((wins / sells.length) * 100);
   const pnlTone = realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined;
+  const chartPoints = useMemo(
+    () => (disconnected ? [] : cumulativePnlPoints(ledger.trades, periods[range].ms)),
+    [disconnected, ledger.trades, range],
+  );
 
   async function copyAddress() {
     if (!wallet.address) {
-      // access.run() opens the modal only when definitively disconnected;
-      // during a restore it is a no-op, so no modal can appear here.
       void access.run();
       return;
     }
     try {
       await navigator.clipboard.writeText(wallet.address);
-      setNotice("Copied");
+      setNotice("Address copied");
       window.setTimeout(() => setNotice(""), 1500);
     } catch {
       setNotice("Copy unavailable");
@@ -102,6 +119,7 @@ function PortfolioPage() {
     <main className="tp-world-port pf">
       <header className="pf-head">
         <div>
+          <p className="pf-kicker">Your account</p>
           <h1>Portfolio</h1>
           <button
             type="button"
@@ -141,7 +159,7 @@ function PortfolioPage() {
 
       <section className="pf-hero" aria-label="Portfolio value">
         <i className="pf-hero-orb" aria-hidden />
-        <span className="pf-label">Total equity</span>
+        <span className="pf-label">Total equity · Virtual USDC</span>
         <strong className="pf-equity">{money(equity, hidden)}</strong>
         <span className={`pf-pnl-pill ${pnlTone ?? ""}`}>
           <TrendingUp size={13} aria-hidden /> {signedMoney(realized, hidden)} realized
@@ -170,7 +188,7 @@ function PortfolioPage() {
               Get Virtual USDC
             </Link>
           )}
-          <Link to="/" className="pf-secondary">
+          <Link to="/up-down" className="pf-secondary">
             Trade
           </Link>
         </div>
@@ -183,6 +201,7 @@ function PortfolioPage() {
           </span>
           <small>Volume</small>
           <b>{money(totalVolume, hidden)}</b>
+          <em className="pf-stat-note">Buy size from your trades</em>
         </div>
         <div>
           <span className="pf-stat-icon green">
@@ -190,13 +209,17 @@ function PortfolioPage() {
           </span>
           <small>Profit/Loss</small>
           <b className={pnlTone}>{signedMoney(realized, hidden)}</b>
+          <em className="pf-stat-note">Settled sells only</em>
         </div>
         <div>
           <span className="pf-stat-icon orange">
             <Target size={16} />
           </span>
           <small>Win rate</small>
-          <b>{hidden ? "••••" : winRate == null ? "0%" : `${winRate}%`}</b>
+          <b>{hidden ? "••••" : winRate == null ? "—" : `${winRate}%`}</b>
+          <em className="pf-stat-note">
+            {disconnected || sells.length === 0 ? "No closed trades" : `${wins}/${sells.length} wins`}
+          </em>
         </div>
         <div>
           <span className="pf-stat-icon purple">
@@ -210,6 +233,7 @@ function PortfolioPage() {
                 ? "0"
                 : (tac.data?.balance.toLocaleString("en-US") ?? "0")}
           </b>
+          <em className="pf-stat-note">Rewards balance</em>
         </div>
       </section>
 
@@ -235,10 +259,11 @@ function PortfolioPage() {
         </div>
         <PortfolioPerformanceChart
           key={range}
+          points={chartPoints}
           empty={sells.length === 0}
           preview={disconnected}
           hidden={hidden}
-          period={periods[range]}
+          period={periods[range].label}
         />
       </section>
 
@@ -269,7 +294,7 @@ function PortfolioPage() {
                 <BarChart3 size={24} />
               </span>
               <p>No open positions</p>
-              <Link to="/" className="pf-secondary">
+              <Link to="/up-down" className="pf-secondary">
                 Start trading <ChevronRight size={16} />
               </Link>
             </div>
