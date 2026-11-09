@@ -71,17 +71,19 @@ test("browser and share logo variants are generated from versioned brand assets"
 });
 
 
-test("scroll discovery is in-page and the page has no site footer", () => {
+test("scroll discovery is in-page and the site footer shows on Home only", () => {
   const discovery = read("src/components/market-discovery.tsx");
   assert.ok(discovery.includes("IntersectionObserver"));
   assert.ok(discovery.includes("prefers-reduced-motion"));
   assert.ok(discovery.includes("if (!visible || reduced) return"));
   assert.ok(!discovery.includes("sessionStorage"));
   assert.ok(discovery.includes("@/styles/market-discovery.css"));
-  // The footer was removed on request (twice). It must not come back through an old merge.
+  // The footer belongs to the Home page only (owner request); every other page ends at its content.
   const shell = read("src/components/app-shell.tsx");
   assert.ok(!shell.includes("SiteFooter"));
-  assert.ok(!shell.includes("<footer"));
+  assert.equal(shell.match(/<footer/g)?.length, 1);
+  assert.match(shell, /const onHome = useRouterState\(\{ select: \(state\) => state\.location\.pathname === "\/" \}\);/);
+  assert.match(shell, /\{onHome \? \(\s*<footer/);
   assert.ok(!existsSync(new URL("src/components/site-footer.tsx", root)));
   assert.ok(!existsSync(new URL("src/styles/site-footer.css", root)));
   assert.ok(!read("src/styles/market-discovery.css").includes("tp-site-footer"));

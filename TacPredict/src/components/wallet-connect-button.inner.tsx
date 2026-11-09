@@ -3,8 +3,12 @@ import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { nativeMarketFeedQueryOptions } from "@/lib/protocol/market-feed.functions";
 import { useVirtualAccount, virtualMoney } from "@/lib/virtual/hooks";
+import { useGiveUp } from "@/hooks/use-give-up";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { cn } from "@/lib/utils";
+
+/** How long a stored connection may take to come back before the header offers Connect again. */
+const RESTORE_GIVE_UP_MS = 6_000;
 
 function shortenAddress(address: string): string {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;
@@ -22,7 +26,10 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
   // trusting it alone shows a clickable "Connect Wallet" to someone who
   // is already connected. Only a definitive "disconnected" may show it.
   const { status: wagmiStatus } = useAccount();
-  const wagmiRestoring = wagmiStatus === "reconnecting" || wagmiStatus === "connecting";
+  const wagmiWaiting = wagmiStatus === "reconnecting" || wagmiStatus === "connecting";
+  // A wallet that never answers must not leave the header on a blank pill: after a few seconds the person can connect.
+  const restoreGaveUp = useGiveUp(wagmiWaiting, RESTORE_GIVE_UP_MS);
+  const wagmiRestoring = wagmiWaiting && !restoreGaveUp;
 
   return (
     <ConnectButton.Custom>
@@ -59,8 +66,10 @@ export function WalletConnectButtonInner({ className }: { className?: string }) 
                 return (
                   <span
                     aria-label="Wallet loading"
-                    className="inline-flex h-10 w-[148px] items-center justify-center rounded-full bg-white/20 animate-pulse"
-                  />
+                    className="inline-flex h-10 w-[148px] items-center justify-center rounded-full border border-white/10 bg-white/10 text-xs font-semibold text-white/70 animate-pulse"
+                  >
+                    Connecting…
+                  </span>
                 );
               }
               if (!connected) {

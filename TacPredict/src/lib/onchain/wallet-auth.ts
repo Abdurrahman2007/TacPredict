@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { WalletProvider } from "./wallet";
+import { signInSmartWallet } from "./smart-wallet-auth";
+import { isPlainSignature, isSignatureShape, signInReasonText } from "./smart-wallet-policy.mjs";
 
 // Explicit sign-in only. The read-only Connect wallet flow never calls this.
 export async function signInWithEthereumWallet(
@@ -45,12 +47,25 @@ export async function signInWithEthereumWallet(
   });
   const encoded = `0x${Array.from(new TextEncoder().encode(message), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
   const signature = await wallet.request({ method: "personal_sign", params: [encoded, address] });
-  if (typeof signature !== "string" || !/^0x[0-9a-f]{130}$/i.test(signature))
-    throw new Error("The wallet did not return a supported sign-in signature.");
-  const { error } = await supabase.auth.signInWithWeb3({
-    chain: "ethereum",
-    message,
-    signature: signature as `0x${string}`,
+  if (!isSignatureShape(signature))
+    throw new Error("The wallet did not return a sign-in signature.");
+  if (isPlainSignature(signature)) {
+    // A single-key wallet: Supabase checks the signature itself.
+    const { error } = await supabase.auth.signInWithWeb3({
+      chain: "ethereum",
+      message,
+      signature: signature as `0x${string}`,
+    });
+    if (error) throw error;
+    return;
+  }
+  // A smart-contract wallet (Base Account and similar): its longer proof is judged by the wallet's contract on Base,
+  // which only the server can ask. The server hands back a one-time token that becomes a normal session here.
+  const result = await signInSmartWallet({ data: { message, signature } });
+  if (!result.ok) throw new Error(signInReasonText(result.reason));
+  const { error } = await supabase.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: result.tokenHash,
   });
   if (error) throw error;
 }

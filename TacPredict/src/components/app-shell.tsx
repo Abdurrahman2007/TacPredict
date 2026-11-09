@@ -1,6 +1,6 @@
 import { AccountProvider } from "./account-provider";
 import { AccountMenu } from "./account-menu";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { House, Gift, Wallet, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
@@ -22,6 +22,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 function ShellContent({ children }: { children: ReactNode }) {
+  // The site footer belongs to the Home page only; every other page ends at its own content and the bottom navigation.
+  const onHome = useRouterState({ select: (state) => state.location.pathname === "/" });
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <header className="app-header hd-v2 sticky top-0 z-40 backdrop-blur-2xl">
@@ -73,30 +75,32 @@ function ShellContent({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-6 lg:pb-12 md:pt-6">
         {children}
       </main>
-      <footer className="tp-site-footer ft-v2" aria-label="Site information">
-        <i className="ft-line" aria-hidden />
-        <div className="ft-brand">
-          <span className="ft-logo">
-            <i className="ft-ring" aria-hidden />
-            <i className="ft-ring ft-ring-2" aria-hidden />
-            <BrandMark className="size-12" />
-          </span>
-          <strong>TacPredict</strong>
-          <p>Predict crypto Up or Down in minutes.</p>
-        </div>
-        <nav className="ft-links" aria-label="Footer">
-          <Link to="/">Home</Link>
-          <Link to="/rewards">Rewards</Link>
-          <Link to="/ranking">Ranking</Link>
-          <Link to="/terms">Terms</Link>
-          <a href="mailto:support@tacpredict.fun">Support</a>
-        </nav>
-        <p className="ft-base">
-          <span className="ft-dot" aria-hidden />
-          Built on Base · Virtual USDC · Not withdrawable
-        </p>
-        <p className="ft-copy">© {new Date().getUTCFullYear()} TacPredict</p>
-      </footer>
+      {onHome ? (
+        <footer className="tp-site-footer ft-v2" aria-label="Site information">
+          <i className="ft-line" aria-hidden />
+          <div className="ft-brand">
+            <span className="ft-logo">
+              <i className="ft-ring" aria-hidden />
+              <i className="ft-ring ft-ring-2" aria-hidden />
+              <BrandMark className="size-12" />
+            </span>
+            <strong>TacPredict</strong>
+            <p>Predict crypto Up or Down in minutes.</p>
+          </div>
+          <nav className="ft-links" aria-label="Footer">
+            <Link to="/">Home</Link>
+            <Link to="/rewards">Rewards</Link>
+            <Link to="/ranking">Ranking</Link>
+            <Link to="/terms">Terms</Link>
+            <a href="mailto:support@tacpredict.fun">Support</a>
+          </nav>
+          <p className="ft-base">
+            <span className="ft-dot" aria-hidden />
+            Built on Base · Virtual USDC · Not withdrawable
+          </p>
+          <p className="ft-copy">© {new Date().getUTCFullYear()} TacPredict</p>
+        </footer>
+      ) : null}
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface-glass px-2 pb-[max(.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         aria-label="Mobile navigation"
