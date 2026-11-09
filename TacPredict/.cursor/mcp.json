@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "promptql": {
+      "url": "https://data.prompt.ql.app/promptql/mcp-server/mcp?project-name=p-610c8044-0a1c"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}

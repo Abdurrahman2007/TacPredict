@@ -4,6 +4,10 @@ import {
   BRAND_SOCIAL_URL,
   BRAND_TOUCH_ICON_URL,
 } from "@/lib/brand";
+import {
+  farcasterFrameEmbed,
+  farcasterMiniAppEmbed,
+} from "@/lib/farcaster/manifest";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
@@ -20,8 +24,12 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/app-shell";
+import { FarcasterReady } from "../components/farcaster-ready";
 import { LoginDialogProvider } from "../components/login-dialog";
 import { Web3ProviderGate } from "../components/providers/Web3ProviderGate";
+
+const FC_MINIAPP = JSON.stringify(farcasterMiniAppEmbed);
+const FC_FRAME = JSON.stringify(farcasterFrameEmbed);
 
 function NotFoundComponent() {
   return (
@@ -89,15 +97,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "TacPredict" },
-      { name: "description", content: "Prediction markets for Base and USDC." },
+      {
+        name: "description",
+        content:
+          "Predict crypto, sports, politics, and culture outcomes in real time. Trade YES or NO shares on TacPredict.",
+      },
       { name: "author", content: "TacPredict" },
       { property: "og:type", content: "website" },
+      { property: "og:title", content: "TacPredict Market" },
+      {
+        property: "og:description",
+        content: "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+      },
+      { property: "og:url", content: "https://tacpredict.fun" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "TacPredict Market" },
+      {
+        name: "twitter:description",
+        content: "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+      },
       { property: "og:image", content: BRAND_SOCIAL_URL },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "TacPredict logo" },
       { name: "twitter:image", content: BRAND_SOCIAL_URL },
+      { name: "fc:miniapp", content: FC_MINIAPP },
+      { name: "fc:frame", content: FC_FRAME },
     ],
     links: [
       {
@@ -139,6 +164,7 @@ function RootComponent() {
 
   return (
     <Web3ProviderGate queryClient={queryClient}>
+      <FarcasterReady />
       <LoginDialogProvider>
         {isAdminArea ? (
           <Outlet />

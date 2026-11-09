@@ -10,3 +10,8 @@ for (const [target, content] of Object.entries(assets)) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, Buffer.from(content, "base64"));
 }
+// Farcaster Mini App screenshotUrls — use the social OG image until dedicated captures ship.
+const social = path.join(root, "public/brand/social-logo-v2.png");
+for (const name of ["screenshot-markets.png", "screenshot-portfolio.png", "screenshot-leaderboard.png"]) {
+  fs.copyFileSync(social, path.join(root, "public/brand", name));
+}

@@ -4,15 +4,74 @@
     "payload": "eyJkb21haW4iOiJ0YWNwcmVkaWN0LmZ1biJ9",
     "signature": "xqAljG4vkeapU2DjkwyqEEedFj6XzKz88b+czWsaE/wS0pPfbtaaVCblN+TsNE+ToeqnuLKVXhvG017ymcylPhw="
   },
+  "miniapp": {
+    "version": "1",
+    "name": "TacPredict",
+    "subtitle": "Virtual Prediction Market",
+    "description": "Predict crypto, sports, politics, and culture outcomes in real time. Trade YES or NO shares, climb the leaderboard, and track your prediction portfolio.",
+    "tagline": "Predict Outcomes. Win Big.",
+    "homeUrl": "https://tacpredict.fun",
+    "canonicalDomain": "tacpredict.fun",
+    "iconUrl": "https://tacpredict.fun/brand/app-icon-v2.png",
+    "imageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
+    "heroImageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
+    "splashImageUrl": "https://tacpredict.fun/brand/app-icon-v2.png",
+    "splashBackgroundColor": "#0B1220",
+    "buttonTitle": "Open TacPredict",
+    "webhookUrl": "https://tacpredict.fun/api/webhook",
+    "primaryCategory": "finance",
+    "tags": [
+      "prediction",
+      "markets",
+      "forecasting",
+      "crypto",
+      "trading"
+    ],
+    "screenshotUrls": [
+      "https://tacpredict.fun/brand/screenshot-markets.png",
+      "https://tacpredict.fun/brand/screenshot-portfolio.png",
+      "https://tacpredict.fun/brand/screenshot-leaderboard.png"
+    ],
+    "ogTitle": "TacPredict Market",
+    "ogDescription": "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+    "ogImageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
+    "castShareUrl": "https://tacpredict.fun",
+    "noindex": false,
+    "supportsFullScreen": true
+  },
   "frame": {
     "version": "1",
     "name": "TacPredict",
-    "iconUrl": "https://tacpredict.fun/brand/app-icon-v2.png",
+    "subtitle": "Virtual Prediction Market",
+    "description": "Predict crypto, sports, politics, and culture outcomes in real time. Trade YES or NO shares, climb the leaderboard, and track your prediction portfolio.",
+    "tagline": "Predict Outcomes. Win Big.",
     "homeUrl": "https://tacpredict.fun",
+    "canonicalDomain": "tacpredict.fun",
+    "iconUrl": "https://tacpredict.fun/brand/app-icon-v2.png",
     "imageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
-    "buttonTitle": "Open TacPredict",
+    "heroImageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
     "splashImageUrl": "https://tacpredict.fun/brand/app-icon-v2.png",
     "splashBackgroundColor": "#0B1220",
-    "webhookUrl": "https://tacpredict.fun/api/webhook"
+    "buttonTitle": "Open TacPredict",
+    "webhookUrl": "https://tacpredict.fun/api/webhook",
+    "primaryCategory": "finance",
+    "tags": [
+      "prediction",
+      "markets",
+      "forecasting",
+      "crypto",
+      "trading"
+    ],
+    "screenshotUrls": [
+      "https://tacpredict.fun/brand/screenshot-markets.png",
+      "https://tacpredict.fun/brand/screenshot-portfolio.png",
+      "https://tacpredict.fun/brand/screenshot-leaderboard.png"
+    ],
+    "ogTitle": "TacPredict Market",
+    "ogDescription": "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+    "ogImageUrl": "https://tacpredict.fun/brand/social-logo-v2.png",
+    "castShareUrl": "https://tacpredict.fun",
+    "noindex": false,
+    "supportsFullScreen": true
   }
 }
