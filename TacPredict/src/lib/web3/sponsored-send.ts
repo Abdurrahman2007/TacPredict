@@ -43,7 +43,7 @@ export async function sponsoredWriteContract(input: {
         dataSuffix: BASE_BUILDER_DATA_SUFFIX_CAPABILITY,
       };
       if (paymaster) {
-        capabilities.paymasterService = { url: paymaster };
+        capabilities["paymasterService"] = { url: paymaster };
       }
       const id = (await input.wallet.request({
         method: "wallet_sendCalls",

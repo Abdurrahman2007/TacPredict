@@ -30,6 +30,7 @@ import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protoc
 import { Route as ApiPaymasterRouteImport } from './routes/api/paymaster'
 import { Route as ApiV2KeeperRouteImport } from './routes/api/v2/keeper'
 import { Route as ApiV2MarketKeyRouteImport } from './routes/api/v2/market/$key'
+import { Route as DotwellKnownFarcasterDotjsonRouteImport } from './routes/.well-known/farcaster[.]json'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +137,11 @@ const ApiV2MarketKeyRoute = ApiV2MarketKeyRouteImport.update({
   path: '/api/v2/market/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotwellKnownFarcasterDotjsonRoute = DotwellKnownFarcasterDotjsonRouteImport.update({
+  id: '/.well-known/farcaster.json',
+  path: '/.well-known/farcaster.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
+  '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
+  '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/api/paymaster': typeof ApiPaymasterRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
+  '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
+    | '/.well-known/farcaster.json'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
+    | '/.well-known/farcaster.json'
   id:
     | '__root__'
     | '/'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/api/paymaster'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
+    | '/.well-known/farcaster.json'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   ApiPaymasterRoute: typeof ApiPaymasterRoute
   ApiV2KeeperRoute: typeof ApiV2KeeperRoute
   ApiV2MarketKeyRoute: typeof ApiV2MarketKeyRoute
+  DotwellKnownFarcasterDotjsonRoute: typeof DotwellKnownFarcasterDotjsonRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV2MarketKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/farcaster.json': {
+      id: '/.well-known/farcaster.json'
+      path: '/.well-known/farcaster.json'
+      fullPath: '/.well-known/farcaster.json'
+      preLoaderRoute: typeof DotwellKnownFarcasterDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -483,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPaymasterRoute: ApiPaymasterRoute,
   ApiV2KeeperRoute: ApiV2KeeperRoute,
   ApiV2MarketKeyRoute: ApiV2MarketKeyRoute,
+  DotwellKnownFarcasterDotjsonRoute: DotwellKnownFarcasterDotjsonRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
