@@ -90,8 +90,14 @@ export function checkSignInMessage({ fields, hosts, nowMs }) {
   return { ok: true, address: address.toLowerCase() };
 }
 
-/** Person-facing words for a refusal. */
-export function signInReasonText(reason) {
+/** Person-facing words for a refusal; `detail` is the short technical step that failed, when the server has one. */
+export function signInReasonText(reason, detail) {
+  const text = baseReasonText(reason);
+  const extra = typeof detail === "string" ? detail.trim().slice(0, 120) : "";
+  return extra ? `${text} (${extra})` : text;
+}
+
+function baseReasonText(reason) {
   switch (reason) {
     case "expired":
       return "The sign-in request expired. Please try again.";

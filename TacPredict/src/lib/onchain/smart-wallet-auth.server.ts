@@ -84,9 +84,10 @@ export async function smartWalletSignIn(input: {
     });
   } catch (error) {
     console.error("[wallet-signin] signature check failed", error);
-    return { ok: false, reason: "unavailable" };
+    return { ok: false, reason: "unavailable", detail: `check: ${brief(error)}` };
   }
-  if (!accepted) return { ok: false, reason: "bad_signature" };
+  if (!accepted)
+    return { ok: false, reason: "bad_signature", detail: `signature ${signature.length} chars` };
 
   try {
     const email = walletEmail(address);
@@ -104,17 +105,17 @@ export async function smartWalletSignIn(input: {
       !/already|exists|registered/i.test(`${created.error.code ?? ""} ${created.error.message}`)
     ) {
       console.error("[wallet-signin] could not create the account", created.error);
-      return { ok: false, reason: "unavailable" };
+      return { ok: false, reason: "unavailable", detail: `account: ${brief(created.error)}` };
     }
 
     const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
     const tokenHash = link.data?.properties?.hashed_token;
     if (link.error || !tokenHash) {
       console.error("[wallet-signin] could not issue a sign-in link", link.error);
-      return { ok: false, reason: "unavailable" };
+      return { ok: false, reason: "unavailable", detail: `link: ${brief(link.error)}` };
     }
     user ??= (link.data?.user ?? null) as AdminUser | null;
-    if (!user) return { ok: false, reason: "unavailable" };
+    if (!user) return { ok: false, reason: "unavailable", detail: "account: missing" };
 
     if (!ownsAccount(user, address)) {
       // An account with this address exists but was not made by this service: only an unconfirmed one (someone
@@ -125,7 +126,8 @@ export async function smartWalletSignIn(input: {
         password: randomPassword(),
         app_metadata: metadata,
       });
-      if (fixed.error) return { ok: false, reason: "unavailable" };
+      if (fixed.error)
+        return { ok: false, reason: "unavailable", detail: `account: ${brief(fixed.error)}` };
     }
 
     // The wallet is now proven to belong to this account.
@@ -134,7 +136,8 @@ export async function smartWalletSignIn(input: {
       .select("user_id")
       .eq("address", address)
       .maybeSingle();
-    if (existing.error) return { ok: false, reason: "unavailable" };
+    if (existing.error)
+      return { ok: false, reason: "unavailable", detail: `wallet: ${brief(existing.error)}` };
     const holder = (existing.data as { user_id: string | null } | null)?.user_id ?? null;
     if (holder && holder !== user.id) return { ok: false, reason: "address_taken" };
     const saved = await admin
@@ -145,12 +148,12 @@ export async function smartWalletSignIn(input: {
       );
     if (saved.error) {
       console.error("[wallet-signin] could not record the wallet", saved.error);
-      return { ok: false, reason: "unavailable" };
+      return { ok: false, reason: "unavailable", detail: `wallet: ${brief(saved.error)}` };
     }
 
     return { ok: true, tokenHash, address };
   } catch (error) {
     console.error("[wallet-signin] unexpected failure", error);
-    return { ok: false, reason: "unavailable" };
+    return { ok: false, reason: "unavailable", detail: `error: ${brief(error)}` };
   }
 }

@@ -8,6 +8,7 @@ import { shouldRequestWalletSignIn } from "@/lib/onchain/wallet-signin-policy.mj
 import { supabase } from "@/integrations/supabase/client";
 import { sessionMatchesWallet } from "@/lib/onchain/wallet-session.mjs";
 import { safeAuthNext } from "@/lib/auth-config";
+import { showWalletNotice } from "@/lib/wallet-notice";
 
 // Shared across React remounts: one login attempt per connection, including rejection.
 const attempted = new Set<string>();
@@ -130,7 +131,17 @@ export function WagmiBaseBridge() {
           else {
             attempted.add(key);
             siweDone.current = key;
-            const login = signInWithEthereumWallet(provider, address).then(() => undefined);
+            const login = signInWithEthereumWallet(provider, address, chainId ?? null)
+              .then(() => undefined)
+              .catch((cause: unknown) => {
+                // A failed sign-in must be visible: the header offers a retry, this says why.
+                showWalletNotice(
+                  cause instanceof Error && cause.message
+                    ? cause.message
+                    : "Verification was not completed. Tap your wallet to retry.",
+                );
+                throw cause;
+              });
             pending.set(key, login);
             try {
               await login;
