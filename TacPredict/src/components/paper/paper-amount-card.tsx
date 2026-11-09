@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { Market } from "@/domain/markets/types";
 import { useLoginDialog } from "@/components/login-dialog";
 import { usePaperLedger } from "@/lib/paper/ledger";
@@ -7,7 +7,8 @@ import { executeOnchainTrade } from "@/lib/virtual-set/wallet-trade";
 import { useOnchainWindow, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
 
 /** Short button text for a window that cannot take a trade yet (reason comes from the server). */
-function waitLabel(reason: string | null, loading: boolean) {
+function waitLabel(reason: string | null, loading: boolean, canRetry: boolean) {
+  if (canRetry) return "Tap to retry setup";
   if (loading) return "Loading…";
   if (reason === "not_open") return "Opens soon";
   if (reason === "closing" || reason === "ended") return "Closed";
@@ -50,10 +51,21 @@ export function PaperAmountCard({
   const waiting = chainMode && onchain.supported && !onchain.ready;
   const windowLoading = chainMode && onchain.supported && Boolean(onchain.loading);
   const [busy, setBusy] = useState(false);
+  const [prepStuck, setPrepStuck] = useState(false);
   const id = useId();
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
   const [notice, setNotice] = useState("");
+
+  // After a few seconds of preparing, let the user tap to nudge setup instead of a dead button.
+  useEffect(() => {
+    if (!waiting) {
+      setPrepStuck(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setPrepStuck(true), 6_000);
+    return () => window.clearTimeout(timer);
+  }, [waiting, market.id]);
   const outcome = market.outcomes.find((o) => o.id === selected) ?? market.outcomes[0];
   const priceCents = outcome && outcome.probabilityKnown !== false ? outcome.probability : null;
   const expired =
@@ -167,6 +179,11 @@ export function PaperAmountCard({
     }
     if (expired) {
       setNotice("Market expired — trading closed");
+      return;
+    }
+    if (waiting) {
+      setNotice("Setting up this window — tap again in a moment");
+      void onchain.refetch();
       return;
     }
     if (!outcome || priceCents == null || !(usdc > 0)) {
@@ -341,16 +358,17 @@ export function PaperAmountCard({
               expired ||
               (needsWallet
                 ? false
-                : waiting ||
-                  !(usdc > 0) ||
-                  usdc > ledger.balance ||
-                  priceCents == null ||
-                  priceCents <= 0)
+                : waiting
+                  ? !prepStuck
+                  : !(usdc > 0) ||
+                    usdc > ledger.balance ||
+                    priceCents == null ||
+                    priceCents <= 0)
             }
             onClick={submitBuy}
           >
             {busy
-              ? "Working…"
+              ? "Confirm in wallet…"
               : !tradingAllowed
                 ? "Unavailable"
                 : chainBlocked
@@ -360,7 +378,7 @@ export function PaperAmountCard({
                     : expired
                       ? "Expired"
                       : waiting
-                        ? waitLabel(onchain.reason, windowLoading)
+                        ? waitLabel(onchain.reason, windowLoading, prepStuck)
                         : usdc > ledger.balance
                           ? "Insufficient balance"
                           : outcome
@@ -369,7 +387,9 @@ export function PaperAmountCard({
           </button>
           <p className="pd-order-note">
             {chainMode && waiting
-              ? "Setting up this window on Base — usually a few seconds. Keep this page open."
+              ? prepStuck
+                ? "Still setting up — tap the button to retry. Wallet confirm opens once the market is ready."
+                : "Setting up this window on Base — usually a few seconds."
               : chainMode
                 ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
                 : (settlementNote ??

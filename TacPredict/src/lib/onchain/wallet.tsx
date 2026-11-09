@@ -64,6 +64,12 @@ export function BaseWalletProvider({ children }: { children: ReactNode }) {
     revision.current += 1;
   }, []);
 
+  // Hard cap: never leave every page on "Connecting…" if wagmi never settles.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRestoring(false), 4_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const announce = (event: Event) => {
       const detail = (

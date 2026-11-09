@@ -96,7 +96,9 @@ export function useOnchainWindow(id: string | null) {
     ready: query.data?.ready === true,
     reason: query.data?.reason ?? null,
     loading: enabled && target !== null && query.isPending && !query.data,
+    refreshing: query.isFetching,
     key: target ? id : null,
+    refetch: () => query.refetch(),
   };
 }
 

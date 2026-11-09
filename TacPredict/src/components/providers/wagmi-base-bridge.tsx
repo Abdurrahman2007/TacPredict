@@ -91,11 +91,16 @@ export function WagmiBaseBridge() {
   }, [status, isConnected, address, chainId, baseAddress, adopt, disconnect, settleWagmi]);
 
   // 1b. A wallet provider that never answers must not freeze the UI in
-  // "restoring" forever. Give mobile wallets longer to come back after app switch.
+  // "Connecting…" forever — especially after disconnect + new dApp tab.
   useEffect(() => {
     if (status !== "reconnecting" && status !== "connecting") return;
-    const timer = window.setTimeout(() => settleWagmi(), 20_000);
+    const timer = window.setTimeout(() => settleWagmi(), 5_000);
     return () => window.clearTimeout(timer);
+  }, [status, settleWagmi]);
+
+  // First paint: if wagmi is already idle-disconnected, stop restoring immediately.
+  useEffect(() => {
+    if (status === "disconnected") settleWagmi();
   }, [status, settleWagmi]);
 
   // 2. Attach the wallet provider (needed to send transactions) and run the one-time sign-in.

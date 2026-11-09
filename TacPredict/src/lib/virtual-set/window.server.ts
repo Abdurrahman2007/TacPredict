@@ -24,6 +24,20 @@ export type OnchainWindow = {
 export const onchainEnabled = () => process.env["VSET_TRADING_ENABLED"] === "1" && vsetServerConfigured();
 
 let lastNudge = 0;
+let nudgeInFlight: Promise<void> | null = null;
+
+function nudgeKeeper(): void {
+  if (Date.now() - lastNudge < 2500) return;
+  if (nudgeInFlight) return;
+  lastNudge = Date.now();
+  // Never block the trade-sheet status request on create/stock transactions — that froze the
+  // button on "Preparing market…" for tens of seconds with no wallet popup.
+  nudgeInFlight = keeperTick()
+    .catch(() => undefined)
+    .then(() => {
+      nudgeInFlight = null;
+    });
+}
 
 export async function onchainWindow(input: {
   asset: VsetAsset;
@@ -56,17 +70,7 @@ export async function onchainWindow(input: {
     blocker === "not_ready" ||
     blocker === "not_open";
   const soon = input.start / 1000 <= nowSec + input.minutes * 60;
-  // Nudge often while someone is on the trade sheet so a late create can stock in the same visit.
-  if (needsWork && soon && Date.now() - lastNudge > 2500) {
-    lastNudge = Date.now();
-    try {
-      await keeperTick();
-    } catch {
-      // The cron run keeps trying; the page simply shows "preparing" a little longer.
-    }
-    row = await marketByKey(db, key);
-    blocker = quoteBlocker(row, nowSec);
-  }
+  if (needsWork && soon) nudgeKeeper();
   // The price to beat is fetched at quote time, so a missing strike alone does not hold the window back.
   const ready = blocker === null || blocker === "no_strike";
   return {

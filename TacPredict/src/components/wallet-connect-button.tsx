@@ -23,7 +23,7 @@ function ConnectWalletSkeleton({ className }: { className?: string }) {
 }
 
 /** If the wallet code has not loaded after this long (a failed download), the header offers a reload instead. */
-const LOAD_GIVE_UP_MS = 12_000;
+const LOAD_GIVE_UP_MS = 5_000;
 
 /**
  * Navbar wallet control. Keeps wagmi/rainbowkit out of the SSR graph by
