@@ -4,6 +4,8 @@ import {
   CLOCK_SKEW_SEC,
   SIGN_IN_MAX_LIFE_SEC,
   checkSignInMessage,
+  claimsOwnWallet,
+  linkDecision,
   isPlainSignature,
   isSignatureShape,
   signInReasonText,
@@ -162,6 +164,28 @@ test("a refusal can carry the failing step so it can be traced", () => {
   );
   assert.equal(signInReasonText("expired"), signInReasonText("expired", ""));
   assert.ok(signInReasonText("unavailable", "x".repeat(500)).length < 200);
+});
+
+test("a wallet already linked to another account still signs in; its own link is refreshed", () => {
+  assert.equal(linkDecision(null, "user-1"), "link");
+  assert.equal(linkDecision(undefined, "user-1"), "link");
+  assert.equal(linkDecision("user-1", "user-1"), "link");
+  assert.equal(linkDecision("admin-account", "user-1"), "keep");
+});
+
+test("a token made by signing in with the wallet proves that wallet, and no other", () => {
+  const claims = { sub: "u", app_metadata: walletAppMetadata(ADDRESS) };
+  assert.equal(claimsOwnWallet(claims, ADDRESS), true);
+  assert.equal(claimsOwnWallet(claims, ADDRESS.toUpperCase().replace("0X", "0x")), true);
+  assert.equal(claimsOwnWallet(claims, `0x${"3".repeat(40)}`), false);
+  assert.equal(
+    claimsOwnWallet({ sub: "u", user_metadata: walletAppMetadata(ADDRESS) }, ADDRESS),
+    false,
+  );
+  assert.equal(claimsOwnWallet({ app_metadata: { wallet_address: ADDRESS } }, ADDRESS), false);
+  assert.equal(claimsOwnWallet({ app_metadata: { wallet_auth: "smart" } }, ADDRESS), false);
+  assert.equal(claimsOwnWallet(null, ADDRESS), false);
+  assert.equal(claimsOwnWallet(claims, "nope"), false);
 });
 
 test("refusals read in plain words", () => {

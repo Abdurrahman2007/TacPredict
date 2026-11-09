@@ -47,6 +47,31 @@ export function walletAppMetadata(address) {
   return { wallet_address: address.toLowerCase(), wallet_auth: "smart" };
 }
 
+/**
+ * A wallet may already be linked to another account (the owner's own email account, for instance). That must not lock
+ * the wallet out: it signs in to its own wallet account and simply does not take over the existing link.
+ */
+export function linkDecision(holderUserId, userId) {
+  if (!holderUserId) return "link";
+  return holderUserId === userId ? "link" : "keep";
+}
+
+/**
+ * Does a verified session token say it belongs to this wallet? Only the server writes `app_metadata`, after checking
+ * the wallet's signature, so on-chain actions for that wallet need no second proof.
+ */
+export function claimsOwnWallet(claims, address) {
+  if (!claims || typeof claims !== "object" || typeof address !== "string") return false;
+  if (!ADDRESS.test(address)) return false;
+  const app = claims.app_metadata;
+  if (!app || typeof app !== "object") return false;
+  return (
+    app.wallet_auth === "smart" &&
+    typeof app.wallet_address === "string" &&
+    app.wallet_address.toLowerCase() === address.toLowerCase()
+  );
+}
+
 function toMs(value) {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "number") return value;

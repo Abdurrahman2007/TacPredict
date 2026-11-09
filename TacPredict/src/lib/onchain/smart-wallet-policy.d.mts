@@ -20,3 +20,8 @@ export declare function checkSignInMessage(input: {
   nowMs: number;
 }): SignInCheck;
 export declare function signInReasonText(reason: string, detail?: string | null): string;
+export declare function linkDecision(
+  holderUserId: string | null | undefined,
+  userId: string,
+): "link" | "keep";
+export declare function claimsOwnWallet(claims: unknown, address: string): boolean;

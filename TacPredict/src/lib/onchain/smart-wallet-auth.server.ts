@@ -16,6 +16,7 @@ import {
   MAX_MESSAGE_CHARS,
   checkSignInMessage,
   isSignatureShape,
+  linkDecision,
   walletAppMetadata,
   walletEmail,
 } from "./smart-wallet-policy.mjs";
@@ -140,25 +141,36 @@ export async function smartWalletSignIn(input: {
         return { ok: false, reason: "unavailable", detail: `account: ${brief(fixed.error)}` };
     }
 
-    // The wallet is now proven to belong to this account.
+    // The wallet is proven to belong to this account. Record it as verified, unless it is already linked to another
+    // account (for example the owner's email account): then that link stays, and this wallet account still works on
+    // chain because its token carries the wallet address (see claimsOwnWallet).
     const existing = await admin
       .from("protocol_wallets")
       .select("user_id")
       .eq("address", address)
       .maybeSingle();
     if (existing.error)
-      return { ok: false, reason: "unavailable", detail: `wallet: ${brief(existing.error)}` };
+      return {
+        ok: false,
+        reason: "unavailable",
+        detail: `wallet: ${brief(existing.error)}`,
+      };
     const holder = (existing.data as { user_id: string | null } | null)?.user_id ?? null;
-    if (holder && holder !== user.id) return { ok: false, reason: "address_taken" };
-    const saved = await admin
-      .from("protocol_wallets")
-      .upsert(
-        { address, user_id: user.id, verified_at: new Date().toISOString() },
-        { onConflict: "address" },
-      );
-    if (saved.error) {
-      console.error("[wallet-signin] could not record the wallet", saved.error);
-      return { ok: false, reason: "unavailable", detail: `wallet: ${brief(saved.error)}` };
+    if (linkDecision(holder, user.id) === "link") {
+      const saved = await admin
+        .from("protocol_wallets")
+        .upsert(
+          { address, user_id: user.id, verified_at: new Date().toISOString() },
+          { onConflict: "address" },
+        );
+      if (saved.error) {
+        console.error("[wallet-signin] could not record the wallet", saved.error);
+        return {
+          ok: false,
+          reason: "unavailable",
+          detail: `wallet: ${brief(saved.error)}`,
+        };
+      }
     }
 
     return { ok: true, tokenHash, address };
