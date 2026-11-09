@@ -13,6 +13,7 @@ const mime = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".txt": "text/plain; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
 };
 function walk(dir) {
   return fs

@@ -7,11 +7,15 @@ import { executeOnchainTrade } from "@/lib/virtual-set/wallet-trade";
 import { useOnchainWindow, useOptionalWallet, useRefreshOnchain } from "@/lib/virtual-set/use-onchain";
 
 /** Short button text for a window that cannot take a trade yet (reason comes from the server). */
-function waitLabel(reason: string | null) {
+function waitLabel(reason: string | null, loading: boolean) {
+  if (loading) return "Loading…";
   if (reason === "not_open") return "Opens soon";
   if (reason === "closing" || reason === "ended") return "Closed";
   if (reason === "market_failed") return "Unavailable";
-  return "Preparing…";
+  if (reason === "not_ready") return "Stocking market…";
+  if (reason === "not_created" || reason === "no_market" || reason === "preparing")
+    return "Preparing market…";
+  return "Preparing market…";
 }
 
 function money(n: number) {
@@ -44,6 +48,7 @@ export function PaperAmountCard({
   const chainBlocked = chainMode && !onchain.supported;
   const needsWallet = chainMode && onchain.supported && !wallet?.address;
   const waiting = chainMode && onchain.supported && !onchain.ready;
+  const windowLoading = chainMode && onchain.supported && Boolean(onchain.loading);
   const [busy, setBusy] = useState(false);
   const id = useId();
   const [mode, setMode] = useState<"buy" | "sell">("buy");
@@ -355,7 +360,7 @@ export function PaperAmountCard({
                     : expired
                       ? "Expired"
                       : waiting
-                        ? waitLabel(onchain.reason)
+                        ? waitLabel(onchain.reason, windowLoading)
                         : usdc > ledger.balance
                           ? "Insufficient balance"
                           : outcome
@@ -363,10 +368,12 @@ export function PaperAmountCard({
                             : "Trade"}
           </button>
           <p className="pd-order-note">
-            {chainMode
-              ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
-              : (settlementNote ??
-                "Share prices track live spot vs open. Virtual USDC only — no withdraw.")}
+            {chainMode && waiting
+              ? "Setting up this window on Base — usually a few seconds. Keep this page open."
+              : chainMode
+                ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
+                : (settlementNote ??
+                  "Share prices track live spot vs open. Virtual USDC only — no withdraw.")}
           </p>
         </>
       ) : (

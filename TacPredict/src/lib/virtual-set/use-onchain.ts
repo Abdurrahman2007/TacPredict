@@ -84,8 +84,9 @@ export function useOnchainWindow(id: string | null) {
     queryFn: () =>
       getOnchainWindow({ data: { asset: target!.asset, minutes: target!.minutes, start: target!.startMs } }),
     enabled: enabled && target !== null,
-    refetchInterval: 6_000,
-    staleTime: 3_000,
+    // Poll faster while the market is still being created/stocked so "Preparing…" clears quickly.
+    refetchInterval: (q) => (q.state.data?.ready === true ? 8_000 : 2_000),
+    staleTime: 1_000,
     placeholderData: keepPreviousData,
   });
   return {
@@ -94,6 +95,7 @@ export function useOnchainWindow(id: string | null) {
     supported: enabled && target !== null,
     ready: query.data?.ready === true,
     reason: query.data?.reason ?? null,
+    loading: enabled && target !== null && query.isPending && !query.data,
     key: target ? id : null,
   };
 }

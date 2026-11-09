@@ -28,6 +28,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as UpDownAssetRouteImport } from './routes/up-down_.$asset'
 import { Route as ApiProtocolMetadataHashRouteImport } from './routes/api/protocol/metadata/$hash'
 import { Route as ApiPaymasterRouteImport } from './routes/api/paymaster'
+import { Route as ApiWebhookRouteImport } from './routes/api/webhook'
 import { Route as ApiV2KeeperRouteImport } from './routes/api/v2/keeper'
 import { Route as ApiV2MarketKeyRouteImport } from './routes/api/v2/market/$key'
 import { Route as DotwellKnownFarcasterDotjsonRouteImport } from './routes/.well-known/farcaster[.]json'
@@ -127,6 +128,11 @@ const ApiPaymasterRoute = ApiPaymasterRouteImport.update({
   path: '/api/paymaster',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhookRoute = ApiWebhookRouteImport.update({
+  id: '/api/webhook',
+  path: '/api/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV2KeeperRoute = ApiV2KeeperRouteImport.update({
   id: '/api/v2/keeper',
   path: '/api/v2/keeper',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
   '/api/paymaster': typeof ApiPaymasterRoute
+  '/api/webhook': typeof ApiWebhookRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
   '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
   '/api/paymaster': typeof ApiPaymasterRoute
+  '/api/webhook': typeof ApiWebhookRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
   '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/api/protocol/metadata/$hash': typeof ApiProtocolMetadataHashRoute
   '/api/paymaster': typeof ApiPaymasterRoute
+  '/api/webhook': typeof ApiWebhookRoute
   '/api/v2/keeper': typeof ApiV2KeeperRoute
   '/api/v2/market/$key': typeof ApiV2MarketKeyRoute
   '/.well-known/farcaster.json': typeof DotwellKnownFarcasterDotjsonRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/protocol/metadata/$hash'
     | '/api/paymaster'
+    | '/api/webhook'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
     | '/.well-known/farcaster.json'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/protocol/metadata/$hash'
     | '/api/paymaster'
+    | '/api/webhook'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
     | '/.well-known/farcaster.json'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/protocol/metadata/$hash'
     | '/api/paymaster'
+    | '/api/webhook'
     | '/api/v2/keeper'
     | '/api/v2/market/$key'
     | '/.well-known/farcaster.json'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   UpDownAssetRoute: typeof UpDownAssetRoute
   ApiProtocolMetadataHashRoute: typeof ApiProtocolMetadataHashRoute
   ApiPaymasterRoute: typeof ApiPaymasterRoute
+  ApiWebhookRoute: typeof ApiWebhookRoute
   ApiV2KeeperRoute: typeof ApiV2KeeperRoute
   ApiV2MarketKeyRoute: typeof ApiV2MarketKeyRoute
   DotwellKnownFarcasterDotjsonRoute: typeof DotwellKnownFarcasterDotjsonRoute
@@ -446,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPaymasterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhook': {
+      id: '/api/webhook'
+      path: '/api/webhook'
+      fullPath: '/api/webhook'
+      preLoaderRoute: typeof ApiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v2/keeper': {
       id: '/api/v2/keeper'
       path: '/api/v2/keeper'
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   UpDownAssetRoute: UpDownAssetRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
   ApiPaymasterRoute: ApiPaymasterRoute,
+  ApiWebhookRoute: ApiWebhookRoute,
   ApiV2KeeperRoute: ApiV2KeeperRoute,
   ApiV2MarketKeyRoute: ApiV2MarketKeyRoute,
   DotwellKnownFarcasterDotjsonRoute: DotwellKnownFarcasterDotjsonRoute,

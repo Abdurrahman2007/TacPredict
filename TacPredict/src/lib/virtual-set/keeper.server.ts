@@ -289,7 +289,9 @@ async function createMarkets(ctx: Ctx, rows: MarketRow[], nowSec: number): Promi
   for (const row of todo) {
     const startSec = secOf(row.start_at);
     const endSec = secOf(row.end_at);
-    const openAtSec = Math.max(startSec - PRE_OPEN_SEC, nowSec + OPEN_LEAD_SEC);
+    // Pre-open windows keep the lead buffer; mid-window recoveries open immediately so stocking can finish this tick.
+    const openAtSec =
+      startSec <= nowSec ? nowSec : Math.max(startSec - PRE_OPEN_SEC, nowSec + OPEN_LEAD_SEC);
     if (endSec - Math.max(startSec, openAtSec) < 45) {
       row.failed = true;
       await patchMarket(ctx.db, row.key, { failed: true, last_error: "window passed before it could be created" });
@@ -323,7 +325,9 @@ async function stockMarkets(ctx: Ctx, rows: MarketRow[], nowSec: number): Promis
   );
   for (const row of watched) {
     if (row.split_tx || row.market_id === null) continue;
-    if (nowSec < secOf(row.open_at) + 1 || nowSec > secOf(row.end_at) - 25) continue;
+    if (nowSec > secOf(row.end_at) - 25) continue;
+    // Stock once the market exists and its open time (or the window start) has been reached.
+    if (nowSec < secOf(row.open_at) && nowSec < secOf(row.start_at)) continue;
     const data = encodeFunctionData({
       abi: virtualConditionalPositionsAbi,
       functionName: "split",
@@ -622,11 +626,23 @@ async function runTick(db: SupabaseClient, report: TickReport): Promise<void> {
     }
   }
 
-  // Wait briefly for what was just sent, so the first trade does not need another run.
+  // Wait briefly for what was just sent, then stock in the same tick once create receipts land.
   const fresh = rows.filter((row) => row.create_tx && row.market_id === null);
   if (fresh.length || stocked.length) {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await settleReceipts(ctx, rows);
+  }
+  if (balance >= MIN_KEEPER_ETH) {
+    try {
+      const more = await stockMarkets(ctx, rows, Math.floor(Date.now() / 1000));
+      if (more.length) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await settleReceipts(ctx, rows);
+      }
+    } catch (error) {
+      if (!(error instanceof BudgetReached)) throw error;
+      report.notes.push("transaction budget reached while stocking; the rest continues next run");
+    }
   }
 
   await indexFills(ctx, rows);

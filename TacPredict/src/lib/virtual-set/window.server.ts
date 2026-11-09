@@ -50,9 +50,14 @@ export async function onchainWindow(input: {
 
   let row = await marketByKey(db, key);
   let blocker = quoteBlocker(row, nowSec);
-  const needsWork = blocker === "no_market" || blocker === "not_created" || blocker === "not_ready";
+  const needsWork =
+    blocker === "no_market" ||
+    blocker === "not_created" ||
+    blocker === "not_ready" ||
+    blocker === "not_open";
   const soon = input.start / 1000 <= nowSec + input.minutes * 60;
-  if (needsWork && soon && Date.now() - lastNudge > 8000) {
+  // Nudge often while someone is on the trade sheet so a late create can stock in the same visit.
+  if (needsWork && soon && Date.now() - lastNudge > 2500) {
     lastNudge = Date.now();
     try {
       await keeperTick();
