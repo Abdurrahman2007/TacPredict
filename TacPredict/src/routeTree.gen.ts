@@ -480,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   UpDownAssetRoute: UpDownAssetRoute,
   ApiProtocolMetadataHashRoute: ApiProtocolMetadataHashRoute,
+  ApiPaymasterRoute: ApiPaymasterRoute,
   ApiV2KeeperRoute: ApiV2KeeperRoute,
   ApiV2MarketKeyRoute: ApiV2MarketKeyRoute,
 }
