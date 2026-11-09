@@ -9,25 +9,16 @@ type WriteArgs = {
   value?: bigint;
 };
 
-/** Minimal wallet/public surfaces — avoids viem PublicClient type identity clashes across packages. */
-type SponsoredWallet = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-  writeContract: (args: Record<string, unknown>) => Promise<Hex>;
-};
-type SponsoredPublic = {
-  waitForTransactionReceipt: (args: {
-    hash: Hex;
-    timeout?: number;
-  }) => Promise<{ status: string }>;
-};
-
 /**
  * Prefer EIP-5792 wallet_sendCalls + Pimlico paymaster (gas sponsored).
  * Falls back to a normal writeContract when the wallet cannot sponsor.
+ * Wallet/public are untyped clients to avoid viem WalletClient identity clashes.
  */
 export async function sponsoredWriteContract(input: {
-  wallet: SponsoredWallet;
-  public: SponsoredPublic;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wallet: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public: any;
   account: Address | { address: Address };
   chain: { id: number };
   request: WriteArgs;
@@ -42,7 +33,7 @@ export async function sponsoredWriteContract(input: {
   const from =
     typeof input.account === "string" ? input.account : (input.account.address as Address);
 
-  if (paymaster && typeof input.wallet.request === "function") {
+  if (paymaster && typeof input.wallet?.request === "function") {
     try {
       input.onStatus?.("Confirm — gas sponsored…");
       const chainIdHex = `0x${input.chain.id.toString(16)}`;
@@ -90,12 +81,14 @@ export async function sponsoredWriteContract(input: {
     functionName: input.request.functionName,
     args: input.request.args,
     value: input.request.value,
-  });
+  }) as Promise<Hex>;
 }
 
 async function waitForSponsoredHash(
-  wallet: SponsoredWallet,
-  pub: SponsoredPublic,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wallet: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pub: any,
   callsId: string,
 ): Promise<Hex | null> {
   const started = Date.now();
