@@ -11,9 +11,9 @@ export const ASSETS = {
 };
 /** Product assets only — XRP permanently removed (no Base settlement path). */
 export const ASSET_KEYS = ["bitcoin", "ethereum", "solana", "bnb"];
-/** Supported UI durations (minutes). 15m is back for the on-chain Virtual USDC set (5m and 15m trade on Base). */
-export const DURATIONS = [5, 15, 30, 60, 720, 1440];
-export const DISPLAY_DURATIONS = [5, 15, 30, 60, 720, 1440];
+/** Product window lengths on Home / Up-Down (minutes). */
+export const DURATIONS = [5, 15, 30];
+export const DISPLAY_DURATIONS = [5, 15, 30];
 const SLUGS = { btc: "bitcoin", eth: "ethereum", sol: "solana", bnb: "bnb" };
 
 /** Coinbase candle sizes (seconds) that exist; the largest request is 300 candles. */

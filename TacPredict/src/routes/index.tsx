@@ -47,28 +47,6 @@ function HomePage() {
           markets={nativeFeed.markets}
           snapshotTime={nativeFeed.updatedAt}
         />
-        <div className="home-long-rounds">
-          <UpDownSection
-            fixedMinutes={30}
-            markets={nativeFeed.markets}
-            snapshotTime={nativeFeed.updatedAt}
-          />
-          <UpDownSection
-            fixedMinutes={60}
-            markets={nativeFeed.markets}
-            snapshotTime={nativeFeed.updatedAt}
-          />
-          <UpDownSection
-            fixedMinutes={720}
-            markets={nativeFeed.markets}
-            snapshotTime={nativeFeed.updatedAt}
-          />
-          <UpDownSection
-            fixedMinutes={1440}
-            markets={nativeFeed.markets}
-            snapshotTime={nativeFeed.updatedAt}
-          />
-        </div>
       </div>
     </div>
   );

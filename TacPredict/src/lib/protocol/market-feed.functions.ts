@@ -76,7 +76,7 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
           virtualMode: true,
           virtualDeployment: virtual.deployment,
         };
-      // No indexer catalogue yet — paper Up/Down + Rewards Virtual USDC still work.
+      // No indexer catalogue yet — paper Up/Down + Rewards still work. No public banner.
       return {
         markets: [],
         cryptoUpDown: {},
@@ -85,9 +85,6 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         updatedAt,
         virtualMode: true,
         ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
-        error: deploymentHint
-          ? "Sepolia VirtualPriceAMM configured; on-chain catalogue waits for indexer. Paper Virtual USDC trading is available."
-          : "Virtual markets are not configured. Paper Rewards Virtual USDC still works. Real-USDC trading is disabled.",
       };
     } catch {
       return {
@@ -98,9 +95,6 @@ export const getNativeMarketFeed = createServerFn({ method: "GET" }).handler(
         deployments: [],
         virtualMode: true,
         ...(deploymentHint ? { virtualDeployment: deploymentHint } : {}),
-        error: deploymentHint
-          ? "Sepolia engine linked; catalogue temporarily unavailable. Use paper Up/Down + Rewards box."
-          : "Native markets are not available yet. No external odds or demo balances are substituted.",
       };
     }
   },

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "@/styles/market-cards.css";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
 import type { Market } from "@/domain/markets/types";
 import { CoinGeckoChart } from "@/components/updown/coingecko-chart";
 import { useNow } from "@/lib/updown/use-clock";
@@ -203,24 +202,8 @@ export function UpDownSection({
       <PaperSettleRobot />
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-[22px]">
-          {fixedMinutes === 30
-            ? "Live · 30M"
-            : fixedMinutes === 60
-              ? "Live · 1H"
-              : fixedMinutes === 720
-                ? "Live · 12H"
-                : fixedMinutes === 1440
-                  ? "Live · 24H"
-                  : "Trending Up & Down"}
+          {fixedMinutes ? `Live · ${durationLabel(fixedMinutes)}` : "Trending Up & Down"}
         </h2>
-        <Link
-          to="/up-down"
-          search={fixedMinutes ? { d: fixedMinutes } : {}}
-          className="flex min-h-11 shrink-0 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground"
-        >
-          View more
-          <ChevronRight className="size-4" />
-        </Link>
       </div>
       {!fixedMinutes && (
         <div

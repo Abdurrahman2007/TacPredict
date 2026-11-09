@@ -1,7 +1,7 @@
 import { useOverviewPrivacy } from "@/lib/accounts/privacy";
 import { useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Copy, Eye, EyeOff, Wallet } from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
 import { usePaperLedger, type PaperPosition, type PaperTrade } from "@/lib/paper/ledger";
@@ -52,7 +52,8 @@ function PortfolioPage() {
   const equity = disconnected ? 0 : ledger.balance + positionValue;
   const realized = disconnected ? 0 : ledger.realizedPnl;
   const totalVolume = disconnected ? 0 : tradeVolume(ledger.trades);
-  const pnlTone = realized > 0 ? "tp-pnl-pos" : realized < 0 ? "tp-pnl-neg" : undefined;
+  const openCount = disconnected ? 0 : ledger.positions.length;
+  const pnlTone = realized > 0 ? "up" : realized < 0 ? "down" : "";
 
   async function copyAddress() {
     if (!wallet.address) {
@@ -83,28 +84,27 @@ function PortfolioPage() {
   }
 
   return (
-    <main className="tp-world-port pf pf-min">
-      <header className="pf-head">
+    <main className="pf pf-pro">
+      <header className="pf-pro-top">
         <div>
-          <h1>Portfolio</h1>
+          <p className="pf-pro-label">Portfolio</p>
           <button
             type="button"
-            className="pf-wallet"
+            className="pf-pro-addr"
             onClick={() => void copyAddress()}
             aria-label={disconnected ? "Connect wallet" : "Copy wallet address"}
           >
-            <Wallet size={13} aria-hidden />
             {disconnected
               ? wallet.restoring
                 ? "Connecting…"
                 : "Not connected"
               : `${wallet.address!.slice(0, 6)}…${wallet.address!.slice(-4)}`}
-            {!disconnected && <Copy size={12} aria-hidden />}
+            {!disconnected ? <Copy size={12} aria-hidden /> : null}
           </button>
         </div>
         <button
           type="button"
-          className="pf-icon"
+          className="pf-pro-icon"
           onClick={() => setHidden(!hidden)}
           aria-label={hidden ? "Show balances" : "Hide balances"}
           aria-pressed={hidden}
@@ -113,56 +113,48 @@ function PortfolioPage() {
         </button>
       </header>
 
-      <section className="pf-hero" aria-label="Portfolio value">
-        <strong className="pf-equity">{money(equity, hidden)}</strong>
-        <span className={`pf-pnl-pill ${pnlTone ?? ""}`}>{signedMoney(realized, hidden)}</span>
-        <div className="pf-split">
-          <div>
-            <small>Available</small>
-            <b>{money(available, hidden)}</b>
-          </div>
-          <div>
-            <small>Positions</small>
-            <b>{money(disconnected ? 0 : positionValue, hidden)}</b>
-          </div>
+      <section className="pf-pro-hero" aria-label="Portfolio value">
+        <p className="pf-pro-label">Total value</p>
+        <h1 className="pf-pro-equity">{money(equity, hidden)}</h1>
+        <p className={`pf-pro-pnl ${pnlTone}`}>{signedMoney(realized, hidden)}</p>
+      </section>
+
+      <section className="pf-pro-metrics" aria-label="Totals">
+        <div>
+          <span>Available</span>
+          <strong>{money(available, hidden)}</strong>
         </div>
-        <div className="pf-actions">
-          {showConnect ? (
-            <button type="button" className="pf-primary" onClick={() => void access.run()}>
-              Connect wallet
-            </button>
-          ) : disconnected ? (
-            <button type="button" className="pf-primary" disabled>
-              Connecting…
-            </button>
-          ) : (
-            <Link to="/up-down" className="pf-primary">
-              Trade
-            </Link>
-          )}
-          <Link to="/rewards" className="pf-secondary">
-            Rewards
+        <div>
+          <span>Positions</span>
+          <strong>{money(disconnected ? 0 : positionValue, hidden)}</strong>
+        </div>
+        <div>
+          <span>Volume</span>
+          <strong>{money(totalVolume, hidden)}</strong>
+        </div>
+      </section>
+
+      <div className="pf-pro-cta">
+        {showConnect ? (
+          <button type="button" className="pf-pro-btn primary" onClick={() => void access.run()}>
+            Connect wallet
+          </button>
+        ) : disconnected ? (
+          <button type="button" className="pf-pro-btn primary" disabled>
+            Connecting…
+          </button>
+        ) : (
+          <Link to="/up-down" className="pf-pro-btn primary">
+            Trade
           </Link>
-        </div>
-      </section>
+        )}
+        <Link to="/rewards" className="pf-pro-btn ghost">
+          Rewards
+        </Link>
+      </div>
 
-      <section className="pf-stats pf-stats-3" aria-label="Totals">
-        <div>
-          <small>Volume</small>
-          <b>{money(totalVolume, hidden)}</b>
-        </div>
-        <div>
-          <small>P&amp;L</small>
-          <b className={pnlTone}>{signedMoney(realized, hidden)}</b>
-        </div>
-        <div>
-          <small>Open</small>
-          <b>{hidden ? "••••" : disconnected ? "0" : String(ledger.positions.length)}</b>
-        </div>
-      </section>
-
-      <section className="pf-card pf-holdings" aria-label="Holdings">
-        <div className="tp-seg" role="tablist">
+      <section className="pf-pro-book" aria-label="Holdings">
+        <div className="pf-pro-tabs" role="tablist">
           {(["positions", "history"] as const).map((t) => (
             <button
               key={t}
@@ -172,76 +164,79 @@ function PortfolioPage() {
               className={tab === t ? "on" : undefined}
               onClick={() => setTab(t)}
             >
-              {t === "positions" ? "Positions" : "History"}
-              {t === "positions" && !disconnected && ledger.positions.length > 0 ? (
-                <em>{ledger.positions.length}</em>
-              ) : null}
+              {t === "positions" ? `Positions${openCount ? ` · ${openCount}` : ""}` : "History"}
             </button>
           ))}
-          <i className="tp-seg-thumb" data-pos={tab === "positions" ? 0 : 1} aria-hidden />
         </div>
 
         {tab === "positions" ? (
-          ledger.positions.length === 0 || disconnected ? (
-            <div className="pf-empty">
-              <p>0</p>
+          openCount === 0 ? (
+            <div className="pf-pro-empty">
+              <b>0</b>
+              <Link to="/up-down">Start trading</Link>
             </div>
           ) : (
-            <ul className="tp-pos-list">
+            <ul className="pf-pro-list">
               {ledger.positions.map((p) => {
                 const cost = p.shares * p.avgCost;
                 return (
-                  <li key={p.id} className="tp-pos-row">
-                    <span className="tp-pos-side" data-side={p.side}>
-                      {p.side}
-                    </span>
-                    <span className="tp-pos-main">
-                      <strong>{p.title}</strong>
-                      <small>
-                        {p.shares.toFixed(2)} · {(p.avgCost * 100).toFixed(0)}¢
-                      </small>
-                    </span>
-                    <span className="tp-pos-val">
+                  <li key={p.id}>
+                    <div className="pf-pro-row-main">
+                      <span className="pf-pro-side" data-side={p.side}>
+                        {p.side}
+                      </span>
+                      <div>
+                        <strong>{p.title}</strong>
+                        <small>
+                          {p.shares.toFixed(2)} sh · {(p.avgCost * 100).toFixed(0)}¢
+                        </small>
+                      </div>
+                    </div>
+                    <div className="pf-pro-row-val">
                       <b>{money(cost, hidden)}</b>
-                    </span>
-                    <button
-                      type="button"
-                      className="tp-pos-sell"
-                      data-confirm={confirm === p.id || undefined}
-                      onClick={() => sell(p.id)}
-                    >
-                      {confirm === p.id ? "Confirm" : `Sell ${sellCents(p.avgCost)}¢`}
-                    </button>
+                      <button
+                        type="button"
+                        className="pf-pro-sell"
+                        data-confirm={confirm === p.id || undefined}
+                        onClick={() => sell(p.id)}
+                      >
+                        {confirm === p.id ? "Confirm" : `Sell ${sellCents(p.avgCost)}¢`}
+                      </button>
+                    </div>
                   </li>
                 );
               })}
             </ul>
           )
         ) : ledger.trades.length === 0 || disconnected ? (
-          <div className="pf-empty">
-            <p>0</p>
+          <div className="pf-pro-empty">
+            <b>0</b>
           </div>
         ) : (
-          <ul className="tp-pos-list">
+          <ul className="pf-pro-list">
             {ledger.trades.slice(0, 40).map((t) => (
-              <li key={t.id} className="tp-pos-row tp-pos-hist">
-                <span className="tp-pos-side" data-side={t.side} data-kind={t.kind}>
-                  {t.kind === "buy" ? "Buy" : "Sell"}
-                </span>
-                <span className="tp-pos-main">
-                  <strong>{t.title}</strong>
-                  <small>
-                    {t.side} · {t.shares.toFixed(2)} @ {t.priceCents.toFixed(0)}¢
-                  </small>
-                </span>
-                <span className="tp-pos-val">
+              <li key={t.id}>
+                <div className="pf-pro-row-main">
+                  <span className="pf-pro-side" data-side={t.side} data-kind={t.kind}>
+                    {t.kind === "buy" ? "Buy" : "Sell"}
+                  </span>
+                  <div>
+                    <strong>{t.title}</strong>
+                    <small>
+                      {t.side} · {t.shares.toFixed(2)} @ {t.priceCents.toFixed(0)}¢
+                    </small>
+                  </div>
+                </div>
+                <div className="pf-pro-row-val">
                   <b>{money(t.usdc, hidden)}</b>
                   {t.realizedPnl != null ? (
-                    <small className={t.realizedPnl >= 0 ? "tp-pnl-pos" : "tp-pnl-neg"}>
+                    <small className={t.realizedPnl >= 0 ? "up" : "down"}>
                       {signedMoney(t.realizedPnl, hidden)}
                     </small>
-                  ) : null}
-                </span>
+                  ) : (
+                    <small>&nbsp;</small>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -249,7 +244,7 @@ function PortfolioPage() {
       </section>
 
       {notice ? (
-        <p className="pf-notice" role="status">
+        <p className="pf-pro-toast" role="status">
           {notice}
         </p>
       ) : null}
