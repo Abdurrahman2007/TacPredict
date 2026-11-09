@@ -4,7 +4,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Copy, Eye, EyeOff } from "lucide-react";
 import { useWalletAccess } from "@/hooks/use-wallet-access";
 import { useBaseWallet } from "@/lib/onchain/use-base-wallet";
-import { usePaperLedger, type PaperPosition, type PaperTrade } from "@/lib/paper/ledger";
+import { usePaperLedger, type PaperPosition } from "@/lib/paper/ledger";
 import "@/styles/portfolio-v2.css";
 
 export const Route = createFileRoute("/profile")({
@@ -23,10 +23,6 @@ function signedMoney(n: number, hidden: boolean) {
   if (hidden) return "••••";
   const sign = n > 0 ? "+" : n < 0 ? "−" : "";
   return `${sign}$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function tradeVolume(trades: PaperTrade[]): number {
-  return trades.filter((t) => t.kind === "buy").reduce((sum, t) => sum + Math.abs(t.usdc), 0);
 }
 
 function sellCents(avgCost: number) {
@@ -51,8 +47,16 @@ function PortfolioPage() {
   const available = disconnected ? 0 : ledger.balance;
   const equity = disconnected ? 0 : ledger.balance + positionValue;
   const realized = disconnected ? 0 : ledger.realizedPnl;
-  const totalVolume = disconnected ? 0 : tradeVolume(ledger.trades);
   const openCount = disconnected ? 0 : ledger.positions.length;
+  const settled = useMemo(() => {
+    if (disconnected) return { wins: 0, total: 0 };
+    const sells = ledger.trades.filter((t) => t.kind === "sell" && t.realizedPnl != null);
+    return {
+      wins: sells.filter((t) => (t.realizedPnl ?? 0) > 0).length,
+      total: sells.length,
+    };
+  }, [disconnected, ledger.trades]);
+  const winRate = settled.total > 0 ? (settled.wins / settled.total) * 100 : null;
   const pnlTone = realized > 0 ? "up" : realized < 0 ? "down" : "";
 
   async function copyAddress() {
@@ -119,18 +123,32 @@ function PortfolioPage() {
         <p className={`pf-pro-pnl ${pnlTone}`}>{signedMoney(realized, hidden)}</p>
       </section>
 
-      <section className="pf-pro-metrics" aria-label="Totals">
+      <section className="pf-pro-metrics pf-pro-metrics-4" aria-label="Portfolio summary">
+        <div>
+          <span>Net value</span>
+          <strong>{money(equity, hidden)}</strong>
+        </div>
+        <div>
+          <span>Open positions</span>
+          <strong>
+            {money(disconnected ? 0 : positionValue, hidden)}
+            <small className="pf-pro-metric-sub">
+              {disconnected ? "0" : String(openCount)} open
+            </small>
+          </strong>
+        </div>
         <div>
           <span>Available</span>
           <strong>{money(available, hidden)}</strong>
         </div>
         <div>
-          <span>Positions</span>
-          <strong>{money(disconnected ? 0 : positionValue, hidden)}</strong>
-        </div>
-        <div>
-          <span>Volume</span>
-          <strong>{money(totalVolume, hidden)}</strong>
+          <span>Win rate</span>
+          <strong className={pnlTone || undefined}>
+            {hidden ? "••••" : winRate == null ? "—" : `${winRate.toFixed(0)}%`}
+            <small className={`pf-pro-metric-sub ${pnlTone}`}>
+              {signedMoney(realized, hidden)} realized
+            </small>
+          </strong>
         </div>
       </section>
 

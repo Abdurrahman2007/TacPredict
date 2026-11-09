@@ -12,12 +12,12 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: updownCss },
     ],
     meta: [
-      { title: "TacPredict — Prediction Markets" },
+      { title: "TacPredict — Crypto Prediction Markets" },
       {
         name: "description",
-        content: "Virtual USDC crypto Up/Down markets on Base.",
+        content: "Predict BTC, ETH, SOL, and BNB Up/Down with Virtual USDC on Base.",
       },
-      { property: "og:title", content: "TacPredict — Prediction Markets" },
+      { property: "og:title", content: "TacPredict Crypto Market" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

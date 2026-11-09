@@ -1,11 +1,11 @@
-/** Shared Mini App / Frame config for Farcaster + Base clients. */
+/** Shared Mini App / Frame config for Farcaster + Base clients (crypto-only product). */
 const app = {
   version: "1",
   name: "TacPredict",
-  subtitle: "Virtual Prediction Market",
+  subtitle: "Crypto Prediction Market",
   description:
-    "Predict crypto, sports, politics, and culture outcomes in real time. Trade YES or NO shares, climb the leaderboard, and track your prediction portfolio.",
-  tagline: "Predict Outcomes. Win Big.",
+    "Predict BTC, ETH, SOL, and BNB price movements in real time. Trade YES or NO shares on crypto markets, climb the leaderboard, and track your portfolio.",
+  tagline: "Predict Crypto. Win Big.",
   homeUrl: "https://tacpredict.fun",
   canonicalDomain: "tacpredict.fun",
   iconUrl: "https://tacpredict.fun/brand/app-icon-v2.png",
@@ -16,15 +16,14 @@ const app = {
   buttonTitle: "Open TacPredict",
   webhookUrl: "https://tacpredict.fun/api/webhook",
   primaryCategory: "finance",
-  tags: ["prediction", "markets", "forecasting", "crypto", "trading"],
+  tags: ["crypto", "prediction", "bitcoin", "ethereum", "trading"],
   screenshotUrls: [
     "https://tacpredict.fun/brand/screenshot-markets.png",
     "https://tacpredict.fun/brand/screenshot-portfolio.png",
     "https://tacpredict.fun/brand/screenshot-leaderboard.png",
   ],
-  ogTitle: "TacPredict Market",
-  ogDescription:
-    "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+  ogTitle: "TacPredict Crypto Market",
+  ogDescription: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
   ogImageUrl: "https://tacpredict.fun/brand/social-logo-v2.png",
   castShareUrl: "https://tacpredict.fun",
   noindex: false,

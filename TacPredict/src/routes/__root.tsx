@@ -100,21 +100,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Predict crypto, sports, politics, and culture outcomes in real time. Trade YES or NO shares on TacPredict.",
+          "Predict BTC, ETH, SOL, and BNB price movements in real time. Trade YES or NO shares on TacPredict.",
       },
       { name: "author", content: "TacPredict" },
       { property: "og:type", content: "website" },
-      { property: "og:title", content: "TacPredict Market" },
+      { property: "og:title", content: "TacPredict Crypto Market" },
       {
         property: "og:description",
-        content: "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
       },
       { property: "og:url", content: "https://tacpredict.fun" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "TacPredict Market" },
+      { name: "twitter:title", content: "TacPredict Crypto Market" },
       {
         name: "twitter:description",
-        content: "Trade YES/NO shares on real-world events on TacPredict virtual prediction market.",
+        content: "Predict BTC, ETH, SOL, and BNB outcomes and trade YES/NO shares on TacPredict.",
       },
       { property: "og:image", content: BRAND_SOCIAL_URL },
       { property: "og:image:width", content: "1200" },
