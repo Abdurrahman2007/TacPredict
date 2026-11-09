@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { claimsOwnWallet } from "@/lib/onchain/smart-wallet-policy.mjs";
 
 const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 const atomic = z.string().regex(/^\d{1,30}$/);
@@ -71,11 +72,19 @@ export const openOnchainBox = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { onchainEnabled } = await import("./window.server");
     if (!onchainEnabled()) return { ok: false as const, reason: "unavailable" as const };
-    const { ownsWallet } = await import("@/lib/virtual/database.server");
-    try {
-      await ownsWallet(context.supabase as unknown as SupabaseClient, context.userId, data.wallet);
-    } catch {
-      return { ok: false as const, reason: "wallet_not_verified" as const };
+    // A session made by signing in with this very wallet (smart wallets included) already proves ownership; any other
+    // session needs the wallet verified on its account.
+    if (!claimsOwnWallet(context.claims, data.wallet)) {
+      const { ownsWallet } = await import("@/lib/virtual/database.server");
+      try {
+        await ownsWallet(
+          context.supabase as unknown as SupabaseClient,
+          context.userId,
+          data.wallet,
+        );
+      } catch {
+        return { ok: false as const, reason: "wallet_not_verified" as const };
+      }
     }
     const { grantWelcomeBox } = await import("./box.server");
     return grantWelcomeBox(data.wallet);
@@ -114,7 +123,9 @@ export const getOnchainCheckin = createServerFn({ method: "GET" })
  * receipt from the chain and records what that receipt proves; any hash is harmless.
  */
 export const confirmOnchainTrade = createServerFn({ method: "POST" })
-  .inputValidator((value: unknown) => z.object({ hash: z.string().regex(/^0x[0-9a-fA-F]{64}$/) }).parse(value))
+  .inputValidator((value: unknown) =>
+    z.object({ hash: z.string().regex(/^0x[0-9a-fA-F]{64}$/) }).parse(value),
+  )
   .handler(async ({ data }) => {
     const { onchainEnabled } = await import("./window.server");
     if (!onchainEnabled()) return { recorded: 0, pending: false };
