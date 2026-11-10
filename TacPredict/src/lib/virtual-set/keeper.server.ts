@@ -58,8 +58,8 @@ const HOT_MINUTES = 20;
 const TX_BUDGET = 12;
 const LOCK_SECONDS = 45;
 const CHALLENGE_WAIT_SEC = 62;
-/** Base txs are cheap; keep working until the wallet is nearly empty instead of idling just under 0.00002. */
-const MIN_KEEPER_ETH = 5_000_000_000_000n; // 0.000005 ETH
+/** Base txs are cheap; keep stocking while any usable gas remains (refill the keeper wallet when this trips often). */
+const MIN_KEEPER_ETH = 1_000_000_000_000n; // 0.000001 ETH
 const BOND_WITHDRAW_AT = 50_000_000n;
 const LOW_FLOAT = 5_000_000_000n;
 
