@@ -15,6 +15,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   virtualConditionalPositionsAbi,
   virtualMarketFactoryAbi,
+  virtualMarketRegistryAbi,
   virtualResolutionOracleAbi,
   virtualUsdcAbi,
 } from "./abi";
@@ -160,7 +161,7 @@ async function settleReceipts(ctx: Ctx, rows: MarketRow[]): Promise<void> {
           logs: receipt.logs,
         });
         const created = parseEventLogs({
-          abi: virtualMarketFactoryAbi,
+          abi: virtualMarketRegistryAbi,
           eventName: "MarketCreated",
           logs: receipt.logs,
         });
