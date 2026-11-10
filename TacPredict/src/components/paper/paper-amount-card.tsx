@@ -8,11 +8,13 @@ import { useOnchainWindow, useOptionalWallet, useRefreshOnchain } from "@/lib/vi
 
 /** Short button text for a window that cannot take a trade yet (reason comes from the server). */
 function waitLabel(reason: string | null, loading: boolean, canRetry: boolean) {
-  if (canRetry) return "Tap to retry setup";
   if (loading) return "Loading…";
   if (reason === "not_open") return "Opens soon";
   if (reason === "closing" || reason === "ended") return "Closed";
   if (reason === "market_failed") return "Unavailable";
+  // Retry only helps when the keeper still has create/stock work left.
+  if (canRetry && (reason === "not_ready" || reason === "not_created" || reason === "no_market" || reason === "preparing" || !reason))
+    return "Tap to retry setup";
   if (reason === "not_ready") return "Stocking market…";
   if (reason === "not_created" || reason === "no_market" || reason === "preparing")
     return "Preparing market…";
@@ -66,6 +68,28 @@ export function PaperAmountCard({
     const timer = window.setTimeout(() => setPrepStuck(true), 6_000);
     return () => window.clearTimeout(timer);
   }, [waiting, market.id]);
+
+  // Kick create/stock as soon as the sheet opens — don't wait for the user to discover retry.
+  useEffect(() => {
+    if (!chainMode || !onchain.supported || onchain.ready) return;
+    const reason = onchain.reason;
+    if (reason === "not_open" || reason === "closing" || reason === "ended" || reason === "market_failed")
+      return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await onchain.prepare();
+      } catch {
+        /* poll + retry button still cover this */
+      }
+      if (cancelled) return;
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Only re-run when the window id changes; prepare itself updates readiness via refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot per market window
+  }, [chainMode, onchain.supported, market.id]);
   const outcome = market.outcomes.find((o) => o.id === selected) ?? market.outcomes[0];
   const priceCents = outcome && outcome.probabilityKnown !== false ? outcome.probability : null;
   const expired =
@@ -406,7 +430,11 @@ export function PaperAmountCard({
           </button>
           <p className="pd-order-note">
             {chainMode && waiting
-              ? "Tap to finish setup, then confirm the trade in your wallet."
+              ? onchain.reason === "not_open"
+                ? "Window opens at the start time — Buy unlocks automatically."
+                : prepStuck
+                  ? "Still setting up — tap the button to retry. Wallet confirm opens once the market is ready."
+                  : "Setting up this window on Base — Buy unlocks when inventory is ready."
               : chainMode
                 ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
                 : (settlementNote ??

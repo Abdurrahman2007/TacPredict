@@ -20,7 +20,6 @@ export const getOnchainWindow = createServerFn({ method: "GET" })
         asset: z.enum(["bitcoin", "ethereum", "solana", "bnb"]),
         minutes: z.number().int().min(1).max(1440),
         start: z.number().int().positive(),
-        awaitKeeper: z.boolean().optional(),
       })
       .parse(value),
   )

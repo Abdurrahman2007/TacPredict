@@ -42,7 +42,7 @@ export async function onchainWindow(input: {
   minutes: number;
   start: number;
   /** When true, wait longer for create/stock (user tapped retry / about to trade). */
-  awaitKeeper?: boolean;
+  awaitKeeper?: boolean | undefined;
 }): Promise<OnchainWindow> {
   const off: OnchainWindow = {
     enabled: false,
@@ -73,14 +73,28 @@ export async function onchainWindow(input: {
 
   if (needsWork && soon) {
     // Cap wait so Cloudflare requests don't hang forever, but give create/stock time to land.
-    const waitMs = input.awaitKeeper ? 22_000 : 8_000;
-    if (Date.now() - lastNudge >= 1500 || nudgeInFlight) {
+    // Prepare (user tap / about-to-trade) always nudges — don't skip when a recent soft poll already ran.
+    const deadline = Date.now() + (input.awaitKeeper ? 22_000 : 8_000);
+    const softGapMs = 1_500;
+    while (Date.now() < deadline) {
+      const canStart =
+        Boolean(input.awaitKeeper) || Date.now() - lastNudge >= softGapMs || Boolean(nudgeInFlight);
+      if (!canStart) break;
+      const slice = Math.min(4_000, Math.max(500, deadline - Date.now()));
       await Promise.race([
         runKeeper(),
-        new Promise<void>((resolve) => setTimeout(resolve, waitMs)),
+        new Promise<void>((resolve) => setTimeout(resolve, slice)),
       ]);
       row = await marketByKey(db, key);
-      blocker = quoteBlocker(row, nowSec);
+      blocker = quoteBlocker(row, Math.floor(Date.now() / 1000));
+      const stillNeeds =
+        blocker === "no_market" ||
+        blocker === "not_created" ||
+        blocker === "not_ready";
+      // not_open means the market exists — waiting longer won't open it early.
+      if (!stillNeeds) break;
+      if (Date.now() >= deadline) break;
+      await new Promise<void>((resolve) => setTimeout(resolve, input.awaitKeeper ? 700 : 200));
     }
   }
 
