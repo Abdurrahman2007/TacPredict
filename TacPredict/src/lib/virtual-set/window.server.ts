@@ -72,29 +72,36 @@ export async function onchainWindow(input: {
   const soon = input.start / 1000 <= nowSec + input.minutes * 60;
 
   if (needsWork && soon) {
-    // Cap wait so Cloudflare requests don't hang forever, but give create/stock time to land.
-    // Prepare (user tap / about-to-trade) always nudges — don't skip when a recent soft poll already ran.
-    const deadline = Date.now() + (input.awaitKeeper ? 22_000 : 8_000);
-    const softGapMs = 1_500;
-    while (Date.now() < deadline) {
-      const canStart =
-        Boolean(input.awaitKeeper) || Date.now() - lastNudge >= softGapMs || Boolean(nudgeInFlight);
-      if (!canStart) break;
-      const slice = Math.min(4_000, Math.max(500, deadline - Date.now()));
-      await Promise.race([
-        runKeeper(),
-        new Promise<void>((resolve) => setTimeout(resolve, slice)),
-      ]);
-      row = await marketByKey(db, key);
-      blocker = quoteBlocker(row, Math.floor(Date.now() / 1000));
-      const stillNeeds =
-        blocker === "no_market" ||
-        blocker === "not_created" ||
-        blocker === "not_ready";
-      // not_open means the market exists — waiting longer won't open it early.
-      if (!stillNeeds) break;
-      if (Date.now() >= deadline) break;
-      await new Promise<void>((resolve) => setTimeout(resolve, input.awaitKeeper ? 700 : 200));
+    if (input.awaitKeeper) {
+      // User-driven prepare: keep nudging until create/stock lands or the request budget is used.
+      const deadline = Date.now() + 22_000;
+      while (Date.now() < deadline) {
+        const slice = Math.min(5_000, Math.max(500, deadline - Date.now()));
+        await Promise.race([
+          runKeeper(),
+          new Promise<void>((resolve) => setTimeout(resolve, slice)),
+        ]);
+        row = await marketByKey(db, key);
+        blocker = quoteBlocker(row, Math.floor(Date.now() / 1000));
+        const stillNeeds =
+          blocker === "no_market" ||
+          blocker === "not_created" ||
+          blocker === "not_ready";
+        // not_open means the market exists — waiting longer won't open it early.
+        if (!stillNeeds) break;
+        await new Promise<void>((resolve) => setTimeout(resolve, 700));
+      }
+    } else if (Date.now() - lastNudge >= 1_500 || nudgeInFlight) {
+      // Soft poll: kick the keeper but do not hold every 2s refetch for many seconds.
+      void runKeeper();
+      if (nudgeInFlight) {
+        await Promise.race([
+          nudgeInFlight,
+          new Promise<void>((resolve) => setTimeout(resolve, 1_200)),
+        ]);
+        row = await marketByKey(db, key);
+        blocker = quoteBlocker(row, Math.floor(Date.now() / 1000));
+      }
     }
   }
 
