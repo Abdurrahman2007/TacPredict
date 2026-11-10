@@ -154,12 +154,17 @@ async function settleReceipts(ctx: Ctx, rows: MarketRow[]): Promise<void> {
     const { row, kind } = item;
     if (receipt.status === "success") {
       if (kind === "create") {
-        const logs = parseEventLogs({
+        const meta = parseEventLogs({
           abi: virtualMarketFactoryAbi,
           eventName: "MetadataPublished",
           logs: receipt.logs,
         });
-        const id = logs[0]?.args.marketId;
+        const created = parseEventLogs({
+          abi: virtualMarketFactoryAbi,
+          eventName: "MarketCreated",
+          logs: receipt.logs,
+        });
+        const id = meta[0]?.args.marketId ?? created[0]?.args.marketId;
         if (id === undefined) {
           row.failed = true;
           await patchMarket(ctx.db, row.key, { failed: true, last_error: "create: no market id in receipt" });
@@ -179,10 +184,22 @@ async function settleReceipts(ctx: Ctx, rows: MarketRow[]): Promise<void> {
       }
       continue;
     }
-    // Reverted. Creation and stocking are not retried (the window is simply skipped); resolution is retried a few times.
+    // Reverted. Retry create/split a few times (gas / RPC blips); resolution already retries.
     if (kind === "create" || kind === "split") {
-      row.failed = true;
-      await patchMarket(ctx.db, row.key, { failed: true, last_error: `${kind} reverted` });
+      const tries = retryCount(row.last_error, kind) + 1;
+      const note = `${kind} reverted #${tries}`;
+      if (kind === "create") row.create_tx = null;
+      else row.split_tx = null;
+      row.last_error = note;
+      const giveUp = tries >= 3;
+      if (giveUp) row.failed = true;
+      await patchMarket(
+        ctx.db,
+        row.key,
+        kind === "create"
+          ? { create_tx: null, last_error: note, failed: giveUp }
+          : { split_tx: null, last_error: note, failed: giveUp, inventory_ready: false },
+      );
     } else {
       const tries = retryCount(row.last_error, kind) + 1;
       const note = `${kind} reverted #${tries}`;
@@ -281,6 +298,35 @@ async function planWindows(ctx: Ctx, rows: MarketRow[], nowSec: number): Promise
   if (error) throw dbError("plan windows", error);
   // Only rows that did not exist before come back; rows that were already finished or failed are left alone.
   for (const row of (data ?? []) as MarketRow[]) rows.push(row);
+}
+
+/** Clear recoverable create/split failures so a hot window can be tried again while time remains. */
+async function reviveFailedCreates(ctx: Ctx, rows: MarketRow[], nowSec: number): Promise<void> {
+  for (const row of rows) {
+    if (!row.failed || row.market_id !== null || !ctx.hot.has(hotKey(row.asset, row.minutes))) continue;
+    if (secOf(row.end_at) - nowSec < 60) continue;
+    const err = row.last_error ?? "";
+    const createTries = retryCount(err, "create");
+    const splitTries = retryCount(err, "split");
+    const recoverable =
+      /create reverted|split reverted|create: no market id/i.test(err) ||
+      (createTries > 0 && createTries < 3) ||
+      (splitTries > 0 && splitTries < 3);
+    if (!recoverable) continue;
+    if (createTries >= 3 || splitTries >= 3) continue;
+    row.failed = false;
+    row.create_tx = null;
+    row.split_tx = null;
+    row.inventory_ready = false;
+    await patchMarket(ctx.db, row.key, {
+      failed: false,
+      create_tx: null,
+      split_tx: null,
+      inventory_ready: false,
+      last_error: err || "retrying create",
+    });
+    ctx.report.notes.push(`revived ${row.key}`);
+  }
 }
 
 async function createMarkets(ctx: Ctx, rows: MarketRow[], nowSec: number): Promise<void> {
@@ -610,6 +656,7 @@ async function runTick(db: SupabaseClient, report: TickReport): Promise<void> {
       await proposeAndFinalize(ctx, rows, nowSec);
       await payOut(ctx, rows, nowSec);
       await planWindows(ctx, rows, nowSec);
+      await reviveFailedCreates(ctx, rows, nowSec);
       await createMarkets(ctx, rows, nowSec);
       stocked = await stockMarkets(ctx, rows, nowSec);
     } catch (error) {

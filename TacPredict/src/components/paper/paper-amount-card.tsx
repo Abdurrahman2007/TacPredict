@@ -11,10 +11,10 @@ function waitLabel(reason: string | null, loading: boolean, canRetry: boolean) {
   if (loading) return "Loading…";
   if (reason === "not_open") return "Opens soon";
   if (reason === "closing" || reason === "ended") return "Closed";
-  if (reason === "market_failed") return "Unavailable";
-  // Retry only helps when the keeper still has create/stock work left.
-  if (canRetry && (reason === "not_ready" || reason === "not_created" || reason === "no_market" || reason === "preparing" || !reason))
+  // Retry can revive a failed create/stock while the window still has time left.
+  if (canRetry && (reason === "market_failed" || reason === "not_ready" || reason === "not_created" || reason === "no_market" || reason === "preparing" || !reason))
     return "Tap to retry setup";
+  if (reason === "market_failed") return "Unavailable";
   if (reason === "not_ready") return "Stocking market…";
   if (reason === "not_created" || reason === "no_market" || reason === "preparing")
     return "Preparing market…";
@@ -416,12 +416,12 @@ export function PaperAmountCard({
                 ? "Unavailable"
                 : chainBlocked
                   ? "Coming soon"
-                  : needsWallet
-                    ? "Connect wallet"
-                    : expired
-                      ? "Expired"
-                      : waiting
-                        ? waitLabel(onchain.reason, windowLoading, prepStuck)
+                  : expired
+                    ? "Expired"
+                    : waiting
+                      ? waitLabel(onchain.reason, windowLoading, prepStuck)
+                      : needsWallet
+                        ? "Connect wallet"
                         : usdc > ledger.balance
                           ? "Insufficient balance"
                           : outcome
@@ -430,11 +430,13 @@ export function PaperAmountCard({
           </button>
           <p className="pd-order-note">
             {chainMode && waiting
-              ? onchain.reason === "not_open"
-                ? "Window opens at the start time — Buy unlocks automatically."
-                : prepStuck
-                  ? "Still setting up — tap the button to retry. Wallet confirm opens once the market is ready."
-                  : "Setting up this window on Base — Buy unlocks when inventory is ready."
+              ? onchain.reason === "market_failed"
+                ? "This window could not open on Base — wait for the next 5 or 15 min window, or tap retry."
+                : onchain.reason === "not_open"
+                  ? "Window opens at the start time — Buy unlocks automatically."
+                  : prepStuck
+                    ? "Still setting up — tap the button to retry. Wallet confirm opens once the market is ready."
+                    : "Setting up this window on Base — Buy unlocks when inventory is ready."
               : chainMode
                 ? "Base trade · gas sponsored when your wallet supports it · Virtual USDC only — no withdraw."
                 : (settlementNote ??
