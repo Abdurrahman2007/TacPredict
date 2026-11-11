@@ -10,6 +10,7 @@ import {
   createWalletClient,
   custom,
   getAddress,
+  WaitForTransactionReceiptTimeoutError,
   type Abi,
   type Address,
   type Hex,
@@ -18,7 +19,10 @@ import { base } from "viem/chains";
 import type { WalletProvider } from "@/lib/onchain/wallet";
 import { BASE_BUILDER_DATA_SUFFIX } from "@/lib/web3/builder-code";
 import {
+  SponsoredSendPendingError,
+  clearPendingSend,
   gasSponsorshipAvailable,
+  previousSendStillPending,
   sponsoredWriteContract,
 } from "@/lib/web3/sponsored-send";
 import { virtualConditionalPositionsAbi, virtualExchangeAbi, virtualUsdcAbi } from "./abi";
@@ -64,6 +68,18 @@ const ONE = 1_000_000;
 
 const fail = (message: string): OnchainTradeResult => ({ ok: false, message });
 
+const STILL_CONFIRMING =
+  "Still confirming on Base — no need to send it again. It will show up once it lands.";
+const PREVIOUS_IN_FLIGHT = "Your last transaction is still confirming — try again in a minute";
+
+/** A send that was accepted but has not confirmed yet: not a failure, and must not be retried. */
+function stillConfirming(error: unknown): boolean {
+  return (
+    error instanceof SponsoredSendPendingError ||
+    error instanceof WaitForTransactionReceiptTimeoutError
+  );
+}
+
 export async function executeOnchainTrade(input: OnchainTradeInput): Promise<OnchainTradeResult> {
   const say = input.onStatus ?? (() => undefined);
   try {
@@ -82,6 +98,8 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
       await input.switchToBase();
     }
     if ((await pub.getChainId()) !== base.id) return fail("Switch your wallet to the Base network");
+    if (await previousSendStillPending({ wallet, public: pub, account, chainId: base.id }))
+      return fail(PREVIOUS_IN_FLIGHT);
 
     const sponsored = gasSponsorshipAvailable();
     if (!sponsored && (await pub.getBalance({ address: account })) < MIN_GAS_WEI)
@@ -132,6 +150,7 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
       });
       say("Confirming approval on Base…");
       const receipt = await pub.waitForTransactionReceipt({ hash: approval, timeout: 60_000 });
+      clearPendingSend(account, base.id);
       if (receipt.status !== "success") return fail("The approval did not go through — try again");
     }
 
@@ -202,6 +221,7 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
     });
     say("Confirming on Base…");
     const receipt = await pub.waitForTransactionReceipt({ hash, timeout: 60_000 });
+    clearPendingSend(account, base.id);
     if (receipt.status !== "success") return fail("The trade did not go through — try again");
 
     // 5. Let the server record the fill from the receipt so the position shows at once.
@@ -219,6 +239,7 @@ export async function executeOnchainTrade(input: OnchainTradeInput): Promise<Onc
       priceCents: Math.round(quote.pricePpm / 10_000),
     };
   } catch (error) {
+    if (stillConfirming(error)) return fail(STILL_CONFIRMING);
     return fail(errorText(error));
   }
 }
@@ -237,6 +258,8 @@ export async function sendCheckIn(input: Pick<OnchainTradeInput, "provider" | "a
     });
     if (input.chainId !== base.id) await input.switchToBase();
     if ((await pub.getChainId()) !== base.id) return { ok: false as const, message: "Switch your wallet to the Base network" };
+    if (await previousSendStillPending({ wallet, public: pub, account, chainId: base.id }))
+      return { ok: false as const, message: PREVIOUS_IN_FLIGHT };
     const sponsored = gasSponsorshipAvailable();
     if (!sponsored && (await pub.getBalance({ address: account })) < MIN_GAS_WEI)
       return { ok: false as const, message: "Add a little ETH on Base for the network fee (about $0.01)" };
@@ -254,9 +277,11 @@ export async function sendCheckIn(input: Pick<OnchainTradeInput, "provider" | "a
       request: { address: USDC, abi: virtualUsdcAbi as Abi, functionName: "checkIn" },
     });
     const receipt = await pub.waitForTransactionReceipt({ hash, timeout: 60_000 });
+    clearPendingSend(account, base.id);
     if (receipt.status !== "success") return { ok: false as const, message: "Check-in did not go through — try again" };
     return { ok: true as const, hash };
   } catch (error) {
+    if (stillConfirming(error)) return { ok: false as const, message: STILL_CONFIRMING };
     return { ok: false as const, message: errorText(error) };
   }
 }
