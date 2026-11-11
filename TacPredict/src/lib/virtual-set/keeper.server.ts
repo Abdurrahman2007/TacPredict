@@ -63,14 +63,15 @@ const MIN_KEEPER_ETH = 1_000_000_000_000n; // 0.000001 ETH
 const BOND_WITHDRAW_AT = 50_000_000n;
 const LOW_FLOAT = 5_000_000_000n;
 
+/** Caps stay modest: wallets need balance >= gas * maxFeePerGas to even submit on Base. */
 const GAS = {
-  create: 800_000n,
-  split: 350_000n,
-  propose: 350_000n,
-  finalize: 300_000n,
-  redeem: 250_000n,
-  approve: 90_000n,
-  withdraw: 120_000n,
+  create: 450_000n,
+  split: 280_000n,
+  propose: 280_000n,
+  finalize: 250_000n,
+  redeem: 220_000n,
+  approve: 80_000n,
+  withdraw: 100_000n,
 } as const;
 
 export type TickReport = {
@@ -91,6 +92,8 @@ type Ctx = {
   nonce: number;
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
+  /** Remaining ETH the keeper can spend this tick (shrinks after each send). */
+  balance: bigint;
   sent: number;
   report: TickReport;
   hot: Set<string>;
@@ -105,6 +108,11 @@ const hotKey = (asset: string, minutes: number) => `${asset}:${minutes}`;
 
 async function send(ctx: Ctx, to: Address, data: Hex, gas: bigint, label: string): Promise<Hex> {
   if (ctx.sent >= TX_BUDGET) throw new BudgetReached();
+  const need = gas * ctx.maxFeePerGas;
+  if (ctx.balance < need) {
+    ctx.report.errors.push(`skipped ${label}: need ${need} wei gas headroom, have ${ctx.balance}`);
+    throw new BudgetReached();
+  }
   const hash = await ctx.wallet.sendTransaction({
     to,
     data,
@@ -116,6 +124,8 @@ async function send(ctx: Ctx, to: Address, data: Hex, gas: bigint, label: string
   });
   ctx.nonce += 1;
   ctx.sent += 1;
+  // Reserve the worst-case fee locally so later sends in this tick do not over-commit.
+  ctx.balance -= need;
   ctx.report.actions.push(`${label} ${hash}`);
   return hash;
 }
@@ -633,13 +643,18 @@ async function runTick(db: SupabaseClient, report: TickReport): Promise<void> {
     pub.estimateFeesPerGas(),
     pub.getBalance({ address: account.address }),
   ]);
+  // Prefer a tight Base fee so a low-balance keeper can still submit create/split.
+  const tip = fees.maxPriorityFeePerGas ?? 1_000_000n;
+  const base = fees.maxFeePerGas ?? tip;
+  const maxFeePerGas = base + tip / 4n;
   const ctx: Ctx = {
     db,
     pub,
     wallet: walletClientFor(account),
     nonce,
-    maxFeePerGas: (fees.maxFeePerGas * 3n) / 2n,
-    maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+    maxFeePerGas,
+    maxPriorityFeePerGas: tip,
+    balance,
     sent: 0,
     report,
     hot,
@@ -652,10 +667,16 @@ async function runTick(db: SupabaseClient, report: TickReport): Promise<void> {
     report.errors.push("keeper wallet is out of ETH for gas");
   } else {
     try {
-      const setup = await ensureMakerSetup(ctx);
-      if (setup.balance < LOW_FLOAT) report.errors.push("market maker float is low");
-      await proposeAndFinalize(ctx, rows, nowSec);
-      await payOut(ctx, rows, nowSec);
+      // When ETH is tight, skip approvals/bond housekeeping and spend gas on create/stock only.
+      const headroom = GAS.create * maxFeePerGas * 2n;
+      if (balance >= headroom) {
+        const setup = await ensureMakerSetup(ctx);
+        if (setup.balance < LOW_FLOAT) report.errors.push("market maker float is low");
+        await proposeAndFinalize(ctx, rows, nowSec);
+        await payOut(ctx, rows, nowSec);
+      } else {
+        report.notes.push("low ETH: prioritizing create/stock over setup and settlement");
+      }
       await planWindows(ctx, rows, nowSec);
       await reviveFailedCreates(ctx, rows, nowSec);
       await createMarkets(ctx, rows, nowSec);
