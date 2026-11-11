@@ -65,14 +65,16 @@ const LOW_FLOAT = 5_000_000_000n;
 
 /** Caps stay modest: wallets need balance >= gas * maxFeePerGas to even submit on Base. */
 const GAS = {
-  create: 450_000n,
-  split: 280_000n,
-  propose: 280_000n,
-  finalize: 250_000n,
-  redeem: 220_000n,
-  approve: 80_000n,
-  withdraw: 100_000n,
+  create: 350_000n,
+  split: 220_000n,
+  propose: 220_000n,
+  finalize: 200_000n,
+  redeem: 180_000n,
+  approve: 70_000n,
+  withdraw: 90_000n,
 } as const;
+/** Hard ceiling for maxFeePerGas (0.02 gwei) — Base is usually far below this. */
+const MAX_FEE_CAP_WEI = 20_000_000n;
 
 export type TickReport = {
   ok: boolean;
@@ -644,16 +646,22 @@ async function runTick(db: SupabaseClient, report: TickReport): Promise<void> {
     pub.getBalance({ address: account.address }),
   ]);
   // Prefer a tight Base fee so a low-balance keeper can still submit create/split.
-  const tip = fees.maxPriorityFeePerGas ?? 1_000_000n;
-  const base = fees.maxFeePerGas ?? tip;
-  const maxFeePerGas = base + tip / 4n;
+  const tip = fees.maxPriorityFeePerGas && fees.maxPriorityFeePerGas > 0n ? fees.maxPriorityFeePerGas : 1_000_000n;
+  let maxFeePerGas = fees.maxFeePerGas && fees.maxFeePerGas > tip ? fees.maxFeePerGas : tip * 2n;
+  if (maxFeePerGas > MAX_FEE_CAP_WEI) maxFeePerGas = MAX_FEE_CAP_WEI;
+  // Fit at least one create into the remaining balance (otherwise every send throws BudgetReached).
+  const affordable = balance / GAS.create;
+  if (affordable >= tip && affordable < maxFeePerGas) {
+    maxFeePerGas = affordable;
+    report.notes.push(`capped maxFeePerGas to ${maxFeePerGas} wei to fit keeper balance`);
+  }
   const ctx: Ctx = {
     db,
     pub,
     wallet: walletClientFor(account),
     nonce,
     maxFeePerGas,
-    maxPriorityFeePerGas: tip,
+    maxPriorityFeePerGas: tip < maxFeePerGas ? tip : maxFeePerGas / 2n,
     balance,
     sent: 0,
     report,
