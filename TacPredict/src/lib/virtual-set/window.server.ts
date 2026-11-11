@@ -30,7 +30,24 @@ function runKeeper(): Promise<void> {
   if (nudgeInFlight) return nudgeInFlight;
   lastNudge = Date.now();
   nudgeInFlight = keeperTick()
-    .catch(() => undefined)
+    .then((report) => {
+      if (report.errors.length || report.skipped)
+        console.error(
+          JSON.stringify({
+            job: "vset-keeper-nudge",
+            skipped: report.skipped ?? null,
+            errors: report.errors.slice(0, 3),
+            actions: report.actions.length,
+            ms: report.ms,
+          }),
+        );
+    })
+    .catch((error) => {
+      console.error(
+        "vset-keeper-nudge failed: " +
+          String((error && (error.message || error)) || "error").slice(0, 200),
+      );
+    })
     .then(() => {
       nudgeInFlight = null;
     });
